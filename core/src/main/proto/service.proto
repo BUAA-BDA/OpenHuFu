@@ -3,7 +3,7 @@ import "common.proto";
 package onedb;
 
 option java_package = "tk.onedb";
-option java_outer_classname = "OneDB";
+option java_outer_classname = "OneDBService";
 
 message AddClientRequest {
   required string endpoint = 1;
@@ -23,7 +23,7 @@ message Query {
   required int32 fetch = 6;
 }
 
-service OneDBService {
+service Service {
   rpc AddClient(AddClientRequest) returns (GeneralResponse);
   rpc OneDBQuery(Query) returns (stream DataSetProto);
 }

@@ -1,7 +1,7 @@
 package tk.onedb.core.data;
 
 public enum FieldType {
-  BOOL,
+  BOOLEAN,
   BYTE,
   SHORT,
   INT,

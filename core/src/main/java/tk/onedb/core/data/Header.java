@@ -1,5 +1,6 @@
 package tk.onedb.core.data;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,5 +35,37 @@ public class Header {
 
   public String getName(int index) {
     return fields.get(index).name;
+  }
+
+  public Level getLevel(int index) {
+    return fields.get(index).level;
+  }
+
+  public static Builder newBuilder() {
+    return new Builder();
+  }
+
+  public static class Builder {
+    private List<Field> fields;
+    
+    private Builder() {
+      fields = new ArrayList<Field>();
+    }
+
+    public void add(String name, FieldType type) {
+      fields.add(Field.of(name, type));
+    }
+
+    public void add(String name, FieldType type, Level level) {
+      fields.add(Field.of(name, type, level));
+    }
+
+    public Header build() {
+      return new Header(fields);
+    }
+
+    public int size() {
+      return fields.size();
+    }
   }
 }

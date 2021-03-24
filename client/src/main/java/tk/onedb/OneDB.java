@@ -31,8 +31,8 @@ public class OneDB {
       dbargs.add("-p");
       dbargs.add("admin");
       OneDBLine.start(dbargs.toArray(new String[6]), null, true);
-    } catch (Exception e1) {
-      e1.printStackTrace();
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
 }

@@ -2,9 +2,7 @@ package tk.onedb.core.data;
 
 import java.util.List;
 
-import org.apache.calcite.linq4j.Enumerator;
-
-public abstract class DataSet implements Enumerator<Row> {
+public abstract class DataSet {
   final Header header;
 
   DataSet(Header header) {

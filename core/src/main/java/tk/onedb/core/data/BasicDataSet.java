@@ -2,8 +2,16 @@ package tk.onedb.core.data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class BasicDataSet extends DataSet {
+import com.google.protobuf.ByteString;
+
+import org.apache.commons.lang3.SerializationUtils;
+
+import tk.onedb.rpc.OneDBCommon.DataSetProto;
+import tk.onedb.rpc.OneDBCommon.RowsProto;
+
+public class BasicDataSet extends EnumerableDataSet {
   List<Row> rows;
   int cursor = 0;
   Row current = null;
@@ -16,6 +24,22 @@ public class BasicDataSet extends DataSet {
   BasicDataSet(Header header) {
     super(header);
     rows = new ArrayList<>();
+  }
+
+  public DataSetProto toProto() {
+    DataSetProto.Builder proto = DataSetProto.newBuilder();
+    proto.setHeader(header.toProto());
+    RowsProto.Builder rowsProto = RowsProto.newBuilder();
+    rows.stream().map(row -> rowsProto.addRow(ByteString.copyFrom(SerializationUtils.serialize(row))));
+    return proto.setRows(rowsProto).build();
+  }
+
+  public static DataSet fromProto(DataSetProto proto) {
+    Header header = Header.fromProto(proto.getHeader());
+    RowsProto rowsProto = proto.getRows();
+    List<Row> rows = rowsProto.getRowList().stream()
+        .map(bytes -> (Row) SerializationUtils.deserialize(bytes.toByteArray())).collect(Collectors.toList());
+    return new BasicDataSet(header, rows);
   }
 
   @Override
