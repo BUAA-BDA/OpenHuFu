@@ -4,6 +4,11 @@ package onedb;
 option java_package = "tk.onedb.rpc";
 option java_outer_classname = "OneDBCommon";
 
+message Point {
+  required double lon = 1;
+  required double lat = 2;
+}
+
 message FieldProto {
   required string name = 1;
   required int32 type = 2;
@@ -22,36 +27,18 @@ message DataSetProto {
   required RowsProto rows = 2;
 }
 
-message FieldValue {
-  oneof field {
-    string str = 1;
-    bool b = 2;
-    int32 i32 = 3;
-    int64 i64 = 4;
-    float f32 = 5;
-    double f64 = 6;
-  }
-}
-
-message LiteralProto {
-  required int32 type = 1;
-  required FieldValue value = 2;
-}
-
-message IRFieldProto {
-  oneof field {
-    LiteralProto literal = 1;
-    int32 ref = 2;
-  }
-}
-
-message OperatorProto {
+message ExpressionProto {
   required int32 opType = 1;
   required int32 outType = 2;
-  repeated IRFieldProto in = 3;
+  repeated ExpressionProto in = 3;
   optional int32 func = 4;
-}
-
-message ExpressionProto {
-  repeated OperatorProto op = 1;
+  oneof value {
+    string str = 5;
+    bool b = 6;
+    int32 i32 = 7;
+    int64 i64 = 8;
+    float f32 = 9;
+    double f64 = 10;
+    Point p = 11;
+  }
 }

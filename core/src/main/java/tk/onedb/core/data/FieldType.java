@@ -11,5 +11,12 @@ public enum FieldType {
   DATE,
   TIME,
   TIMESTAMP,
-  STRING;
+  POINT,
+  STRING,
+  INPUT_REF, // input reference in expression
+  OP; // operator in expression
+
+  public static FieldType of(int id) {
+    return values()[id];
+  }
 }
