@@ -51,5 +51,5 @@ message OneDBQueryProto {
   repeated ExpressionProto whereExp = 4;
   repeated ExpressionProto aggExp = 5;
   repeated string order = 6;
-  required int32 fetch = 7;
+  optional int32 fetch = 7;
 }
