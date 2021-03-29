@@ -141,7 +141,7 @@ public class OneDBClient {
       List<Future<Boolean>> statusList = executorService.invokeAll(tasks);
       for (Future<Boolean> status : statusList) {
         if (!status.get()) {
-          LOG.error("error in fedSpatialPublicQuery");
+          LOG.error("error in oneDBQuery");
         }
       }
     } catch (InterruptedException | ExecutionException e) {

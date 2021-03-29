@@ -44,6 +44,12 @@ public class OneDBReference implements OneDBExpression {
     return new OneDBReference(TypeConverter.convert2OneDBType(ref.getType().getSqlTypeName()), ref.getIndex());
   }
 
+  public static OneDBExpression fromProto(ExpressionProto proto) {
+    FieldType type = FieldType.of(proto.getOutType());
+    int idx = proto.getRef();
+    return new OneDBReference(type, idx);
+  }
+
   @Override
   public ExpressionProto toProto() {
     return ExpressionProto.newBuilder().setOpType(OneDBOpType.REF.ordinal()).setOutType(type.ordinal()).setI32(idx).build();

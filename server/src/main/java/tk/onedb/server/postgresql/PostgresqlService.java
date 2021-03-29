@@ -135,7 +135,9 @@ public class PostgresqlService extends DBService {
     Header tableHeader = getTableHeader(tableName);
     List<String> filters = OneDBTranslator.tranlateExps(tableHeader, proto.getWhereExpList());
     List<String> selects = OneDBTranslator.tranlateExps(tableHeader, proto.getSelectExpList());
-    selects = OneDBTranslator.translateAgg(selects, proto.getAggExpList());
+    if (!proto.getAggExpList().isEmpty()) {
+      selects = OneDBTranslator.translateAgg(selects, proto.getAggExpList());
+    }
     // select clause
     StringBuilder sql = new StringBuilder(String.format("SELECT %s from %s", String.join(",", selects), tableName));
     // where clause

@@ -41,14 +41,6 @@ public class OneDBOperator implements OneDBExpression {
     this.funcType = funcType;
   }
 
-  public static OneDBExpression fromProto(ExpressionProto proto) {
-    OneDBOpType opType = OneDBOpType.of(proto.getOpType());
-    FuncType funcType = FuncType.of(proto.getFunc());
-    FieldType outType = FieldType.of(proto.getOutType());
-    List<OneDBExpression> elements = proto.getInList().stream().map(ele -> OneDBLiteral.fromProto(ele)).collect(Collectors.toList());
-    return new OneDBOperator(opType, outType, elements,funcType);
-  }
-
   public ExpressionProto toProto() {
     ExpressionProto.Builder builder = ExpressionProto.newBuilder();
     builder.setOpType(opType.ordinal());
