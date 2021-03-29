@@ -4,16 +4,16 @@ import org.apache.calcite.linq4j.Enumerator;
 
 import tk.onedb.core.client.OneDBClient;
 import tk.onedb.core.data.Row;
-import tk.onedb.core.sql.expression.OneDBQuery;
 import tk.onedb.core.sql.schema.OneDBSchema;
+import tk.onedb.rpc.OneDBCommon.OneDBQueryProto;
 
 public class OneDBEnumerator implements Enumerator<Object> {
   private final Enumerator<Row> enumerator;
   private final int limitCount;
   private int cnt = 0;
 
-  public OneDBEnumerator(String tableName, OneDBSchema schema, OneDBQuery query) {
-    this.limitCount = query.fetch;
+  public OneDBEnumerator(String tableName, OneDBSchema schema, OneDBQueryProto query) {
+    this.limitCount = query.getFetch();
     OneDBClient client = schema.getClient();
     enumerator = client.oneDBQuery(tableName, query);
   }

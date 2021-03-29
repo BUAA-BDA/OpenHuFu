@@ -51,7 +51,7 @@ public class OneDBToEnumerableConverter extends ConverterImpl implements Enumera
     final PhysType physType = PhysTypeImpl.of(implementor.getTypeFactory(), rowType, pref.prefer(JavaRowFormat.ARRAY));
     OneDBQuery oQuery = oImplementor.getQuery();
     final Expression table = builder.append("table", oQuery.table.getExpression(OneDBTable.OneDBQueryable.class));
-    final Expression query = builder.append("query", Expressions.constant(oQuery, OneDBQuery.class));
+    final Expression query = builder.append("query", Expressions.constant(oQuery.toProto().toString(), String.class));
     Expression enumerable = builder.append("enumerable", Expressions.call(table, OneDBMethod.ONEDB_TABLE_QUERY.method, query));
     builder.add(Expressions.return_(null, enumerable));
     return implementor.result(physType, builder.toBlock());

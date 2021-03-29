@@ -4,6 +4,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.protobuf.TextFormat;
+import com.google.protobuf.TextFormat.ParseException;
+
 import org.apache.calcite.adapter.java.AbstractQueryableTable;
 import org.apache.calcite.linq4j.AbstractEnumerable;
 import org.apache.calcite.linq4j.Enumerable;
@@ -32,10 +35,10 @@ import tk.onedb.core.client.DBClient;
 import tk.onedb.core.data.Header;
 import tk.onedb.core.data.TypeConverter;
 import tk.onedb.core.sql.enumerator.OneDBEnumerator;
-import tk.onedb.core.sql.expression.OneDBQuery;
 import tk.onedb.core.sql.schema.OneDBSchema;
 import tk.onedb.core.table.OneDBTableInfo;
 import tk.onedb.core.table.TableMeta;
+import tk.onedb.rpc.OneDBCommon.OneDBQueryProto;
 
 public class OneDBTable extends AbstractQueryableTable implements TranslatableTable {
   private static final Logger LOG = LoggerFactory.getLogger(OneDBTable.class);
@@ -154,8 +157,14 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
       return enumerable.enumerator();
     }
 
-    public Enumerable<Object> query(OneDBQuery query) {
-      return getTable().query(query);
+    public Enumerable<Object> query(String queryStr) {
+      OneDBQueryProto.Builder builder = OneDBQueryProto.newBuilder();
+      try {
+        TextFormat.getParser().merge(queryStr, builder);
+      } catch (ParseException e) {
+        e.printStackTrace();
+      }
+      return getTable().query(builder.build());
     }
   }
 
@@ -164,7 +173,7 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
     return query(null);
   }
 
-  public Enumerable<Object> query(OneDBQuery query) {
+  public Enumerable<Object> query(OneDBQueryProto query) {
     return new AbstractEnumerable<Object>() {
       Enumerator<Object> enumerator;
 

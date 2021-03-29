@@ -41,6 +41,7 @@ public abstract class DBService extends ServiceGrpc.ServiceImplBase {
 
   @Override
   public void oneDBQuery(OneDBQueryProto request, StreamObserver<DataSetProto> responseObserver) {
+
     StreamObserverDataSet obDataSet = new StreamObserverDataSet(responseObserver, Header.fromProto(request.getHeader()));
     try {
       oneDBQueryInternal(request, obDataSet);

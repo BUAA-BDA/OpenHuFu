@@ -22,6 +22,7 @@ public class OneDBQuery {
 
   public OneDBQueryProto toProto() {
     OneDBQueryProto.Builder builder = OneDBQueryProto.newBuilder();
+    builder.setTableName(oneDBTable.getTableName()).setHeader(header.toProto());
     builder.addAllSelectExp(selectExps.stream().map(exp -> exp.toProto()).collect(Collectors.toList()));
     builder.addAllWhereExp(filterExps.stream().map(exp -> exp.toProto()).collect(Collectors.toList()));
     builder.addAllAggExp(aggExps.stream().map(exp -> exp.toProto()).collect(Collectors.toList()));

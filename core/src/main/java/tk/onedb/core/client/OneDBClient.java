@@ -20,10 +20,10 @@ import tk.onedb.core.config.OneDBConfig;
 import tk.onedb.core.data.Header;
 import tk.onedb.core.data.Row;
 import tk.onedb.core.data.StreamBuffer;
-import tk.onedb.core.sql.expression.OneDBQuery;
 import tk.onedb.core.table.OneDBTableInfo;
 import tk.onedb.core.utils.EmptyEnumerator;
 import tk.onedb.rpc.OneDBCommon.DataSetProto;
+import tk.onedb.rpc.OneDBCommon.OneDBQueryProto;
 
 /*
 * client for all DB
@@ -112,19 +112,19 @@ public class OneDBClient {
   /*
   * onedb query
   */
-  public Enumerator<Row> oneDBQuery(String tableName, OneDBQuery query) {
+  public Enumerator<Row> oneDBQuery(String tableName, OneDBQueryProto query) {
     Map<DBClient, String> tableClients = getTableClients(tableName);
     StreamBuffer<DataSetProto> streamProto = oneDBQuery(getHeader(tableName), query, tableClients);
     return new EmptyEnumerator<>();
   }
 
-  private StreamBuffer<DataSetProto> oneDBQuery(Header header, OneDBQuery query, Map<DBClient, String> tableClients) {
+  private StreamBuffer<DataSetProto> oneDBQuery(Header header, OneDBQueryProto query, Map<DBClient, String> tableClients) {
     StreamBuffer<DataSetProto> iterator = new StreamBuffer<>(tableClients.size());
     List<Callable<Boolean>> tasks = new ArrayList<Callable<Boolean>>();
     for (Entry<DBClient, String> entry : tableClients.entrySet()) {
       tasks.add(() -> {
         try {
-          Iterator<DataSetProto> it = entry.getKey().oneDBQuery(query.toProto());
+          Iterator<DataSetProto> it = entry.getKey().oneDBQuery(query);
           while (it.hasNext()) {
             iterator.add(it.next());
           }
