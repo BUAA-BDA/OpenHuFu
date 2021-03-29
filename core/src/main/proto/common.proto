@@ -40,5 +40,16 @@ message ExpressionProto {
     float f32 = 9;
     double f64 = 10;
     Point p = 11;
+    int32 ref = 12;
   }
+}
+
+message OneDBQueryProto {
+  required string tableName = 1;
+  required HeaderProto header = 2;
+  repeated ExpressionProto selectExp = 3;
+  repeated ExpressionProto whereExp = 4;
+  repeated ExpressionProto aggExp = 5;
+  repeated string order = 6;
+  required int32 fetch = 7;
 }

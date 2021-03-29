@@ -45,6 +45,10 @@ public class Header {
     return new Builder();
   }
 
+  public int size() {
+    return fields.size();
+  }
+
   public static class Builder {
     private List<Field> fields;
     
@@ -67,5 +71,19 @@ public class Header {
     public int size() {
       return fields.size();
     }
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return obj == this || (obj instanceof Header && fields.equals(((Header) obj).fields));
+  }
+
+  @Override
+  public String toString() {
+    List<String> columnStr = new ArrayList<>();
+    for (Field field : fields) {
+      columnStr.add(field.toString());
+    }
+    return String.join(" | ", columnStr);
   }
 }

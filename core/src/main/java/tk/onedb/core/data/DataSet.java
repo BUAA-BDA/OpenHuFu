@@ -13,13 +13,13 @@ public abstract class DataSet {
     return header;
   }
 
-  abstract int getRowCount();
+  public abstract int getRowCount();
 
-  abstract void addRow(Row row);
+  public abstract void addRow(Row row);
 
-  abstract void addRows(List<Row> rows);
+  public abstract void addRows(List<Row> rows);
 
-  abstract void mergeDataSet(DataSet dataSet);
+  public abstract void mergeDataSet(DataSet dataSet);
 
   abstract List<Row> getRows();
 }

@@ -1,21 +1,19 @@
 package tk.onedb.core.sql.expression;
 
-import org.apache.calcite.rex.RexInputRef;
 import org.apache.calcite.rex.RexLiteral;
 
 import tk.onedb.core.data.FieldType;
 import tk.onedb.core.data.TypeConverter;
-import tk.onedb.core.sql.expression.OneDBOperator.OperatorType;
 import tk.onedb.rpc.OneDBCommon.ExpressionProto;
 
 /*
 * leaf node of expression tree
 */
-public class OneDBElement implements OneDBExpression {
+public class OneDBLiteral implements OneDBExpression {
   FieldType type;
   Object value;
 
-  OneDBElement(FieldType type, Object value) {
+  OneDBLiteral(FieldType type, Object value) {
     this.type = type;
     this.value = value;
   }
@@ -23,12 +21,9 @@ public class OneDBElement implements OneDBExpression {
   public static OneDBExpression fromLiteral(RexLiteral literal) {
     FieldType type = TypeConverter.convert2OneDBType(literal.getTypeName());
     Object value = literal.getValue2();
-    return new OneDBElement(type, value);
+    return new OneDBLiteral(type, value);
   }
 
-  public static OneDBExpression fromInputRef(RexInputRef ref) {
-    return new OneDBElement(FieldType.INPUT_REF, ref.getIndex());
-  }
 
   public static OneDBExpression fromProto(ExpressionProto proto) {
     FieldType type = FieldType.of(proto.getOutType());
@@ -37,7 +32,6 @@ public class OneDBElement implements OneDBExpression {
     case BOOLEAN:
       value = proto.getB();
       break;
-    case INPUT_REF:
     case BYTE:
     case SHORT:
     case INT:
@@ -61,17 +55,16 @@ public class OneDBElement implements OneDBExpression {
     default:
       throw new RuntimeException("can't translate " + proto);
     }
-    return new OneDBElement(type, value);
+    return new OneDBLiteral(type, value);
   }
 
   @Override
   public ExpressionProto toProto() {
-    ExpressionProto.Builder builder = ExpressionProto.newBuilder().setOpType(OperatorType.REF.ordinal())
+    ExpressionProto.Builder builder = ExpressionProto.newBuilder().setOpType(OneDBOpType.LITERAL.ordinal())
         .setOutType(type.ordinal());
     switch (type) {
     case BOOLEAN:
       return builder.setB((Boolean) value).build();
-    case INPUT_REF:
     case BYTE:
     case SHORT:
     case INT:
@@ -90,5 +83,19 @@ public class OneDBElement implements OneDBExpression {
     default:
       throw new RuntimeException("can't translate " + type);
     }
+  }
+
+  @Override
+  public FieldType getOutType() {
+    return type;
+  }
+
+  @Override
+  public OneDBOpType getOpType() {
+    return OneDBOpType.LITERAL;
+  }
+
+  public Object getValue() {
+    return value;
   }
 }

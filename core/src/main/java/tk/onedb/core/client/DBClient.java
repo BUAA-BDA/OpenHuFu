@@ -1,4 +1,4 @@
-package tk.onedb.client;
+package tk.onedb.core.client;
 
 import java.util.Iterator;
 
@@ -8,13 +8,18 @@ import org.slf4j.LoggerFactory;
 import io.grpc.Channel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
-import tk.onedb.OneDBService.AddClientRequest;
+import tk.onedb.OneDBService.GeneralRequest;
 import tk.onedb.OneDBService.GeneralResponse;
-import tk.onedb.OneDBService.Query;
 import tk.onedb.ServiceGrpc;
+import tk.onedb.core.data.Header;
 import tk.onedb.core.utils.EmptyIterator;
 import tk.onedb.rpc.OneDBCommon.DataSetProto;
+import tk.onedb.rpc.OneDBCommon.HeaderProto;
+import tk.onedb.rpc.OneDBCommon.OneDBQueryProto;
 
+/*
+* client for a single DB
+*/
 public class DBClient {
   private static final Logger LOG = LoggerFactory.getLogger(DBClient.class);
 
@@ -41,7 +46,7 @@ public class DBClient {
   }
 
   public boolean addClient(String endpoint) {
-    AddClientRequest request = AddClientRequest.newBuilder().setEndpoint(endpoint).build();
+    GeneralRequest request = GeneralRequest.newBuilder().setValue(endpoint).build();
     GeneralResponse response;
     try {
       response = blockingStub.addClient(request);
@@ -57,7 +62,7 @@ public class DBClient {
     return true;
   }
 
-  public Iterator<DataSetProto> oneDBQuery(Query query) {
+  public Iterator<DataSetProto> oneDBQuery(OneDBQueryProto query) {
     try {
       return blockingStub.oneDBQuery(query);
     } catch (StatusRuntimeException e) {
@@ -77,5 +82,16 @@ public class DBClient {
       return false;
     }
     return endpoint.equals(((DBClient) obj).endpoint);
+  }
+
+  public Header getTableHeader(String tableName) {
+    try {
+      HeaderProto proto = blockingStub
+              .getTableHeader(GeneralRequest.newBuilder().setValue(tableName).build());
+      return Header.fromProto(proto);
+    } catch (StatusRuntimeException e) {
+      LOG.error("RPC failed in getTableHeader: {}", e.getStatus());
+      return Header.newBuilder().build();
+    }
   }
 }

@@ -19,7 +19,6 @@ public class TableInfo {
     this.columnIndex = columnIndex;
   }
 
-
   public static class Builder {
     private String tableName;
     private final Header.Builder builder;
@@ -65,5 +64,10 @@ public class TableInfo {
 
   public Integer getColumnIndex(String name) {
     return columnIndex.get(name);
+  }
+
+  @Override
+  public String toString() {
+    return String.format("table [%s] : %s", name, header.toString());
   }
 }

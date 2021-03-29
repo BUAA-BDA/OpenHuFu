@@ -23,7 +23,7 @@ public class StreamObserverDataSet extends DataSet {
     rows = new ArrayList<>();
   }
 
-  void addRow(Row row) {
+  public void addRow(Row row) {
     rows.add(row);
     count++;
     rowCount++;
@@ -32,7 +32,7 @@ public class StreamObserverDataSet extends DataSet {
     }
   }
 
-  void addRows(List<Row> rows) {
+  public void addRows(List<Row> rows) {
     int size = rows.size();
     int i = 0;
     for (; i + BATCH_SIZE < size; i+= BATCH_SIZE) {
@@ -46,12 +46,12 @@ public class StreamObserverDataSet extends DataSet {
   }
 
   @Override
-  int getRowCount() {
+  public int getRowCount() {
     return rowCount;
   }
 
   @Override
-  void mergeDataSet(DataSet dataSet) {
+  public void mergeDataSet(DataSet dataSet) {
     addRows(dataSet.getRows());
   }
 
@@ -73,7 +73,7 @@ public class StreamObserverDataSet extends DataSet {
     }
   }
 
-  void close() {
+  public void close() {
     flush();
     observer.onCompleted();
   }

@@ -70,22 +70,22 @@ public class BasicDataSet extends EnumerableDataSet {
   }
 
   @Override
-  int getRowCount() {
+  public int getRowCount() {
     return rows.size();
   }
 
   @Override
-  void addRow(Row row) {
+  public void addRow(Row row) {
     rows.add(row);
   }
 
   @Override
-  void addRows(List<Row> rows) {
+  public void addRows(List<Row> rows) {
     rows.addAll(rows);
   }
 
   @Override
-  void mergeDataSet(DataSet dataSet) {
+  public void mergeDataSet(DataSet dataSet) {
     rows.addAll(dataSet.getRows());
   }
 

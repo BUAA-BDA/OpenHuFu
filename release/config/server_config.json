@@ -1,0 +1,13 @@
+{
+  "port": 12348,
+  "url": "jdbc:postgresql://localhost:5432/test_a",
+  "catalog": "test_a",
+  "user": "tester",
+  "passwd": "#test$",
+  "tables": [
+    {
+      "name": "onedb_test",
+      "columns": []
+    }
+  ]
+}
