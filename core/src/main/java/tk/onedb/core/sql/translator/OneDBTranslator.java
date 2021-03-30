@@ -30,7 +30,7 @@ public class OneDBTranslator {
   }
 
   List<String> translateAllExps() {
-    return exps.stream().map(exp -> OneDBExpression.fromProto(exp)).map(exp -> translate(exp))
+    return exps.stream().map(exp -> translate(OneDBExpression.fromProto(exp)))
         .collect(Collectors.toList());
   }
 

@@ -52,7 +52,7 @@ public class OneDBReference implements OneDBExpression {
 
   @Override
   public ExpressionProto toProto() {
-    return ExpressionProto.newBuilder().setOpType(OneDBOpType.REF.ordinal()).setOutType(type.ordinal()).setI32(idx).build();
+    return ExpressionProto.newBuilder().setOpType(OneDBOpType.REF.ordinal()).setOutType(type.ordinal()).setRef(idx).build();
   }
 
   @Override

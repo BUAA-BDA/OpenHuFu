@@ -11,7 +11,7 @@ import io.grpc.ServerBuilder;
 import tk.onedb.ServiceGrpc;
 
 public abstract class DBServer {
-  private static final Logger LOG = LoggerFactory.getLogger(Server.class);
+  private static final Logger LOG = LoggerFactory.getLogger(DBServer.class);
   protected final int port;
   protected final Server server;
 
