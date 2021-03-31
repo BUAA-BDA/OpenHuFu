@@ -1,17 +1,17 @@
-syntax = "proto2";
+syntax = "proto3";
 package onedb;
 
 option java_package = "tk.onedb.rpc";
 option java_outer_classname = "OneDBCommon";
 
 message Point {
-  required double lon = 1;
-  required double lat = 2;
+  double lon = 1;
+  double lat = 2;
 }
 
 message FieldProto {
-  required string name = 1;
-  required int32 type = 2;
+  string name = 1;
+  int32 type = 2;
 }
 
 message HeaderProto {
@@ -23,15 +23,15 @@ message RowsProto {
 }
 
 message DataSetProto {
-  required HeaderProto header = 1;
-  required RowsProto rows = 2;
+  HeaderProto header = 1;
+  RowsProto rows = 2;
 }
 
 message ExpressionProto {
-  required int32 opType = 1;
-  required int32 outType = 2;
+  int32 opType = 1;
+  int32 outType = 2;
   repeated ExpressionProto in = 3;
-  optional int32 func = 4;
+  int32 func = 4;
   oneof value {
     string str = 5;
     bool b = 6;
@@ -45,11 +45,11 @@ message ExpressionProto {
 }
 
 message OneDBQueryProto {
-  required string tableName = 1;
-  required HeaderProto header = 2;
+  string tableName = 1;
+  HeaderProto header = 2;
   repeated ExpressionProto selectExp = 3;
   repeated ExpressionProto whereExp = 4;
   repeated ExpressionProto aggExp = 5;
   repeated string order = 6;
-  optional int32 fetch = 7;
+  int32 fetch = 7;
 }

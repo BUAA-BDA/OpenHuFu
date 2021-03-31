@@ -1,4 +1,4 @@
-syntax = "proto2";
+syntax = "proto3";
 import "common.proto";
 package onedb;
 
@@ -7,12 +7,12 @@ option java_outer_classname = "OneDBService";
 
 
 message GeneralRequest {
-  required string value = 1;
+  string value = 1;
 }
 
 message GeneralResponse {
-  optional int32 status = 1 [default = 0];
-  optional string msg = 2 [default = "ok"];
+  int32 status = 1;
+  string msg = 2;
 }
 
 service Service {
