@@ -1,7 +1,5 @@
 package tk.onedb.core.zk;
 
-import java.io.IOException;
-
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
@@ -20,10 +18,14 @@ public abstract class ZkClient implements Watcher {
   protected String endpointRootPath;
   protected ZooKeeper zk;
 
-  public ZkClient(String servers, String zkRootPath) throws IOException {
+  public ZkClient(String servers, String zkRootPath) {
     this.zkRootPath = zkRootPath;
     this.endpointRootPath = zkRootPath + "/endpoint";
-    this.zk = new ZooKeeper(servers, OneDBConfig.ZK_TIME_OUT, this);
+    try {
+      this.zk = new ZooKeeper(servers, OneDBConfig.ZK_TIME_OUT, this);
+    } catch (Exception e) {
+      LOG.error("Error when init ZkClient: {}", e.getMessage());
+    }
   }
 
   protected void initRootPath() throws KeeperException, InterruptedException {

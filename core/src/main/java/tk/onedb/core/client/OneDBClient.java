@@ -23,6 +23,8 @@ import tk.onedb.core.data.Row;
 import tk.onedb.core.data.StreamBuffer;
 import tk.onedb.core.sql.enumerator.RowEnumerator;
 import tk.onedb.core.table.OneDBTableInfo;
+import tk.onedb.core.zk.OneDBZkClient;
+import tk.onedb.core.zk.ZkConfig;
 import tk.onedb.rpc.OneDBCommon.DataSetProto;
 import tk.onedb.rpc.OneDBCommon.OneDBQueryProto;
 
@@ -35,11 +37,24 @@ public class OneDBClient {
   private final Map<String, DBClient> dbClientMap;
   private final Map<String, OneDBTableInfo> tableMap;
   private final ExecutorService executorService;
+  private final OneDBZkClient zkClient;
 
   public OneDBClient() {
     dbClientMap = new ConcurrentHashMap<>();
     tableMap = new ConcurrentHashMap<>();
+    zkClient = null;
     this.executorService = Executors.newFixedThreadPool(OneDBConfig.CLIENT_THREAD_NUM);
+  }
+
+  public OneDBClient(ZkConfig zkConfig) {
+    dbClientMap = new ConcurrentHashMap<>();
+    tableMap = new ConcurrentHashMap<>();
+    zkClient = new OneDBZkClient(zkConfig, this);
+    this.executorService = Executors.newFixedThreadPool(OneDBConfig.CLIENT_THREAD_NUM);
+  }
+
+  private boolean hasZk() {
+    return zkClient != null;
   }
 
   Map<String, OneDBTableInfo> getTableMap() {

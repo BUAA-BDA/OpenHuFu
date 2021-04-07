@@ -16,6 +16,7 @@ import tk.onedb.core.client.DBClient;
 import tk.onedb.core.client.OneDBClient;
 import tk.onedb.core.data.Header;
 import tk.onedb.core.sql.rel.OneDBTable;
+import tk.onedb.core.zk.ZkConfig;
 
 public class OneDBSchema extends AbstractSchema {
   private static final Logger LOG = LoggerFactory.getLogger(OneDBSchema.class);
@@ -23,6 +24,18 @@ public class OneDBSchema extends AbstractSchema {
   private final Map<String, Table> tableMap;
   private final OneDBClient client;
 
+  public OneDBSchema(List<String> endpoints, List<Map<String, Object>> tables, ZkConfig zkConfig) {
+    LOG.info("add schema");
+    this.tableMap = new HashMap<>();
+    this.client = new OneDBClient(zkConfig);
+    for (String endpoint : endpoints) {
+      if (!addFederate(endpoint)) {
+        LOG.warn("fed {} already exist", endpoint);
+      } else {
+        LOG.info("add fed {}", endpoint);
+      }
+    }
+  }
 
   public OneDBSchema(List<String> endpoints, List<Map<String, Object>> tables) {
     LOG.info("add schema");

@@ -1,10 +1,7 @@
 package tk.onedb.core.zk;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -26,29 +23,29 @@ import tk.onedb.rpc.OneDBCommon.HeaderProto;
 public class OneDBZkClient extends ZkClient {
 
   private final OneDBClient client;
-  private List<String> endpoints;
   private final String schemaRootPath;
   private final String schemaDirectoryPath;
-  private final ReadWriteLock lock;
   private final List<ACL> ONEDB_AUTH;
 
-  public OneDBZkClient(String servers, String zkRootPath, OneDBClient client, String directory, byte[] digest) throws IOException, KeeperException, InterruptedException {
-    super(servers, zkRootPath);
-    this.client = client;
-    this.lock = new ReentrantReadWriteLock();
+  public OneDBZkClient(ZkConfig zkConfig, OneDBClient client) {
+    super(zkConfig.servers, zkConfig.zkRoot);
     this.schemaRootPath = zkRootPath + "/schema";
-    this.schemaDirectoryPath = buildPath(schemaRootPath, directory);
+    this.schemaDirectoryPath = buildPath(schemaRootPath, zkConfig.schemaName);
+    this.client = client;
     ONEDB_AUTH = new ArrayList<>();
     ONEDB_AUTH.addAll(Ids.READ_ACL_UNSAFE);
     ONEDB_AUTH.addAll(Ids.CREATOR_ALL_ACL);
-    init();
+    try {
+      init();
+    } catch (Exception e) {
+      LOG.error("Error when init OneDBZkClient: {}", e.getMessage());
+    }
   }
 
   private void init() throws KeeperException, InterruptedException {
     initRootPath();
     initSchemaPath();
-    List<String> endpoints= zk.getChildren(endpointRootPath, new EndpointWatcher(client, zk, endpointRootPath));
-    this.endpoints = endpoints;
+    zk.getChildren(endpointRootPath, new EndpointWatcher(client, zk, endpointRootPath));
   }
 
   private void initSchemaPath() throws KeeperException, InterruptedException {
@@ -102,9 +99,14 @@ public class OneDBZkClient extends ZkClient {
     return zk.getChildren(path, false, null);
   }
 
-  public TableInfo watchTable(String endpoint, String tableName) throws KeeperException, InterruptedException, InvalidProtocolBufferException {
+  public void watchTable(String endpoint, String tableName) throws KeeperException, InterruptedException {
     String path = buildPath(buildPath(endpointRootPath, endpoint), tableName);
-    byte[] header = zk.getData(path, new TableInfoWatcher(client, zk, path), null);
+    zk.exists(path, new TableInfoWatcher(client, zk, path));
+  }
+
+  public TableInfo getTableInfo(String endpoint, String tableName) throws KeeperException, InterruptedException, InvalidProtocolBufferException {
+    String path = buildPath(buildPath(endpointRootPath, endpoint), tableName);
+    byte[] header = zk.getData(path, false, null);
     return TableInfo.of(tableName, Header.fromProto(HeaderProto.parseFrom(header)));
   }
 
@@ -113,16 +115,24 @@ public class OneDBZkClient extends ZkClient {
     zk.create(path, table.getHeader().toProto().toByteArray(), ONEDB_AUTH, CreateMode.PERSISTENT);
   }
 
+  public void deleteGlobalTable(String name) throws KeeperException, InterruptedException {
+    String path = buildPath(schemaDirectoryPath, name);
+    zk.delete(path, -1);
+  }
+
   public void addLocalTable(String globalTableName, String endpoint, String localTableName) {
     OneDBTableInfo globalTable = client.getTable(globalTableName);
     if (globalTable == null) {
       LOG.error("Gloabl table {} not exists", globalTableName);
       return;
     }
+    String globalTablePath = buildPath(schemaDirectoryPath, globalTableName);
     try {
-      TableInfo localTable = watchTable(endpoint, localTableName);
+      TableInfo localTable = getTableInfo(endpoint, localTableName);
       if (localTable.getHeader().equals(globalTable.getHeader())) {
         addLocalTable(globalTableName, endpoint, localTableName);
+        watchTable(endpoint, localTableName);
+        zk.create(globalTablePath, null, ONEDB_AUTH, CreateMode.PERSISTENT);
       }
     } catch (InvalidProtocolBufferException e) {
       LOG.error("Failed to parse header of table {} in {}", localTableName, endpoint);
@@ -143,12 +153,12 @@ public class OneDBZkClient extends ZkClient {
     client.removeLocalTable(endpoint, localTableName);
   }
 
-  public static void main(String[] args) {
-    try {
-      OneDBZkClient client = new OneDBZkClient("localhost:12349", "/onedb", null, "user1", "user1:user1".getBytes());
-      Thread.sleep(1000000);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
+  // public static void main(String[] args) {
+  //   try {
+  //     OneDBZkClient client = new OneDBZkClient("localhost:12349", "/onedb", null, "user1", "user1:user1".getBytes());
+  //     Thread.sleep(1000000);
+  //   } catch (Exception e) {
+  //     e.printStackTrace();
+  //   }
+  // }
 }
