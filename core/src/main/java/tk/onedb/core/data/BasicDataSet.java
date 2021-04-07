@@ -34,12 +34,16 @@ public class BasicDataSet extends EnumerableDataSet {
     return proto.setRows(rowsProto).build();
   }
 
-  public static DataSet fromProto(DataSetProto proto) {
+  public static BasicDataSet fromProto(DataSetProto proto) {
     Header header = Header.fromProto(proto.getHeader());
     RowsProto rowsProto = proto.getRows();
     List<Row> rows = rowsProto.getRowList().stream()
         .map(bytes -> (Row) SerializationUtils.deserialize(bytes.toByteArray())).collect(Collectors.toList());
     return new BasicDataSet(header, rows);
+  }
+
+  public static BasicDataSet of(Header header) {
+    return new BasicDataSet(header);
   }
 
   @Override

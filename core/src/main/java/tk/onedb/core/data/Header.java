@@ -56,12 +56,14 @@ public class Header {
       fields = new ArrayList<Field>();
     }
 
-    public void add(String name, FieldType type) {
+    public Builder add(String name, FieldType type) {
       fields.add(Field.of(name, type));
+      return this;
     }
 
-    public void add(String name, FieldType type, Level level) {
+    public Builder add(String name, FieldType type, Level level) {
       fields.add(Field.of(name, type, level));
+      return this;
     }
 
     public Header build() {

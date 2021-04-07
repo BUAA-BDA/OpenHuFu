@@ -18,6 +18,11 @@ message HeaderProto {
   repeated FieldProto field = 1;
 }
 
+message LocalTableInfoProto {
+  string name = 1;
+  HeaderProto header = 2;
+}
+
 message RowsProto {
   repeated bytes row = 1;
 }

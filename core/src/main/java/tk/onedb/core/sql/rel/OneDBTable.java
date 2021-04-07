@@ -139,7 +139,7 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
   }
 
   public void addDB(DBClient client, String localName) {
-    tableInfo.addDB(client, localName);
+    tableInfo.addLocalTable(client, localName);
   }
 
   public static class OneDBQueryable<T> extends AbstractTableQueryable<T> {

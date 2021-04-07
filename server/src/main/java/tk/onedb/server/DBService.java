@@ -20,10 +20,10 @@ import tk.onedb.core.config.OneDBConfig;
 import tk.onedb.core.data.DataSet;
 import tk.onedb.core.data.Header;
 import tk.onedb.core.data.StreamObserverDataSet;
+import tk.onedb.core.data.TableInfo;
 import tk.onedb.rpc.OneDBCommon.DataSetProto;
 import tk.onedb.rpc.OneDBCommon.HeaderProto;
 import tk.onedb.rpc.OneDBCommon.OneDBQueryProto;
-import tk.onedb.server.data.TableInfo;
 
 public abstract class DBService extends ServiceGrpc.ServiceImplBase {
   private static final Logger LOG = LoggerFactory.getLogger(DBService.class);

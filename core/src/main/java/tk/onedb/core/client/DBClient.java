@@ -71,6 +71,10 @@ public class DBClient {
     return new EmptyIterator<DataSetProto>();
   }
 
+  public String getEndpoint() {
+    return endpoint;
+  }
+
   @Override
   public String toString() {
     return String.format("DBClient[%s]", endpoint);

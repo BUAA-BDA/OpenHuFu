@@ -15,11 +15,11 @@ import tk.onedb.core.data.DataSet;
 import tk.onedb.core.data.Header;
 import tk.onedb.core.data.Level;
 import tk.onedb.core.data.Row;
+import tk.onedb.core.data.TableInfo;
 import tk.onedb.core.sql.translator.OneDBTranslator;
 import tk.onedb.rpc.OneDBCommon.OneDBQueryProto;
 import tk.onedb.server.DBService;
 import tk.onedb.server.data.ServerConfig;
-import tk.onedb.server.data.TableInfo;
 
 public class PostgresqlService extends DBService {
   private static final Logger LOG = LoggerFactory.getLogger(PostgresqlService.class);

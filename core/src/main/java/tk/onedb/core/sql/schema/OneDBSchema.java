@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 
 import org.apache.calcite.schema.Table;
 import org.apache.calcite.schema.impl.AbstractSchema;
@@ -79,14 +78,6 @@ public class OneDBSchema extends AbstractSchema {
 
   public DBClient getDBClient(String endpoint) {
     return client.getDBClient(endpoint);
-  }
-
-  public Map<DBClient, String> getClients(String tableName) {
-    OneDBTable table = (OneDBTable) tableMap.get(tableName);
-    if (table == null) {
-      return ImmutableMap.of();
-    }
-    return table.getTableInfo().getTableMap();
   }
 
   @Deprecated

@@ -50,7 +50,7 @@ public class StreamBuffer<E> implements Iterator<E> {
       // wait for productor
       try {
         synchronized (lock) {
-          lock.wait(OneDBConfig.TIME_OUT);
+          lock.wait(OneDBConfig.RPC_TIME_OUT);
         }
       } catch (Exception e) {
         return false;
