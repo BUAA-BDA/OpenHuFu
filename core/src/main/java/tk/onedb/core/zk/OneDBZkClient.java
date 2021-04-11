@@ -23,13 +23,11 @@ import tk.onedb.rpc.OneDBCommon.HeaderProto;
 public class OneDBZkClient extends ZkClient {
 
   private final OneDBClient client;
-  private final String schemaRootPath;
   private final String schemaDirectoryPath;
   private final List<ACL> ONEDB_AUTH;
 
   public OneDBZkClient(ZkConfig zkConfig, OneDBClient client) {
     super(zkConfig.servers, zkConfig.zkRoot);
-    this.schemaRootPath = zkRootPath + "/schema";
     this.schemaDirectoryPath = buildPath(schemaRootPath, zkConfig.schemaName);
     this.client = client;
     ONEDB_AUTH = new ArrayList<>();
@@ -43,25 +41,16 @@ public class OneDBZkClient extends ZkClient {
   }
 
   private void init() throws KeeperException, InterruptedException {
-    initRootPath();
     initSchemaPath();
     zk.getChildren(endpointRootPath, new EndpointWatcher(client, zk, endpointRootPath));
   }
 
   private void initSchemaPath() throws KeeperException, InterruptedException {
-    if (zk.exists(schemaRootPath, false) == null) {
-      LOG.info("Create SchemaPath: {}", schemaRootPath);
-      zk.create(schemaRootPath, null, Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+    if (zk.exists(schemaDirectoryPath, false) == null)  {
       LOG.info("Create Schema Directory: {}", schemaDirectoryPath);
       zk.create(schemaDirectoryPath, null, ONEDB_AUTH, CreateMode.PERSISTENT);
     } else {
-      LOG.info("SchemaPath {} already exists", schemaRootPath);
-      if (zk.exists(schemaDirectoryPath, false) == null)  {
-        LOG.info("Create Schema Directory: {}", schemaDirectoryPath);
-        zk.create(schemaDirectoryPath, null, ONEDB_AUTH, CreateMode.PERSISTENT);
-      } else {
-        LOG.info("Schema Directory {} already exists", schemaDirectoryPath);
-      }
+      LOG.info("Schema Directory {} already exists", schemaDirectoryPath);
     }
   }
 

@@ -1,9 +1,9 @@
 # OneDB
 
-#### 介绍
+## 介绍
 数据库联合查询中间件
 
-#### 使用说明
+## 使用说明
 已安装 java jdk 1.8及以上版本、maven 3.5.2及以上版本和 postgresql
 
 首先在项目根目录下运行打包命令
@@ -61,3 +61,26 @@ cd release
 ```
 ./stop_server.sh
 ```
+
+## zookeeper 设置说明
+
+zookeeper 目录结构如下：
+
+* `${ONEDB_ROOT}`
+    * `${ONEDB_ROOT}/endpoint` -> null
+        * `{ONEDB_ROOT}/endpoint/${endpoint_1}` -> null
+            * `{ONEDB_ROOT}/endpoint/${endpoint_1}/${local_table_1}` -> header proto
+            * ...
+            * `{ONEDB_ROOT}/endpoint/${endpoint_1}/${local_table_n}` -> header proto
+        * ...
+        * `{ONEDB_ROOT}/endpoint/${endpoint_n}` -> null
+    * `${ONEDB_ROOT}/schema` -> null
+        * `${ONEDB_ROOT}/schema/${schema_1}` -> null
+            * `${ONEDB_ROOT}/schema/${schema_1}/${global_table_1}` -> null
+                * `${ONEDB_ROOT}/schema/${schema_1}/${global_table_1}/${endpoint_1}` -> local table name
+                * ...
+                * `${ONEDB_ROOT}/schema/${schema_1}/${global_table_1}/${endpoint_n}` -> local table name
+            * ...
+            * `${ONEDB_ROOT}/schema/${schema_n}/${global_table_n}` -> null
+        * ...
+        * `${ONEDB_ROOT}/schema/${schema_n}`

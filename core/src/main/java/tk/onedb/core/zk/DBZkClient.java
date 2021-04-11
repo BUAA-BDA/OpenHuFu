@@ -30,7 +30,6 @@ public class DBZkClient extends ZkClient {
   }
 
   private void init(String endpoint) throws KeeperException, InterruptedException {
-    initRootPath();
     if (zk.exists(dbRootPath, false) == null) {
       LOG.info("Create DBPath: {}", dbRootPath);
       zk.create(dbRootPath, null, DB_AUTH, CreateMode.PERSISTENT);
@@ -44,10 +43,29 @@ public class DBZkClient extends ZkClient {
     byte[] header = tableInfo.getHeader().toProto().toByteArray();
     try {
       zk.create(tablePath, header, DB_AUTH, CreateMode.EPHEMERAL);
-      LOG.info("add table info on path {} success", tablePath);
+      LOG.info("Add table info on path {} success", tablePath);
       return true;
     } catch (KeeperException | InterruptedException e) {
-      LOG.error("add table info on path {} failed: {}", tablePath, e.getMessage());
+      LOG.error("Fail to add table info on path {}: {}", tablePath, e.getMessage());
+      return false;
+    }
+  }
+
+  public boolean registerTable2Schema(String schema, String globalTableName, String endpoint, String localTableName) {
+    String directory = buildPath(schemaRootPath, schema);
+    String tablePath = buildPath(directory, globalTableName);
+    String registerPath = buildPath(tablePath, endpoint);
+    try {
+      if (createRecursive(tablePath, Ids.OPEN_ACL_UNSAFE)) {
+        zk.create(registerPath, localTableName.getBytes(), DB_AUTH, CreateMode.EPHEMERAL);
+        LOG.info("register {} to {}/{}/{}", localTableName, schema, globalTableName, endpoint);
+        return true;
+      } else {
+        return false;
+      }
+    } catch (KeeperException | InterruptedException e) {
+      LOG.error("Error when register to schema {}: {}", schema, e.getMessage());
+      e.printStackTrace();
       return false;
     }
   }
@@ -71,11 +89,10 @@ public class DBZkClient extends ZkClient {
     try {
       TableInfo table1 = TableInfo.newBuilder().add("id", FieldType.LONG).add("name", FieldType.STRING).setTableName("user").build();
       DBZkClient client = new DBZkClient("localhost:12349", "/onedb", "localhost:12345", "DB1:DB1".getBytes());
-      Thread.sleep(10000);
+      Thread.sleep(100);
       client.addTableInfo(table1);
-      Thread.sleep(1000);
-      client.addTableInfo(table1);
-      Thread.sleep(10000);
+      client.registerTable2Schema("default", "user", "localhost:12345", "user");
+      Thread.sleep(100000);
       client.deleteTableInfo(table1.getName());
     } catch (Exception e) {
       e.printStackTrace();

@@ -1,13 +1,23 @@
 {
   "port": 12348,
+  "hostname": "localhost",
   "url": "jdbc:postgresql://localhost:5432/test_a",
   "catalog": "test_a",
   "user": "tester",
   "passwd": "#test$",
+  "zkservers": "localhost:12349",
+  "zkroot": "/onedb",
+  "digest": "tester:#test$",
   "tables": [
     {
       "name": "onedb_test",
-      "columns": []
+      "columns": [],
+      "mappings": [
+        {
+          "schema": "default",
+          "name": "onedb_test"
+        }
+      ]
     }
   ]
 }

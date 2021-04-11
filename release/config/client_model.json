@@ -10,7 +10,7 @@
         "endpoints": ["localhost:12348"],
         "zookeeper": "localhost:12349",
         "zkroot": "/onedb",
-        "usr": "user1",
+        "user": "user1",
         "passwd": "user1"
       },
       "tables": [

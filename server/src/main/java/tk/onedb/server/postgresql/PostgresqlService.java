@@ -20,6 +20,7 @@ import tk.onedb.core.sql.translator.OneDBTranslator;
 import tk.onedb.rpc.OneDBCommon.OneDBQueryProto;
 import tk.onedb.server.DBService;
 import tk.onedb.server.data.ServerConfig;
+import tk.onedb.server.data.ServerConfig.Table;
 
 public class PostgresqlService extends DBService {
   private static final Logger LOG = LoggerFactory.getLogger(PostgresqlService.class);
@@ -28,6 +29,8 @@ public class PostgresqlService extends DBService {
   private final String catalog;
 
   PostgresqlService(PostgresqlConfig config) {
+    super(config.zkservers, config.zkroot,
+        String.format("%s:%d", config.hostname == null ? "localhost" : config.hostname, config.port), config.digest);
     this.catalog = config.catalog;
     try {
       init(config);
@@ -40,7 +43,7 @@ public class PostgresqlService extends DBService {
     Class.forName("org.postgresql.Driver");
     connection = DriverManager.getConnection(config.url, config.user, config.passwd);
     metaData = connection.getMetaData();
-    ResultSet rs = metaData.getTables(catalog, null, "%", new String[]{"TABLE"});
+    ResultSet rs = metaData.getTables(catalog, null, "%", new String[] { "TABLE" });
     while (rs.next()) {
       String tableName = rs.getString("TABLE_NAME");
       ServerConfig.Table table = config.getTable(tableName);
@@ -55,23 +58,23 @@ public class PostgresqlService extends DBService {
     }
   }
 
-  void addTable(ServerConfig.Table table) throws SQLException {
-    ResultSet rc = metaData.getColumns(catalog, null, table.name, null);
-    TableInfo.Builder tableInfoBuilder = TableInfo.newBuilder();
-    tableInfoBuilder.setTableName(table.name);
-    while (rc.next()) {
-      String columnName = rc.getString("COLUMN_NAME");
-      Level level = table.getLevel(columnName);
-      if (level.equals(Level.HIDE)) continue;
-      tableInfoBuilder.add(columnName, PostgresqlTypeConverter.convert(rc.getString("TYPE_NAME")), level);
-    }
+  @Override
+  protected TableInfo loadTableInfo(Table table) {
     try {
-      TableInfo tableInfo = tableInfoBuilder.build();
-      LOG.info("add {}", tableInfo.toString());
-      tableInfoMap.put(table.name, tableInfo);
-    } catch (Exception e) {
-      LOG.warn("fail to add table {}", table.name);
-      e.printStackTrace();
+      ResultSet rc = metaData.getColumns(catalog, null, table.name, null);
+      TableInfo.Builder tableInfoBuilder = TableInfo.newBuilder();
+      tableInfoBuilder.setTableName(table.name);
+      while (rc.next()) {
+        String columnName = rc.getString("COLUMN_NAME");
+        Level level = table.getLevel(columnName);
+        if (level.equals(Level.HIDE))
+          continue;
+        tableInfoBuilder.add(columnName, PostgresqlTypeConverter.convert(rc.getString("TYPE_NAME")), level);
+      }
+      return tableInfoBuilder.build();
+    } catch (SQLException e) {
+      LOG.error("Error when load tableinfo of {}: ", table.name, e.getMessage());
+      return null;
     }
   }
 
@@ -85,45 +88,45 @@ public class PostgresqlService extends DBService {
           continue;
         }
         switch (header.getType(i)) {
-          case BYTE:
-            builder.set(i, rs.getByte(i + 1));
-            break;
-          case SHORT:
-            builder.set(i, rs.getShort(i + 1));
-            break;
-          case INT:
-            builder.set(i, rs.getInt(i + 1));
-            break;
-          case LONG:
-            builder.set(i, rs.getLong(i + 1));
-            break;
-          case FLOAT:
-            builder.set(i, rs.getFloat(i + 1));
-            break;
-          case DOUBLE:
-            builder.set(i, rs.getDouble(i + 1));
-            break;
-          case STRING:
-            builder.set(i, rs.getString(i + 1));
-            break;
-          case BOOLEAN:
-            builder.set(i, rs.getBoolean(i + 1));
-            break;
-          case DATE:
-            // Divide by 86400000L to prune time field
-            Long date = rs.getDate(i + 1).getTime() / 86400000L;
-            builder.set(i, date);
-            break;
-          case TIME:
-            Long time = rs.getTime(i + 1).getTime();
-            builder.set(i, time);
-            break;
-          case TIMESTAMP:
-            Long timeStamp = rs.getTimestamp(i + 1).getTime();
-            builder.set(i, timeStamp);
-            break;
-          default:
-            break;
+        case BYTE:
+          builder.set(i, rs.getByte(i + 1));
+          break;
+        case SHORT:
+          builder.set(i, rs.getShort(i + 1));
+          break;
+        case INT:
+          builder.set(i, rs.getInt(i + 1));
+          break;
+        case LONG:
+          builder.set(i, rs.getLong(i + 1));
+          break;
+        case FLOAT:
+          builder.set(i, rs.getFloat(i + 1));
+          break;
+        case DOUBLE:
+          builder.set(i, rs.getDouble(i + 1));
+          break;
+        case STRING:
+          builder.set(i, rs.getString(i + 1));
+          break;
+        case BOOLEAN:
+          builder.set(i, rs.getBoolean(i + 1));
+          break;
+        case DATE:
+          // Divide by 86400000L to prune time field
+          Long date = rs.getDate(i + 1).getTime() / 86400000L;
+          builder.set(i, date);
+          break;
+        case TIME:
+          Long time = rs.getTime(i + 1).getTime();
+          builder.set(i, time);
+          break;
+        case TIMESTAMP:
+          Long timeStamp = rs.getTimestamp(i + 1).getTime();
+          builder.set(i, timeStamp);
+          break;
+        default:
+          break;
         }
       }
       dataSet.addRow(builder.build());

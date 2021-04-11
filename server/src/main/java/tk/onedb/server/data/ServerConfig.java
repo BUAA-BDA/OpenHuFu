@@ -11,6 +11,7 @@ public interface ServerConfig {
   public static class Table {
     public String name;
     public List<Column> columns;
+    public List<Mapping> mappings;
 
     public Level getLevel(String columnName) {
       for (Column column : columns) {
@@ -25,5 +26,10 @@ public interface ServerConfig {
   public static class Column {
     public String name;
     public Level level;
+  }
+
+  public static class Mapping {
+    public String schema;
+    public String name;
   }
 }

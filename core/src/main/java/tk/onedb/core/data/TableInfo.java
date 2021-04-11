@@ -65,7 +65,7 @@ public class TableInfo {
       return this;
     }
 
-    public TableInfo build() throws Exception {
+    public TableInfo build() {
       return new TableInfo(tableName, builder.build(), columnIndex);
     }
   }

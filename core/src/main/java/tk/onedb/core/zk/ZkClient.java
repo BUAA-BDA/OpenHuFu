@@ -1,28 +1,35 @@
 package tk.onedb.core.zk;
 
+import java.util.List;
+
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
+import org.apache.zookeeper.data.ACL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import tk.onedb.core.config.OneDBConfig;
+
 
 public abstract class ZkClient implements Watcher {
   protected static Logger LOG = LoggerFactory.getLogger(ZkClient.class);
 
   protected String zkRootPath;
   protected String endpointRootPath;
+  protected String schemaRootPath;
   protected ZooKeeper zk;
 
   public ZkClient(String servers, String zkRootPath) {
     this.zkRootPath = zkRootPath;
     this.endpointRootPath = zkRootPath + "/endpoint";
+    this.schemaRootPath = zkRootPath + "/schema";
     try {
       this.zk = new ZooKeeper(servers, OneDBConfig.ZK_TIME_OUT, this);
+      initRootPath();
     } catch (Exception e) {
       LOG.error("Error when init ZkClient: {}", e.getMessage());
     }
@@ -30,19 +37,34 @@ public abstract class ZkClient implements Watcher {
 
   protected void initRootPath() throws KeeperException, InterruptedException {
     LOG.info("root path: {}; endpoint path: {}", zkRootPath, endpointRootPath);
-    if (zk.exists(zkRootPath, false) == null) {
-      LOG.info("init root path: {}", zkRootPath);
-      zk.create(zkRootPath, null, Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-      LOG.info("init endpoint path: {}", endpointRootPath);
-      zk.create(endpointRootPath, null, Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-    } else if (zk.exists(endpointRootPath, false) == null) {
-      LOG.info("init endpoint path: {}", endpointRootPath);
-      zk.create(endpointRootPath, null, Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-    }
+    createRecursive(endpointRootPath, Ids.OPEN_ACL_UNSAFE);
+    createRecursive(schemaRootPath, Ids.OPEN_ACL_UNSAFE);
   }
 
   protected static String buildPath(String rootPath, String nodeName) {
     return rootPath + "/" + nodeName;
+  }
+
+  protected boolean createRecursive(String path, List<ACL> acls) {
+    int idx = 0;
+    LOG.info("Creating path {} recursively", path);
+    while(true) {
+      idx = path.indexOf("/", idx + 1);
+      String tmp = idx == -1 ? path : path.substring(0, idx);
+      try {
+        if (zk.exists(tmp, false) == null) {
+          zk.create(tmp, null, acls, CreateMode.PERSISTENT);
+          LOG.info("Create path {}", tmp);
+        }
+      } catch (KeeperException | InterruptedException e) {
+        LOG.error("Error when creating path {}", tmp);
+        return false;
+      }
+      if (idx == -1) {
+        break;
+      }
+    }
+    return true;
   }
 
   @Override
