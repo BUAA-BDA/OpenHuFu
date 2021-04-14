@@ -63,7 +63,10 @@ public class StreamObserverDataSet extends DataSet {
 
   private void send() {
     count = 0;
-    observer.onNext((new BasicDataSet(header, rows)).toProto());
+    BasicDataSet dataSet = new BasicDataSet(header, rows);
+    DataSetProto proto = dataSet.toProto();
+    observer.onNext(proto);
+    dataSet.close();
     rows.clear();
   }
 

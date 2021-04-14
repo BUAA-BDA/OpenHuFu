@@ -30,7 +30,7 @@ public class BasicDataSet extends EnumerableDataSet {
     DataSetProto.Builder proto = DataSetProto.newBuilder();
     proto.setHeader(header.toProto());
     RowsProto.Builder rowsProto = RowsProto.newBuilder();
-    rows.stream().map(row -> rowsProto.addRow(ByteString.copyFrom(SerializationUtils.serialize(row))));
+    rows.stream().forEach(row -> rowsProto.addRow(ByteString.copyFrom(SerializationUtils.serialize(row))));
     return proto.setRows(rowsProto).build();
   }
 

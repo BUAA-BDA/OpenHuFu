@@ -13,7 +13,11 @@ public class OneDBEnumerator implements Enumerator<Object> {
   private int cnt = 0;
 
   public OneDBEnumerator(String tableName, OneDBSchema schema, OneDBQueryProto query) {
-    this.limitCount = query.getFetch();
+    if (query.getFetch() == 0) {
+      this.limitCount = Integer.MAX_VALUE;
+    } else {
+      this.limitCount = query.getFetch();
+    }
     OneDBClient client = schema.getClient();
     enumerator = client.oneDBQuery(tableName, query);
   }
