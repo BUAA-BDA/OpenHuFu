@@ -1,0 +1,20 @@
+{
+  "version": "1.0",
+  "defaultSchema": "default",
+  "schemas": [
+    {
+      "name": "default",
+      "type": "custom",
+      "factory": "tk.onedb.core.sql.schema.OneDBSchemaFactory",
+      "operand": {
+        "zookeeper": "localhost:12349",
+        "zkroot": "/onedb",
+        "schema": "default",
+        "user": "user1",
+        "passwd": "user1"
+      },
+      "tables": [
+      ]
+    }
+  ]
+}

@@ -1,11 +1,9 @@
-package tk.onedb.server.data;
+package tk.onedb.core.data;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import tk.onedb.core.data.FieldType;
-import tk.onedb.core.data.Header;
-import tk.onedb.core.data.Level;
+import tk.onedb.rpc.OneDBCommon.LocalTableInfoProto;
 
 public class TableInfo {
   private final String name;
@@ -19,6 +17,26 @@ public class TableInfo {
     this.columnIndex = columnIndex;
   }
 
+  private TableInfo(String name, Header header) {
+    this.name = name;
+    this.header = header;
+    this.columnIndex = new HashMap<>();
+    for (int i = 0; i < header.size(); ++i) {
+      columnIndex.put(header.getName(i), i);
+    }
+  }
+
+  public LocalTableInfoProto toProto() {
+    return LocalTableInfoProto.newBuilder().setName(name).setHeader(header.toProto()).build();
+  }
+
+  public static TableInfo fromProto(LocalTableInfoProto proto) {
+    return new TableInfo(proto.getName(), Header.fromProto(proto.getHeader()));
+  }
+
+  public static TableInfo of(String name, Header header) {
+    return new TableInfo(name, header);
+  }
 
   public static class Builder {
     private String tableName;
@@ -30,21 +48,24 @@ public class TableInfo {
       columnIndex = new HashMap<>();
     }
 
-    public void setTableName(String tableName) {
+    public Builder setTableName(String tableName) {
       this.tableName = tableName;
+      return this;
     }
 
-    public void add(String name, FieldType type) {
+    public Builder add(String name, FieldType type) {
       columnIndex.put(name, builder.size());
       builder.add(name, type);
+      return this;
     }
 
-    public void add(String name, FieldType type, Level level) {
+    public Builder add(String name, FieldType type, Level level) {
       columnIndex.put(name, builder.size());
       builder.add(name, type, level);
+      return this;
     }
 
-    public TableInfo build() throws Exception {
+    public TableInfo build() {
       return new TableInfo(tableName, builder.build(), columnIndex);
     }
   }
@@ -65,5 +86,10 @@ public class TableInfo {
 
   public Integer getColumnIndex(String name) {
     return columnIndex.get(name);
+  }
+
+  @Override
+  public String toString() {
+    return String.format("table [%s] : %s", name, header.toString());
   }
 }

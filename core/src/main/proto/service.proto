@@ -1,29 +1,22 @@
-syntax = "proto2";
+syntax = "proto3";
 import "common.proto";
 package onedb;
 
 option java_package = "tk.onedb";
 option java_outer_classname = "OneDBService";
 
-message AddClientRequest {
-  required string endpoint = 1;
+
+message GeneralRequest {
+  string value = 1;
 }
 
 message GeneralResponse {
-  optional int32 status = 1 [default = 0];
-  optional string msg = 2 [default = "ok"];
-}
-
-message Query {
-  required string tableName = 1;
-  required HeaderProto header = 2;
-  repeated ExpressionProto selectExp = 3;
-  repeated ExpressionProto whereExp = 4;
-  repeated string order = 5;
-  required int32 fetch = 6;
+  int32 status = 1;
+  string msg = 2;
 }
 
 service Service {
-  rpc AddClient(AddClientRequest) returns (GeneralResponse);
-  rpc OneDBQuery(Query) returns (stream DataSetProto);
+  rpc AddClient(GeneralRequest) returns (GeneralResponse);
+  rpc GetTableHeader(GeneralRequest) returns (HeaderProto);
+  rpc OneDBQuery(OneDBQueryProto) returns (stream DataSetProto);
 }

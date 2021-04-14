@@ -30,16 +30,20 @@ public class BasicDataSet extends EnumerableDataSet {
     DataSetProto.Builder proto = DataSetProto.newBuilder();
     proto.setHeader(header.toProto());
     RowsProto.Builder rowsProto = RowsProto.newBuilder();
-    rows.stream().map(row -> rowsProto.addRow(ByteString.copyFrom(SerializationUtils.serialize(row))));
+    rows.stream().forEach(row -> rowsProto.addRow(ByteString.copyFrom(SerializationUtils.serialize(row))));
     return proto.setRows(rowsProto).build();
   }
 
-  public static DataSet fromProto(DataSetProto proto) {
+  public static BasicDataSet fromProto(DataSetProto proto) {
     Header header = Header.fromProto(proto.getHeader());
     RowsProto rowsProto = proto.getRows();
     List<Row> rows = rowsProto.getRowList().stream()
         .map(bytes -> (Row) SerializationUtils.deserialize(bytes.toByteArray())).collect(Collectors.toList());
     return new BasicDataSet(header, rows);
+  }
+
+  public static BasicDataSet of(Header header) {
+    return new BasicDataSet(header);
   }
 
   @Override
@@ -70,22 +74,22 @@ public class BasicDataSet extends EnumerableDataSet {
   }
 
   @Override
-  int getRowCount() {
+  public int getRowCount() {
     return rows.size();
   }
 
   @Override
-  void addRow(Row row) {
+  public void addRow(Row row) {
     rows.add(row);
   }
 
   @Override
-  void addRows(List<Row> rows) {
+  public void addRows(List<Row> rows) {
     rows.addAll(rows);
   }
 
   @Override
-  void mergeDataSet(DataSet dataSet) {
+  public void mergeDataSet(DataSet dataSet) {
     rows.addAll(dataSet.getRows());
   }
 
