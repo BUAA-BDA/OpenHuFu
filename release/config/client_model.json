@@ -7,25 +7,13 @@
       "type": "custom",
       "factory": "tk.onedb.core.sql.schema.OneDBSchemaFactory",
       "operand": {
-        "endpoints": ["localhost:12348"],
         "zookeeper": "localhost:12349",
         "zkroot": "/onedb",
+        "schema": "default",
         "user": "user1",
         "passwd": "user1"
       },
       "tables": [
-        {
-          "name": "onedb_test",
-          "factory": "tk.onedb.core.table.OneDBTableFactory",
-          "operand": {
-            "feds": [
-              {
-                "endpoint": "localhost:12348",
-                "name": "onedb_test"
-              }
-            ]
-          }
-        }
       ]
     }
   ]

@@ -12,6 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.apache.calcite.linq4j.Enumerator;
+import org.apache.calcite.schema.Table;
 import org.apache.calcite.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,9 +23,8 @@ import tk.onedb.core.data.Header;
 import tk.onedb.core.data.Row;
 import tk.onedb.core.data.StreamBuffer;
 import tk.onedb.core.sql.enumerator.RowEnumerator;
+import tk.onedb.core.sql.schema.OneDBSchema;
 import tk.onedb.core.table.OneDBTableInfo;
-import tk.onedb.core.zk.OneDBZkClient;
-import tk.onedb.core.zk.ZkConfig;
 import tk.onedb.rpc.OneDBCommon.DataSetProto;
 import tk.onedb.rpc.OneDBCommon.OneDBQueryProto;
 
@@ -34,28 +34,19 @@ import tk.onedb.rpc.OneDBCommon.OneDBQueryProto;
 public class OneDBClient {
   private static final Logger LOG = LoggerFactory.getLogger(OneDBClient.class);
 
+  private final OneDBSchema schema;
   private final Map<String, DBClient> dbClientMap;
   private final Map<String, OneDBTableInfo> tableMap;
   private final ExecutorService executorService;
-  private final OneDBZkClient zkClient;
 
-  public OneDBClient() {
+
+  public OneDBClient(OneDBSchema schema) {
+    this.schema = schema;
     dbClientMap = new ConcurrentHashMap<>();
     tableMap = new ConcurrentHashMap<>();
-    zkClient = null;
     this.executorService = Executors.newFixedThreadPool(OneDBConfig.CLIENT_THREAD_NUM);
   }
 
-  public OneDBClient(ZkConfig zkConfig) {
-    dbClientMap = new ConcurrentHashMap<>();
-    tableMap = new ConcurrentHashMap<>();
-    zkClient = new OneDBZkClient(zkConfig, this);
-    this.executorService = Executors.newFixedThreadPool(OneDBConfig.CLIENT_THREAD_NUM);
-  }
-
-  private boolean hasZk() {
-    return zkClient != null;
-  }
 
   Map<String, OneDBTableInfo> getTableMap() {
     return tableMap;
@@ -65,17 +56,18 @@ public class OneDBClient {
     return executorService;
   }
 
-  public boolean addDB(String endpoint) {
+  public DBClient addDB(String endpoint) {
     if (hasDB(endpoint)) {
-      return false;
+      LOG.info("DB at {} already exists", endpoint);
+      return getDBClient(endpoint);
     }
     DBClient client = new DBClient(endpoint);
-    for (Map.Entry<String, DBClient> entry : dbClientMap.entrySet()) {
-      entry.getValue().addClient(endpoint);
-      client.addClient(endpoint);
-    }
+    // for (Map.Entry<String, DBClient> entry : dbClientMap.entrySet()) {
+    //   entry.getValue().addClient(endpoint);
+    //   client.addClient(endpoint);
+    // }
     dbClientMap.put(endpoint, client);
-    return true;
+    return client;
   }
 
   public boolean hasDB(String endpoint) {
@@ -86,11 +78,17 @@ public class OneDBClient {
     return dbClientMap.get(endpoint);
   }
 
-  // for global table
+  // add global table through zk
+  public void addTable2Schema(String tableName, Table table) {
+    schema.addTable(tableName, table);
+  }
+
+  // add global table through model.json
   public void addTable(String tableName, OneDBTableInfo table) {
     this.tableMap.put(tableName, table);
   }
 
+  // drop global table
   public void dropTable(String tableName) {
     tableMap.remove(tableName);
   }
@@ -104,20 +102,6 @@ public class OneDBClient {
   }
 
   // for local table
-  public void addLocalTable(String globalTableName, String endpoint, String localTableName) {
-    OneDBTableInfo table = getTable(globalTableName);
-    if (table == null) {
-      LOG.error("Gloabl table {} not exists", globalTableName);
-      return;
-    }
-    DBClient client = getDBClient(endpoint);
-    if (client == null) {
-      LOG.error("Endpoint {} not exists", endpoint);
-      return;
-    }
-    table.addLocalTable(client, localTableName);
-  }
-
   public void removeLocalTable(String globalTableName, String endpoint, String localTableName) {
     OneDBTableInfo table = getTable(globalTableName);
     if (table == null) {
@@ -128,18 +112,18 @@ public class OneDBClient {
     if (client == null) {
       LOG.error("Endpoint {} not exists", endpoint);
     }
-    table.removeLocalTable(client, localTableName);
+    table.dropLocalTable(client, localTableName);
   }
 
   public void removeLocalTable(String endpoint, String tableName) {
     for (OneDBTableInfo info : tableMap.values()) {
-      info.removeLocalTable(dbClientMap.get(endpoint), tableName);
+      info.dropLocalTable(dbClientMap.get(endpoint), tableName);
     }
   }
 
-  public void removeDB(String endpoint) {
+  public void dropDB(String endpoint) {
     for (OneDBTableInfo info : tableMap.values()) {
-      info.removeDB(dbClientMap.get(endpoint));
+      info.dropDB(dbClientMap.get(endpoint));
     }
   }
 
@@ -177,7 +161,8 @@ public class OneDBClient {
     for (Pair<DBClient, String> entry : tableClients) {
       tasks.add(() -> {
         try {
-          Iterator<DataSetProto> it = entry.getKey().oneDBQuery(query);
+          OneDBQueryProto localQuery = query.toBuilder().setTableName(entry.getValue()).build();
+          Iterator<DataSetProto> it = entry.getKey().oneDBQuery(localQuery);
           while (it.hasNext()) {
             iterator.add(it.next());
           }

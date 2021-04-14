@@ -3,8 +3,6 @@ package tk.onedb.server;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -16,7 +14,6 @@ import tk.onedb.OneDBService.GeneralRequest;
 import tk.onedb.OneDBService.GeneralResponse;
 import tk.onedb.ServiceGrpc;
 import tk.onedb.core.client.DBClient;
-import tk.onedb.core.config.OneDBConfig;
 import tk.onedb.core.data.DataSet;
 import tk.onedb.core.data.Header;
 import tk.onedb.core.data.StreamObserverDataSet;
@@ -33,7 +30,7 @@ public abstract class DBService extends ServiceGrpc.ServiceImplBase {
   private final Map<String, TableInfo> tableInfoMap;
   protected final Map<String, DBClient> dbClientMap;
   protected final Lock clientLock;
-  private final ExecutorService executorService;
+  // private final ExecutorService executorService;
   private final DBZkClient zkClient;
   protected final String endpoint;
 
@@ -41,7 +38,7 @@ public abstract class DBService extends ServiceGrpc.ServiceImplBase {
     this.tableInfoMap = new HashMap<>();
     this.dbClientMap = new HashMap<>();
     this.clientLock = new ReentrantLock();
-    this.executorService = Executors.newFixedThreadPool(OneDBConfig.SERVER_THREAD_NUM);
+    // this.executorService = Executors.newFixedThreadPool(OneDBConfig.SERVER_THREAD_NUM);
     this.endpoint = endpoint;
     if (zkServers == null || zkRootPath == null || digest == null) {
       zkClient = null;
@@ -78,6 +75,7 @@ public abstract class DBService extends ServiceGrpc.ServiceImplBase {
   @Override
   public void getTableHeader(GeneralRequest request, StreamObserver<HeaderProto> responseObserver) {
     HeaderProto headerProto = getTableHeader(request.getValue()).toProto();
+    LOG.info("Get header of table {}", request.getValue());
     responseObserver.onNext(headerProto);
     responseObserver.onCompleted();
   }

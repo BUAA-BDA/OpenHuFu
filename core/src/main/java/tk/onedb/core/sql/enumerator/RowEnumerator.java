@@ -16,7 +16,11 @@ public class RowEnumerator implements Enumerator<Row> {
 
   public RowEnumerator(StreamBuffer<DataSetProto> iter, int limitCount) {
     enumerator = new StreamEnumerator(iter);
-    this.limitCount = limitCount;
+    if (limitCount == 0) {
+      this.limitCount = Integer.MAX_VALUE;
+    } else {
+      this.limitCount = limitCount;
+    }
   }
 
   @Override

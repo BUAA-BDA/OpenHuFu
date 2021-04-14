@@ -6,7 +6,6 @@ import java.io.InputStream;
 import sqlline.BuiltInProperty;
 import sqlline.SqlLine;
 import sqlline.SqlLineOpts;
-import tk.onedb.core.sql.schema.OneDBSchema;
 
 public class OneDBLine extends SqlLine {
   public static Status start(String[] args, InputStream inputStream, boolean saveHistory) throws IOException {

@@ -22,10 +22,15 @@ public class OneDBQuery {
 
   public OneDBQueryProto toProto() {
     OneDBQueryProto.Builder builder = OneDBQueryProto.newBuilder();
-    builder.setTableName(oneDBTable.getTableName()).setHeader(header.toProto());
+    builder.setTableName(oneDBTable.getTableName());
     builder.addAllSelectExp(selectExps.stream().map(exp -> exp.toProto()).collect(Collectors.toList()));
     builder.addAllWhereExp(filterExps.stream().map(exp -> exp.toProto()).collect(Collectors.toList()));
     builder.addAllAggExp(aggExps.stream().map(exp -> exp.toProto()).collect(Collectors.toList()));
+    if (aggExps.isEmpty()) {
+      builder.setHeader(OneDBExpression.generateHeader(selectExps).toProto());
+    } else {
+      builder.setHeader(OneDBExpression.generateHeader(aggExps).toProto());
+    }
     if (fetch != null) {
       builder.setFetch(fetch);
     }

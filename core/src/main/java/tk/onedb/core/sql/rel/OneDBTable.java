@@ -1,5 +1,6 @@
 package tk.onedb.core.sql.rel;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,11 +29,13 @@ import org.apache.calcite.schema.TranslatableTable;
 import org.apache.calcite.schema.impl.AbstractTableQueryable;
 import org.apache.calcite.sql.type.SqlTypeFactoryImpl;
 import org.apache.calcite.sql.type.SqlTypeName;
+import org.apache.calcite.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import tk.onedb.core.client.DBClient;
 import tk.onedb.core.data.Header;
+import tk.onedb.core.data.TableInfo;
 import tk.onedb.core.data.TypeConverter;
 import tk.onedb.core.sql.enumerator.OneDBEnumerator;
 import tk.onedb.core.sql.schema.OneDBSchema;
@@ -66,28 +69,33 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
   public static Table create(OneDBSchema schema, TableMeta tableMeta) {
     final String tableName = tableMeta.tableName;
     OneDBTable table = null;
+    List<Pair<DBClient, TableInfo>> localInfos = new ArrayList<>();
     for (TableMeta.FedMeta fedMeta : tableMeta.feds) {
       DBClient client = schema.getDBClient(fedMeta.endpoint);
       if (client == null) {
-        throw new RuntimeException("endpoint not exist");
+        client = schema.addDB(fedMeta.endpoint);
       }
       Header header = client.getTableHeader(fedMeta.localName);
-      LOG.info("{}: header {} from [{} : {}]", tableName, header.toString(), fedMeta.endpoint, fedMeta.localName);
-      if (table == null) {
-        RelProtoDataType dataType = getRelDataType(client, fedMeta.localName);
-        table = new OneDBTable(tableName, schema, header, dataType);
-        table.addDB(client, fedMeta.localName);
-        schema.addTable(tableName, table);
-      } else {
-        if (table.getHeader().equals(header)) {
-          table.addDB(client, fedMeta.localName);
-        } else {
-          LOG.warn("header in {} mismatch", fedMeta.endpoint);
+      LOG.info("Table {} header {} from {}", fedMeta.localName, header.toString(), fedMeta.endpoint);
+      localInfos.add(Pair.of(client, TableInfo.of(fedMeta.localName, header)));
+    }
+    if (localInfos.size() > 0) {
+      TableInfo standard = localInfos.get(0).getValue();
+      for (Pair<DBClient, TableInfo> pair : localInfos) {
+        if (!standard.getHeader().equals(pair.getValue().getHeader())) {
+          LOG.warn("Header of {} {} {} mismatch with {} {} {}", localInfos.get(0).getKey(), localInfos.get(0).getValue().getName(), standard.toString(), pair.getKey(), standard.getName(), standard.getHeader());
+          return null;
         }
       }
+      RelProtoDataType dataType = getRelDataType(standard.getHeader());
+      table = new OneDBTable(tableName, schema, standard.getHeader(), dataType);
+      for (Pair<DBClient, TableInfo> pair : localInfos) {
+        table.addDB(pair.getKey(), pair.getValue().getName());
+      }
+      schema.addTable(tableMeta.tableName, table);
     }
     if (table == null) {
-      throw new RuntimeException("table init failed");
+      LOG.error("Fail to init table {}", tableMeta.tableName);
     }
     return table;
   }
@@ -118,7 +126,7 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
       }
     }
     if (table == null) {
-      throw new RuntimeException("table init failed");
+      LOG.error("Fail to init table {}", tableName);
     }
     return table;
   }

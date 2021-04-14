@@ -11,7 +11,6 @@ import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.ACL;
 
 import tk.onedb.core.config.OneDBConfig;
-import tk.onedb.core.data.FieldType;
 import tk.onedb.core.data.TableInfo;
 
 public class DBZkClient extends ZkClient {
@@ -82,20 +81,6 @@ public class DBZkClient extends ZkClient {
     } catch (InterruptedException e) {
       LOG.error("Interrupted when delete node [{}]: {}", tablePath, e.getMessage());
       return false;
-    }
-  }
-
-  public static void main(String[] args) {
-    try {
-      TableInfo table1 = TableInfo.newBuilder().add("id", FieldType.LONG).add("name", FieldType.STRING).setTableName("user").build();
-      DBZkClient client = new DBZkClient("localhost:12349", "/onedb", "localhost:12345", "DB1:DB1".getBytes());
-      Thread.sleep(100);
-      client.addTableInfo(table1);
-      client.registerTable2Schema("default", "user", "localhost:12345", "user");
-      Thread.sleep(100000);
-      client.deleteTableInfo(table1.getName());
-    } catch (Exception e) {
-      e.printStackTrace();
     }
   }
 }

@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.ImmutableList;
+
 import tk.onedb.rpc.OneDBCommon.HeaderProto;
 
 public class Header {
+  public static final Header EMPTY_HEADER = new Header(ImmutableList.of());
   List<Field> fields;
 
   Header(List<Field> fields) {
