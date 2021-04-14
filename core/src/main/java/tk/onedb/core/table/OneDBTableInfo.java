@@ -56,18 +56,14 @@ public class OneDBTableInfo {
   public void changeLocalTable(DBClient client, String localName) {
     Header header = client.getTableHeader(localName);
     if (header.equals(this.header)) {
-      lock.readLock().lock();
+      lock.writeLock().lock();
       for (int i = 0; i < tableList.size(); ++i) {
         Pair<DBClient, String> pair = tableList.get(i);
         if (pair.left.equals(client)) {
-          lock.writeLock().lock();
           tableList.remove(i);
-          lock.writeLock().unlock();
           break;
         }
       }
-      lock.readLock().unlock();
-      lock.writeLock().lock();
       tableList.add(Pair.of(client, localName));
       lock.writeLock().unlock();
     } else {
@@ -107,31 +103,27 @@ public class OneDBTableInfo {
   }
 
   public void dropLocalTable(DBClient client, String localName) {
-    lock.readLock().lock();
+    lock.writeLock().lock();
     for (int i = 0; i < tableList.size(); ++i) {
       Pair<DBClient, String> pair = tableList.get(i);
       if (pair.left.equals(client) && pair.right.equals(localName)) {
-        lock.writeLock().lock();
         tableList.remove(i);
-        lock.writeLock().unlock();
         break;
       }
     }
-    lock.readLock().unlock();
+    lock.writeLock().unlock();
   }
 
   public void dropLocalTable(DBClient client) {
-    lock.readLock().lock();
+    lock.writeLock().lock();
     for (int i = 0; i < tableList.size(); ++i) {
       Pair<DBClient, String> pair = tableList.get(i);
       if (pair.left.equals(client)) {
-        lock.writeLock().lock();
         tableList.remove(i);
-        lock.writeLock().unlock();
         break;
       }
     }
-    lock.readLock().unlock();
+    lock.writeLock().unlock();
   }
 
   public List<String> getEndpoints() {

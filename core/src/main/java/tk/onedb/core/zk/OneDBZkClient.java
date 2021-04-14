@@ -10,6 +10,7 @@ import org.apache.zookeeper.ZooDefs.Ids;
 import tk.onedb.core.sql.rel.OneDBTable;
 import tk.onedb.core.sql.schema.OneDBSchema;
 import tk.onedb.core.table.TableMeta;
+import tk.onedb.core.zk.watcher.EndpointWatcher;
 import tk.onedb.core.zk.watcher.GlobalTableWatcher;
 import tk.onedb.core.zk.watcher.LocalTableWatcher;
 
@@ -28,11 +29,19 @@ public class OneDBZkClient extends ZkClient {
 
   public void loadZkTable() {
     try {
+      watchEndpoints();
       watchSchemaDirectory();
     } catch (KeeperException | InterruptedException e) {
       e.printStackTrace();
     }
     LOG.info("Load table from zk success");
+  }
+
+  private void watchEndpoints() throws KeeperException, InterruptedException {
+    List<String> endpoints = zk.getChildren(endpointRootPath, new EndpointWatcher(schema, zk, endpointRootPath));
+    for (String endpoint : endpoints) {
+      schema.addDB(endpoint);
+    }
   }
 
   private void watchSchemaDirectory() throws KeeperException, InterruptedException {

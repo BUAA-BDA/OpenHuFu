@@ -3,6 +3,7 @@ package tk.onedb.core.sql.schema;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import org.apache.calcite.schema.SchemaPlus;
@@ -46,6 +47,10 @@ public class OneDBSchema extends AbstractSchema {
 
   public OneDBClient getClient() {
     return client;
+  }
+
+  public Set<String> getEndpoints() {
+    return client.getEndpoints();
   }
 
   public OneDBTableInfo getOneDBTableInfo(String tableName) {

@@ -1,11 +1,23 @@
 #!/bin/bash
-mkdir -p log
-echo "starting server A..."
-nohup java -jar ./bin/onedb_server.jar -c ./config/server_config_a.json > ./log/a.log &
-echo $! >> ./log/pid
-echo "postgresql server A start"
 
-echo "starting server B..."
-nohup java -jar ./bin/onedb_server.jar -c ./config/server_config_b.json > ./log/b.log &
-echo $! >> ./log/pid
-echo "postgresql server B start"
+start() {
+  echo "starting server $1..."
+  nohup java -jar ./bin/onedb_server.jar -c ./config/server_config_$1.json > ./log/$1.log &
+  echo $! >> ./log/pid_$1
+  echo "postgresql server $1 start"
+}
+
+mkdir -p log
+if [ $# -eq 0 ]
+then
+  start "a"
+  start "b"
+  start "c"
+elif [ "$1" == "all" ]
+then
+  start "a"
+  start "b"
+  start "c"
+else
+  start $1
+fi

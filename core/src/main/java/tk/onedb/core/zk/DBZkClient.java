@@ -11,7 +11,6 @@ import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.ACL;
 
 import tk.onedb.core.config.OneDBConfig;
-import tk.onedb.core.data.TableInfo;
 
 public class DBZkClient extends ZkClient {
   private final String dbRootPath;
@@ -31,22 +30,9 @@ public class DBZkClient extends ZkClient {
   private void init(String endpoint) throws KeeperException, InterruptedException {
     if (zk.exists(dbRootPath, false) == null) {
       LOG.info("Create DBPath: {}", dbRootPath);
-      zk.create(dbRootPath, null, DB_AUTH, CreateMode.PERSISTENT);
+      zk.create(dbRootPath, null, DB_AUTH, CreateMode.EPHEMERAL);
     } else {
       LOG.info("DBPath {} already exists", dbRootPath);
-    }
-  }
-
-  public boolean addTableInfo(TableInfo tableInfo) {
-    String tablePath = buildPath(dbRootPath, tableInfo.getName());
-    byte[] header = tableInfo.getHeader().toProto().toByteArray();
-    try {
-      zk.create(tablePath, header, DB_AUTH, CreateMode.EPHEMERAL);
-      LOG.info("Add table info on path {} success", tablePath);
-      return true;
-    } catch (KeeperException | InterruptedException e) {
-      LOG.error("Fail to add table info on path {}: {}", tablePath, e.getMessage());
-      return false;
     }
   }
 
@@ -65,21 +51,6 @@ public class DBZkClient extends ZkClient {
     } catch (KeeperException | InterruptedException e) {
       LOG.error("Error when register to schema {}: {}", schema, e.getMessage());
       e.printStackTrace();
-      return false;
-    }
-  }
-
-  public boolean deleteTableInfo(String name) {
-    String tablePath = buildPath(dbRootPath, name);
-    try {
-      zk.delete(tablePath, -1);
-      LOG.info("delete table info on path {} success", tablePath);
-      return true;
-    } catch (KeeperException e) {
-      LOG.error("Error when delete node [{}]: {}", tablePath, e.getMessage());
-      return false;
-    } catch (InterruptedException e) {
-      LOG.error("Interrupted when delete node [{}]: {}", tablePath, e.getMessage());
       return false;
     }
   }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -63,10 +64,6 @@ public class OneDBClient {
       return getDBClient(endpoint);
     }
     DBClient client = new DBClient(endpoint);
-    // for (Map.Entry<String, DBClient> entry : dbClientMap.entrySet()) {
-    //   entry.getValue().addClient(endpoint);
-    //   client.addClient(endpoint);
-    // }
     dbClientMap.put(endpoint, client);
     return client;
   }
@@ -77,6 +74,10 @@ public class OneDBClient {
 
   public DBClient getDBClient(String endpoint) {
     return dbClientMap.get(endpoint);
+  }
+
+  public Set<String> getEndpoints() {
+    return dbClientMap.keySet();
   }
 
   // add global table through zk
@@ -123,8 +124,9 @@ public class OneDBClient {
   }
 
   public void dropDB(String endpoint) {
+    DBClient client = dbClientMap.remove(endpoint);
     for (OneDBTableInfo info : tableMap.values()) {
-      info.dropDB(dbClientMap.get(endpoint));
+      info.dropDB(client);
     }
   }
 
@@ -184,7 +186,7 @@ public class OneDBClient {
         }
       }
     } catch (InterruptedException | ExecutionException e) {
-      e.printStackTrace();
+      LOG.error("Error in OneDBQuery for {}", e.getMessage());
     }
     return iterator;
   }

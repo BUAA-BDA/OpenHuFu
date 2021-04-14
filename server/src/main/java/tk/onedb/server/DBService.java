@@ -102,7 +102,6 @@ public abstract class DBService extends ServiceGrpc.ServiceImplBase {
   }
 
   final protected void addTableInfo(TableInfo tableInfo) {
-    zkClient.addTableInfo(tableInfo);
     tableInfoMap.put(tableInfo.getName(), tableInfo);
   }
 
