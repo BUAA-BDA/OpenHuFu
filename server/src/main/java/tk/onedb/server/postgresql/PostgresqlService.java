@@ -16,8 +16,8 @@ import tk.onedb.core.data.Header;
 import tk.onedb.core.data.Level;
 import tk.onedb.core.data.Row;
 import tk.onedb.core.data.TableInfo;
+import tk.onedb.core.sql.expression.OneDBQuery;
 import tk.onedb.core.sql.translator.OneDBTranslator;
-import tk.onedb.rpc.OneDBCommon.OneDBQueryProto;
 import tk.onedb.server.DBService;
 import tk.onedb.server.data.ServerConfig;
 import tk.onedb.server.data.ServerConfig.Table;
@@ -133,13 +133,13 @@ public class PostgresqlService extends DBService {
     }
   }
 
-  String generateSQL(OneDBQueryProto proto) {
-    String tableName = proto.getTableName();
+  String generateSQL(OneDBQuery query) {
+    String tableName = query.tableName;
     Header tableHeader = getTableHeader(tableName);
-    List<String> filters = OneDBTranslator.tranlateExps(tableHeader, proto.getWhereExpList());
-    List<String> selects = OneDBTranslator.tranlateExps(tableHeader, proto.getSelectExpList());
-    if (!proto.getAggExpList().isEmpty()) {
-      selects = OneDBTranslator.translateAgg(selects, proto.getAggExpList());
+    List<String> filters = OneDBTranslator.tranlateExps(tableHeader, query.filterExps);
+    List<String> selects = OneDBTranslator.tranlateExps(tableHeader, query.selectExps);
+    if (!query.aggExps.isEmpty()) {
+      selects = OneDBTranslator.translateAgg(selects, query.aggExps);
     }
     // select clause
     StringBuilder sql = new StringBuilder(String.format("SELECT %s from %s", String.join(",", selects), tableName));
@@ -159,7 +159,7 @@ public class PostgresqlService extends DBService {
   }
 
   @Override
-  protected void oneDBQueryInternal(OneDBQueryProto query, DataSet dataSet) throws SQLException {
+  protected void oneDBQueryInternal(OneDBQuery query, DataSet dataSet) throws SQLException {
     String sql = generateSQL(query);
     if (sql.isEmpty()) {
       return;

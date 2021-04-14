@@ -51,10 +51,9 @@ message ExpressionProto {
 
 message OneDBQueryProto {
   string tableName = 1;
-  HeaderProto header = 2;
-  repeated ExpressionProto selectExp = 3;
-  repeated ExpressionProto whereExp = 4;
-  repeated ExpressionProto aggExp = 5;
-  repeated string order = 6;
-  int32 fetch = 7;
+  repeated ExpressionProto selectExp = 2;
+  repeated ExpressionProto whereExp = 3;
+  repeated ExpressionProto aggExp = 4;
+  repeated string order = 5;
+  int32 fetch = 6;
 }

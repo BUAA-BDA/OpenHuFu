@@ -23,6 +23,7 @@ import tk.onedb.core.data.Header;
 import tk.onedb.core.data.Row;
 import tk.onedb.core.data.StreamBuffer;
 import tk.onedb.core.sql.enumerator.RowEnumerator;
+import tk.onedb.core.sql.expression.OneDBQuery;
 import tk.onedb.core.sql.schema.OneDBSchema;
 import tk.onedb.core.table.OneDBTableInfo;
 import tk.onedb.rpc.OneDBCommon.DataSetProto;
@@ -142,8 +143,8 @@ public class OneDBClient {
   */
   public Enumerator<Row> oneDBQuery(String tableName, OneDBQueryProto query) {
     List<Pair<DBClient, String>> tableClients = getTableClients(tableName);
-    StreamBuffer<DataSetProto> streamProto = oneDBQuery(getHeader(tableName), query, tableClients);
-    Header header = Header.fromProto(query.getHeader());
+    StreamBuffer<DataSetProto> streamProto = oneDBQuery(query, tableClients);
+    Header header = OneDBQuery.generateHeader(query);
     if (query.getAggExpCount() > 0) {
       BasicDataSet localDataSet = BasicDataSet.of(header);
       while (streamProto.hasNext()) {
@@ -155,7 +156,7 @@ public class OneDBClient {
     }
   }
 
-  private StreamBuffer<DataSetProto> oneDBQuery(Header header, OneDBQueryProto query, List<Pair<DBClient, String>> tableClients) {
+  private StreamBuffer<DataSetProto> oneDBQuery(OneDBQueryProto query, List<Pair<DBClient, String>> tableClients) {
     StreamBuffer<DataSetProto> iterator = new StreamBuffer<>(tableClients.size());
     List<Callable<Boolean>> tasks = new ArrayList<Callable<Boolean>>();
     for (Pair<DBClient, String> entry : tableClients) {

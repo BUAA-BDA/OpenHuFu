@@ -18,6 +18,7 @@ import tk.onedb.core.data.DataSet;
 import tk.onedb.core.data.Header;
 import tk.onedb.core.data.StreamObserverDataSet;
 import tk.onedb.core.data.TableInfo;
+import tk.onedb.core.sql.expression.OneDBQuery;
 import tk.onedb.core.zk.DBZkClient;
 import tk.onedb.rpc.OneDBCommon.DataSetProto;
 import tk.onedb.rpc.OneDBCommon.HeaderProto;
@@ -56,10 +57,11 @@ public abstract class DBService extends ServiceGrpc.ServiceImplBase {
 
   @Override
   public void oneDBQuery(OneDBQueryProto request, StreamObserver<DataSetProto> responseObserver) {
-
-    StreamObserverDataSet obDataSet = new StreamObserverDataSet(responseObserver, Header.fromProto(request.getHeader()));
+    OneDBQuery query = OneDBQuery.fromProto(request);
+    Header header = query.generateHeader();
+    StreamObserverDataSet obDataSet = new StreamObserverDataSet(responseObserver, header);
     try {
-      oneDBQueryInternal(request, obDataSet);
+      oneDBQueryInternal(query, obDataSet);
     } catch (SQLException e) {
       LOG.error("error when query table [{}]", request.getTableName());
       e.printStackTrace();
@@ -118,5 +120,5 @@ public abstract class DBService extends ServiceGrpc.ServiceImplBase {
 
   protected abstract TableInfo loadTableInfo(ServerConfig.Table table);
 
-  protected abstract void oneDBQueryInternal(OneDBQueryProto query, DataSet dataSet) throws SQLException;
+  protected abstract void oneDBQueryInternal(OneDBQuery query, DataSet dataSet) throws SQLException;
 }

@@ -4,7 +4,7 @@
 
   <groupId>tk.onedb</groupId>
   <artifactId>onedb</artifactId>
-  <version>0.1</version>
+  <version>0.1-SNAPSHOT</version>
 
   <name>onedb</name>
   <url>http://onedb.tk</url>

@@ -4,11 +4,11 @@
   <parent>
     <groupId>tk.onedb</groupId>
     <artifactId>onedb</artifactId>
-    <version>0.1</version>
+    <version>0.1-SNAPSHOT</version>
   </parent>
   <groupId>tk.onedb</groupId>
   <artifactId>client</artifactId>
-  <version>0.1</version>
+  <version>0.1-SNAPSHOT</version>
   <name>client</name>
   <url>http://maven.apache.org</url>
   <properties>
@@ -18,7 +18,7 @@
     <dependency>
       <groupId>tk.onedb</groupId>
       <artifactId>core</artifactId>
-      <version>0.1</version>
+      <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>sqlline</groupId>

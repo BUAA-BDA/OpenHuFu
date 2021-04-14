@@ -12,37 +12,36 @@ import tk.onedb.core.sql.expression.OneDBOpType;
 import tk.onedb.core.sql.expression.OneDBOperator;
 import tk.onedb.core.sql.expression.OneDBOperator.FuncType;
 import tk.onedb.core.sql.expression.OneDBReference;
-import tk.onedb.rpc.OneDBCommon.ExpressionProto;
 
 public class OneDBTranslator {
   Header inputHeader;
   List<String> inputExps;
-  List<ExpressionProto> exps;
+  List<OneDBExpression> exps;
 
-  OneDBTranslator(Header inputHeader, List<ExpressionProto> exps) {
+  OneDBTranslator(Header inputHeader, List<OneDBExpression> exps) {
     this.inputHeader = inputHeader;
     this.exps = exps;
   }
 
-  OneDBTranslator(List<String> exps, List<ExpressionProto> aggs) {
+  OneDBTranslator(List<String> exps, List<OneDBExpression> aggs) {
     this.inputExps = exps;
     this.exps = aggs;
   }
 
   List<String> translateAllExps() {
-    return exps.stream().map(exp -> translate(OneDBExpression.fromProto(exp)))
+    return exps.stream().map(exp -> translate(exp))
         .collect(Collectors.toList());
   }
 
   public List<String> translateAgg() {
-    return exps.stream().map(exp -> aggregateFunc(OneDBAggCall.fromProto(exp))).collect(Collectors.toList());
+    return exps.stream().map(exp -> aggregateFunc((OneDBAggCall)exp)).collect(Collectors.toList());
   }
 
-  public static List<String> tranlateExps(Header inputHeader, List<ExpressionProto> exps) {
+  public static List<String> tranlateExps(Header inputHeader, List<OneDBExpression> exps) {
     return new OneDBTranslator(inputHeader, exps).translateAllExps();
   }
 
-  public static List<String> translateAgg(List<String> exps, List<ExpressionProto> aggs) {
+  public static List<String> translateAgg(List<String> exps, List<OneDBExpression> aggs) {
     return new OneDBTranslator(exps, aggs).translateAgg();
   }
 

@@ -4,11 +4,11 @@
   <parent>
     <groupId>tk.onedb</groupId>
     <artifactId>onedb</artifactId>
-    <version>0.1</version>
+    <version>0.1-SNAPSHOT</version>
   </parent>
   <groupId>tk.onedb</groupId>
   <artifactId>core</artifactId>
-  <version>0.1</version>
+  <version>0.1-SNAPSHOT</version>
   <name>core</name>
 
   <properties>
