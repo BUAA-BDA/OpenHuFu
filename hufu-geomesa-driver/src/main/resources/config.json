@@ -1,0 +1,11 @@
+{
+  "port": 12345,
+  "zookeepers": "localhost",
+  "catalog": "feda",
+  "tables": [
+    {
+      "name": "rides_a",
+      "columns": []
+    }
+  ]
+}

@@ -1,0 +1,253 @@
+syntax = "proto2";
+import "common.proto";
+import "google/protobuf/empty.proto";
+package federate;
+
+option java_package = "group.bda.federate.rpc";
+option java_outer_classname = "FederateService";
+
+enum Code {
+  kOk = 1;
+  kAddClientFailed = 2;
+  kCacheNotExist = 3;
+}
+
+message Status {
+  required Code code = 1 [default = kOk];
+  required string msg = 2 [default = "ok"];
+}
+
+message AddClientRequest {
+  required string endpoint = 1;
+}
+
+message GeneralResponse {
+  required Status status = 1;
+}
+
+message BoxRequest {
+  required string tableName = 1;
+  required Box box = 2;
+}
+
+message RangeQueryRequest {
+  required Point center = 1;
+  required double radius = 2;
+  required string tableName = 3;
+  optional string uuid = 4 [default = ""];
+  repeated string columns = 5;
+}
+
+message RangeCountRequest {
+  required Point center = 1;
+  required double radius = 2;
+  required string tableName = 3;
+  optional string uuid = 4 [default = ""];
+}
+
+message KnnQueryRequest {
+  required Point center = 1;
+  required int32 k = 2;
+  required string tableName = 3;
+  optional string uuid = 4 [default = ""];
+  repeated string columns = 5;
+}
+
+message KnnRadiusQueryRequest {
+  required Query query = 1;
+  required string uuid = 2;
+}
+
+message RangeCountResponse {
+  required int32 count = 1;
+}
+
+message KnnRadiusQueryResponse {
+  required double radius = 1;
+}
+
+message PrivacyCountRequest {
+  repeated int32 x = 1;
+  repeated string endpoints = 2;
+  required string uuid = 3;
+  required string cacheUuid = 4;
+  optional double radius = 5;
+  optional int32 columnId = 6;
+}
+
+message PrivacyCountResponse {
+  optional double sum = 1;
+  required Status status = 2;
+}
+
+message DPRangeCountResponse {
+  required double result = 1;
+  required double sd = 2;
+}
+
+message QValue {
+  required double q = 1;
+  required string uuid = 3;
+}
+
+message CacheID {
+  required string uuid = 1;
+}
+
+message Row {
+  required int32 id = 1;
+  required double distance = 2;
+  required string value = 3;
+}
+
+message GetRowsResponse {
+  repeated Row rows = 1;
+}
+
+message CompareShare {
+  required int32 idx = 1;
+  required int32 share = 2;
+}
+
+message CompareShareVector {
+  required int32 id = 1;
+  repeated CompareShare share = 2;
+  optional string value = 3;
+}
+
+message CompareShareMatrix {
+  required string uuid = 1;
+  repeated CompareShareVector shares = 2;
+}
+
+message DistanceJoinRequest {
+  required string uuid = 1;
+  required FederateTableInfo leftTable = 2;
+  repeated FederateTableInfo rightTables = 3;
+  required double radius = 4;
+  repeated string leftColumns = 5;
+  repeated string rightColumns = 6;
+}
+
+message IntersectData {
+  required string value = 1;
+  repeated int64 dataId = 2;
+}
+
+
+message GridSetRequest {
+  required FederateTableInfo rightTable = 1;
+  required int64 gridId = 2;
+  required double gridLength = 3;
+  required double radius = 4;
+  optional string uuid = 5;
+  optional FederateTableInfo leftTable = 6;
+  optional int32 dataNumber = 7;
+}
+
+message CompareDistanceRequest {
+  required Point point = 1;
+  required string uuid = 2;
+}
+
+message CompareDistanceResponse {
+  repeated int64 dataId = 1;
+}
+
+message CompareDistanceHERequest {
+  repeated bytes cipherVector = 1;
+  required int64 gridId = 2;
+  required int32 batchSize = 3;
+  required string endpoint = 4;
+  required string uuid = 5;
+}
+
+message CompareDistanceHEResponse {
+  repeated bytes cipherVector = 1;
+  repeated int64 dataId = 2; // todo: this field can merge with cipherVector in future
+}
+
+message HEParams {
+  required bytes params = 1;
+  required bytes publicKey = 2;
+  required bytes galoisKeys = 3;
+  required bytes relinKeys = 4;
+}
+
+message GetTableHeaderRequest {
+  required string tableName = 1;
+}
+
+message TraversalTable {
+  required string tableName = 1;
+  required HeaderProto header = 2;
+  repeated string filter = 3;
+}
+
+message Query {
+  required string tableName = 1;
+  required HeaderProto header = 2;
+  repeated Expression projectExp = 3;
+  repeated Expression filterExp = 5;
+  required int32 fetch = 6;
+  repeated string order = 7;
+  optional string aggUuid = 8;
+}
+
+message PrivacyQuery {
+  required Query query = 1;
+  required SetUnionRequest setUnion = 2;
+  optional string knnCacheId = 3;
+  optional double radius = 4;
+}
+
+message Order {
+  required int32 index = 1;
+  required string uuid = 2;
+  repeated string endpoints = 3;
+}
+
+message SetUnionRequest {
+  repeated Order addOrder = 1;
+  repeated Order delOrder = 2;
+}
+
+message PrivacyCompareRequest {
+  required int32 x = 1;
+  required string uuid = 2;
+  required string cacheid = 3;
+  required double radius = 4;
+  required int32 idx = 5;
+  repeated string endpoints = 6;
+}
+
+message PrivacyCompareResponse {
+  repeated int32 shares = 1;
+}
+
+message GetMulValueRequest {
+  required bool isRan = 1;
+  required int32 idx = 2;
+  required bool isFirst = 3;
+  required string uuid = 4;
+}
+
+message Value {
+  required int32 val = 1;
+}
+
+service Federate {
+  rpc AddClient(AddClientRequest) returns (GeneralResponse);
+  rpc KnnRadiusQuery(KnnRadiusQueryRequest) returns (KnnRadiusQueryResponse);
+  rpc PrivacyCount(PrivacyCountRequest) returns (PrivacyCountResponse);
+  rpc DPRangeCount(PrivacyCountRequest) returns (DPRangeCountResponse);
+  rpc SendQValue(QValue) returns (GeneralResponse);
+  rpc GetSum(CacheID) returns (PrivacyCountResponse);
+  rpc GetTableHeader(GetTableHeaderRequest) returns (HeaderProto);
+  rpc ClearCache(CacheID) returns (google.protobuf.Empty);
+  rpc FedSpatialQuery(Query) returns(stream DataSetProto);
+  rpc FedSpatialPrivacyQuery(PrivacyQuery) returns(stream DataSetProto);
+  rpc GetRandomDataSet(CacheID) returns (stream DataSetProto);
+  rpc PrivacyCompare(PrivacyCompareRequest) returns (PrivacyCompareResponse);
+  rpc GetMulValue(GetMulValueRequest) returns (Value);
+}

@@ -1,0 +1,53 @@
+syntax = "proto2";
+import "common.proto";
+import "google/protobuf/empty.proto";
+package federate;
+
+option java_package = "group.bda.federate.rpc";
+option java_outer_classname = "FederateClient";
+
+message RangeQuery {
+  required Point center = 1;
+  required double radius = 2;
+  required string tableName = 3;
+  repeated string columns = 4;
+}
+
+message KnnQuery {
+  required Point center = 1;
+  required int32 k = 2;
+  required string tableName = 3;
+  repeated string columns = 4;
+}
+
+message KnnJoinUserQuery {
+  required int32 k = 1;
+  required string tableName = 2;
+  optional bytes dataSetBytes = 3;
+  repeated string columns = 4;
+}
+
+message DistanceJoinQuery {
+  required double radius = 1;
+  required string leftTableName = 2;
+  required string rightTableName = 3;
+  repeated string columns = 4;
+}
+
+message DistanceJoinUserQuery {
+  required double radius = 1;
+  required string tableName = 2;
+  optional bytes dataSetBytes = 3;
+  repeated string columns = 4;
+}
+
+service Client {
+  rpc getTableInfo(google.protobuf.Empty) returns (FederateDataSet);
+  rpc SquareRange(RangeQuery) returns (FederateDataSet);
+  rpc CircleRange(RangeQuery) returns (FederateDataSet);
+  rpc Knn(KnnQuery) returns (FederateDataSet);
+  rpc BaselineKnn(KnnQuery) returns (FederateDataSet);
+  rpc DistanceJoin(DistanceJoinQuery) returns (stream FederateDataSet);
+  rpc DistanceJoinUser(DistanceJoinUserQuery) returns (stream FederateDataSet);
+  rpc KnnJoinUser(KnnJoinUserQuery) returns (stream FederateDataSet);
+}

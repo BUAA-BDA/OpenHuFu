@@ -1,0 +1,26 @@
+{
+    "port": 54680,
+    "url": "jdbc:postgresql://localhost:5432/<Name of Database>",
+    "catalog": "<Name of Database>",
+    "user": "<Username of PostgreSQL>",
+    "passwd": "<Password of PostgreSQL>",
+    "tables": [
+        {
+            "name": "tablea_3",
+            "columns": [
+                {
+                    "name": "id",
+                    "level": "protected"
+                },
+                {
+                    "name": "location",
+                    "level": "private"
+                }
+            ]
+        },
+        {
+            "name": "tableb_3",
+            "columns": []
+        }
+    ]
+}
