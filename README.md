@@ -2,7 +2,7 @@
 
 ## Features
 
-Hu-Fu is the first system for efficient and secure spatial queries over data federation based on secure multi-party computation technique. The system can parse the federated spatial query written in SQL, decompose the query into (plaintext/secure) operators and collect the query result securely.  In particular, the features of Hu-Fu are summarized as follows.
+Hu-Fu is the first system for efficient and secure spatial queries over data federation based on secure multi-party computation technique. The system can parse the federated spatial query written in SQL, decompose the query into (plaintext/secure) operators and collect the query result securely.  In particular, the features of Hu-Fu are summarized as follows. (For more details, please refer to [this paper](hufu2021.pdf).)
 
 * **Supporting five federated spatial queries:** Hu-Fu supports five mainstream federated spatial queries as below.
   * Federated Range Query
@@ -94,25 +94,25 @@ Hu-Fu is the first system for efficient and secure spatial queries over data fed
   * Federated Range Query
 
     ```sql
-    Hu-Fu> SELECT id FROM tablea WHERE DWithin(location, Point(116.5, 39.9), 0.2);
+    Hu-Fu> SELECT id FROM tablea WHERE DWithin(location, Point(121.5, 14.5), 0.5);
     ```
 
   * Federated Range Counting
 
     ```sql
-    Hu-Fu> SELECT COUNT(*) FROM tablea WHERE DWithin(location, Point(116.5, 39.9), 0.2);
+    Hu-Fu> SELECT COUNT(*) FROM tablea WHERE DWithin(location, Point(121.5, 14.5), 0.5);
     ```
 
   * Federated kNN
 
     ```sql
-    Hu-Fu> SELECT id FROM tablea WHERE KNN(location, Point(116.5, 39.9), 8);
+    Hu-Fu> SELECT id FROM tablea WHERE KNN(location, Point(121.5, 14.5), 8);
     ```
 
   * Federated Distance Join
 
     ```sql
-    Hu-Fu> SELECT R.id, S.id FROM tableb R JOIN tablea S ON DWithin(R.location, S.location, 0.02);
+    Hu-Fu> SELECT R.id, S.id FROM tableb R JOIN tablea S ON DWithin(R.location, S.location, 0.2);
     ```
 
   * Federated kNN Join
@@ -120,6 +120,10 @@ Hu-Fu is the first system for efficient and secure spatial queries over data fed
     ```sql
     Hu-Fu> SELECT R.id, S.id FROM tableb R JOIN tablea S ON KNN(R.location, S.location, 8);
     ```
+  
+* Sample output of the kNN query
+
+  <img src="sample_output.svg" alt="sample_output" style="zoom: 50%;" />
 
 * Stop servers
 
@@ -144,6 +148,7 @@ It is very easy to deploy Hu-Fu on different physical machines. You only need to
 
 To simplify the installation process, the underlying databases of all silos are PostgreSQL(PostGIS) in example. Recall that Hu-Fu can support heterogeneous underlying spatial database. We also provide the adapters for other five spatial databases. You can install these spatial databases by referring to the documentations as below.
 
+* [PostGIS](https://postgis.net/)
 * [Simba](http://www.cs.utah.edu/~dongx/simba/)
 * [GeoMesa](https://www.geomesa.org/)
 * [SpatialHadoop](http://spatialhadoop.cs.umn.edu/)
@@ -152,6 +157,5 @@ To simplify the installation process, the underlying databases of all silos are 
 
 ## References
 
-1. **[Hu-Fu](Hu-Fu2021.pdf):** 
-2. **SMCQL:** Johes Bater, Gregory Elliott, Craig Eggen, Satyender Goel, Abel N. Kho, and Jennie Rogers. SMCQL: Secure Query Processing for Private Data Networks.*PVLDB* 10, 6 (2017), 673–684.
-3. **Conclave:** Nikolaj Volgushev, Malte Schwarzkopf, Ben Getchell, Mayank Varia, Andrei Lapets, and Azer Bestavros. 2019. Conclave: secure multi\-party computation onbig data. In *EuroSys*. 3:1–3:18.
+1. **SMCQL:** Johes Bater, Gregory Elliott, Craig Eggen, Satyender Goel, Abel N. Kho, and Jennie Rogers. SMCQL: Secure Query Processing for Private Data Networks.*PVLDB* 10, 6 (2017), 673–684.
+2. **Conclave:** Nikolaj Volgushev, Malte Schwarzkopf, Ben Getchell, Mayank Varia, Andrei Lapets, and Azer Bestavros. 2019. Conclave: secure multi\-party computation onbig data. In *EuroSys*. 3:1–3:18.
