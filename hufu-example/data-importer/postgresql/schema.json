@@ -1,0 +1,181 @@
+{
+  "databases": [
+    {
+      "host": "localhost",
+      "port": 5432,
+      "username": "<Username of PostgreSQL>",
+      "password": "<Password of PostgreSQL>",
+      "database": "<Name of Database>",
+      "schemas": [
+        {
+          "name": "tablea_1",
+          "csv_path": "./data/tableA_1.csv",
+          "columns": [
+            {
+              "name": "id",
+              "type": "int",
+              "index": [
+                0
+              ]
+            },
+            {
+              "name": "location",
+              "type": "geometry",
+              "index": [
+                1,
+                2
+              ]
+            }
+          ]
+        },
+        {
+          "name": "tablea_2",
+          "csv_path": "./data/tableA_2.csv",
+          "columns": [
+            {
+              "name": "id",
+              "type": "int",
+              "index": [
+                0
+              ]
+            },
+            {
+              "name": "location",
+              "type": "geometry",
+              "index": [
+                1,
+                2
+              ]
+            }
+          ]
+        },
+        {
+          "name": "tablea_3",
+          "csv_path": "./data/tableA_3.csv",
+          "columns": [
+            {
+              "name": "id",
+              "type": "int",
+              "index": [
+                0
+              ]
+            },
+            {
+              "name": "location",
+              "type": "geometry",
+              "index": [
+                1,
+                2
+              ]
+            }
+          ]
+        },
+        {
+          "name": "tablea_4",
+          "csv_path": "./data/tableA_4.csv",
+          "columns": [
+            {
+              "name": "id",
+              "type": "int",
+              "index": [
+                0
+              ]
+            },
+            {
+              "name": "location",
+              "type": "geometry",
+              "index": [
+                1,
+                2
+              ]
+            }
+          ]
+        },
+        {
+          "name": "tableb_1",
+          "csv_path": "./data/tableB_1.csv",
+          "columns": [
+            {
+              "name": "id",
+              "type": "int",
+              "index": [
+                0
+              ]
+            },
+            {
+              "name": "location",
+              "type": "geometry",
+              "index": [
+                1,
+                2
+              ]
+            }
+          ]
+        },
+        {
+          "name": "tableb_2",
+          "csv_path": "./data/tableB_2.csv",
+          "columns": [
+            {
+              "name": "id",
+              "type": "int",
+              "index": [
+                0
+              ]
+            },
+            {
+              "name": "location",
+              "type": "geometry",
+              "index": [
+                1,
+                2
+              ]
+            }
+          ]
+        },
+        {
+          "name": "tableb_3",
+          "csv_path": "./data/tableB_3.csv",
+          "columns": [
+            {
+              "name": "id",
+              "type": "int",
+              "index": [
+                0
+              ]
+            },
+            {
+              "name": "location",
+              "type": "geometry",
+              "index": [
+                1,
+                2
+              ]
+            }
+          ]
+        },
+        {
+          "name": "tableb_4",
+          "csv_path": "./data/tableB_4.csv",
+          "columns": [
+            {
+              "name": "id",
+              "type": "int",
+              "index": [
+                0
+              ]
+            },
+            {
+              "name": "location",
+              "type": "geometry",
+              "index": [
+                1,
+                2
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
