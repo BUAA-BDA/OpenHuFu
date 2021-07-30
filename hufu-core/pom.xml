@@ -179,7 +179,7 @@
           </descriptorRefs>
           <archive>
             <manifest>
-              <mainClass>group.bda.federate.cmd.hufuCLI</mainClass>
+              <mainClass>group.bda.federate.cmd.HufuCLI</mainClass>
             </manifest>
           </archive>
         </configuration>

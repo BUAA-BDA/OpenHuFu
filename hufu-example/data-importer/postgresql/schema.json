@@ -3,12 +3,12 @@
     {
       "host": "localhost",
       "port": 5432,
-      "username": "<Username of PostgreSQL>",
-      "password": "<Password of PostgreSQL>",
-      "database": "<Name of Database>",
+      "username": "xuechunbo",
+      "password": "xuechunbo",
+      "database": "feddb",
       "schemas": [
         {
-          "name": "tablea_1",
+          "name": "tableA_1",
           "csv_path": "./data/tableA_1.csv",
           "columns": [
             {
@@ -29,7 +29,7 @@
           ]
         },
         {
-          "name": "tablea_2",
+          "name": "tableA_2",
           "csv_path": "./data/tableA_2.csv",
           "columns": [
             {
@@ -50,7 +50,7 @@
           ]
         },
         {
-          "name": "tablea_3",
+          "name": "tableA_3",
           "csv_path": "./data/tableA_3.csv",
           "columns": [
             {
@@ -71,7 +71,7 @@
           ]
         },
         {
-          "name": "tablea_4",
+          "name": "tableA_4",
           "csv_path": "./data/tableA_4.csv",
           "columns": [
             {
@@ -92,7 +92,7 @@
           ]
         },
         {
-          "name": "tableb_1",
+          "name": "tableB_1",
           "csv_path": "./data/tableB_1.csv",
           "columns": [
             {
@@ -113,7 +113,7 @@
           ]
         },
         {
-          "name": "tableb_2",
+          "name": "tableB_2",
           "csv_path": "./data/tableB_2.csv",
           "columns": [
             {
@@ -134,7 +134,7 @@
           ]
         },
         {
-          "name": "tableb_3",
+          "name": "tableB_3",
           "csv_path": "./data/tableB_3.csv",
           "columns": [
             {
@@ -155,7 +155,7 @@
           ]
         },
         {
-          "name": "tableb_4",
+          "name": "tableB_4",
           "csv_path": "./data/tableB_4.csv",
           "columns": [
             {

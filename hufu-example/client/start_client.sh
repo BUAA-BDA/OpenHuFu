@@ -1,0 +1,1 @@
+java -Dlog4j.configurationFile=./log4j2.xml -jar ../../release/bin/hufu.jar -m ./model.json

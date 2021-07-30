@@ -3,7 +3,6 @@ start() {
     echo $! >> pid
 }
 
-cat /dev/null > pid
 for i in $*
 do
     start $i

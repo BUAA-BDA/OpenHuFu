@@ -23,7 +23,7 @@ public class Hufu {
   private Connection connection;
 
   private void setUp(List<String> endpoints, List<TableMeta> metas) throws SQLException, ClassNotFoundException {
-    Class.forName("group.bda.federate.sql.jdbc.FedSpatialDriver");
+    Class.forName("group.bda.federate.sql.jdbc.HufuJDBCDriver");
     Properties props = new Properties();
     props.setProperty("lex", "JAVA");
     props.setProperty("caseSensitive", "false");

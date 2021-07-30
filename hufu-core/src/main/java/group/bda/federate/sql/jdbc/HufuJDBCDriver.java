@@ -4,14 +4,14 @@ import org.apache.calcite.jdbc.CalcitePrepare;
 import org.apache.calcite.jdbc.Driver;
 import org.apache.calcite.linq4j.function.Function0;
 
-public class FedSpatialDriver extends Driver {
+public class HufuJDBCDriver extends Driver {
   final Function0<CalcitePrepare> prepareFactory;
 
   static {
-    new FedSpatialDriver().register();
+    new HufuJDBCDriver().register();
   }
 
-  public FedSpatialDriver() {
+  public HufuJDBCDriver() {
     super();
     this.prepareFactory = createPrepareFactory();
   }
@@ -22,6 +22,6 @@ public class FedSpatialDriver extends Driver {
 
   @Override
   protected String getConnectStringPrefix() {
-    return "jdbc:fedspatial:";
+    return "jdbc:hufu:";
   }
 }

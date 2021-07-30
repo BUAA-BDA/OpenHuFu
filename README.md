@@ -80,51 +80,51 @@ Hu-Fu is the first system for efficient and secure spatial queries over data fed
 * Start up servers
 
   ```bash
-  cd {Path of Repository}/hufu-example
+  cd {Path of Repository}/hufu-example/server
   ./start_server.sh 1 2 3 4
   ```
 
 * Start up CLI
 
   ```bash
-  cd {Path of Repository}/hufu-core
-  ./start.sh
+  cd {Path of Repository}/hufu-example/client
+  ./start_client.sh
   ```
 
   * Federated Range Query
 
     ```sql
-    hufu> SELECT id FROM tablea WHERE DWithin(location, Point(116.5, 39.9), 0.2);
+    Hu-Fu> SELECT id FROM tablea WHERE DWithin(location, Point(116.5, 39.9), 0.2);
     ```
 
   * Federated Range Counting
 
     ```sql
-    hufu> SELECT COUNT(*) FROM tablea WHERE DWithin(location, Point(116.5, 39.9), 0.2);
+    Hu-Fu> SELECT COUNT(*) FROM tablea WHERE DWithin(location, Point(116.5, 39.9), 0.2);
     ```
 
   * Federated kNN
 
     ```sql
-    hufu> SELECT id FROM tablea WHERE KNN(location, Point(116.5, 39.9), 8);
+    Hu-Fu> SELECT id FROM tablea WHERE KNN(location, Point(116.5, 39.9), 8);
     ```
 
   * Federated Distance Join
 
     ```sql
-    hufu> SELECT R.id, S.id FROM tableb R JOIN tablea S ON DWithin(R.location, S.location, 0.02);
+    Hu-Fu> SELECT R.id, S.id FROM tableb R JOIN tablea S ON DWithin(R.location, S.location, 0.02);
     ```
 
   * Federated kNN Join
 
     ```sql
-    hufu> SELECT R.id, S.id FROM tableb R JOIN tablea S ON KNN(R.location, S.location, 8);
+    Hu-Fu> SELECT R.id, S.id FROM tableb R JOIN tablea S ON KNN(R.location, S.location, 8);
     ```
 
 * Stop servers
 
   ```bash
-  cd {Path of Repository}/hufu-example
+  cd {Path of Repository}/hufu-example/server
   ./stop_server.sh
   ```
 
@@ -134,17 +134,17 @@ If you want to execute queries on your own spatial data, you should modify some 
 
 * `hufu-example/data-importer/postgresql/schema.json`:  You can modify this file to change the **original spatial data and table schema**.
 * `hufu-example/server/configx.json`:  You can modify the **secure level** of each table in servers.
-* `hufu-core/src/main/resources/model.json`:   You can change **the number of silos** in the data federation by modifying this file.
+* `hufu-example/client/model.json`:   You can change **the number of silos** in the data federation by modifying this file.
 
 ### Running Hu-Fu on different physical machines
 
-It is very easy to deploy Hu-Fu on different physical machines. You only need to start up the server on their respective machines using the script `hufu-example/server/start_server.sh` and modify the ip address in `hufu-core/src/main/resources/model.json`. Note that the server port should be open on each machine.
+It is very easy to deploy Hu-Fu on different physical machines. You only need to start up the server on their respective machines using the script `hufu-example/server/start_server.sh` and modify the ip address in `hufu-example/client/model.json`. Note that the server port should be open on each machine.
 
 ### Running Hu-Fu on heterogeneous underlying spatial database
 
 To simplify the installation process, the underlying databases of all silos are PostgreSQL(PostGIS) in example. Recall that Hu-Fu can support heterogeneous underlying spatial database. We also provide the adapters for other five spatial databases. You can install these spatial databases by referring to the documentations as below.
 
-* [simba](http://www.cs.utah.edu/~dongx/simba/)
+* [Simba](http://www.cs.utah.edu/~dongx/simba/)
 * [GeoMesa](https://www.geomesa.org/)
 * [SpatialHadoop](http://spatialhadoop.cs.umn.edu/)
 * [MySQL](https://dev.mysql.com/doc/refman/8.0/en/spatial-types.html)

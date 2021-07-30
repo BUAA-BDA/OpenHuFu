@@ -20,12 +20,12 @@ public class HufuCLI {
     final CommandLineParser parser = new DefaultParser();
     CommandLine cmd;
     try {
-      Class.forName("group.bda.federate.sql.jdbc.FedSpatialDriver");
+      Class.forName("group.bda.federate.sql.jdbc.HufuJDBCDriver");
       cmd = parser.parse(options, args);
       final String m = cmd.getOptionValue("model", "model.json");
       List<String> fedArgs = new ArrayList<>();
       fedArgs.add("-u");
-      fedArgs.add("jdbc:fedspatial:model=" + m + ";lex=JAVA;caseSensitive=false;");
+      fedArgs.add("jdbc:hufu:model=" + m + ";lex=JAVA;caseSensitive=false;");
       fedArgs.add("-n");
       fedArgs.add("admin");
       fedArgs.add("-p");
