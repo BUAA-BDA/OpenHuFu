@@ -1,12 +1,12 @@
 {
-    "port": 54681,
-    "url": "jdbc:postgresql://localhost:5432/<Database Name>",
-    "catalog": "<Database Name>",
-    "user": "<Username of PostgreSQL>",
-    "passwd": "<Password of PostgreSQL>",
+    "port": 54678,
+    "url": "jdbc:postgresql://localhost:5432/osm_db",
+    "catalog": "osm_db",
+    "user": "hufu",
+    "passwd": "hufu",
     "tables": [
         {
-            "name": "tablea_4",
+            "name": "osm_a_1",
             "columns": [
                 {
                     "name": "id",
@@ -19,7 +19,7 @@
             ]
         },
         {
-            "name": "tableb_4",
+            "name": "osm_b_1",
             "columns": []
         }
     ]
