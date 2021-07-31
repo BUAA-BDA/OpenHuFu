@@ -102,7 +102,7 @@ In the example below, we will show how to execute federated spatial queries over
   * Federated Range Counting
 
     ```sql
-    Hu-Fu> SELECT COUNT(*) FROM tablea WHERE DWithin(location, Point(121.5, 14.5), 0.5);
+    Hu-Fu> SELECT COUNT(*) cnt FROM tablea WHERE DWithin(location, Point(121.5, 14.5), 0.5);
     ```
 
   * Federated kNN
@@ -123,9 +123,15 @@ In the example below, we will show how to execute federated spatial queries over
     Hu-Fu> SELECT R.id, S.id FROM tableb R JOIN tablea S ON KNN(R.location, S.location, 8);
     ```
   
-* Sample output of the kNN query
+* Sample output of federated spatial query
 
-  <img src="sample_output.svg" alt="sample_output" style="zoom: 50%;" />
+  Due to limited space, we only show the output of federated Range Counting and federated kNN query.
+
+  * Federated Range Counting
+  <img src="sample_output_rangecounting.svg" alt="sample_output" style="zoom: 50%;" />
+
+  * Federated kNN query
+  <img src="sample_output_knn.svg" alt="sample_output" style="zoom: 50%;" />
 
 * Stop servers
 
