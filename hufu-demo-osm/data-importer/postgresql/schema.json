@@ -3,9 +3,9 @@
     {
       "host": "localhost",
       "port": 5432,
-      "username": "<Username of PostgreSQL>",
-      "password": "<Password of PostgreSQL>",
-      "database": "<Database Name>",
+      "username": "hufu",
+      "password": "hufu",
+      "database": "osm_db",
       "schemas": [
         {
           "name": "osm_a_1",
