@@ -12,8 +12,11 @@ Hu-Fu is the first system for efficient and secure spatial queries over data fed
   * Federated kNN Join
 
 * **A user-friendly SQL interface:** User can issue a federated spatial query by a SQL statement.
+
 * **Multiple parties(>=2):** Hu-Fu can support multiple parties in data federation.
+
 * **Heterogeneous underlying spatial database:** Hu-Fu can adapt to heterogeneous underlying spatial database, e.g. PostgreSQL(PostGIS), Simba, GeoMesa and SpatialHadoop, MySQL, SpatiaLite.
+
 * **High efficiency:** Compared with existing systems (SMCQL and Conclave),  Hu-Fu has a better performance in both running time and communication cost.
 
 ## Requirements
@@ -145,7 +148,9 @@ In the example below, we will show how to execute federated spatial queries over
 If you want to execute queries on your own spatial data, you should modify some configuration files as follows.
 
 * `hufu-example/data-importer/postgresql/schema.json`:  You can modify this file to change the **original spatial data and table schema**.
+
 * `hufu-example/server/configx.json`:  You can modify the **secure level** of each table in servers.
+
 * `hufu-example/client/model.json`:   You can change **the number of silos** in the data federation by modifying this file.
 
 ### Running Hu-Fu on different physical machines
