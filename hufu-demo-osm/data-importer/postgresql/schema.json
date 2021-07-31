@@ -8,8 +8,8 @@
       "database": "<Database Name>",
       "schemas": [
         {
-          "name": "tablea_1",
-          "csv_path": "./data/tableA_1.csv",
+          "name": "osm_a_1",
+          "csv_path": "./data/osm_a_1.csv",
           "columns": [
             {
               "name": "id",
@@ -29,8 +29,8 @@
           ]
         },
         {
-          "name": "tablea_2",
-          "csv_path": "./data/tableA_2.csv",
+          "name": "osm_a_2",
+          "csv_path": "./data/osm_a_2.csv",
           "columns": [
             {
               "name": "id",
@@ -50,8 +50,8 @@
           ]
         },
         {
-          "name": "tablea_3",
-          "csv_path": "./data/tableA_3.csv",
+          "name": "osm_a_3",
+          "csv_path": "./data/osm_a_3.csv",
           "columns": [
             {
               "name": "id",
@@ -71,8 +71,8 @@
           ]
         },
         {
-          "name": "tablea_4",
-          "csv_path": "./data/tableA_4.csv",
+          "name": "osm_a_4",
+          "csv_path": "./data/osm_a_4.csv",
           "columns": [
             {
               "name": "id",
@@ -92,8 +92,8 @@
           ]
         },
         {
-          "name": "tableb_1",
-          "csv_path": "./data/tableB_1.csv",
+          "name": "osm_b_1",
+          "csv_path": "./data/osm_b_1.csv",
           "columns": [
             {
               "name": "id",
@@ -113,8 +113,8 @@
           ]
         },
         {
-          "name": "tableb_2",
-          "csv_path": "./data/tableB_2.csv",
+          "name": "osm_b_2",
+          "csv_path": "./data/osm_b_2.csv",
           "columns": [
             {
               "name": "id",
@@ -134,8 +134,8 @@
           ]
         },
         {
-          "name": "tableb_3",
-          "csv_path": "./data/tableB_3.csv",
+          "name": "osm_b_3",
+          "csv_path": "./data/osm_b_3.csv",
           "columns": [
             {
               "name": "id",
@@ -155,8 +155,8 @@
           ]
         },
         {
-          "name": "tableb_4",
-          "csv_path": "./data/tableB_4.csv",
+          "name": "osm_b_4",
+          "csv_path": "./data/osm_b_4.csv",
           "columns": [
             {
               "name": "id",

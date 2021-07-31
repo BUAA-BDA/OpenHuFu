@@ -6,7 +6,7 @@
     "passwd": "<Password of PostgreSQL>",
     "tables": [
         {
-            "name": "tablea_3",
+            "name": "osm_a_3",
             "columns": [
                 {
                     "name": "id",
@@ -19,7 +19,7 @@
             ]
         },
         {
-            "name": "tableb_3",
+            "name": "osm_b_3",
             "columns": []
         }
     ]
