@@ -26,31 +26,27 @@ Here we take PostgreSQL(SQL) as an example. The installation of other systems pl
 * Install PostgreSQL (PostGIS)
 
   ```bash
-  sudo apt-get install postgresql-10
-  sudo apt-get install postgis
+  sudo apt-get install postgresql-10, postgis
   ```
-
+  
 * Create user, database and PostGIS extension
 
-```bash
+  ```bash
   sudo su postgres
   psql
-
   postgres=# create database osm_db;
   postgres=# create user hufu with password 'hufu';
   postgres=# grant all on database osm_db to hufu;
   postgres=# \c osm_db
   osm_db=# create extension postgis;
-```
+  ```
 
 * Install Java , Maven and Python
 
   ```bash
-  sudo apt-get install openjdk-8-jdk
-  sudo apt-get install maven
-  sudo apt-get install python3.6
+  sudo apt-get install openjdk-8-jdk, maven, python3.6
   ```
-
+  
 * Clone the git repository
 
   ```bash
@@ -77,19 +73,17 @@ In the example below, we will show how to execute federated spatial queries over
   python importer.py  # If a package is missing, install it leveraging 'pip'.
   ```
 
-* Replace the strings within `< >` in `hufu-demo-osm/data-importer/postgresql/schema.json` and `hufu-demo-osm/driver/config[x].json`
-
 * Start up drivers
 
   ```bash
-  cd {Path of Repository}/hufu-demo-osm/driver
+  cd hufu-demo-osm/driver
   ./start_driver.sh 1 2 3 4
   ```
 
 * Start up command line interface(CLI)
 
   ```bash
-  cd {Path of Repository}/hufu-demo-osm/cli
+  cd hufu-demo-osm/cli
   ./start_cli.sh
   ```
 
@@ -122,7 +116,13 @@ In the example below, we will show how to execute federated spatial queries over
     ```sql
     Hu-Fu> SELECT R.id, S.id FROM osm_b R JOIN osm_a S ON KNN(R.location, S.location, 8);
     ```
-  
+
+  * Exit
+
+    ```sql
+    Hu-Fu> !q
+    ```
+
 * Sample output of federated spatial query
 
   Due to limited space, we only show the output of federated Range Counting and federated kNN query.
@@ -136,7 +136,7 @@ In the example below, we will show how to execute federated spatial queries over
 * Stop drivers
 
   ```bash
-  cd {Path of Repository}/hufu-osm-demo/driver
+  cd hufu-osm-demo/driver
   ./stop_driver.sh
   ```
 
@@ -146,7 +146,7 @@ If you want to execute queries on your own spatial data, you should modify some 
 
 * `hufu-demo-osm/data-importer/postgresql/schema.json`:  You can modify this file to change the **original spatial data and table schema**.
 
-* `hufu-demo-osm/driver/configx.json`:  You can modify the **secure level** of each table in drivers.
+* `hufu-demo-osm/driver/config[x].json`:  You can modify the **secure level** of each table in drivers.
 
 * `hufu-demo-osm/client/model.json`:   You can change **the number of silos** in the data federation by modifying this file.
 
