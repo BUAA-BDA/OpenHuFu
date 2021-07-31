@@ -29,10 +29,10 @@ Hu-Fu is the first system for efficient and secure spatial queries over data fed
 
 * Install PostgreSQL (PostGIS)
 
-  ``````bash
+  ```bash
   sudo apt-get install postgresql-10
   sudo apt-get install postgis
-  ``````
+  ```
 
 * Create user for postgreSQL and create database
 
@@ -54,7 +54,7 @@ Hu-Fu is the first system for efficient and secure spatial queries over data fed
 * Clone the git repository
 
   ```bash
-  git clone xxx.git
+  git clone https://github.com/BUAA-BDA/Hu-Fu.git
   ```
 
 * Compile and package the source code
@@ -68,7 +68,7 @@ Hu-Fu is the first system for efficient and secure spatial queries over data fed
 
 ### Executing example queries
 
-* Import the data
+* Import the data which is sampled from [OSM](https://www.openstreetmap.org/) dataset
 
   ```bash
   cd {Path of Repository}/hufu-example/data-importer/postgresql
