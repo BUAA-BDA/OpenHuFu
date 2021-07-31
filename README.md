@@ -68,6 +68,8 @@ Hu-Fu is the first system for efficient and secure spatial queries over data fed
 
 ### Executing example queries
 
+In the example below, we will show how to execute federated spatial queries over a data federation with four silos.
+
 * Import the data which is sampled from [OSM](https://www.openstreetmap.org/) dataset
 
   ```bash

@@ -1,7 +1,7 @@
 {
     "port": 54679,
-    "url": "jdbc:postgresql://localhost:5432/<Name of Database>",
-    "catalog": "<Name of Database>",
+    "url": "jdbc:postgresql://localhost:5432/<Database Name>",
+    "catalog": "<Database Name>",
     "user": "<Username of PostgreSQL>",
     "passwd": "<Password of PostgreSQL>",
     "tables": [
