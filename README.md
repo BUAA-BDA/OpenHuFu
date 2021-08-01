@@ -84,13 +84,13 @@ In the example below, we will show how to execute federated spatial queries over
   * Federated Range Query
 
     ```sql
-    Hu-Fu> SELECT id FROM osm_a WHERE DWithin(location, Point(121.5, 14.5), 0.5);
+    Hu-Fu> SELECT id FROM osm_a WHERE DWithin(Point(121.5, 14.5), location, 0.5);
     ```
 
   * Federated Range Counting
 
     ```sql
-    Hu-Fu> SELECT COUNT(*) cnt FROM osm_a WHERE DWithin(location, Point(121.5, 14.5), 0.5);
+    Hu-Fu> SELECT COUNT(*) cnt FROM osm_a WHERE DWithin(Point(121.5, 14.5), location, 0.5);
     ```
 
   * Federated kNN
@@ -102,13 +102,13 @@ In the example below, we will show how to execute federated spatial queries over
   * Federated Distance Join
 
     ```sql
-    Hu-Fu> SELECT R.id, S.id FROM osm_b R JOIN osm_a S ON DWithin(R.location, S.location, 0.2);
+    Hu-Fu> SELECT R.id, S.id FROM osm_b R JOIN osm_a S ON DWithin(S.location, R.location, 0.2);
     ```
 
   * Federated kNN Join
 
     ```sql
-    Hu-Fu> SELECT R.id, S.id FROM osm_b R JOIN osm_a S ON KNN(R.location, S.location, 8);
+    Hu-Fu> SELECT R.id, S.id FROM osm_b R JOIN osm_a S ON KNN(S.location, R.location, 8);
     ```
 
   * Exit
