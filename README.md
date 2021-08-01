@@ -2,7 +2,7 @@
 
 ## Features
 
-Hu-Fu is the first system for a system for efficient and secure processing of federated spatial queries. The system can parse the federated spatial query written in SQL, decompose the query into (plaintext/secure) operators and collect the query result securely. We also provide a demo on OSM dataset in [hufu-demo-osm](hufu-demo-osm) .  In particular, the features of Hu-Fu are summarized as follows. (For more details, please refer to [technical report](hufu-docs/Hu-Fu (technical report).pdf))
+Hu-Fu is the first system for a system for efficient and secure processing of federated spatial queries. The system can parse the federated spatial query written in SQL, decompose the query into (plaintext/secure) operators and collect the query result securely. We also provide a demo on OSM dataset in [hufu-demo-osm](hufu-demo-osm) .  In particular, the features of Hu-Fu are summarized as follows. (For more details, please refer to [technical report](hufu-docs/Hu-Fu_technical_report.pdf))
 
 * **Efficient and Secure Federated Spatial Queries:** Hu-Fu uses novel decomposition plans for federated spatial queries(federated kNN, kNN join, range counting, range query, distance join)(In [hufu-core](hufu-core)).
 * **An Easy to Use SQL Interface:**  Hu-Fu supports query input in SQL format(In [hufu-core](hufu-core)).
