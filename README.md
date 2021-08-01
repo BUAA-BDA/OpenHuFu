@@ -19,8 +19,6 @@ Hu-Fu is the first system for a system for efficient and secure processing of fe
 
 ## Installation
 
-### Installation of Silos' Underlying Databases
-
 Here we take PostgreSQL(SQL) as an example. The installation of other systems please refer to [MySQL](https://dev.mysql.com/doc/mysql-installation-excerpt/5.7/en/), [SpatiaLite](https://www.gaia-gis.it/fossil/libspatialite/index), [Simba](http://www.cs.utah.edu/~dongx/simba/), [GeoMesa](https://www.geomesa.org/), [SpatialHadoop](http://spatialhadoop.cs.umn.edu/)
 
 * Install PostgreSQL (PostGIS)
@@ -28,25 +26,13 @@ Here we take PostgreSQL(SQL) as an example. The installation of other systems pl
   ```bash
   sudo apt-get install postgresql-10, postgis
   ```
-  
-* Create user, database and PostGIS extension
-
-  ```bash
-  sudo su postgres
-  psql
-  postgres=# create database osm_db;
-  postgres=# create user hufu with password 'hufu';
-  postgres=# grant all on database osm_db to hufu;
-  postgres=# \c osm_db
-  osm_db=# create extension postgis;
-  ```
 
 * Install Java , Maven and Python
 
   ```bash
   sudo apt-get install openjdk-8-jdk, maven, python3.6
   ```
-  
+
 * Clone the git repository
 
   ```bash
@@ -62,18 +48,30 @@ Here we take PostgreSQL(SQL) as an example. The installation of other systems pl
 
 ## Setup
 
-### Executing example queries
+### Running Hu-Fu Demo on OSM
 
-In the example below, we will show how to execute federated spatial queries over a data federation with four silos.
+In the example below, we will show how to execute federated spatial queries over a four silo data federation with PostgreSQL.
+
+* Create user, database and PostGIS extension in PostgreSQL
+
+  ```bash
+  sudo su postgres
+  psql
+  postgres=# create database osm_db;
+  postgres=# create user hufu with password 'hufu';
+  postgres=# grant all on database osm_db to hufu;
+  postgres=# \c osm_db
+  osm_db=# create extension postgis;
+  ```
 
 * Import the data which is sampled from [OSM](https://www.openstreetmap.org/) dataset
 
   ```bash
-  cd {Path of Repository}/hufu-demo-osm/data-importer/postgresql
+  cd hufu-demo-osm/data-importer/postgresql
   python importer.py  # If a package is missing, install it leveraging 'pip'.
   ```
 
-* Start up drivers
+* Start up drivers(Make sure the socket port used by ``hufu-demo-osm/driver/config[x].json`` is available)
 
   ```bash
   cd hufu-demo-osm/driver
@@ -144,11 +142,11 @@ In the example below, we will show how to execute federated spatial queries over
 
 If you want to execute queries on your own spatial data, you should modify some configuration files as follows.
 
-* `hufu-demo-osm/data-importer/postgresql/schema.json`:  You can modify this file to change the **original spatial data and table schema**.
+* `hufu-demo-osm/data-importer/postgresql/schema.json`: You can modify this file to import other data. You can also create tables and import data by yourself.
 
-* `hufu-demo-osm/driver/config[x].json`:  You can modify the **secure level** of each table in drivers.
+* `hufu-demo-osm/driver/config[x].json`: You can modify the **secure level** of each table in drivers. For details of ``config[x].json``, see [Configuration of Driver](hufu-docs/DriverConfig.md).
 
-* `hufu-demo-osm/client/model.json`:   You can change **the number of silos** in the data federation by modifying this file.
+* `hufu-demo-osm/client/model.json`: You can change **the number of silos** in the data federation by modifying this file, see [Configuration of CLI](hufu-docs/CLIConfig.md).
 
 ### Running Hu-Fu on different physical machines
 
