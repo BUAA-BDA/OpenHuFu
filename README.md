@@ -2,7 +2,7 @@
 
 ## Features
 
-Hu-Fu is the first system for a system for efficient and secure processing of federated spatial queries. The system can parse the federated spatial query written in SQL, decompose the query into (plaintext/secure) operators and collect the query result securely. We also provide a demo on OSM dataset in [hufu-demo-osm](hufu-demo-osm) .  In particular, the features of Hu-Fu are summarized as follows. (For more details, please refer to [technical report](hufu-docs/Hu-Fu_technical_report.pdf))
+Hu-Fu is the first system for efficient and secure processing of federated spatial queries. The system can parse the federated spatial query written in SQL, decompose the query into (plaintext/secure) operators and collect the query result securely. We also provide a demo on the OSM dataset in [hufu-demo-osm](hufu-demo-osm) .  In particular, the features of Hu-Fu are summarized as follows. (For more details, please refer to [technical report](hufu-docs/Hu-Fu_technical_report.pdf))
 
 * **Efficient and Secure Federated Spatial Queries:** Hu-Fu uses novel decomposition plans for federated spatial queries(federated kNN, kNN join, range counting, range query, distance join)(In [hufu-core](hufu-core)).
 * **An Easy to Use SQL Interface:**  Hu-Fu supports query input in SQL format(In [hufu-core](hufu-core)).
@@ -19,7 +19,7 @@ Hu-Fu is the first system for a system for efficient and secure processing of fe
 
 ## Installation
 
-Here we take PostgreSQL(SQL) as an example. The installation of other systems please refer to [MySQL](https://dev.mysql.com/doc/mysql-installation-excerpt/5.7/en/), [SpatiaLite](https://www.gaia-gis.it/fossil/libspatialite/index), [Simba](http://www.cs.utah.edu/~dongx/simba/), [GeoMesa](https://www.geomesa.org/), [SpatialHadoop](http://spatialhadoop.cs.umn.edu/)
+Here we take PostgreSQL(SQL) as an example. For the installation of other systems, please refer to [MySQL](https://dev.mysql.com/doc/mysql-installation-excerpt/5.7/en/), [SpatiaLite](https://www.gaia-gis.it/fossil/libspatialite/index), [Simba](http://www.cs.utah.edu/~dongx/simba/), [GeoMesa](https://www.geomesa.org/), [SpatialHadoop](http://spatialhadoop.cs.umn.edu/)
 
 * Install PostgreSQL (PostGIS)
 
@@ -50,7 +50,7 @@ Here we take PostgreSQL(SQL) as an example. The installation of other systems pl
 
 ### Running Hu-Fu Demo on OSM
 
-In the example below, we will show how to execute federated spatial queries over a four silo data federation with PostgreSQL.
+In the example below, we will show how to execute federated spatial queries over a four-silo data federation with PostgreSQL.
 
 * Create user, database and PostGIS extension in PostgreSQL
 
@@ -154,7 +154,7 @@ It is very easy to deploy Hu-Fu on different physical machines. You only need to
 
 ### Running Hu-Fu on heterogeneous underlying spatial database
 
-To simplify the installation process, the underlying databases of all silos are PostgreSQL(PostGIS) in example. Recall that Hu-Fu can support heterogeneous underlying spatial database. We also provide the adapters for other five spatial databases. You can install these spatial databases by referring to the documentations as below.
+To simplify the installation process, the underlying databases of all silos are PostgreSQL(PostGIS) in the example. Recall that Hu-Fu can support heterogeneous underlying spatial databases. We also provide the adapters for other five spatial databases. You can install these spatial databases by referring to documentations.
 
 * [PostGIS](https://postgis.net/)
 * [Simba](http://www.cs.utah.edu/~dongx/simba/)
