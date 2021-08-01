@@ -2,7 +2,7 @@
 
 ## Features
 
-Hu-Fu is the first system for efficient and secure processing of federated spatial queries. The system can parse the federated spatial query written in SQL, decompose the query into (plaintext/secure) operators and collect the query result securely. We also provide a demo on the OSM dataset in [hufu-demo-osm](hufu-demo-osm) .  In particular, the features of Hu-Fu are summarized as follows. (For more details, please refer to [technical report](hufu-docs/Hu-Fu_technical_report.pdf))
+Hu-Fu is the first system for efficient and secure processing of federated spatial queries. The system can parse the federated spatial query written in SQL, decompose the query into (plaintext/secure) operators and collect the query result securely. We also provide [**a demo on the OSM dataset**](hufu-demo-osm). In particular, the features of Hu-Fu are summarized as follows. (For more details, please refer to [**Hu-Fu Technical Report.pdf**](Hu-Fu_Technical_Report.pdf))
 
 * **Efficient and Secure Federated Spatial Queries:** Hu-Fu uses novel decomposition plans for federated spatial queries(federated kNN, kNN join, range counting, range query, distance join)(In [hufu-core](hufu-core)).
 * **An Easy to Use SQL Interface:**  Hu-Fu supports query input in SQL format(In [hufu-core](hufu-core)).
@@ -27,11 +27,7 @@ Here we take PostgreSQL(SQL) as an example. For the installation of other system
   sudo apt-get install postgresql-10, postgis
   ```
 
-* Install Java , Maven and Python
-
-  ```bash
-  sudo apt-get install openjdk-8-jdk, maven, python3.6
-  ```
+* Download and install [Java 8](http://openjdk.java.net/projects/jdk8/), [Maven](http://maven.apache.org/install.html) and [Python](https://www.python.org/)
 
 * Clone the git repository
 
@@ -54,7 +50,7 @@ In the example below, we will show how to execute federated spatial queries over
 
 * Create user, database and PostGIS extension in PostgreSQL
 
-  ```bash
+  ```sqlite
   sudo su postgres
   psql
   postgres=# CREATE DATABASE osm_db;
@@ -68,21 +64,21 @@ In the example below, we will show how to execute federated spatial queries over
 
   ```bash
   cd hufu-demo-osm/data-importer/postgresql
-  python importer.py  # If a package is missing, install it leveraging 'pip'.
+  python importer.py  # If a package is missing, install it using 'pip'.
   ```
 
 * Start up drivers(Make sure the socket port used by ``hufu-demo-osm/driver/config[x].json`` is available)
 
   ```bash
   cd hufu-demo-osm/driver
-  ./start_driver.sh 1 2 3 4
+  ./start_driver.sh 1 2 3 4  # make sure you have compiled and packaged the source code with package.sh
   ```
 
 * Start up command line interface(CLI)
 
   ```bash
   cd hufu-demo-osm/cli
-  ./start_cli.sh
+  ./start_cli.sh  # make sure you have compiled and packaged the source code with package.sh
   ```
 
   * Federated Range Query
