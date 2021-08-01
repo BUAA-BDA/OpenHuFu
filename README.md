@@ -57,11 +57,11 @@ In the example below, we will show how to execute federated spatial queries over
   ```bash
   sudo su postgres
   psql
-  postgres=# create database osm_db;
-  postgres=# create user hufu with password 'hufu';
-  postgres=# grant all on database osm_db to hufu;
+  postgres=# CREATE DATABASE osm_db;
+  postgres=# CREATE USER hufu WITH PASSWORD 'hufu';
+  postgres=# GRANT ALL ON DATABASE osm_db TO hufu;
   postgres=# \c osm_db
-  osm_db=# create extension postgis;
+  osm_db=# CREATE EXTENSION postgis;
   ```
 
 * Import the data which is sampled from [OSM](https://www.openstreetmap.org/) dataset
@@ -88,31 +88,31 @@ In the example below, we will show how to execute federated spatial queries over
   * Federated Range Query
 
     ```sql
-    Hu-Fu> SELECT id FROM osm_a WHERE DWithin(location, Point(121.5, 14.5), 0.5);
+    Hu-Fu> SELECT id FROM osm_a WHERE DWithin(Point(121.5, 14.5), location, 0.5);
     ```
 
   * Federated Range Counting
 
     ```sql
-    Hu-Fu> SELECT COUNT(*) cnt FROM osm_a WHERE DWithin(location, Point(121.5, 14.5), 0.5);
+    Hu-Fu> SELECT COUNT(*) cnt FROM osm_a WHERE DWithin(Point(121.5, 14.5), location, 0.5);
     ```
 
   * Federated kNN
 
     ```sql
-    Hu-Fu> SELECT id FROM osm_a WHERE KNN(location, Point(121.5, 14.5), 8);
+    Hu-Fu> SELECT id FROM osm_a WHERE KNN(Point(121.5, 14.5), location, 8);
     ```
 
   * Federated Distance Join
 
     ```sql
-    Hu-Fu> SELECT R.id, S.id FROM osm_b R JOIN osm_a S ON DWithin(R.location, S.location, 0.2);
+    Hu-Fu> SELECT R.id, S.id FROM osm_b R JOIN osm_a S ON DWithin(S.location, R.location, 0.2);
     ```
 
   * Federated kNN Join
 
     ```sql
-    Hu-Fu> SELECT R.id, S.id FROM osm_b R JOIN osm_a S ON KNN(R.location, S.location, 8);
+    Hu-Fu> SELECT R.id, S.id FROM osm_b R JOIN osm_a S ON KNN(S.location, R.location, 8);
     ```
 
   * Exit
