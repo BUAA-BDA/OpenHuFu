@@ -2,7 +2,7 @@ syntax = "proto3";
 import "common.proto";
 package onedb;
 
-option java_package = "tk.onedb";
+option java_package = "com.hufudb.onedb.rpc";
 option java_outer_classname = "OneDBService";
 
 

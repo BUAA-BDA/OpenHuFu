@@ -1,0 +1,20 @@
+{
+  "port": 12346,
+  "hostname": "localhost",
+  "url": "jdbc:postgresql://localhost:13102/postgres",
+  "catalog": "postgres",
+  "user": "postgres",
+  "passwd": "onedb",
+  "tables": [
+    {
+      "name": "student",
+      "columns": [],
+      "mappings": [
+        {
+          "schema": "default",
+          "name": "onedb_test"
+        }
+      ]
+    }
+  ]
+}

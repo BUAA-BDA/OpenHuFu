@@ -53,7 +53,7 @@
           </descriptorRefs>
           <archive>
             <manifest>
-              <mainClass>tk.onedb.server.postgresql.PostgresqlServer</mainClass>
+              <mainClass>com.hufudb.onedb.server.postgresql.PostgresqlServer</mainClass>
             </manifest>
           </archive>
         </configuration>

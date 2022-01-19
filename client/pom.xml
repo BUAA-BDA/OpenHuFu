@@ -52,7 +52,7 @@
           </descriptorRefs>
           <archive>
             <manifest>
-              <mainClass>tk.onedb.OneDB</mainClass>
+              <mainClass>com.hufudb.onedb.OneDB</mainClass>
             </manifest>
           </archive>
         </configuration>

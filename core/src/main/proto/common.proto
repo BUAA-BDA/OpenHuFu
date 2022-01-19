@@ -1,7 +1,7 @@
 syntax = "proto3";
 package onedb;
 
-option java_package = "tk.onedb.rpc";
+option java_package = "com.hufudb.onedb.rpc";
 option java_outer_classname = "OneDBCommon";
 
 message Point {

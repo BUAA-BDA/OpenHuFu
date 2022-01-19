@@ -5,9 +5,13 @@
     {
       "name": "default",
       "type": "custom",
-      "factory": "tk.onedb.core.sql.schema.OneDBSchemaFactory",
+      "factory": "com.hufudb.onedb.core.sql.schema.OneDBSchemaFactory",
       "operand": {
-        "endpoints": ["localhost:12345", "localhost:12346", "localhost:12347"]
+        "zookeeper": "localhost:12349",
+        "zkroot": "/onedb",
+        "schema": "default",
+        "user": "user1",
+        "passwd": "user1"
       },
       "tables": [
       ]
