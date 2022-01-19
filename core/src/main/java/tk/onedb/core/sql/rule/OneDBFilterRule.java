@@ -10,13 +10,14 @@ import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.logical.LogicalFilter;
 import org.apache.calcite.rex.RexNode;
+import org.immutables.value.Value;
 
 import tk.onedb.core.sql.rel.OneDBFilter;
 import tk.onedb.core.sql.rel.OneDBRel;
 import tk.onedb.core.sql.rel.OneDBTableScan;
 
-public class OneDBFilterRule extends RelRule<OneDBFilterRule.Config> {
-  protected OneDBFilterRule(Config config) {
+public class OneDBFilterRule extends RelRule<OneDBFilterRule.OneDBFilterRuleConfig> {
+  protected OneDBFilterRule(OneDBFilterRuleConfig config) {
     super(config);
   }
 
@@ -29,11 +30,12 @@ public class OneDBFilterRule extends RelRule<OneDBFilterRule.Config> {
     return disjunctions.size() == 1;
   }
 
-  public interface Config extends RelRule.Config {
-    Config DEFAULT = EMPTY
-        .withOperandSupplier(
+  @Value.Immutable
+  public interface OneDBFilterRuleConfig extends RelRule.Config {
+    OneDBFilterRuleConfig DEFAULT = ImmutableOneDBFilterRuleConfig.builder()
+        .operandSupplier(
             b0 -> b0.operand(LogicalFilter.class).oneInput(b1 -> b1.operand(OneDBTableScan.class).noInputs()))
-        .as(Config.class);
+        .build();
 
     @Override
     default OneDBFilterRule toRule() {

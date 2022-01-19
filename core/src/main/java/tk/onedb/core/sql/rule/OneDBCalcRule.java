@@ -7,12 +7,14 @@ import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rex.RexProgram;
 
+import org.immutables.value.Value;
+
 import tk.onedb.core.sql.rel.OneDBCalc;
 import tk.onedb.core.sql.rel.OneDBRel;
 import tk.onedb.core.sql.rel.OneDBToEnumerableConverter;
 
-public class OneDBCalcRule extends RelRule<OneDBCalcRule.Config> {
-  protected OneDBCalcRule(Config config) {
+public class OneDBCalcRule extends RelRule<OneDBCalcRule.OneDBCalcRuleConfig> {
+  protected OneDBCalcRule(OneDBCalcRuleConfig config) {
     super(config);
   }
 
@@ -24,9 +26,11 @@ public class OneDBCalcRule extends RelRule<OneDBCalcRule.Config> {
     return new OneDBCalc(project.getCluster(), traitSet, project.getHints(), convert(project.getInput(), OneDBRel.CONVENTION), program);
   }
 
-  public interface Config extends RelRule.Config {
-    Config DEFAULT = EMPTY.withOperandSupplier(b0 -> b0.operand(EnumerableProject.class)
-            .oneInput(b1 -> b1.operand(OneDBToEnumerableConverter.class).anyInputs())).as(Config.class);
+  @Value.Immutable
+  public interface OneDBCalcRuleConfig extends RelRule.Config {
+    OneDBCalcRuleConfig DEFAULT = ImmutableOneDBCalcRuleConfig.builder()
+        .operandSupplier(b0 -> b0.operand(EnumerableProject.class)
+            .oneInput(b1 -> b1.operand(OneDBToEnumerableConverter.class).anyInputs())).build();
 
     @Override
     default OneDBCalcRule toRule() {
