@@ -1,5 +1,6 @@
 package com.hufudb.onedb.core.sql.schema;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,12 +12,14 @@ import com.hufudb.onedb.core.client.OneDBClient;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.sql.rel.OneDBTable;
 import com.hufudb.onedb.core.table.OneDBTableInfo;
+import com.hufudb.onedb.core.table.TableMeta;
 import com.hufudb.onedb.core.zk.OneDBZkClient;
 import com.hufudb.onedb.core.zk.ZkConfig;
 
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.schema.Table;
 import org.apache.calcite.schema.impl.AbstractSchema;
+import org.apache.calcite.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +58,14 @@ public class OneDBSchema extends AbstractSchema {
 
   public OneDBTableInfo getOneDBTableInfo(String tableName) {
     return ((OneDBTable)getTable(tableName)).getTableInfo();
+  }
+
+  public List<OneDBTableInfo> getAllOneDBTableInfo() {
+    List<OneDBTableInfo> infos = new ArrayList<>();
+    for (Table table : tableMap.values()) {
+      infos.add(((OneDBTable)table).getTableInfo());
+    }
+    return infos;
   }
 
   public DBClient addDB(String endpoint) {

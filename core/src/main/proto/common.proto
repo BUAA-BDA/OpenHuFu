@@ -23,6 +23,10 @@ message LocalTableInfoProto {
   HeaderProto header = 2;
 }
 
+message LocalTableListProto {
+  repeated LocalTableInfoProto table = 1;
+}
+
 message RowsProto {
   repeated bytes row = 1;
 }

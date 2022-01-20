@@ -12,10 +12,13 @@ import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.client.DBClient;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
+import com.hufudb.onedb.core.table.TableMeta.LocalTableMeta;
 
 import org.apache.calcite.util.Pair;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 public class OneDBTableInfo {
   private static final Logger LOG = LoggerFactory.getLogger(OneDBSchema.class);
 
@@ -131,5 +134,15 @@ public class OneDBTableInfo {
     endpoints = tableList.stream().map(pair -> pair.getKey().getEndpoint()).collect(Collectors.toList());
     lock.readLock().unlock();
     return endpoints;
+  }
+
+  public List<LocalTableMeta> getMappings() {
+    return getTableList().stream().map(p -> new LocalTableMeta(p.left.getEndpoint(), p.right)).collect(Collectors.toList());
+  }
+
+  @Override
+  public String toString() {
+    List<String> mappings = getMappings().stream().map(p -> p.toString()).collect(Collectors.toList());
+    return String.format("[%s](%s){%s}", name, header, StringUtils.join(mappings, ","));
   }
 }

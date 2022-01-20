@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.ImmutableList;
+// import com.google.common.collect.ImmutableList;
 
 import com.hufudb.onedb.rpc.OneDBCommon.HeaderProto;
 
 public class Header {
-  public static final Header EMPTY_HEADER = new Header(ImmutableList.of());
+  // public static final Header EMPTY_HEADER = new Header(ImmutableList.of());
   List<Field> fields;
 
   Header(List<Field> fields) {
@@ -26,6 +26,14 @@ public class Header {
 
   public static Header fromProto(HeaderProto proto) {
     return new Header(proto);
+  }
+
+  public List<Field> getFields() {
+    return fields;
+  }
+
+  public void setFields(List<Field> fields) {
+    this.fields = fields;
   }
 
   public FieldType getType(int index) {

@@ -1,5 +1,6 @@
 package com.hufudb.onedb.core.sql.schema;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -22,8 +23,15 @@ public class OneDBSchemaFactory implements SchemaFactory {
 
   @Override
   public Schema create(SchemaPlus parentSchema, String name, Map<String, Object> operand) {
-    List<String> endpoints = (List<String>) operand.get("endpoints");
-    List<Map<String, Object>> tables = (List) operand.get("tables");
+    // List<String> endpoints = (List<String>) operand.get("endpoints");
+    List<String> endpoints = new ArrayList<>();
+    List<Map<String, Object>> tables = new ArrayList<>();
+    if (operand.containsKey("endpoints")) {
+      endpoints.addAll((List) operand.get("endpoints"));
+    }
+    if (operand.containsKey("tables")) {
+      tables.addAll((List) operand.get("tables"));
+    }
     ZkConfig zkConfig = new ZkConfig();
     zkConfig.servers = (String) operand.get("zookeeper");
     zkConfig.schemaName = (String) operand.get("schema");

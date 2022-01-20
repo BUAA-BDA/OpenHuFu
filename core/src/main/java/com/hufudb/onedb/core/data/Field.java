@@ -41,6 +41,30 @@ public class Field {
     return new Field(name, type, level);
   }
 
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public FieldType getType() {
+    return type;
+  }
+
+  public void setType(FieldType type) {
+    this.type = type;
+  }
+
+  public Level getLevel() {
+    return level;
+  }
+
+  public void setLevel(Level level) {
+    this.level = level;
+  }
+
   @Override
   public boolean equals(Object obj) {
     return obj == this || (obj instanceof Field && ((Field) obj).name.equals(this.name) && ((Field) obj).type.equals(this.type) && ((Field) obj).level.equals(this.level));

@@ -1,5 +1,8 @@
 package com.hufudb.onedb.core.data;
 
+import java.sql.Types;
+
+import org.apache.calcite.sql.type.ExtraSqlTypes;
 import org.apache.calcite.sql.type.SqlTypeName;
 
 public class TypeConverter {
@@ -60,6 +63,38 @@ public class TypeConverter {
       case TIMESTAMP:
         return FieldType.TIMESTAMP;
       case GEOMETRY:
+        return FieldType.POINT;
+      default:
+        return FieldType.STRING;
+    }
+  }
+
+  public static FieldType convert2OneDBTyep(int sqlType) {
+    switch (sqlType) {
+      case Types.VARCHAR:
+        return FieldType.STRING;
+      case Types.BOOLEAN:
+        return FieldType.BOOLEAN;
+      case Types.TINYINT:
+        return FieldType.BYTE;
+      case Types.INTEGER:
+        return FieldType.INT;
+      case Types.SMALLINT:
+        return FieldType.SHORT;
+      case Types.BIGINT:
+        return FieldType.LONG;
+      case Types.FLOAT:
+        return FieldType.FLOAT;
+      case Types.DOUBLE:
+      case Types.DECIMAL:
+        return FieldType.DOUBLE;
+      case Types.DATE:
+        return FieldType.DATE;
+      case Types.TIME:
+        return FieldType.TIME;
+      case Types.TIMESTAMP:
+        return FieldType.TIMESTAMP;
+      case ExtraSqlTypes.GEOMETRY:
         return FieldType.POINT;
       default:
         return FieldType.STRING;

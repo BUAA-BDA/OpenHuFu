@@ -22,6 +22,7 @@ import com.hufudb.onedb.core.sql.expression.OneDBQuery;
 import com.hufudb.onedb.core.zk.DBZkClient;
 import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
 import com.hufudb.onedb.rpc.OneDBCommon.HeaderProto;
+import com.hufudb.onedb.rpc.OneDBCommon.LocalTableListProto;
 import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
 import com.hufudb.onedb.server.data.ServerConfig;
 import com.hufudb.onedb.server.data.ServerConfig.Mapping;
@@ -82,6 +83,17 @@ public abstract class DBService extends ServiceGrpc.ServiceImplBase {
     responseObserver.onCompleted();
   }
 
+  @Override
+  public void getAllLocalTable(GeneralRequest request, StreamObserver<LocalTableListProto> responseObserver) {
+    LocalTableListProto.Builder builder = LocalTableListProto.newBuilder();
+    for (TableInfo info : tableInfoMap.values()) {
+      builder.addTable(info.toProto());
+    }
+    responseObserver.onNext(builder.build());
+    LOG.info("Get {} local table infos", builder.getTableCount());
+    responseObserver.onCompleted();
+  }
+
   protected Header getTableHeader(String name) {
     TableInfo info = tableInfoMap.get(name);
     if (info == null) {
@@ -90,7 +102,6 @@ public abstract class DBService extends ServiceGrpc.ServiceImplBase {
       return info.getHeader();
     }
   }
-
 
   final protected void addTable(ServerConfig.Table table) throws SQLException {
     TableInfo tableInfo = loadTableInfo(table);

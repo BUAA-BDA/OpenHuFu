@@ -70,7 +70,7 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
     final String tableName = tableMeta.tableName;
     OneDBTable table = null;
     List<Pair<DBClient, TableInfo>> localInfos = new ArrayList<>();
-    for (TableMeta.FedMeta fedMeta : tableMeta.feds) {
+    for (TableMeta.LocalTableMeta fedMeta : tableMeta.localTables) {
       DBClient client = schema.getDBClient(fedMeta.endpoint);
       if (client == null) {
         client = schema.addDB(fedMeta.endpoint);

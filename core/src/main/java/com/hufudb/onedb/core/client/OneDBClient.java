@@ -65,7 +65,9 @@ public class OneDBClient {
       return getDBClient(endpoint);
     }
     DBClient client = new DBClient(endpoint);
-    dbClientMap.put(endpoint, client);
+    if (client != null) {
+      dbClientMap.put(endpoint, client);
+    }
     return client;
   }
 

@@ -1,6 +1,8 @@
 package com.hufudb.onedb.core.client;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,9 +14,11 @@ import com.hufudb.onedb.rpc.OneDBService.GeneralRequest;
 import com.hufudb.onedb.rpc.OneDBService.GeneralResponse;
 import com.hufudb.onedb.rpc.ServiceGrpc;
 import com.hufudb.onedb.core.data.Header;
+import com.hufudb.onedb.core.data.TableInfo;
 import com.hufudb.onedb.core.utils.EmptyIterator;
 import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
 import com.hufudb.onedb.rpc.OneDBCommon.HeaderProto;
+import com.hufudb.onedb.rpc.OneDBCommon.LocalTableListProto;
 import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
 
 /*
@@ -96,6 +100,17 @@ public class DBClient {
     } catch (StatusRuntimeException e) {
       LOG.error("RPC failed in getTableHeader: {}", e.getStatus());
       return Header.newBuilder().build();
+    }
+  }
+
+  public List<TableInfo> getAllLocalTable() {
+    try {
+      LocalTableListProto proto = blockingStub
+              .getAllLocalTable(GeneralRequest.newBuilder().build());
+      return TableInfo.fromProto(proto);
+    } catch (StatusRuntimeException e) {
+      LOG.error("RPC failed in getAllLocalTable: {}", e.getStatus());
+      return new ArrayList<>();
     }
   }
 }

@@ -18,5 +18,6 @@ message GeneralResponse {
 service Service {
   rpc AddClient(GeneralRequest) returns (GeneralResponse);
   rpc GetTableHeader(GeneralRequest) returns (HeaderProto);
+  rpc GetAllLocalTable(GeneralRequest) returns (LocalTableListProto);
   rpc OneDBQuery(OneDBQueryProto) returns (stream DataSetProto);
 }

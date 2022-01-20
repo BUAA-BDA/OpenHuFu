@@ -1,9 +1,12 @@
 package com.hufudb.onedb.core.data;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.hufudb.onedb.rpc.OneDBCommon.LocalTableInfoProto;
+import com.hufudb.onedb.rpc.OneDBCommon.LocalTableListProto;
 
 public class TableInfo {
   private final String name;
@@ -32,6 +35,11 @@ public class TableInfo {
 
   public static TableInfo fromProto(LocalTableInfoProto proto) {
     return new TableInfo(proto.getName(), Header.fromProto(proto.getHeader()));
+  }
+
+  public static List<TableInfo> fromProto(LocalTableListProto proto) {
+    return proto.getTableList().stream()
+        .map(info -> TableInfo.fromProto(info)).collect(Collectors.toList());
   }
 
   public static TableInfo of(String name, Header header) {
@@ -90,6 +98,6 @@ public class TableInfo {
 
   @Override
   public String toString() {
-    return String.format("table [%s] : %s", name, header.toString());
+    return String.format("[%s](%s)", name, header);
   }
 }
