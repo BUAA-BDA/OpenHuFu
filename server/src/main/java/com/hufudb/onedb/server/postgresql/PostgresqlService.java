@@ -10,7 +10,9 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
+import com.hufudb.onedb.core.data.AliasTableInfo;
 import com.hufudb.onedb.core.data.DataSet;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.data.Level;
@@ -19,61 +21,73 @@ import com.hufudb.onedb.core.data.TableInfo;
 import com.hufudb.onedb.core.sql.expression.OneDBQuery;
 import com.hufudb.onedb.core.sql.translator.OneDBTranslator;
 import com.hufudb.onedb.server.DBService;
-import com.hufudb.onedb.server.data.ServerConfig;
-import com.hufudb.onedb.server.data.ServerConfig.Table;
 
+@Service
 public class PostgresqlService extends DBService {
   private static final Logger LOG = LoggerFactory.getLogger(PostgresqlService.class);
   private DatabaseMetaData metaData;
   private Connection connection;
   private final String catalog;
 
-  PostgresqlService(PostgresqlConfig config) {
-    super(config.zkservers, config.zkroot,
-        String.format("%s:%d", config.hostname == null ? "localhost" : config.hostname, config.port), config.digest);
-    this.catalog = config.catalog;
+  public PostgresqlService(String hostname, int port, String catalog, String url, String user, String passwd) {
+    super(null, null, String.format("%s:%d", hostname, port), null);
+    this.catalog = catalog;
     try {
-      init(config);
+      Class.forName("org.postgresql.Driver");
+      connection = DriverManager.getConnection(url, user, passwd);
+      loadAllTableInfo();
     } catch (Exception e) {
       e.printStackTrace();
     }
   }
 
-  public void init(PostgresqlConfig config) throws ClassNotFoundException, SQLException {
-    Class.forName("org.postgresql.Driver");
-    connection = DriverManager.getConnection(config.url, config.user, config.passwd);
-    metaData = connection.getMetaData();
-    ResultSet rs = metaData.getTables(catalog, null, "%", new String[] { "TABLE" });
-    while (rs.next()) {
-      String tableName = rs.getString("TABLE_NAME");
-      ServerConfig.Table table = config.getTable(tableName);
-      if (table == null) {
-        continue;
-      }
-      try {
-        addTable(table);
-      } catch (SQLException e) {
-        LOG.warn("Failed to add table {} : {}", table.name, e.getCause());
-      }
+  PostgresqlService(PostgresqlConfig config) {
+    super(config.zkservers, config.zkroot,
+        String.format("%s:%d", config.hostname == null ? "localhost" : config.hostname, config.port), config.digest);
+    this.catalog = config.catalog;
+    try {
+      Class.forName("org.postgresql.Driver");
+      connection = DriverManager.getConnection(config.url, config.user, config.passwd);
+      loadAllTableInfo();
+      initVirtualTable(config.tables);
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
 
   @Override
-  protected TableInfo loadTableInfo(Table table) {
+  public void loadAllTableInfo() {
     try {
-      ResultSet rc = metaData.getColumns(catalog, null, table.name, null);
+      metaData = connection.getMetaData();
+      ResultSet rs = metaData.getTables(catalog, null, "%", new String[] { "TABLE" });
+      while (rs.next()) {
+        addLocalTableInfo(loadTableInfo(rs.getString("TABLE_NAME")));
+      }
+    } catch (SQLException e) {
+      LOG.error("Failed to load all tables: {}", e.getCause());
+      e.printStackTrace();
+    }
+  }
+
+  public void initVirtualTable(List<AliasTableInfo> infos) {
+    for (AliasTableInfo info : infos) {
+      addVirtualTable(info);
+    }
+  }
+
+  @Override
+  protected TableInfo loadTableInfo(String tableName) {
+    try {
+      ResultSet rc = metaData.getColumns(catalog, null, tableName, null);
       TableInfo.Builder tableInfoBuilder = TableInfo.newBuilder();
-      tableInfoBuilder.setTableName(table.name);
+      tableInfoBuilder.setTableName(tableName);
       while (rc.next()) {
         String columnName = rc.getString("COLUMN_NAME");
-        Level level = table.getLevel(columnName);
-        if (level.equals(Level.HIDE))
-          continue;
-        tableInfoBuilder.add(columnName, PostgresqlTypeConverter.convert(rc.getString("TYPE_NAME")), level);
+        tableInfoBuilder.add(columnName, PostgresqlTypeConverter.convert(rc.getString("TYPE_NAME")), Level.PUBLIC);
       }
       return tableInfoBuilder.build();
     } catch (SQLException e) {
-      LOG.error("Error when load tableinfo of {}: ", table.name, e.getMessage());
+      LOG.error("Error when load tableinfo of {}: ", tableName, e.getMessage());
       return null;
     }
   }
@@ -135,7 +149,7 @@ public class PostgresqlService extends DBService {
 
   String generateSQL(OneDBQuery query) {
     String tableName = query.tableName;
-    Header tableHeader = getTableHeader(tableName);
+    Header tableHeader = getVirtualTableHeader(tableName);
     List<String> filters = OneDBTranslator.tranlateExps(tableHeader, query.filterExps);
     List<String> selects = OneDBTranslator.tranlateExps(tableHeader, query.selectExps);
     if (!query.aggExps.isEmpty()) {

@@ -7,14 +7,9 @@
   "passwd": "onedb",
   "tables": [
     {
-      "name": "student",
-      "columns": [],
-      "mappings": [
-        {
-          "schema": "default",
-          "name": "onedb_test"
-        }
-      ]
+      "localTableName": "student",
+      "virtualTableName": "student",
+      "fields": []
     }
   ]
 }

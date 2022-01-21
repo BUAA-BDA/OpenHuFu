@@ -23,6 +23,10 @@ public class PostgresqlServer extends DBServer {
     super(ServerBuilder.forPort(config.port), config.port, new PostgresqlService(config));
   }
 
+  public PostgresqlServer(int port, PostgresqlService service) throws IOException {
+    super(ServerBuilder.forPort(port), port, service);
+  }
+
   public static void main(String[] args) {
     Options options = new Options();
     Option config = new Option("c", "config", true, "postgresql config");

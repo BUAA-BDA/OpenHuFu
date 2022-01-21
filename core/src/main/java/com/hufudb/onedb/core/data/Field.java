@@ -7,6 +7,8 @@ public class Field {
   FieldType type;
   Level level;
 
+  Field() {}
+
   Field(String name, FieldType type, Level level) {
     this.name = name;
     this.type = type;

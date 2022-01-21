@@ -36,7 +36,7 @@ public class DBZkClient extends ZkClient {
     }
   }
 
-  public boolean registerTable2Schema(String schema, String globalTableName, String endpoint, String localTableName) {
+  public boolean registerTable(String schema, String globalTableName, String endpoint, String localTableName) {
     String directory = buildPath(schemaRootPath, schema);
     String tablePath = buildPath(directory, globalTableName);
     String registerPath = buildPath(tablePath, endpoint);
@@ -52,6 +52,20 @@ public class DBZkClient extends ZkClient {
       LOG.error("Error when register to schema {}: {}", schema, e.getMessage());
       e.printStackTrace();
       return false;
+    }
+  }
+
+  public void removeTable(String schema, String globalTableName, String endpoint) {
+    String directory = buildPath(schemaRootPath, schema);
+    String tablePath = buildPath(directory, globalTableName);
+    String registerPath = buildPath(tablePath, endpoint);
+    try {
+      if (zk.exists(registerPath, false) != null) {
+        zk.delete(registerPath, -1);
+      }
+    } catch (KeeperException | InterruptedException e) {
+      LOG.error("Error when remove {} from schema {}: {}", endpoint, schema, e.getMessage());
+      e.printStackTrace();
     }
   }
 }

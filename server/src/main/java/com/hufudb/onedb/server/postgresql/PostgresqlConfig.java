@@ -2,28 +2,17 @@ package com.hufudb.onedb.server.postgresql;
 
 import java.util.List;
 
-import com.hufudb.onedb.server.data.ServerConfig;
+import com.hufudb.onedb.core.data.AliasTableInfo;
 
-
-public class PostgresqlConfig implements ServerConfig {
+public class PostgresqlConfig {
   public int port;
   public String hostname;
   public String url;
   public String catalog;
   public String user;
   public String passwd;
-  public List<Table> tables;
   public String zkservers;
   public String zkroot;
   public String digest;
-
-  @Override
-  public Table getTable(String tableName) {
-    for (Table table : tables) {
-      if (tableName.equals(table.name)) {
-        return table;
-      }
-    }
-    return null;
-  }
+  public List<AliasTableInfo> tables;
 }

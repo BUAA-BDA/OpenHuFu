@@ -8,15 +8,16 @@ import org.slf4j.LoggerFactory;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
-import com.hufudb.onedb.rpc.ServiceGrpc;
 
 public abstract class DBServer {
   private static final Logger LOG = LoggerFactory.getLogger(DBServer.class);
   protected final int port;
   protected final Server server;
+  protected final DBService service;
 
-  public DBServer(ServerBuilder<?> serverBuilder, int port, ServiceGrpc.ServiceImplBase service) throws IOException {
+  public DBServer(ServerBuilder<?> serverBuilder, int port, DBService service) throws IOException {
     this.port = port;
+    this.service = service;
     this.server = serverBuilder.addService(service).build();
   }
 
@@ -50,7 +51,7 @@ public abstract class DBServer {
    * Await termination on the main thread since the grpc library uses daemon
    * threads.
    */
-  protected void blockUntilShutdown() throws InterruptedException {
+  public void blockUntilShutdown() throws InterruptedException {
     if (server != null) {
       server.awaitTermination();
     }

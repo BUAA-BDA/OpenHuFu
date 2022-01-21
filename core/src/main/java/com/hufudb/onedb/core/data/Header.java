@@ -10,13 +10,17 @@ import com.hufudb.onedb.rpc.OneDBCommon.HeaderProto;
 
 public class Header {
   // public static final Header EMPTY_HEADER = new Header(ImmutableList.of());
-  List<Field> fields;
+  protected List<Field> fields;
 
-  Header(List<Field> fields) {
+  protected Header() {
+    this.fields = new ArrayList<>();
+  }
+
+  public Header(List<Field> fields) {
     this.fields = fields;
   }
 
-  Header(HeaderProto proto) {
+  protected Header(HeaderProto proto) {
     this.fields = proto.getFieldList().stream().map(f -> Field.fromProto(f)).collect(Collectors.toList());
   }
 
@@ -74,6 +78,11 @@ public class Header {
 
     public Builder add(String name, FieldType type, Level level) {
       fields.add(Field.of(name, type, level));
+      return this;
+    }
+
+    public Builder add(Field field) {
+      fields.add(field);
       return this;
     }
 

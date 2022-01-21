@@ -64,12 +64,12 @@ public class ClientController {
     return SimpleGlobalTableInfo.from(clientService.getOneDBTableInfo(name));
   }
 
-  @PostMapping("client/globaltables")
+  @PostMapping("/client/globaltables")
   boolean addGlobalTable(@RequestBody TableMeta meta) {
     return clientService.createOneDBTable(meta);
   }
 
-  @DeleteMapping("client/globaltables/{name}")
+  @DeleteMapping("/client/globaltables/{name}")
   void dropGlobalTable(@PathVariable String name) {
     clientService.dropOneDBTable(name);
   }

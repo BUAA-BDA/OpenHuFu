@@ -9,22 +9,26 @@ import com.hufudb.onedb.rpc.OneDBCommon.LocalTableInfoProto;
 import com.hufudb.onedb.rpc.OneDBCommon.LocalTableListProto;
 
 public class TableInfo {
-  private final String name;
-  private final Header header;
 
-  private final Map<String, Integer> columnIndex;
+  protected String name;
+  protected Header header;
 
-  private TableInfo(String name, Header header, Map<String, Integer> columnIndex) {
+  protected Map<String, Integer> columnIndex;
+
+  TableInfo(String name, Header header, Map<String, Integer> columnIndex) {
     this.name = name;
     this.header = header;
     this.columnIndex = columnIndex;
   }
 
-  private TableInfo(String name, Header header) {
+  TableInfo(String name, Header header) {
     this.name = name;
     this.header = header;
     this.columnIndex = new HashMap<>();
     for (int i = 0; i < header.size(); ++i) {
+      if (columnIndex.containsKey(name)) {
+        throw new RuntimeException("column " + name +  " already exist");
+      }
       columnIndex.put(header.getName(i), i);
     }
   }
@@ -47,11 +51,11 @@ public class TableInfo {
   }
 
   public static class Builder {
-    private String tableName;
-    private final Header.Builder builder;
-    private final Map<String, Integer> columnIndex;
+    protected String tableName;
+    protected final Header.Builder builder;
+    protected final Map<String, Integer> columnIndex;
 
-    private Builder() {
+    protected Builder() {
       this.builder = Header.newBuilder();
       columnIndex = new HashMap<>();
     }
@@ -62,12 +66,18 @@ public class TableInfo {
     }
 
     public Builder add(String name, FieldType type) {
+      if (columnIndex.containsKey(name)) {
+        throw new RuntimeException("column " + name +  " already exist");
+      }
       columnIndex.put(name, builder.size());
       builder.add(name, type);
       return this;
     }
 
     public Builder add(String name, FieldType type, Level level) {
+      if (columnIndex.containsKey(name)) {
+        throw new RuntimeException("column " + name +  " already exist");
+      }
       columnIndex.put(name, builder.size());
       builder.add(name, type, level);
       return this;
