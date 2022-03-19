@@ -69,7 +69,7 @@ public class TypeConverter {
     }
   }
 
-  public static FieldType convert2OneDBTyep(int sqlType) {
+  public static FieldType convert2OneDBType(int sqlType) {
     switch (sqlType) {
       case Types.VARCHAR:
         return FieldType.STRING;

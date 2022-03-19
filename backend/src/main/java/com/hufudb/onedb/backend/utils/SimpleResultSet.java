@@ -41,7 +41,7 @@ public class SimpleResultSet {
       List<List<String>> rows = new ArrayList<>();
       int columnCount = meta.getColumnCount();
       for (int i = 1; i <= columnCount; i++) {
-        builder.add(meta.getColumnName(i), TypeConverter.convert2OneDBTyep(meta.getColumnType(i)));
+        builder.add(meta.getColumnName(i), TypeConverter.convert2OneDBType(meta.getColumnType(i)));
       }
       while (rs.next()) {
         List<String> row = new ArrayList<>();
