@@ -4,7 +4,7 @@ import java.util.List;
 
 public class AliasTableInfo {
     String localTableName;
-    String virtualTableName;
+    String publishedTableName;
     List<Field> fields;
 
     public String getLocalTableName() {
@@ -13,11 +13,11 @@ public class AliasTableInfo {
     public void setLocalTableName(String localTableName) {
         this.localTableName = localTableName;
     }
-    public String getVirtualTableName() {
-        return virtualTableName;
+    public String getPublishedTableName() {
+        return publishedTableName;
     }
-    public void setVirtualTableName(String virtualTableName) {
-        this.virtualTableName = virtualTableName;
+    public void setPublishedTableName(String publishedTableName) {
+        this.publishedTableName = publishedTableName;
     }
     public List<Field> getFields() {
         return fields;

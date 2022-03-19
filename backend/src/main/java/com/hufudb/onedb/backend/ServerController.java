@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.hufudb.onedb.backend.utils.SimpleLocalTableInfo;
 import com.hufudb.onedb.core.data.AliasTableInfo;
-import com.hufudb.onedb.core.data.VirtualTableInfo;
 import com.hufudb.onedb.server.DBService;
 
 import org.slf4j.Logger;
@@ -18,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@ConditionalOnProperty(name={"db.enable"}, havingValue = "true")
+@ConditionalOnProperty(name = { "owner.db.enable" }, havingValue = "true")
 public class ServerController {
   private static final Logger LOG = LoggerFactory.getLogger(ServerController.class);
   private final DBService service;
@@ -34,16 +33,16 @@ public class ServerController {
 
   @GetMapping("/server/virtualtables")
   List<SimpleLocalTableInfo> getVirtualTableInfos() {
-    return SimpleLocalTableInfo.from(service.getAllVirtualTable());
+    return SimpleLocalTableInfo.from(service.getAllPublishedTable());
   }
 
   @PostMapping("/server/virtualtables")
   boolean addVirtualTable(@RequestBody AliasTableInfo alias) {
-    return service.addVirtualTable(alias);
+    return service.addPublishedTable(alias);
   }
 
   @DeleteMapping("/server/virtualtables/{name}")
   void dropVirtualTable(@PathVariable String name) {
-    service.dropVirtualTable(name);
+    service.dropPublishedTable(name);
   }
 }

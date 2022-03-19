@@ -96,6 +96,8 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
     }
     if (table == null) {
       LOG.error("Fail to init table {}", tableMeta.tableName);
+    } else {
+      LOG.info("create global table {}", tableMeta.tableName);
     }
     return table;
   }

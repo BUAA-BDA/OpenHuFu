@@ -1,0 +1,11 @@
+[
+  {
+    "tableName": "student",
+    "localTables": [
+      {
+        "endpoint": "localhost:12345",
+        "localName": "student"
+      }
+    ]
+  }
+]

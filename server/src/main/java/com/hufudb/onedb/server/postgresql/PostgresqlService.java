@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.data.AliasTableInfo;
 import com.hufudb.onedb.core.data.DataSet;
 import com.hufudb.onedb.core.data.Header;
@@ -29,16 +30,21 @@ public class PostgresqlService extends DBService {
   private Connection connection;
   private final String catalog;
 
-  public PostgresqlService(String hostname, int port, String catalog, String url, String user, String passwd) {
+  public PostgresqlService(String hostname, int port, String catalog, String url, String user, String passwd, List<AliasTableInfo> infos) {
     super(null, null, String.format("%s:%d", hostname, port), null);
     this.catalog = catalog;
     try {
       Class.forName("org.postgresql.Driver");
       connection = DriverManager.getConnection(url, user, passwd);
       loadAllTableInfo();
+      initPublishedTable(infos);
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+
+  public PostgresqlService(String hostname, int port, String catalog, String url, String user, String passwd) {
+    this(hostname, port, catalog, url, user, passwd, ImmutableList.of());
   }
 
   PostgresqlService(PostgresqlConfig config) {
@@ -49,7 +55,7 @@ public class PostgresqlService extends DBService {
       Class.forName("org.postgresql.Driver");
       connection = DriverManager.getConnection(config.url, config.user, config.passwd);
       loadAllTableInfo();
-      initVirtualTable(config.tables);
+      initPublishedTable(config.tables);
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -66,12 +72,6 @@ public class PostgresqlService extends DBService {
     } catch (SQLException e) {
       LOG.error("Failed to load all tables: {}", e.getCause());
       e.printStackTrace();
-    }
-  }
-
-  public void initVirtualTable(List<AliasTableInfo> infos) {
-    for (AliasTableInfo info : infos) {
-      addVirtualTable(info);
     }
   }
 
@@ -149,7 +149,7 @@ public class PostgresqlService extends DBService {
 
   String generateSQL(OneDBQuery query) {
     String tableName = query.tableName;
-    Header tableHeader = getVirtualTableHeader(tableName);
+    Header tableHeader = getPublishedTableHeader(tableName);
     List<String> filters = OneDBTranslator.tranlateExps(tableHeader, query.filterExps);
     List<String> selects = OneDBTranslator.tranlateExps(tableHeader, query.selectExps);
     if (!query.aggExps.isEmpty()) {

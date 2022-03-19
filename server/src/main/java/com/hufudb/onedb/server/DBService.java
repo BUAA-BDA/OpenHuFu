@@ -24,7 +24,7 @@ import com.hufudb.onedb.core.data.Field;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.data.StreamObserverDataSet;
 import com.hufudb.onedb.core.data.TableInfo;
-import com.hufudb.onedb.core.data.VirtualTableInfo;
+import com.hufudb.onedb.core.data.PublishedTableInfo;
 import com.hufudb.onedb.core.sql.expression.OneDBQuery;
 import com.hufudb.onedb.core.zk.DBZkClient;
 import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
@@ -38,8 +38,8 @@ public abstract class DBService extends ServiceGrpc.ServiceImplBase {
   protected final Map<String, DBClient> dbClientMap; // endpoint -> rpc_client
   private final Map<String, TableInfo> localTableInfoMap; // localName -> localTableInfo
   private final ReadWriteLock localLock;
-  private final Map<String, VirtualTableInfo> virtualTableInfoMap; // virtualName -> virtualTableInfo
-  private final ReadWriteLock virtualLock;
+  private final Map<String, PublishedTableInfo> publishedTableInfoMap; // publishedTableName -> publishedTableInfo
+  private final ReadWriteLock publishedLock;
   // private final ExecutorService executorService;
   private final DBZkClient zkClient;
   protected final String endpoint;
@@ -47,10 +47,10 @@ public abstract class DBService extends ServiceGrpc.ServiceImplBase {
   public DBService(String zkServers, String zkRootPath, String endpoint, String digest) {
     this.dbClientMap = new HashMap<>();
     this.localTableInfoMap = new HashMap<>();
-    this.virtualTableInfoMap = new HashMap<>();
+    this.publishedTableInfoMap = new HashMap<>();
     // this.executorService = Executors.newFixedThreadPool(OneDBConfig.SERVER_THREAD_NUM);
     this.localLock = new ReentrantReadWriteLock();
-    this.virtualLock = new ReentrantReadWriteLock();
+    this.publishedLock = new ReentrantReadWriteLock();
     this.endpoint = endpoint;
     if (zkServers == null || zkRootPath == null || digest == null) {
       zkClient = null;
@@ -87,25 +87,25 @@ public abstract class DBService extends ServiceGrpc.ServiceImplBase {
 
   @Override
   public void getTableHeader(GeneralRequest request, StreamObserver<HeaderProto> responseObserver) {
-    HeaderProto headerProto = getVirtualTableHeader(request.getValue()).toProto();
+    HeaderProto headerProto = getPublishedTableHeader(request.getValue()).toProto();
     LOG.info("Get header of table {}", request.getValue());
     responseObserver.onNext(headerProto);
     responseObserver.onCompleted();
   }
 
-  public List<TableInfo> getAllVirtualTable() {
-    virtualLock.readLock().lock();
-    List<TableInfo> infos = virtualTableInfoMap.values().stream().map(
+  public List<TableInfo> getAllPublishedTable() {
+    publishedLock.readLock().lock();
+    List<TableInfo> infos = publishedTableInfoMap.values().stream().map(
       vinfo -> vinfo.getFakeTableInfo()
     ).collect(Collectors.toList());
-    virtualLock.readLock().unlock();
+    publishedLock.readLock().unlock();
     return infos;
   }
 
   @Override
   public void getAllLocalTable(GeneralRequest request, StreamObserver<LocalTableListProto> responseObserver) {
     LocalTableListProto.Builder builder = LocalTableListProto.newBuilder();
-    getAllVirtualTable().forEach(info -> builder.addTable(info.toProto()));
+    getAllPublishedTable().forEach(info -> builder.addTable(info.toProto()));
     responseObserver.onNext(builder.build());
     LOG.info("Get {} local table infos", builder.getTableCount());
     responseObserver.onCompleted();
@@ -119,8 +119,8 @@ public abstract class DBService extends ServiceGrpc.ServiceImplBase {
     return zkClient.registerTable(schema, globalName, endpoint, localName);
   }
 
-  protected Header getVirtualTableHeader(String virtualTableName) {
-    VirtualTableInfo info = virtualTableInfoMap.get(virtualTableName);
+  protected Header getPublishedTableHeader(String publishedTableName) {
+    PublishedTableInfo info = publishedTableInfoMap.get(publishedTableName);
     if (info == null) {
       return Header.newBuilder().build();
     } else {
@@ -152,38 +152,44 @@ public abstract class DBService extends ServiceGrpc.ServiceImplBase {
     return infos;
   }
 
-  public void clearVirtualTable() {
-    virtualLock.writeLock().lock();
-    virtualTableInfoMap.clear();
-    virtualLock.writeLock().unlock();
+  public void clearPublishedTable() {
+    publishedLock.writeLock().lock();
+    publishedTableInfoMap.clear();
+    publishedLock.writeLock().unlock();
   }
 
-  public void dropVirtualTable(String tableName) {
-    virtualLock.writeLock().lock();
-    virtualTableInfoMap.remove(tableName);
-    virtualLock.writeLock().unlock();
+  public void dropPublishedTable(String tableName) {
+    publishedLock.writeLock().lock();
+    publishedTableInfoMap.remove(tableName);
+    publishedLock.writeLock().unlock();
   }
 
-  public VirtualTableInfo configVirtualTableInfo(String localTableName, String virtualTableName, List<Field> fields) {
+  public void initPublishedTable(List<AliasTableInfo> infos) {
+    for (AliasTableInfo info : infos) {
+      addPublishedTable(info);
+    }
+  }
+
+  public PublishedTableInfo setPublishedTableInfo(String localTableName, String publishedTableName, List<Field> fields) {
     TableInfo info = getLocalTableInfo(localTableName);
-    return new VirtualTableInfo(info, virtualTableName, fields);
+    return new PublishedTableInfo(info, publishedTableName, fields);
   }
 
-  public boolean addVirtualTable(AliasTableInfo info) {
-    VirtualTableInfo v = configVirtualTableInfo(info.getLocalTableName(), info.getVirtualTableName(), info.getFields());
-    return addVirtualTable(v);
+  public boolean addPublishedTable(AliasTableInfo info) {
+    PublishedTableInfo v = setPublishedTableInfo(info.getLocalTableName(), info.getPublishedTableName(), info.getFields());
+    return addPublishedTable(v);
   }
 
-  public boolean addVirtualTable(VirtualTableInfo virtualTable) {
-    virtualLock.writeLock().lock();
-    if (virtualTableInfoMap.containsKey(virtualTable.getVirtualTableName())) {
-      LOG.error("virtual table {} already exist", virtualTable.getVirtualTableName());
-      virtualLock.writeLock().unlock();
+  public boolean addPublishedTable(PublishedTableInfo publishedTable) {
+    publishedLock.writeLock().lock();
+    if (publishedTableInfoMap.containsKey(publishedTable.getPublishedTableName())) {
+      LOG.error("published table {} already exist", publishedTable.getPublishedTableName());
+      publishedLock.writeLock().unlock();
       return false;
     }
-    LOG.info("Add Virtual Table {}", virtualTable);
-    virtualTableInfoMap.put(virtualTable.getVirtualTableName(), virtualTable);
-    virtualLock.writeLock().unlock();
+    LOG.info("Add Published Table {}", publishedTable);
+    publishedTableInfoMap.put(publishedTable.getPublishedTableName(), publishedTable);
+    publishedLock.writeLock().unlock();
     return true;
   }
 

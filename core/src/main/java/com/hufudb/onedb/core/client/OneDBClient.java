@@ -68,6 +68,7 @@ public class OneDBClient {
     if (client != null) {
       dbClientMap.put(endpoint, client);
     }
+    LOG.info("add DB {}", endpoint);
     return client;
   }
 
