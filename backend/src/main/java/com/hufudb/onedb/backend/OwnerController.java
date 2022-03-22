@@ -2,9 +2,6 @@ package com.hufudb.onedb.backend;
 
 import java.util.List;
 
-import com.hufudb.onedb.core.data.AliasTableInfo;
-import com.hufudb.onedb.core.data.PublishedTableInfo;
-import com.hufudb.onedb.core.data.utils.POJOGlobalTableInfo;
 import com.hufudb.onedb.core.data.utils.POJOLocalTableInfo;
 import com.hufudb.onedb.core.data.utils.POJOPublishedTableInfo;
 import com.hufudb.onedb.server.DBService;

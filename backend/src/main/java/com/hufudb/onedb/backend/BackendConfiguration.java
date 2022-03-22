@@ -12,8 +12,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.hufudb.onedb.OneDB;
-import com.hufudb.onedb.core.data.AliasTableInfo;
-import com.hufudb.onedb.core.data.PublishedTableInfo;
+import com.hufudb.onedb.core.data.utils.POJOPublishedTableInfo;
 import com.hufudb.onedb.core.table.TableMeta;
 import com.hufudb.onedb.server.DBServer;
 import com.hufudb.onedb.server.DBService;
@@ -56,13 +55,13 @@ public class BackendConfiguration {
 
   private List<TableMeta> tableMetas;
 
-  private List<PublishedTableInfo> tableInfos;
+  private List<POJOPublishedTableInfo> tableInfos;
 
   @Bean
   @ConditionalOnProperty(name={"owner.db.enable"}, havingValue = "true")
   public DBService initService() {
     try (Reader reader = Files.newBufferedReader(Paths.get(ownerConfigPath))) {
-      tableInfos = new Gson().fromJson(reader, new TypeToken<ArrayList<AliasTableInfo>>() {}.getType());
+      tableInfos = new Gson().fromJson(reader, new TypeToken<ArrayList<POJOPublishedTableInfo>>() {}.getType());
     } catch (IOException|JsonSyntaxException e) {
       tableInfos = ImmutableList.of();
       LOG.warn("fail to read schema.path");

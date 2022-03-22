@@ -166,8 +166,8 @@ public abstract class DBService extends ServiceGrpc.ServiceImplBase {
     publishedLock.writeLock().unlock();
   }
 
-  public void initPublishedTable(List<PublishedTableInfo> infos) {
-    for (PublishedTableInfo info : infos) {
+  public void initPublishedTable(List<POJOPublishedTableInfo> infos) {
+    for (POJOPublishedTableInfo info : infos) {
       addPublishedTable(info);
     }
   }
@@ -177,11 +177,11 @@ public abstract class DBService extends ServiceGrpc.ServiceImplBase {
     List<Integer> mappings = new ArrayList<>();
     TableInfo originInfo = localTableInfoMap.get(publishedTableInfo.getOriginTableName());
     List<Field> publishedFields = publishedTableInfo.getPublishedFields();
-    List<String> originNames = publishedTableInfo.getOriginNames();
+    List<Integer> originNames = publishedTableInfo.getOriginColumns();
     for (int i = 0; i < publishedFields.size(); ++i) {
       if (!publishedFields.get(i).getLevel().equals(Level.HIDDEN)) {
         pFields.add(publishedFields.get(i));
-        mappings.add(originInfo.getColumnIndex(originNames.get(i)));
+        mappings.add(originNames.get(i));
       }
     }
     return new PublishedTableInfo(originInfo, publishedTableInfo.getPublishedTableName(), pFields, mappings);

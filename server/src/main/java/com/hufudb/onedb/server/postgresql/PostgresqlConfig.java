@@ -2,7 +2,7 @@ package com.hufudb.onedb.server.postgresql;
 
 import java.util.List;
 
-import com.hufudb.onedb.core.data.PublishedTableInfo;
+import com.hufudb.onedb.core.data.utils.POJOPublishedTableInfo;
 
 public class PostgresqlConfig {
   public int port;
@@ -14,5 +14,5 @@ public class PostgresqlConfig {
   public String zkservers;
   public String zkroot;
   public String digest;
-  public List<PublishedTableInfo> tables;
+  public List<POJOPublishedTableInfo> tables;
 }

@@ -16,9 +16,9 @@ import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.data.DataSet;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.data.Level;
-import com.hufudb.onedb.core.data.PublishedTableInfo;
 import com.hufudb.onedb.core.data.Row;
 import com.hufudb.onedb.core.data.TableInfo;
+import com.hufudb.onedb.core.data.utils.POJOPublishedTableInfo;
 import com.hufudb.onedb.core.sql.expression.OneDBQuery;
 import com.hufudb.onedb.core.sql.translator.OneDBTranslator;
 import com.hufudb.onedb.server.DBService;
@@ -30,7 +30,7 @@ public class PostgresqlService extends DBService {
   private Connection connection;
   private final String catalog;
 
-  public PostgresqlService(String hostname, int port, String catalog, String url, String user, String passwd, List<PublishedTableInfo> infos) {
+  public PostgresqlService(String hostname, int port, String catalog, String url, String user, String passwd, List<POJOPublishedTableInfo> infos) {
     super(null, null, String.format("%s:%d", hostname, port), null);
     this.catalog = catalog;
     try {

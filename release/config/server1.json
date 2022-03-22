@@ -1,7 +1,38 @@
-[
-  {
-    "localTableName": "student",
-    "publishedTableName": "student",
-    "fields": []
-  }
-]
+{
+  "port": 12345,
+  "hostname": "localhost",
+  "url": "jdbc:postgresql://localhost:13101/postgres",
+  "catalog": "postgres",
+  "user": "postgres",
+  "passwd": "onedb",
+  "tables": [
+    {
+      "originName": "student",
+      "publishedName": "student1",
+      "publishedFields": [],
+      "originColumns": []
+    },
+    {
+      "originName": "student",
+      "publishedName": "student2",
+      "publishedFields": [
+        {
+          "name": "name",
+          "type": "STRING",
+          "level": "public"
+        },
+        {
+          "name": "score",
+          "type": "INT",
+          "level": "public"
+        },
+        {
+          "name": "age",
+          "type": "INT",
+          "level": "hidden"
+        }
+      ],
+      "originColumns": [0, 2, 1]
+    }
+  ]
+}

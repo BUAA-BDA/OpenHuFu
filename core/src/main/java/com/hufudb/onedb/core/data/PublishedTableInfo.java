@@ -64,6 +64,10 @@ public class PublishedTableInfo {
     return originTableInfo.header.getField(mappings.get(index));
   }
 
+  public List<Integer> getMappings() {
+    return ImmutableList.copyOf(mappings);
+  }
+
   @Override
   public String toString() {
       return String.format("%s -> %s", fakeTableInfo.toString(), originTableInfo.toString());
