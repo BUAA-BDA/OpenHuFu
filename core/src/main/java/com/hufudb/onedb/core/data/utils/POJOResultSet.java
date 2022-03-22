@@ -1,4 +1,4 @@
-package com.hufudb.onedb.backend.utils;
+package com.hufudb.onedb.core.data.utils;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -6,25 +6,24 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.data.TypeConverter;
 
 
-public class SimpleResultSet {
-  Header header;
+public class POJOResultSet {
+  POJOHeader header;
   List<List<String>> rows;
 
-  public SimpleResultSet() {}
+  public POJOResultSet() {}
 
-  public SimpleResultSet(Header header, List<List<String>> rows) {
+  public POJOResultSet(POJOHeader header, List<List<String>> rows) {
     this.header = header;
     this.rows = rows;
   }
 
-  public Header getHeader() {
+  public POJOHeader getHeader() {
     return header;
   }
-  public void setHeader(Header header) {
+  public void setHeader(POJOHeader header) {
     this.header = header;
   }
   public List<List<String>> getRows() {
@@ -34,10 +33,10 @@ public class SimpleResultSet {
     this.rows = rows;
   }
 
-  public static SimpleResultSet fromResultSet(ResultSet rs) {
+  public static POJOResultSet fromResultSet(ResultSet rs) {
     try {
       ResultSetMetaData meta = rs.getMetaData();
-      Header.Builder builder = Header.newBuilder();
+      POJOHeader.Builder builder = POJOHeader.newBuilder();
       List<List<String>> rows = new ArrayList<>();
       int columnCount = meta.getColumnCount();
       for (int i = 1; i <= columnCount; i++) {
@@ -50,10 +49,10 @@ public class SimpleResultSet {
         }
         rows.add(row);
       }
-      return new SimpleResultSet(builder.build(), rows);
+      return new POJOResultSet(builder.build(), rows);
     } catch (SQLException e) {
       e.printStackTrace();
-      return new SimpleResultSet();
+      return new POJOResultSet();
     }
   }
 }

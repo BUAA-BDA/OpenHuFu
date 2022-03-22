@@ -4,20 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-// import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList;
 
 import com.hufudb.onedb.rpc.OneDBCommon.HeaderProto;
 
 public class Header {
-  // public static final Header EMPTY_HEADER = new Header(ImmutableList.of());
+  public static final Header EMPTY = new Header(ImmutableList.of());
   protected List<Field> fields;
 
   protected Header() {
     this.fields = new ArrayList<>();
   }
 
-  public Header(List<Field> fields) {
-    this.fields = fields;
+  protected Header(List<Field> fields) {
+    this.fields = ImmutableList.copyOf(fields);
   }
 
   protected Header(HeaderProto proto) {
@@ -36,10 +36,6 @@ public class Header {
     return fields;
   }
 
-  public void setFields(List<Field> fields) {
-    this.fields = fields;
-  }
-
   public FieldType getType(int index) {
     return fields.get(index).type;
   }
@@ -56,12 +52,21 @@ public class Header {
     return fields.get(index).level;
   }
 
+  public Field getField(int index) {
+    Field ori = fields.get(index);
+    return new Field(ori.name, ori.type, ori.level);
+  }
+
   public static Builder newBuilder() {
     return new Builder();
   }
 
   public int size() {
     return fields.size();
+  }
+
+  public Header immutableCopy() {
+    return new Header(fields);
   }
 
   public static class Builder {

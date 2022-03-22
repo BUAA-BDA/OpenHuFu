@@ -13,6 +13,7 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.hufudb.onedb.OneDB;
 import com.hufudb.onedb.core.data.AliasTableInfo;
+import com.hufudb.onedb.core.data.PublishedTableInfo;
 import com.hufudb.onedb.core.table.TableMeta;
 import com.hufudb.onedb.server.DBServer;
 import com.hufudb.onedb.server.DBService;
@@ -55,7 +56,7 @@ public class BackendConfiguration {
 
   private List<TableMeta> tableMetas;
 
-  private List<AliasTableInfo> tableInfos;
+  private List<PublishedTableInfo> tableInfos;
 
   @Bean
   @ConditionalOnProperty(name={"owner.db.enable"}, havingValue = "true")

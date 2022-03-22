@@ -2,8 +2,11 @@ package com.hufudb.onedb.backend;
 
 import java.util.List;
 
-import com.hufudb.onedb.backend.utils.SimpleLocalTableInfo;
 import com.hufudb.onedb.core.data.AliasTableInfo;
+import com.hufudb.onedb.core.data.PublishedTableInfo;
+import com.hufudb.onedb.core.data.utils.POJOGlobalTableInfo;
+import com.hufudb.onedb.core.data.utils.POJOLocalTableInfo;
+import com.hufudb.onedb.core.data.utils.POJOPublishedTableInfo;
 import com.hufudb.onedb.server.DBService;
 
 import org.slf4j.Logger;
@@ -18,30 +21,30 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @ConditionalOnProperty(name = { "owner.db.enable" }, havingValue = "true")
-public class ServerController {
-  private static final Logger LOG = LoggerFactory.getLogger(ServerController.class);
+public class OwnerController {
+  private static final Logger LOG = LoggerFactory.getLogger(OwnerController.class);
   private final DBService service;
 
-  ServerController(DBService service) {
+  OwnerController(DBService service) {
     this.service = service;
   }
 
-  @GetMapping("/server/localtables")
-  List<SimpleLocalTableInfo> getLocalTableInfos() {
-    return SimpleLocalTableInfo.from(service.getAllLocalTable());
+  @GetMapping("/owner/localtables")
+  List<POJOLocalTableInfo> getLocalTableInfos() {
+    return POJOLocalTableInfo.from(service.getAllLocalTable());
   }
 
-  @GetMapping("/server/virtualtables")
-  List<SimpleLocalTableInfo> getVirtualTableInfos() {
-    return SimpleLocalTableInfo.from(service.getAllPublishedTable());
+  @GetMapping("/owner/publishedtables")
+  List<POJOPublishedTableInfo> getPublishedTableInfos() {
+    return POJOPublishedTableInfo.from(service.getAllPublishedTable());
   }
 
-  @PostMapping("/server/virtualtables")
-  boolean addVirtualTable(@RequestBody AliasTableInfo alias) {
+  @PostMapping("/owner/publishedtables")
+  boolean addVirtualTable(@RequestBody POJOPublishedTableInfo alias) {
     return service.addPublishedTable(alias);
   }
 
-  @DeleteMapping("/server/virtualtables/{name}")
+  @DeleteMapping("/owner/publishedtables/{name}")
   void dropVirtualTable(@PathVariable String name) {
     service.dropPublishedTable(name);
   }

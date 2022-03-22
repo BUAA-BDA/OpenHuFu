@@ -1,29 +1,28 @@
-package com.hufudb.onedb.backend.utils;
+package com.hufudb.onedb.core.data.utils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.table.OneDBTableInfo;
 import com.hufudb.onedb.core.table.TableMeta.LocalTableMeta;
 
-public class SimpleGlobalTableInfo {
+public class POJOGlobalTableInfo {
   String name;
-  Header header;
+  POJOHeader header;
   List<LocalTableMeta> mappings;
 
-  public static SimpleGlobalTableInfo from(OneDBTableInfo info) {
-    SimpleGlobalTableInfo sinfo = new SimpleGlobalTableInfo();
+  public static POJOGlobalTableInfo from(OneDBTableInfo info) {
+    POJOGlobalTableInfo sinfo = new POJOGlobalTableInfo();
     sinfo.setName(info.getName());
-    sinfo.setHeader(info.getHeader());
+    sinfo.setHeader(POJOHeader.fromHeader(info.getHeader()));
     sinfo.setMappings(info.getMappings());
     return sinfo;
   }
 
-  public static List<SimpleGlobalTableInfo> from(List<OneDBTableInfo> info) {
-    List<SimpleGlobalTableInfo> sinfo = new ArrayList<>();
+  public static List<POJOGlobalTableInfo> from(List<OneDBTableInfo> info) {
+    List<POJOGlobalTableInfo> sinfo = new ArrayList<>();
     for (OneDBTableInfo i : info) {
-      sinfo.add(SimpleGlobalTableInfo.from(i));
+      sinfo.add(POJOGlobalTableInfo.from(i));
     }
     return sinfo;
   }
@@ -34,10 +33,10 @@ public class SimpleGlobalTableInfo {
   public void setName(String name) {
     this.name = name;
   }
-  public Header getHeader() {
+  public POJOHeader getHeader() {
     return header;
   }
-  public void setHeader(Header header) {
+  public void setHeader(POJOHeader header) {
     this.header = header;
   }
 

@@ -3,10 +3,10 @@ package com.hufudb.onedb.backend;
 import java.util.List;
 import java.util.Set;
 
-import com.hufudb.onedb.backend.utils.SimpleGlobalTableInfo;
-import com.hufudb.onedb.backend.utils.SimpleLocalTableInfo;
-import com.hufudb.onedb.backend.utils.SimpleResultSet;
 import com.hufudb.onedb.core.data.TableInfo;
+import com.hufudb.onedb.core.data.utils.POJOGlobalTableInfo;
+import com.hufudb.onedb.core.data.utils.POJOLocalTableInfo;
+import com.hufudb.onedb.core.data.utils.POJOResultSet;
 import com.hufudb.onedb.core.table.OneDBTableInfo;
 import com.hufudb.onedb.core.table.TableMeta;
 
@@ -20,62 +20,62 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class ClientController {
-  private static final Logger LOG = LoggerFactory.getLogger(ClientController.class);
-  private final ClientService clientService;
+public class UserController {
+  private static final Logger LOG = LoggerFactory.getLogger(UserController.class);
+  private final UserService clientService;
 
-  ClientController(ClientService service) {
+  UserController(UserService service) {
       this.clientService = service;
   }
 
   // for endpoints
-  @GetMapping("/client/endpoints")
+  @GetMapping("/user/endpoints")
   Set<String> getEndpoints() {
     return clientService.getEndpoints();
   }
 
-  @PostMapping("/client/endpoints")
+  @PostMapping("/user/endpoints")
   boolean addEndpoint(@RequestBody String endpoint) {
     return clientService.addDB(endpoint);
   }
 
-  @DeleteMapping("/client/endpoints/{endpoint}")
+  @DeleteMapping("/user/endpoints/{endpoint}")
   void delEndpoint(@PathVariable String endpoint) {
     clientService.dropDB(endpoint);
   }
 
-  @GetMapping("/client/endpoints/{endpoint}")
-  List<SimpleLocalTableInfo> getAllLocalTabelInfo(@PathVariable String endpoint) {
+  @GetMapping("/user/endpoints/{endpoint}")
+  List<POJOLocalTableInfo> getAllLocalTabelInfo(@PathVariable String endpoint) {
     List<TableInfo> infos = clientService.getDBTableInfo(endpoint);
     LOG.info("get local table {} from endpoint {}", infos, endpoint);
-    return SimpleLocalTableInfo.from(infos);
+    return POJOLocalTableInfo.from(infos);
   }
 
   // for global tables
-  @GetMapping("/client/globaltables")
-  List<SimpleGlobalTableInfo> getAllGlobalTableInfo() {
+  @GetMapping("/user/globaltables")
+  List<POJOGlobalTableInfo> getAllGlobalTableInfo() {
     List<OneDBTableInfo> infos = clientService.getAllOneDBTableInfo();
     LOG.info("get global table {}", infos);
-    return SimpleGlobalTableInfo.from(infos);
+    return POJOGlobalTableInfo.from(infos);
   }
 
-  @GetMapping("/client/globaltables/{name}")
-  SimpleGlobalTableInfo getGlobalTableInfo(@PathVariable String name) {
-    return SimpleGlobalTableInfo.from(clientService.getOneDBTableInfo(name));
+  @GetMapping("/user/globaltables/{name}")
+  POJOGlobalTableInfo getGlobalTableInfo(@PathVariable String name) {
+    return POJOGlobalTableInfo.from(clientService.getOneDBTableInfo(name));
   }
 
-  @PostMapping("/client/globaltables")
+  @PostMapping("/user/globaltables")
   boolean addGlobalTable(@RequestBody TableMeta meta) {
     return clientService.createOneDBTable(meta);
   }
 
-  @DeleteMapping("/client/globaltables/{name}")
+  @DeleteMapping("/user/globaltables/{name}")
   void dropGlobalTable(@PathVariable String name) {
     clientService.dropOneDBTable(name);
   }
 
-  @PostMapping("/client/query")
-  SimpleResultSet query(@RequestBody String sql) {
-    return SimpleResultSet.fromResultSet(clientService.executeQuery(sql));
+  @PostMapping("/user/query")
+  POJOResultSet query(@RequestBody String sql) {
+    return POJOResultSet.fromResultSet(clientService.executeQuery(sql));
   }
 }

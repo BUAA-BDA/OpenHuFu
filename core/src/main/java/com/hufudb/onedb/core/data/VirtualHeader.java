@@ -79,7 +79,7 @@ public class VirtualHeader extends Header {
     Set<String> nameSet = new HashSet<>();
     for (int i = 0; i < aliasFields.size(); ++i) {
       Field af = aliasFields.get(i);
-      if (af.getLevel() != Level.HIDE) {
+      if (af.getLevel() != Level.HIDDEN) {
         if (checkTypeConvert(af.getType(), this.fields.get(i).getType()) 
             && !nameSet.contains(af.getName())) {
           this.aliasFields.add(aliasFields.get(i));

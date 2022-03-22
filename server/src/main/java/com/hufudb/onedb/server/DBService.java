@@ -18,12 +18,13 @@ import com.hufudb.onedb.rpc.OneDBService.GeneralRequest;
 import com.hufudb.onedb.rpc.OneDBService.GeneralResponse;
 import com.hufudb.onedb.rpc.ServiceGrpc;
 import com.hufudb.onedb.core.client.DBClient;
-import com.hufudb.onedb.core.data.AliasTableInfo;
 import com.hufudb.onedb.core.data.DataSet;
 import com.hufudb.onedb.core.data.Field;
 import com.hufudb.onedb.core.data.Header;
+import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.data.StreamObserverDataSet;
 import com.hufudb.onedb.core.data.TableInfo;
+import com.hufudb.onedb.core.data.utils.POJOPublishedTableInfo;
 import com.hufudb.onedb.core.data.PublishedTableInfo;
 import com.hufudb.onedb.core.sql.expression.OneDBQuery;
 import com.hufudb.onedb.core.zk.DBZkClient;
@@ -48,7 +49,8 @@ public abstract class DBService extends ServiceGrpc.ServiceImplBase {
     this.dbClientMap = new HashMap<>();
     this.localTableInfoMap = new HashMap<>();
     this.publishedTableInfoMap = new HashMap<>();
-    // this.executorService = Executors.newFixedThreadPool(OneDBConfig.SERVER_THREAD_NUM);
+    // this.executorService =
+    // Executors.newFixedThreadPool(OneDBConfig.SERVER_THREAD_NUM);
     this.localLock = new ReentrantReadWriteLock();
     this.publishedLock = new ReentrantReadWriteLock();
     this.endpoint = endpoint;
@@ -57,7 +59,7 @@ public abstract class DBService extends ServiceGrpc.ServiceImplBase {
     } else {
       DBZkClient client;
       try {
-         client = new DBZkClient(zkServers, zkRootPath, endpoint, digest.getBytes());
+        client = new DBZkClient(zkServers, zkRootPath, endpoint, digest.getBytes());
       } catch (Exception e) {
         LOG.error("Error when init DBZkClient: {}", e.getMessage());
         client = null;
@@ -93,19 +95,19 @@ public abstract class DBService extends ServiceGrpc.ServiceImplBase {
     responseObserver.onCompleted();
   }
 
-  public List<TableInfo> getAllPublishedTable() {
+  public List<PublishedTableInfo> getAllPublishedTable() {
     publishedLock.readLock().lock();
-    List<TableInfo> infos = publishedTableInfoMap.values().stream().map(
-      vinfo -> vinfo.getFakeTableInfo()
-    ).collect(Collectors.toList());
+    List<PublishedTableInfo> infos = publishedTableInfoMap.values().stream().map(
+        vinfo -> vinfo).collect(Collectors.toList());
     publishedLock.readLock().unlock();
     return infos;
   }
 
+  // todo: rename the funciton and rpc
   @Override
   public void getAllLocalTable(GeneralRequest request, StreamObserver<LocalTableListProto> responseObserver) {
     LocalTableListProto.Builder builder = LocalTableListProto.newBuilder();
-    getAllPublishedTable().forEach(info -> builder.addTable(info.toProto()));
+    getAllPublishedTable().forEach(info -> builder.addTable(info.getFakeTableInfo().toProto()));
     responseObserver.onNext(builder.build());
     LOG.info("Get {} local table infos", builder.getTableCount());
     responseObserver.onCompleted();
@@ -164,20 +166,29 @@ public abstract class DBService extends ServiceGrpc.ServiceImplBase {
     publishedLock.writeLock().unlock();
   }
 
-  public void initPublishedTable(List<AliasTableInfo> infos) {
-    for (AliasTableInfo info : infos) {
+  public void initPublishedTable(List<PublishedTableInfo> infos) {
+    for (PublishedTableInfo info : infos) {
       addPublishedTable(info);
     }
   }
 
-  public PublishedTableInfo setPublishedTableInfo(String localTableName, String publishedTableName, List<Field> fields) {
-    TableInfo info = getLocalTableInfo(localTableName);
-    return new PublishedTableInfo(info, publishedTableName, fields);
+  public PublishedTableInfo generatePublishedTableInfo(POJOPublishedTableInfo publishedTableInfo) {
+    List<Field> pFields = new ArrayList<>();
+    List<Integer> mappings = new ArrayList<>();
+    TableInfo originInfo = localTableInfoMap.get(publishedTableInfo.getOriginTableName());
+    List<Field> publishedFields = publishedTableInfo.getPublishedFields();
+    List<String> originNames = publishedTableInfo.getOriginNames();
+    for (int i = 0; i < publishedFields.size(); ++i) {
+      if (!publishedFields.get(i).getLevel().equals(Level.HIDDEN)) {
+        pFields.add(publishedFields.get(i));
+        mappings.add(originInfo.getColumnIndex(originNames.get(i)));
+      }
+    }
+    return new PublishedTableInfo(originInfo, publishedTableInfo.getPublishedTableName(), pFields, mappings);
   }
 
-  public boolean addPublishedTable(AliasTableInfo info) {
-    PublishedTableInfo v = setPublishedTableInfo(info.getLocalTableName(), info.getPublishedTableName(), info.getFields());
-    return addPublishedTable(v);
+  public boolean addPublishedTable(POJOPublishedTableInfo publishedTableInfo) {
+    return addPublishedTable(generatePublishedTableInfo(publishedTableInfo));
   }
 
   public boolean addPublishedTable(PublishedTableInfo publishedTable) {

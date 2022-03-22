@@ -23,7 +23,7 @@ public class TableInfo {
 
   TableInfo(String name, Header header) {
     this.name = name;
-    this.header = header;
+    this.header = header.immutableCopy();
     this.columnIndex = new HashMap<>();
     for (int i = 0; i < header.size(); ++i) {
       if (columnIndex.containsKey(name)) {
@@ -48,6 +48,10 @@ public class TableInfo {
 
   public static TableInfo of(String name, Header header) {
     return new TableInfo(name, header);
+  }
+
+  public static TableInfo of(String name, List<Field> fields) {
+    return new TableInfo(name, new Header(fields));
   }
 
   public static class Builder {

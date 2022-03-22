@@ -13,10 +13,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.ImmutableList;
-import com.hufudb.onedb.core.data.AliasTableInfo;
 import com.hufudb.onedb.core.data.DataSet;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.data.Level;
+import com.hufudb.onedb.core.data.PublishedTableInfo;
 import com.hufudb.onedb.core.data.Row;
 import com.hufudb.onedb.core.data.TableInfo;
 import com.hufudb.onedb.core.sql.expression.OneDBQuery;
@@ -30,7 +30,7 @@ public class PostgresqlService extends DBService {
   private Connection connection;
   private final String catalog;
 
-  public PostgresqlService(String hostname, int port, String catalog, String url, String user, String passwd, List<AliasTableInfo> infos) {
+  public PostgresqlService(String hostname, int port, String catalog, String url, String user, String passwd, List<PublishedTableInfo> infos) {
     super(null, null, String.format("%s:%d", hostname, port), null);
     this.catalog = catalog;
     try {
@@ -98,7 +98,7 @@ public class PostgresqlService extends DBService {
     while (rs.next()) {
       Row.RowBuilder builder = Row.newBuilder(columnSize);
       for (int i = 0; i < columnSize; ++i) {
-        if (header.getLevel(i).equals(Level.HIDE)) {
+        if (header.getLevel(i).equals(Level.HIDDEN)) {
           continue;
         }
         switch (header.getType(i)) {
