@@ -148,8 +148,8 @@ public class PostgresqlService extends DBService {
   }
 
   String generateSQL(OneDBQuery query) {
-    String tableName = query.tableName;
-    Header tableHeader = getPublishedTableHeader(tableName);
+    String tableName = getOriginTableName(query.tableName);
+    Header tableHeader = getPublishedTableHeader(query.tableName);
     List<String> filters = OneDBTranslator.tranlateExps(tableHeader, query.filterExps);
     List<String> selects = OneDBTranslator.tranlateExps(tableHeader, query.selectExps);
     if (!query.aggExps.isEmpty()) {

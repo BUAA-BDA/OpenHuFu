@@ -51,6 +51,14 @@ public class PublishedTableInfo {
     return fakeTableInfo;
   }
 
+  public VirtualHeader getVirtualHeader() {
+    return VirtualHeader.of(this);
+  }
+
+  public Header getFakeHeader() {
+    return fakeTableInfo.getHeader();
+  }
+
   public List<String> getOriginNames() {
     ImmutableList.Builder<String> builder = ImmutableList.builder();
     for (int i = 0; i < originTableInfo.header.size(); ++i) {
@@ -62,6 +70,10 @@ public class PublishedTableInfo {
   public Field getOriginField(int index) {
     // todo: check index out of range
     return originTableInfo.header.getField(mappings.get(index));
+  }
+
+  public List<Field> getOriginFields() {
+    return originTableInfo.getHeader().getFields();
   }
 
   public List<Integer> getMappings() {

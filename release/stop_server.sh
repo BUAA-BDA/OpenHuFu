@@ -7,14 +7,14 @@ stop() {
 
 if [ $# -eq 0 ]
 then
-  stop "a"
-  stop "b"
-  stop "c"
+  stop "1"
+  stop "2"
+  stop "3"
 elif [ "$1" == "all" ]
 then
-  stop "a"
-  stop "b"
-  stop "c"
+  stop "1"
+  stop "2"
+  stop "3"
 else
   stop $1
 fi

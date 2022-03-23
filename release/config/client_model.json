@@ -7,13 +7,33 @@
       "type": "custom",
       "factory": "com.hufudb.onedb.core.sql.schema.OneDBSchemaFactory",
       "operand": {
-        "zookeeper": "localhost:12349",
-        "zkroot": "/onedb",
-        "schema": "default",
-        "user": "user1",
-        "passwd": "user1"
+        "endpoints": ["localhost:12345"]
       },
       "tables": [
+        {
+          "name": "student1",
+          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
+          "operand": {
+            "feds": [
+              {
+                "endpoint": "localhost:12345",
+                "name": "student1"
+              }
+            ]
+          }
+        },
+        {
+          "name": "student2",
+          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
+          "operand": {
+            "feds": [
+              {
+                "endpoint": "localhost:12345",
+                "name": "student2"
+              }
+            ]
+          }
+        }
       ]
     }
   ]

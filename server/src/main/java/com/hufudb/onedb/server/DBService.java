@@ -89,8 +89,9 @@ public abstract class DBService extends ServiceGrpc.ServiceImplBase {
 
   @Override
   public void getTableHeader(GeneralRequest request, StreamObserver<HeaderProto> responseObserver) {
-    HeaderProto headerProto = getPublishedTableHeader(request.getValue()).toProto();
-    LOG.info("Get header of table {}", request.getValue());
+    Header fakeHeader = getPublishedTableHeader(request.getValue());
+    HeaderProto headerProto = fakeHeader.toProto();
+    LOG.info("Get header of table {} {}", request.getValue(), fakeHeader.toString());
     responseObserver.onNext(headerProto);
     responseObserver.onCompleted();
   }
@@ -121,12 +122,25 @@ public abstract class DBService extends ServiceGrpc.ServiceImplBase {
     return zkClient.registerTable(schema, globalName, endpoint, localName);
   }
 
+  protected String getOriginTableName(String publishedTableName) {
+    return publishedTableInfoMap.get(publishedTableName).getOriginTableName();
+  }
+
   protected Header getPublishedTableHeader(String publishedTableName) {
     PublishedTableInfo info = publishedTableInfoMap.get(publishedTableName);
     if (info == null) {
-      return Header.newBuilder().build();
+      return Header.EMPTY;
     } else {
-      return info.getFakeTableInfo().getHeader();
+      return info.getFakeHeader();
+    }
+  }
+
+  protected Header getVirtualHeader(String publishedTableName) {
+    PublishedTableInfo info = publishedTableInfoMap.get(publishedTableName);
+    if (info == null) {
+      return Header.EMPTY;
+    } else {
+      return info.getVirtualHeader();
     }
   }
 
@@ -142,6 +156,13 @@ public abstract class DBService extends ServiceGrpc.ServiceImplBase {
     TableInfo info = localTableInfoMap.get(tableName);
     localLock.readLock().unlock();
     return info;
+  }
+
+  final public List<TableInfo> getAllFakeTable() {
+    localLock.readLock().lock();
+    List<TableInfo> results = publishedTableInfoMap.values().stream().map(info -> info.getFakeTableInfo()).collect(Collectors.toList());
+    localLock.readLock().unlock();
+    return results;
   }
 
   final public List<TableInfo> getAllLocalTable() {
