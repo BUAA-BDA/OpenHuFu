@@ -15,9 +15,9 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import io.grpc.ServerBuilder;
-import com.hufudb.onedb.server.DBServer;
+import com.hufudb.onedb.server.OwnerServer;
 
-public class PostgresqlServer extends DBServer {
+public class PostgresqlServer extends OwnerServer {
 
   public PostgresqlServer(PostgresqlConfig config) throws IOException {
     super(ServerBuilder.forPort(config.port), config.port, new PostgresqlService(config));

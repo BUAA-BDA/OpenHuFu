@@ -72,12 +72,12 @@ public class OneDB {
     return schema.getEndpoints();
   }
 
-  public boolean addDB(String endpoint) {
-    return schema.addDB(endpoint) != null;
+  public boolean addOwner(String endpoint) {
+    return schema.addOwner(endpoint) != null;
   }
 
-  public void dropDB(String endpoint) {
-    schema.dropDB(endpoint);
+  public void removeOwner(String endpoint) {
+    schema.removeOnwer(endpoint);
   }
 
   public List<TableInfo> getDBTableInfo(String endpoint) {

@@ -9,13 +9,13 @@ import org.slf4j.LoggerFactory;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 
-public abstract class DBServer {
-  private static final Logger LOG = LoggerFactory.getLogger(DBServer.class);
+public abstract class OwnerServer {
+  private static final Logger LOG = LoggerFactory.getLogger(OwnerServer.class);
   protected final int port;
   protected final Server server;
-  protected final DBService service;
+  protected final OwnerService service;
 
-  public DBServer(ServerBuilder<?> serverBuilder, int port, DBService service) throws IOException {
+  public OwnerServer(ServerBuilder<?> serverBuilder, int port, OwnerService service) throws IOException {
     this.port = port;
     this.service = service;
     this.server = serverBuilder.addService(service).build();
@@ -31,7 +31,7 @@ public abstract class DBServer {
         // hook.
         LOG.info("*** shutting down gRPC server since JVM is shutting down");
         try {
-          DBServer.this.stop();
+          OwnerServer.this.stop();
         } catch (InterruptedException e) {
           e.printStackTrace(System.err);
         }

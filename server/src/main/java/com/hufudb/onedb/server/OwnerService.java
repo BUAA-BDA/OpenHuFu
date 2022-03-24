@@ -17,7 +17,7 @@ import io.grpc.stub.StreamObserver;
 import com.hufudb.onedb.rpc.OneDBService.GeneralRequest;
 import com.hufudb.onedb.rpc.OneDBService.GeneralResponse;
 import com.hufudb.onedb.rpc.ServiceGrpc;
-import com.hufudb.onedb.core.client.DBClient;
+import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.data.DataSet;
 import com.hufudb.onedb.core.data.Field;
 import com.hufudb.onedb.core.data.Header;
@@ -34,9 +34,9 @@ import com.hufudb.onedb.rpc.OneDBCommon.LocalTableListProto;
 import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
 
 @Service
-public abstract class DBService extends ServiceGrpc.ServiceImplBase {
-  private static final Logger LOG = LoggerFactory.getLogger(DBService.class);
-  protected final Map<String, DBClient> dbClientMap; // endpoint -> rpc_client
+public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
+  private static final Logger LOG = LoggerFactory.getLogger(OwnerService.class);
+  protected final Map<String, OwnerClient> dbClientMap; // endpoint -> rpc_client
   private final Map<String, TableInfo> localTableInfoMap; // localName -> localTableInfo
   private final ReadWriteLock localLock;
   private final Map<String, PublishedTableInfo> publishedTableInfoMap; // publishedTableName -> publishedTableInfo
@@ -45,7 +45,7 @@ public abstract class DBService extends ServiceGrpc.ServiceImplBase {
   private final DBZkClient zkClient;
   protected final String endpoint;
 
-  public DBService(String zkServers, String zkRootPath, String endpoint, String digest) {
+  public OwnerService(String zkServers, String zkRootPath, String endpoint, String digest) {
     this.dbClientMap = new HashMap<>();
     this.localTableInfoMap = new HashMap<>();
     this.publishedTableInfoMap = new HashMap<>();

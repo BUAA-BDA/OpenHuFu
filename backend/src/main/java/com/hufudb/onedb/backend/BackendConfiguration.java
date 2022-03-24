@@ -14,8 +14,8 @@ import com.google.gson.reflect.TypeToken;
 import com.hufudb.onedb.OneDB;
 import com.hufudb.onedb.core.data.utils.POJOPublishedTableInfo;
 import com.hufudb.onedb.core.table.TableMeta;
-import com.hufudb.onedb.server.DBServer;
-import com.hufudb.onedb.server.DBService;
+import com.hufudb.onedb.server.OwnerServer;
+import com.hufudb.onedb.server.OwnerService;
 import com.hufudb.onedb.server.postgresql.PostgresqlServer;
 import com.hufudb.onedb.server.postgresql.PostgresqlService;
 
@@ -59,7 +59,7 @@ public class BackendConfiguration {
 
   @Bean
   @ConditionalOnProperty(name={"owner.db.enable"}, havingValue = "true")
-  public DBService initService() {
+  public OwnerService initService() {
     try (Reader reader = Files.newBufferedReader(Paths.get(ownerConfigPath))) {
       tableInfos = new Gson().fromJson(reader, new TypeToken<ArrayList<POJOPublishedTableInfo>>() {}.getType());
     } catch (IOException|JsonSyntaxException e) {
@@ -78,7 +78,7 @@ public class BackendConfiguration {
   private void initClient(OneDB client) {
     for (String endpoint : endpoints) {
       LOG.info("add Owner {}", endpoint);
-      client.addDB(endpoint);
+      client.addOwner(endpoint);
     }
     try (Reader reader = Files.newBufferedReader(Paths.get(userConfigPath))) {
       tableMetas = new Gson().fromJson(reader, new TypeToken<ArrayList<TableMeta>>() {}.getType());
@@ -92,10 +92,10 @@ public class BackendConfiguration {
 
   @Bean
   @ConditionalOnProperty(name={"owner.db.enable"}, havingValue = "true")
-  public CommandLineRunner Server(OneDB client, DBService service) {
+  public CommandLineRunner Server(OneDB client, OwnerService service) {
     LOG.info("init Server");
     return args -> {
-      DBServer server = null;
+      OwnerServer server = null;
       switch (type) {
         case "postgresql":
           server = new PostgresqlServer(port, (PostgresqlService)service);

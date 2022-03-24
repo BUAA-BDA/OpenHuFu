@@ -9,7 +9,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
-import com.hufudb.onedb.core.client.DBClient;
+import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
 import com.hufudb.onedb.core.table.TableMeta.LocalTableMeta;
@@ -25,7 +25,7 @@ public class OneDBTableInfo {
   private String name;
   private Header header;
   private Map<String, Integer> columnMap;
-  private List<Pair<DBClient, String>> tableList;
+  private List<Pair<OwnerClient, String>> tableList;
   private final ReadWriteLock lock;
 
   public OneDBTableInfo(String name, Header header) {
@@ -39,12 +39,12 @@ public class OneDBTableInfo {
     }
   }
 
-  public OneDBTableInfo(String globalName, Header header, DBClient client, String localName) {
+  public OneDBTableInfo(String globalName, Header header, OwnerClient client, String localName) {
     this(globalName, header);
     this.tableList.add(Pair.of(client, localName));
   }
 
-  public void addLocalTable(DBClient client, String localName) {
+  public void addLocalTable(OwnerClient client, String localName) {
     Header header = client.getTableHeader(localName);
     if (header.equals(this.header)) {
       lock.writeLock().lock();
@@ -55,12 +55,12 @@ public class OneDBTableInfo {
     }
   }
 
-  public void changeLocalTable(DBClient client, String localName) {
+  public void changeLocalTable(OwnerClient client, String localName) {
     Header header = client.getTableHeader(localName);
     if (header.equals(this.header)) {
       lock.writeLock().lock();
       for (int i = 0; i < tableList.size(); ++i) {
-        Pair<DBClient, String> pair = tableList.get(i);
+        Pair<OwnerClient, String> pair = tableList.get(i);
         if (pair.left.equals(client)) {
           tableList.remove(i);
           break;
@@ -81,7 +81,7 @@ public class OneDBTableInfo {
     return name;
   }
 
-  public List<Pair<DBClient, String>> getTableList() {
+  public List<Pair<OwnerClient, String>> getTableList() {
     try {
       lock.readLock().lock();
       return ImmutableList.copyOf(tableList);
@@ -90,10 +90,10 @@ public class OneDBTableInfo {
     }
   }
 
-  public void dropDB(DBClient client) {
-    List<Pair<DBClient, String>> newList = new ArrayList<>();
+  public void removeOwner(OwnerClient client) {
+    List<Pair<OwnerClient, String>> newList = new ArrayList<>();
     lock.readLock().lock();
-    for (Pair<DBClient, String> pair : tableList) {
+    for (Pair<OwnerClient, String> pair : tableList) {
       if (!pair.left.equals(client)) {
         newList.add(pair);
       }
@@ -104,10 +104,10 @@ public class OneDBTableInfo {
     lock.writeLock().unlock();
   }
 
-  public void dropLocalTable(DBClient client, String localName) {
+  public void dropLocalTable(OwnerClient client, String localName) {
     lock.writeLock().lock();
     for (int i = 0; i < tableList.size(); ++i) {
-      Pair<DBClient, String> pair = tableList.get(i);
+      Pair<OwnerClient, String> pair = tableList.get(i);
       if (pair.left.equals(client) && pair.right.equals(localName)) {
         tableList.remove(i);
         break;
@@ -116,10 +116,10 @@ public class OneDBTableInfo {
     lock.writeLock().unlock();
   }
 
-  public void dropLocalTable(DBClient client) {
+  public void dropLocalTable(OwnerClient client) {
     lock.writeLock().lock();
     for (int i = 0; i < tableList.size(); ++i) {
-      Pair<DBClient, String> pair = tableList.get(i);
+      Pair<OwnerClient, String> pair = tableList.get(i);
       if (pair.left.equals(client)) {
         tableList.remove(i);
         break;

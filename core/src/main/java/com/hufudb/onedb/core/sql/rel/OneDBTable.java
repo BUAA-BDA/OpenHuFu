@@ -7,7 +7,7 @@ import java.util.Map;
 
 import com.google.protobuf.TextFormat;
 import com.google.protobuf.TextFormat.ParseException;
-import com.hufudb.onedb.core.client.DBClient;
+import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.data.TableInfo;
 import com.hufudb.onedb.core.data.TypeConverter;
@@ -69,11 +69,11 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
   public static Table create(OneDBSchema schema, TableMeta tableMeta) {
     final String tableName = tableMeta.tableName;
     OneDBTable table = null;
-    List<Pair<DBClient, TableInfo>> localInfos = new ArrayList<>();
+    List<Pair<OwnerClient, TableInfo>> localInfos = new ArrayList<>();
     for (TableMeta.LocalTableMeta fedMeta : tableMeta.localTables) {
-      DBClient client = schema.getDBClient(fedMeta.endpoint);
+      OwnerClient client = schema.getDBClient(fedMeta.endpoint);
       if (client == null) {
-        client = schema.addDB(fedMeta.endpoint);
+        client = schema.addOwner(fedMeta.endpoint);
       }
       Header header = client.getTableHeader(fedMeta.localName);
       LOG.info("Table {} header {} from {}", fedMeta.localName, header.toString(), fedMeta.endpoint);
@@ -81,7 +81,7 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
     }
     if (localInfos.size() > 0) {
       TableInfo standard = localInfos.get(0).getValue();
-      for (Pair<DBClient, TableInfo> pair : localInfos) {
+      for (Pair<OwnerClient, TableInfo> pair : localInfos) {
         if (!standard.getHeader().equals(pair.getValue().getHeader())) {
           LOG.warn("Header of {} {} {} mismatch with {} {} {}", localInfos.get(0).getKey(), localInfos.get(0).getValue().getName(), standard.toString(), pair.getKey(), standard.getName(), standard.getHeader());
           return null;
@@ -89,8 +89,8 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
       }
       RelProtoDataType dataType = getRelDataType(standard.getHeader());
       table = new OneDBTable(tableName, schema, standard.getHeader(), dataType);
-      for (Pair<DBClient, TableInfo> pair : localInfos) {
-        table.addDB(pair.getKey(), pair.getValue().getName());
+      for (Pair<OwnerClient, TableInfo> pair : localInfos) {
+        table.addOwner(pair.getKey(), pair.getValue().getName());
       }
       schema.addTable(tableMeta.tableName, table);
     }
@@ -108,7 +108,7 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
     for (LinkedHashMap<String, Object> fed : feds) {
       String endpoint = fed.get("endpoint").toString();
       String localName = fed.get("name").toString();
-      DBClient client = schema.getDBClient(endpoint);
+      OwnerClient client = schema.getDBClient(endpoint);
       if (client == null) {
         LOG.warn("endpont {} not exist", endpoint);
         throw new RuntimeException("endpoint not exist");
@@ -116,13 +116,13 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
       Header header = client.getTableHeader(localName);
       LOG.info("{}: header {} from [{} : {}]", tableName, header.toString(), endpoint, localName);
       if (table == null) {
-        RelProtoDataType dataType = getRelDataType(client, localName);
+        RelProtoDataType dataType = getRelDataType(header);
         table = new OneDBTable(tableName, schema, header, dataType);
-        table.addDB(client, localName);
+        table.addOwner(client, localName);
         schema.addTable(tableName, table);
       } else {
         if (table.getHeader().equals(header)) {
-          table.addDB(client, localName);
+          table.addOwner(client, localName);
         } else {
           LOG.warn("header in {} mismatch", endpoint);
         }
@@ -134,7 +134,7 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
     return table;
   }
 
-  public static RelProtoDataType getRelDataType(DBClient client, String localName) {
+  public static RelProtoDataType getRelDataType(OwnerClient client, String localName) {
     Header header = client.getTableHeader(localName);
     return getRelDataType(header);
   }
@@ -149,7 +149,7 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
     return RelDataTypeImpl.proto(fieldInfo.build());
   }
 
-  public void addDB(DBClient client, String localName) {
+  public void addOwner(OwnerClient client, String localName) {
     tableInfo.addLocalTable(client, localName);
   }
 

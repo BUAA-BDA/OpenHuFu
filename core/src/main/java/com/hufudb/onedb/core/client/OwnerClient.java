@@ -24,28 +24,28 @@ import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
 /*
 * client for a single DB
 */
-public class DBClient {
-  private static final Logger LOG = LoggerFactory.getLogger(DBClient.class);
+public class OwnerClient {
+  private static final Logger LOG = LoggerFactory.getLogger(OwnerClient.class);
 
   private final ServiceGrpc.ServiceBlockingStub blockingStub;
 
   private String endpoint;
 
-  public DBClient(String host, int port) {
+  public OwnerClient(String host, int port) {
     this(ManagedChannelBuilder.forAddress(host, port).usePlaintext().maxInboundMessageSize(1024 * 1024 * 80));
     this.endpoint = String.format("%s:%d", host, port);
   }
 
-  public DBClient(String endpoint) {
+  public OwnerClient(String endpoint) {
     this(ManagedChannelBuilder.forTarget(endpoint).usePlaintext().maxInboundMessageSize(1024 * 1024 * 80));
     this.endpoint = endpoint;
   }
 
-  public DBClient(ManagedChannelBuilder<?> channelBuilder) {
+  public OwnerClient(ManagedChannelBuilder<?> channelBuilder) {
     this(channelBuilder.build());
   }
 
-  public DBClient(Channel channel) {
+  public OwnerClient(Channel channel) {
     blockingStub = ServiceGrpc.newBlockingStub(channel);
   }
 
@@ -81,15 +81,15 @@ public class DBClient {
 
   @Override
   public String toString() {
-    return String.format("DBClient[%s]", endpoint);
+    return String.format("OwnerClient[%s]", endpoint);
   }
 
   @Override
   public boolean equals(Object obj) {
-    if (!(obj instanceof DBClient)) {
+    if (!(obj instanceof OwnerClient)) {
       return false;
     }
-    return endpoint.equals(((DBClient) obj).endpoint);
+    return endpoint.equals(((OwnerClient) obj).endpoint);
   }
 
   public Header getTableHeader(String tableName) {

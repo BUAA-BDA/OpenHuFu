@@ -21,10 +21,10 @@ import com.hufudb.onedb.core.data.TableInfo;
 import com.hufudb.onedb.core.data.utils.POJOPublishedTableInfo;
 import com.hufudb.onedb.core.sql.expression.OneDBQuery;
 import com.hufudb.onedb.core.sql.translator.OneDBTranslator;
-import com.hufudb.onedb.server.DBService;
+import com.hufudb.onedb.server.OwnerService;
 
 @Service
-public class PostgresqlService extends DBService {
+public class PostgresqlService extends OwnerService {
   private static final Logger LOG = LoggerFactory.getLogger(PostgresqlService.class);
   private DatabaseMetaData metaData;
   private Connection connection;

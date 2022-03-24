@@ -36,12 +36,12 @@ public class UserController {
 
   @PostMapping("/user/endpoints")
   boolean addEndpoint(@RequestBody String endpoint) {
-    return clientService.addDB(endpoint);
+    return clientService.addOwner(endpoint);
   }
 
   @DeleteMapping("/user/endpoints/{endpoint}")
   void delEndpoint(@PathVariable String endpoint) {
-    clientService.dropDB(endpoint);
+    clientService.removeOwner(endpoint);
   }
 
   @GetMapping("/user/endpoints/{endpoint}")

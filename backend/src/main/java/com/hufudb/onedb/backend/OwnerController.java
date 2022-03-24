@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.hufudb.onedb.core.data.utils.POJOLocalTableInfo;
 import com.hufudb.onedb.core.data.utils.POJOPublishedTableInfo;
-import com.hufudb.onedb.server.DBService;
+import com.hufudb.onedb.server.OwnerService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 @ConditionalOnProperty(name = { "owner.db.enable" }, havingValue = "true")
 public class OwnerController {
   private static final Logger LOG = LoggerFactory.getLogger(OwnerController.class);
-  private final DBService service;
+  private final OwnerService service;
 
-  OwnerController(DBService service) {
+  OwnerController(OwnerService service) {
     this.service = service;
   }
 

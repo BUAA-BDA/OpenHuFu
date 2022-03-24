@@ -38,14 +38,14 @@ public class OneDBClient {
   private static final Logger LOG = LoggerFactory.getLogger(OneDBClient.class);
 
   private final OneDBSchema schema;
-  private final Map<String, DBClient> dbClientMap;
+  private final Map<String, OwnerClient> ownerMap;
   private final Map<String, OneDBTableInfo> tableMap;
   private final ExecutorService executorService;
 
 
   public OneDBClient(OneDBSchema schema) {
     this.schema = schema;
-    dbClientMap = new ConcurrentHashMap<>();
+    ownerMap = new ConcurrentHashMap<>();
     tableMap = new ConcurrentHashMap<>();
     this.executorService = Executors.newFixedThreadPool(OneDBConfig.CLIENT_THREAD_NUM);
   }
@@ -59,29 +59,29 @@ public class OneDBClient {
     return executorService;
   }
 
-  public DBClient addDB(String endpoint) {
-    if (hasDB(endpoint)) {
+  public OwnerClient addOwner(String endpoint) {
+    if (hasOwner(endpoint)) {
       LOG.info("DB at {} already exists", endpoint);
-      return getDBClient(endpoint);
+      return getOwnerClient(endpoint);
     }
-    DBClient client = new DBClient(endpoint);
+    OwnerClient client = new OwnerClient(endpoint);
     if (client != null) {
-      dbClientMap.put(endpoint, client);
+      ownerMap.put(endpoint, client);
     }
     LOG.info("add DB {}", endpoint);
     return client;
   }
 
-  public boolean hasDB(String endpoint) {
-    return dbClientMap.containsKey(endpoint);
+  public boolean hasOwner(String endpoint) {
+    return ownerMap.containsKey(endpoint);
   }
 
-  public DBClient getDBClient(String endpoint) {
-    return dbClientMap.get(endpoint);
+  public OwnerClient getOwnerClient(String endpoint) {
+    return ownerMap.get(endpoint);
   }
 
   public Set<String> getEndpoints() {
-    return dbClientMap.keySet();
+    return ownerMap.keySet();
   }
 
   // add global table through zk
@@ -114,7 +114,7 @@ public class OneDBClient {
       LOG.error("Gloabl table {} not exists", globalTableName);
       return;
     }
-    DBClient client = getDBClient(endpoint);
+    OwnerClient client = getOwnerClient(endpoint);
     if (client == null) {
       LOG.error("Endpoint {} not exists", endpoint);
     }
@@ -123,14 +123,14 @@ public class OneDBClient {
 
   public void removeLocalTable(String endpoint, String tableName) {
     for (OneDBTableInfo info : tableMap.values()) {
-      info.dropLocalTable(dbClientMap.get(endpoint), tableName);
+      info.dropLocalTable(ownerMap.get(endpoint), tableName);
     }
   }
 
-  public void dropDB(String endpoint) {
-    DBClient client = dbClientMap.remove(endpoint);
+  public void removeOwner(String endpoint) {
+    OwnerClient client = ownerMap.remove(endpoint);
     for (OneDBTableInfo info : tableMap.values()) {
-      info.dropDB(client);
+      info.removeOwner(client);
     }
   }
 
@@ -139,7 +139,7 @@ public class OneDBClient {
     return table != null ? table.getHeader() : null;
   }
 
-  public List<Pair<DBClient, String>> getTableClients(String tableName) {
+  public List<Pair<OwnerClient, String>> getTableClients(String tableName) {
     OneDBTableInfo table = getTable(tableName);
     return table != null ? table.getTableList() : null;
   }
@@ -148,7 +148,7 @@ public class OneDBClient {
   * onedb query
   */
   public Enumerator<Row> oneDBQuery(String tableName, OneDBQueryProto query) {
-    List<Pair<DBClient, String>> tableClients = getTableClients(tableName);
+    List<Pair<OwnerClient, String>> tableClients = getTableClients(tableName);
     StreamBuffer<DataSetProto> streamProto = oneDBQuery(query, tableClients);
     Header header = OneDBQuery.generateHeader(query);
     if (query.getAggExpCount() > 0) {
@@ -162,10 +162,10 @@ public class OneDBClient {
     }
   }
 
-  private StreamBuffer<DataSetProto> oneDBQuery(OneDBQueryProto query, List<Pair<DBClient, String>> tableClients) {
+  private StreamBuffer<DataSetProto> oneDBQuery(OneDBQueryProto query, List<Pair<OwnerClient, String>> tableClients) {
     StreamBuffer<DataSetProto> iterator = new StreamBuffer<>(tableClients.size());
     List<Callable<Boolean>> tasks = new ArrayList<Callable<Boolean>>();
-    for (Pair<DBClient, String> entry : tableClients) {
+    for (Pair<OwnerClient, String> entry : tableClients) {
       tasks.add(() -> {
         try {
           OneDBQueryProto localQuery = query.toBuilder().setTableName(entry.getValue()).build();

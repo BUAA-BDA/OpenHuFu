@@ -7,19 +7,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
-import com.hufudb.onedb.core.client.DBClient;
+import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.client.OneDBClient;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.sql.rel.OneDBTable;
 import com.hufudb.onedb.core.table.OneDBTableInfo;
-import com.hufudb.onedb.core.table.TableMeta;
 import com.hufudb.onedb.core.zk.OneDBZkClient;
 import com.hufudb.onedb.core.zk.ZkConfig;
 
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.schema.Table;
 import org.apache.calcite.schema.impl.AbstractSchema;
-import org.apache.calcite.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +42,7 @@ public class OneDBSchema extends AbstractSchema {
     this.client = new OneDBClient(this);
     this.zkClient = null;
     for (String endpoint : endpoints) {
-      addDB(endpoint);
+      addOwner(endpoint);
     }
   }
 
@@ -68,16 +66,16 @@ public class OneDBSchema extends AbstractSchema {
     return infos;
   }
 
-  public DBClient addDB(String endpoint) {
-    return client.addDB(endpoint);
+  public OwnerClient addOwner(String endpoint) {
+    return client.addOwner(endpoint);
   }
 
-  public boolean hasDB(String endpoint) {
-    return client.hasDB(endpoint);
+  public boolean hasOwner(String endpoint) {
+    return client.hasOwner(endpoint);
   }
 
-  public void dropDB(String endpoint) {
-    client.dropDB(endpoint);
+  public void removeOnwer(String endpoint) {
+    client.removeOwner(endpoint);
   }
 
   public void addTable(String tableName, Table table) {
@@ -93,7 +91,7 @@ public class OneDBSchema extends AbstractSchema {
 
   public void addLocalTable(String tableName, String endpoint, String localTableName) {
     OneDBTableInfo table = getOneDBTableInfo(tableName);
-    DBClient client = getDBClient(endpoint);
+    OwnerClient client = getDBClient(endpoint);
     if (table != null && client != null) {
       table.addLocalTable(client, localTableName);
     }
@@ -101,7 +99,7 @@ public class OneDBSchema extends AbstractSchema {
 
   public void dropLocalTable(String tableName, String endpoint) {
     OneDBTableInfo table = getOneDBTableInfo(tableName);
-    DBClient client = getDBClient(endpoint);
+    OwnerClient client = getDBClient(endpoint);
     if (table != null && client != null) {
       table.dropLocalTable(client);
     }
@@ -109,7 +107,7 @@ public class OneDBSchema extends AbstractSchema {
 
   public void changeLocalTable(String tableName, String endpoint, String localTableName) {
     OneDBTableInfo table = getOneDBTableInfo(tableName);
-    DBClient client = getDBClient(endpoint);
+    OwnerClient client = getDBClient(endpoint);
     if (table != null && client != null) {
       table.changeLocalTable(client, localTableName);
     }
@@ -128,8 +126,8 @@ public class OneDBSchema extends AbstractSchema {
     return client.getHeader(tableName);
   }
 
-  public DBClient getDBClient(String endpoint) {
-    return client.getDBClient(endpoint);
+  public OwnerClient getDBClient(String endpoint) {
+    return client.getOwnerClient(endpoint);
   }
 
   @Deprecated

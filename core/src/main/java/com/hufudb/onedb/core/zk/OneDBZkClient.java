@@ -40,7 +40,7 @@ public class OneDBZkClient extends ZkClient {
   private void watchEndpoints() throws KeeperException, InterruptedException {
     List<String> endpoints = zk.getChildren(endpointRootPath, new EndpointWatcher(schema, zk, endpointRootPath));
     for (String endpoint : endpoints) {
-      schema.addDB(endpoint);
+      schema.addOwner(endpoint);
     }
   }
 
@@ -62,7 +62,7 @@ public class OneDBZkClient extends ZkClient {
     List<String> endpoints = zk.getChildren(gPath, null);
     TableMeta tableMeta = new TableMeta(tableName);
     for (String endpoint : endpoints) {
-      schema.addDB(endpoint);
+      schema.addOwner(endpoint);
       String localTableName = watchLocalTable(buildPath(gPath, endpoint));
       tableMeta.addFeds(endpoint, localTableName);
     }
