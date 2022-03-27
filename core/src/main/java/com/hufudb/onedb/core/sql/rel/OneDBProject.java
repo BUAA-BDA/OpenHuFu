@@ -31,12 +31,12 @@ public class OneDBProject extends Project implements OneDBRel {
 
   @Override
   public RelOptCost computeSelfCost(RelOptPlanner planner, RelMetadataQuery mq) {
-    return planner.getCostFactory().makeZeroCost();
+    return super.computeSelfCost(planner, mq).multiplyBy(.05);
   }
 
   @Override
   public void implement(Implementor implementor) {
-    implementor.visitChild(0, getInput());
+    implementor.visitChild(getInput());
     List<OneDBExpression> exps = OneDBReference.fromHeader(implementor.getHeader(), getProjects());
     implementor.setSelectExps(exps);
   }

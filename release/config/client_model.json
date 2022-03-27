@@ -1,9 +1,9 @@
 {
   "version": "1.0",
-  "defaultSchema": "default",
+  "defaultSchema": "onedb",
   "schemas": [
     {
-      "name": "default",
+      "name": "onedb",
       "type": "custom",
       "factory": "com.hufudb.onedb.core.sql.schema.OneDBSchemaFactory",
       "operand": {

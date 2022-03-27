@@ -222,4 +222,8 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
   public String getTableName() {
     return tableInfo.getName();
   }
+
+  protected OneDBSchema getSchema() {
+    return schema;
+  }
 }

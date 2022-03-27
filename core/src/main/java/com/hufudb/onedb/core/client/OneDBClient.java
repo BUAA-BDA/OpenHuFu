@@ -21,6 +21,7 @@ import com.hufudb.onedb.core.sql.enumerator.RowEnumerator;
 import com.hufudb.onedb.core.sql.expression.OneDBQuery;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
 import com.hufudb.onedb.core.table.OneDBTableInfo;
+import com.hufudb.onedb.core.utils.EmptyEnumerator;
 
 import org.apache.calcite.linq4j.Enumerator;
 import org.apache.calcite.schema.Table;
@@ -160,6 +161,12 @@ public class OneDBClient {
     } else {
       return new RowEnumerator(streamProto, query.getFetch());
     }
+  }
+
+  // todo: analyize queryContext inside this function
+  public Enumerator<Object> oneDBQuery(OneDBQueryProto queryContext) {
+    LOG.warn("Coming soon...");
+    return new EmptyEnumerator<Object>();
   }
 
   private StreamBuffer<DataSetProto> oneDBQuery(OneDBQueryProto query, List<Pair<OwnerClient, String>> tableClients) {

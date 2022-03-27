@@ -11,6 +11,8 @@ import org.apache.calcite.plan.RelOptTable;
 
 import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
 
+// todo: remove this class and directly use OneDBQueryProto to reduce conversion overhead
+@Deprecated
 public class OneDBQuery {
   public String tableName;
   public Header header;
@@ -21,6 +23,12 @@ public class OneDBQuery {
   public List<OneDBExpression> aggExps;
   public int offset = 0;
   public int fetch = 0;
+  public boolean hasJoin = false;
+  public List<OneDBExpression> joinCondition;
+  public OneDBQuery left;
+  public OneDBQuery right;
+
+  // OneDBQueryProto.Builder builder;
 
   public OneDBQueryProto toProto() {
     OneDBQueryProto.Builder builder = OneDBQueryProto.newBuilder();
@@ -45,10 +53,11 @@ public class OneDBQuery {
 
   public static Header generateHeader(OneDBQueryProto proto) {
     if (proto.getAggExpCount() > 0) {
-      return OneDBExpression.generateHeader(proto.getAggExpList().stream().map(p -> OneDBExpression.fromProto(p)).collect(Collectors.toList()));
+      return OneDBExpression.generateHeader(
+          proto.getAggExpList().stream().map(p -> OneDBExpression.fromProto(p)).collect(Collectors.toList()));
     } else {
       return OneDBExpression.generateHeader(proto.getSelectExpList().stream().map(p -> OneDBExpression.fromProto(p))
-      .collect(Collectors.toList()));
+          .collect(Collectors.toList()));
     }
   }
 
@@ -61,6 +70,7 @@ public class OneDBQuery {
   }
 
   public OneDBQuery() {
+    // this.builder = OneDBQueryProto.newBuilder();
     this.selectExps = new ArrayList<>();
     this.filterExps = new ArrayList<>();
     this.aggExps = new ArrayList<>();
@@ -68,6 +78,11 @@ public class OneDBQuery {
 
   public OneDBQuery(String tableName, List<OneDBExpression> selectExps, List<OneDBExpression> filterExps,
       List<OneDBExpression> aggExps, int fetch) {
+    // builder.setTableName(tableName)
+    //     .addAllSelectExp(selectExps.stream().map(exp -> exp.toProto()).collect(Collectors.toList()))
+    //     .addAllWhereExp(filterExps.stream().map(exp -> exp.toProto()).collect(Collectors.toList()))
+    //     .addAllAggExp(aggExps.stream().map(exp -> exp.toProto()).collect(Collectors.toList()))
+    //     .setFetch(fetch);
     this.tableName = tableName;
     this.selectExps = selectExps;
     this.filterExps = filterExps;

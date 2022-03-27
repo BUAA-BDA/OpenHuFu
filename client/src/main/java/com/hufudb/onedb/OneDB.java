@@ -42,7 +42,7 @@ public class OneDB {
       calciteConnection = connection.unwrap(CalciteConnection.class);
       calciteConnection.setTransactionIsolation(Connection.TRANSACTION_NONE);
       SchemaPlus rootSchema = calciteConnection.getRootSchema();
-      schema = (OneDBSchema) OneDBSchemaFactory.INSTANCE.create(rootSchema, "default", new HashMap<String,Object>());
+      schema = (OneDBSchema) OneDBSchemaFactory.INSTANCE.create(rootSchema, "onedb", new HashMap<String,Object>());
       rootSchema.add("onedb", schema);
     } catch (Exception e) {
       e.printStackTrace();

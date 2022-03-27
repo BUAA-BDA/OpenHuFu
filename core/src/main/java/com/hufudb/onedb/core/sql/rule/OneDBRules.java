@@ -17,5 +17,7 @@ public class OneDBRules {
 
   public static final OneDBAggregateRule AGGREGATE = OneDBAggregateRule.DEFAULT_CONFIG.toRule(OneDBAggregateRule.class);
 
-  public static final RelOptRule[] RULES = { FILTER, PROJECT, CALC, AGGREGATE };
+  public static final OneDBJoinRule JOIN = OneDBJoinRule.DEFAULT_CONFIG.toRule(OneDBJoinRule.class);
+
+  public static final RelOptRule[] RULES = { FILTER, PROJECT, CALC, AGGREGATE, JOIN };
 }

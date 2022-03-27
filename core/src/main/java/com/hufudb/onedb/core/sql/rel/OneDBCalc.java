@@ -34,7 +34,7 @@ public class OneDBCalc extends Calc implements OneDBRel {
 
   @Override
   public void implement(Implementor implementor) {
-    implementor.visitChild(0, getInput());
+    implementor.visitChild(getInput());
     Header header = implementor.getHeader();
     RexProgram program = getProgram();
     assert header.size() == program.getInputRowType().getFieldCount();

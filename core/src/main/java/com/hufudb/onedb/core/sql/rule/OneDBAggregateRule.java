@@ -11,7 +11,7 @@ import com.hufudb.onedb.core.sql.rel.OneDBAggregate;
 import com.hufudb.onedb.core.sql.rel.OneDBRel;
 
 public class OneDBAggregateRule extends ConverterRule {
-  static final ConverterRule.Config DEFAULT_CONFIG = ConverterRule.Config.INSTANCE
+  static final Config DEFAULT_CONFIG = Config.INSTANCE
       .withConversion(LogicalAggregate.class, Convention.NONE, OneDBRel.CONVENTION, "OneDBAggregateRule")
       .withRuleFactory(OneDBAggregateRule::new);
 
