@@ -1,8 +1,11 @@
 package com.hufudb.onedb.core.sql.rel;
 
+import java.util.List;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableList;
+import com.hufudb.onedb.core.sql.expression.OneDBExpression;
+import com.hufudb.onedb.core.sql.expression.OneDBReference;
 
 import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelOptCost;
@@ -35,6 +38,8 @@ public class OneDBJoin extends Join implements OneDBRel {
   @Override
   public void implement(Implementor implementor) {
     implementor.visitChild(getLeft(), getRight());
+    List<OneDBExpression> exps = OneDBReference.fromHeader(implementor.getHeader());
+    implementor.setSelectExps(exps);
   }
 
   @Override

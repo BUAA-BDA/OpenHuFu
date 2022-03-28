@@ -4,9 +4,11 @@ import java.util.List;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
+import com.hufudb.onedb.rpc.OneDBCommon.ExpressionProto;
 import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
 
 import org.apache.calcite.linq4j.tree.Expression;
@@ -22,7 +24,6 @@ public interface OneDBRel extends RelNode {
     OneDBSchema schema;
     OneDBQueryProto.Builder rootContext;
     OneDBQueryProto.Builder currentContext;
-    Stack<OneDBQueryProto> contextStack;
 
     Implementor() {
       rootContext = OneDBQueryProto.newBuilder();
@@ -42,26 +43,21 @@ public interface OneDBRel extends RelNode {
     }
 
     public void visitChild(RelNode left, RelNode right) {
-      OneDBQueryProto.Builder parentBuilder = currentContext;
-      OneDBQueryProto.Builder leftBuilder = OneDBQueryProto.newBuilder();
-      OneDBQueryProto.Builder rightBuilder = OneDBQueryProto.newBuilder();
-      currentContext = leftBuilder;
+      OneDBQueryProto.Builder parentContext = currentContext;
+      OneDBQueryProto.Builder leftContext = OneDBQueryProto.newBuilder();
+      OneDBQueryProto.Builder rightContext = OneDBQueryProto.newBuilder();
+      currentContext = leftContext;
       ((OneDBRel) left).implement(this);
-      currentContext = rightBuilder;
+      parentContext.setLeft(leftContext);
+      currentContext = rightContext;
       ((OneDBRel) right).implement(this);
-      currentContext = parentBuilder;
+      parentContext.setRight(rightContext);
+      currentContext = parentContext;
+      ImmutableList.Builder<ExpressionProto> builder = ImmutableList.builder();
+        builder.addAll(currentContext.getLeft().getSelectExpList())
+            .addAll(currentContext.getRight().getSelectExpList());
+      setSelectExpProtos(builder.build());
     }
-
-    // public void visitJoin(BiRel join) {
-    //   OneDBQueryProto.Builder parentBuilder = currentContext;
-    //   OneDBQueryProto.Builder leftBuilder = OneDBQueryProto.newBuilder();
-    //   OneDBQueryProto.Builder rightBuilder = OneDBQueryProto.newBuilder();
-    //   currentContext = leftBuilder;
-    //   ((OneDBRel) join.getLeft()).implement(this);
-    //   currentContext = rightBuilder;
-    //   ((OneDBRel) join.getRight()).implement(this);
-    //   currentContext = parentBuilder;
-    // }
 
     public void setSchema(OneDBSchema schema) {
       if (this.schema == null) {
@@ -75,7 +71,13 @@ public interface OneDBRel extends RelNode {
 
     // todo: pass proto
     public void setSelectExps(List<OneDBExpression> exps) {
+      currentContext.clearSelectExp();
       currentContext.addAllSelectExp(exps.stream().map(exp -> exp.toProto()).collect(Collectors.toList()));
+    }
+
+    void setSelectExpProtos(List<ExpressionProto> exps) {
+      currentContext.clearSelectExp();
+      currentContext.addAllSelectExp(exps);
     }
 
     public void addFilterExps(OneDBExpression exp) {
@@ -83,24 +85,30 @@ public interface OneDBRel extends RelNode {
     }
 
     public void setAggExps(List<OneDBExpression> exps) {
+      currentContext.clearAggExp();
       currentContext.addAllAggExp(exps.stream().map(exp -> exp.toProto()).collect(Collectors.toList()));
     }
 
     public void setOffset(int offset) {
       currentContext.setOffset(offset);
-      // currentBuilder.offset = offset;
     }
 
     public void setFetch(int fetch) {
       currentContext.setFetch(fetch);
     }
 
+    public boolean hasJoin() {
+      return currentContext.hasLeft() && currentContext.hasRight();
+    }
+
     public Header getHeader() {
-      return Header.EMPTY;
+      return OneDBExpression.generateHeaderFromProto(currentContext.getSelectExpList());
     }
 
     public List<OneDBExpression> getCurrentOutput() {
-      return currentContext.getSelectExpList().stream().map(exp -> OneDBExpression.fromProto(exp)).collect(Collectors.toList());
+      return currentContext.getSelectExpList().stream()
+          .map(exp -> OneDBExpression.fromProto(exp))
+          .collect(Collectors.toList());
     }
   }
 }

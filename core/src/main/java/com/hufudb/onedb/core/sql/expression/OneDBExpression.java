@@ -24,6 +24,14 @@ public interface OneDBExpression {
     return builder.build();
   }
 
+  public static Header generateHeaderFromProto(List<ExpressionProto> exps) {
+    Header.Builder builder = Header.newBuilder();
+    exps.stream().forEach(exp -> {
+      builder.add("", OneDBExpression.fromProto(exp).getOutType());
+    });
+    return builder.build();
+  }
+
   public static OneDBExpression fromProto(ExpressionProto proto) {
     OneDBOpType opType = OneDBOpType.of(proto.getOpType());
     switch (opType) {

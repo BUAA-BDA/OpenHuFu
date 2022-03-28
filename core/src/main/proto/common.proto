@@ -62,4 +62,6 @@ message OneDBQueryProto {
   repeated string order = 6;
   int32 fetch = 7;
   int32 offset = 8;
+  OneDBQueryProto left = 9;
+  OneDBQueryProto right = 10;
 }

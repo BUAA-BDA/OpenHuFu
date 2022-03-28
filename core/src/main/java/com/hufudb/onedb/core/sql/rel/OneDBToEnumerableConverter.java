@@ -37,7 +37,11 @@ public class OneDBToEnumerableConverter extends ConverterImpl implements Enumera
   @Override
   public Result implement(EnumerableRelImplementor implementor, Prefer pref) {
     final OneDBRel.Implementor oImplementor = new OneDBRel.Implementor();
-    oImplementor.visitChild(getInput());
+    try {
+      oImplementor.visitChild(getInput());
+    } catch(Exception e) {
+      e.printStackTrace();
+    }
     return implement(implementor, oImplementor, pref);
   }
 

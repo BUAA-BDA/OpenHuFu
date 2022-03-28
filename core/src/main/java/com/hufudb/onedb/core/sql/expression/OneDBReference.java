@@ -30,10 +30,14 @@ public class OneDBReference implements OneDBExpression {
     return exps;
   }
 
-  public static List<OneDBExpression> fromHeader(Header header, List<RexNode> nodes) {
+  public static List<OneDBExpression> fromHeader(List<OneDBExpression> exps, List<RexNode> nodes) {
     return nodes.stream().map(node -> {
-      int i =((RexInputRef)node).getIndex();
-      return new OneDBReference(header.getType(i), i);
+      if (node instanceof RexInputRef) {
+        int i = ((RexInputRef)node).getIndex();
+        return new OneDBReference(exps.get(i).getOutType(), i);
+      } else {
+        return OneDBOperator.fromRexNode(node, exps);
+      }
     }).collect(Collectors.toList());
   }
 
