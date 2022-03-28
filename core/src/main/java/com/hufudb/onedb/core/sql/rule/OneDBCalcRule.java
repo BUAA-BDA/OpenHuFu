@@ -1,49 +1,23 @@
 package com.hufudb.onedb.core.sql.rule;
 
-import org.apache.calcite.adapter.enumerable.EnumerableProject;
-import org.apache.calcite.plan.RelOptRuleCall;
-import org.apache.calcite.plan.RelRule;
-import org.apache.calcite.plan.RelTraitSet;
+import org.apache.calcite.plan.Convention;
 import org.apache.calcite.rel.RelNode;
-import org.apache.calcite.rex.RexProgram;
-
-import org.immutables.value.Value;
+import org.apache.calcite.rel.convert.ConverterRule;
+import org.apache.calcite.rel.logical.LogicalCalc;
 
 import com.hufudb.onedb.core.sql.rel.OneDBCalc;
 import com.hufudb.onedb.core.sql.rel.OneDBRel;
-import com.hufudb.onedb.core.sql.rel.OneDBToEnumerableConverter;
 
-public class OneDBCalcRule extends RelRule<OneDBCalcRule.OneDBCalcRuleConfig> {
-  protected OneDBCalcRule(OneDBCalcRuleConfig config) {
+public class OneDBCalcRule extends ConverterRule {
+  static final Config DEFAULT_CONFIG = Config.INSTANCE.withConversion(LogicalCalc.class, Convention.NONE, OneDBRel.CONVENTION, "OneDBCalcRule").withRuleFactory(OneDBCalcRule::new);
+
+  protected OneDBCalcRule(Config config) {
     super(config);
   }
 
   public RelNode convert(RelNode relNode) {
-    final EnumerableProject project = (EnumerableProject) relNode;
-    final RelNode input = project.getInput();
-    final RelTraitSet traitSet = project.getTraitSet().replace(OneDBRel.CONVENTION);
-    final RexProgram program = RexProgram.create(input.getRowType(), project.getProjects(), null, project.getRowType(), project.getCluster().getRexBuilder());
-    return new OneDBCalc(project.getCluster(), traitSet, project.getHints(), convert(project.getInput(), OneDBRel.CONVENTION), program);
-  }
-
-  @Value.Immutable
-  public interface OneDBCalcRuleConfig extends RelRule.Config {
-    OneDBCalcRuleConfig DEFAULT = ImmutableOneDBCalcRuleConfig.builder()
-        .operandSupplier(b0 -> b0.operand(EnumerableProject.class)
-            .oneInput(b1 -> b1.operand(OneDBToEnumerableConverter.class).anyInputs())).build();
-
-    @Override
-    default OneDBCalcRule toRule() {
-      return new OneDBCalcRule(this);
-    }
-  }
-
-  @Override
-  public void onMatch(RelOptRuleCall call) {
-    final EnumerableProject project = call.rel(0);
-    final RelNode converted = convert(project);
-    if (converted != null) {
-      call.transformTo(converted);
-    }
+    final LogicalCalc calc = (LogicalCalc) relNode;
+    final RelNode input = calc.getInput();
+    return OneDBCalc.create(convert(input, input.getTraitSet().replace(OneDBRel.CONVENTION)), calc.getProgram());
   }
 }

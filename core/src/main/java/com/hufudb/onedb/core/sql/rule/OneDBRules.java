@@ -13,7 +13,7 @@ public class OneDBRules {
 
   public static final OneDBProjectRule PROJECT = OneDBProjectRule.DEFAULT_CONFIG.toRule(OneDBProjectRule.class);
 
-  public static final OneDBCalcRule CALC = OneDBCalcRule.OneDBCalcRuleConfig.DEFAULT.toRule();
+  public static final OneDBCalcRule CALC = OneDBCalcRule.DEFAULT_CONFIG.toRule(OneDBCalcRule.class);
 
   public static final OneDBAggregateRule AGGREGATE = OneDBAggregateRule.DEFAULT_CONFIG.toRule(OneDBAggregateRule.class);
 
