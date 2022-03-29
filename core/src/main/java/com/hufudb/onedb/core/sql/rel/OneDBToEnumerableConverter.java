@@ -48,13 +48,13 @@ public class OneDBToEnumerableConverter extends ConverterImpl implements Enumera
   public Result implement(EnumerableRelImplementor implementor, OneDBRel.Implementor oImplementor, Prefer pref) {
     final BlockBuilder builder = new BlockBuilder();
     final PhysType physType = PhysTypeImpl.of(implementor.getTypeFactory(), getRowType(), pref.preferArray());
-    String queryProtoStr = oImplementor.getQuery().toString();
+    // build and save context for the query
+    OneDBQueryContext context = oImplementor.buildContext();
+    OneDBQueryContext.saveContext(context);
     // get OneDBSchema for query
     Expression schema = oImplementor.getSchemaExpression();
-    // get queryContext
-    Expression queryContext = builder.append("queryContext", Expressions.constant(queryProtoStr, String.class));
     // call the query method on onedbschema
-    Expression enumerable = builder.append("enumerable", Expressions.call(schema, "query", queryContext));
+    Expression enumerable = builder.append("enumerable", Expressions.call(schema, "query", Expressions.constant(context.getContextId())));
     builder.add(Expressions.return_(null, enumerable));
     return implementor.result(physType, builder.toBlock());
   }

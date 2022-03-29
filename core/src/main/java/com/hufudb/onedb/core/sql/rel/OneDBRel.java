@@ -1,12 +1,12 @@
 package com.hufudb.onedb.core.sql.rel;
 
 import java.util.List;
-import java.util.Stack;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
+import com.hufudb.onedb.core.sql.expression.OneDBOperator;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
 import com.hufudb.onedb.rpc.OneDBCommon.ExpressionProto;
 import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
@@ -14,6 +14,7 @@ import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
 import org.apache.calcite.linq4j.tree.Expression;
 import org.apache.calcite.plan.Convention;
 import org.apache.calcite.rel.RelNode;
+import org.apache.calcite.rel.core.JoinInfo;
 
 public interface OneDBRel extends RelNode {
   void implement(Implementor implementor);
@@ -22,12 +23,23 @@ public interface OneDBRel extends RelNode {
 
   class Implementor {
     OneDBSchema schema;
+    OneDBQueryContext context;
     OneDBQueryProto.Builder rootContext;
     OneDBQueryProto.Builder currentContext;
 
     Implementor() {
       rootContext = OneDBQueryProto.newBuilder();
       currentContext = rootContext;
+      context = new OneDBQueryContext();
+    }
+
+    public OneDBQueryContext buildContext() {
+      context = OneDBQueryContext.fromProto(rootContext);
+      return context;
+    }
+
+    public Long getContextId() {
+      return context.getContextId();
     }
 
     public OneDBQueryProto getQuery() {
@@ -95,6 +107,14 @@ public interface OneDBRel extends RelNode {
 
     public void setFetch(int fetch) {
       currentContext.setFetch(fetch);
+    }
+
+    public void setJoinCondition(JoinInfo joinInfo) {
+      if (!joinInfo.nonEquiConditions.isEmpty()) {
+        currentContext.clearJoinCond();
+        currentContext.addAllJoinCond(OneDBOperator.fromRexNodes(joinInfo.nonEquiConditions, getCurrentOutput()).stream().map(exp -> exp.toProto()).collect(Collectors.toList()));
+      }
+      currentContext.addAllLeftKey(joinInfo.leftKeys).addAllRightKey(joinInfo.rightKeys);
     }
 
     public boolean hasJoin() {

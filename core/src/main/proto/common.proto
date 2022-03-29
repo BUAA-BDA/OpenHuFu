@@ -64,4 +64,7 @@ message OneDBQueryProto {
   int32 offset = 8;
   OneDBQueryProto left = 9;
   OneDBQueryProto right = 10;
+  repeated int32 leftKey = 11;
+  repeated int32 rightKey = 12;
+  repeated ExpressionProto joinCond = 13;
 }

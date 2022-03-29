@@ -3,13 +3,11 @@ package com.hufudb.onedb.core.sql.rel;
 import java.lang.reflect.Method;
 
 import com.google.common.collect.ImmutableMap;
-import com.hufudb.onedb.core.sql.schema.OneDBSchema;
 
 import org.apache.calcite.linq4j.tree.Types;
 
 public enum OneDBMethod {
-  ONEDB_TABLE_QUERY(OneDBTable.OneDBQueryable.class, "query", String.class),
-  ONEDB_SCHEMA_TEST(OneDBSchema.class, "query", String.class);
+  ONEDB_TABLE_QUERY(OneDBTable.OneDBQueryable.class, "query", Long.class);
 
   public final Method method;
 

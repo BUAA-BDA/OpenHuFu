@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import com.google.protobuf.Empty;
 import com.hufudb.onedb.core.config.OneDBConfig;
 import com.hufudb.onedb.core.data.BasicDataSet;
 import com.hufudb.onedb.core.data.Header;
@@ -19,6 +20,7 @@ import com.hufudb.onedb.core.data.Row;
 import com.hufudb.onedb.core.data.StreamBuffer;
 import com.hufudb.onedb.core.sql.enumerator.RowEnumerator;
 import com.hufudb.onedb.core.sql.expression.OneDBQuery;
+import com.hufudb.onedb.core.sql.rel.OneDBQueryContext;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
 import com.hufudb.onedb.core.table.OneDBTableInfo;
 import com.hufudb.onedb.core.utils.EmptyEnumerator;
@@ -163,10 +165,11 @@ public class OneDBClient {
     }
   }
 
-  // todo: analyize queryContext inside this function
-  public Enumerator<Object> oneDBQuery(OneDBQueryProto queryContext) {
-    LOG.warn("Coming soon...");
-    return new EmptyEnumerator<Object>();
+  // todo: execute query in this function
+  public Enumerator<Object> oneDBQuery(Long contextId) {
+    OneDBQueryContext context = OneDBQueryContext.getContext(contextId);
+    LOG.info("execute query id[{}]: {}", contextId, context.toProtoStr());
+    return new EmptyEnumerator<>();
   }
 
   private StreamBuffer<DataSetProto> oneDBQuery(OneDBQueryProto query, List<Pair<OwnerClient, String>> tableClients) {

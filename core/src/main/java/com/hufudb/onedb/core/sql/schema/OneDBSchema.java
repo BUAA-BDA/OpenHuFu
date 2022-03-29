@@ -151,20 +151,15 @@ public class OneDBSchema extends AbstractSchema {
   }
 
   @SuppressWarnings("unused")
-  public Enumerable<Object> query(String queryStr) {
+  public Enumerable<Object> query(long contextId) {
     OneDBQueryProto.Builder builder = OneDBQueryProto.newBuilder();
-    try {
-      TextFormat.getParser().merge(queryStr, builder);
-    } catch (ParseException e) {
-      e.printStackTrace();
-    }
     return new AbstractEnumerable<Object>() {
       Enumerator<Object> enumerator;
 
       @Override
       public Enumerator<Object> enumerator() {
         if (enumerator == null) {
-          this.enumerator = client.oneDBQuery(builder.build());
+          this.enumerator = client.oneDBQuery(contextId);
 
         } else {
           this.enumerator.reset();
