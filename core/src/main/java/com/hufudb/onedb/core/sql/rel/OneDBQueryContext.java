@@ -1,13 +1,16 @@
 package com.hufudb.onedb.core.sql.rel;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.google.protobuf.TextFormat;
 import com.google.protobuf.TextFormat.ParseException;
+import com.hufudb.onedb.core.data.Header;
+import com.hufudb.onedb.core.sql.expression.OneDBExpression;
+import com.hufudb.onedb.rpc.OneDBCommon.ExpressionProto;
 import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
-import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProtoOrBuilder;
 
 public class OneDBQueryContext {
   // 
@@ -51,14 +54,26 @@ public class OneDBQueryContext {
     return new OneDBQueryContext(proto);
   }
 
-  public static OneDBQueryContext fromProtoStr(String protoStr) {
+  public static OneDBQueryContext fromProto(OneDBQueryProto proto) {
+    return new OneDBQueryContext(proto.toBuilder());
+  }
+
+  public static OneDBQueryContext fromProto(String proto) {
     OneDBQueryProto.Builder builder = OneDBQueryProto.newBuilder();
     try {
-      TextFormat.getParser().merge(protoStr, builder);
+      TextFormat.getParser().merge(proto, builder);
     } catch (ParseException e) {
       e.printStackTrace();
     }
     return new OneDBQueryContext(builder);
+  }
+
+  public static Header generateHeader(OneDBQueryProto proto) {
+    if (proto.getAggExpCount() > 0) {
+      return OneDBExpression.generateHeader(proto.getAggExpList());
+    } else {
+      return OneDBExpression.generateHeader(proto.getSelectExpList());
+    }
   }
 
   public OneDBQueryProto toProto() {

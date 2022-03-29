@@ -16,10 +16,10 @@ public interface OneDBExpression {
 
   public OneDBOpType getOpType();
 
-  public static Header generateHeader(List<OneDBExpression> exps) {
+  public static Header generateHeader(List<ExpressionProto> exps) {
     Header.Builder builder = Header.newBuilder();
     exps.stream().forEach(exp -> {
-      builder.add("", exp.getOutType());
+      builder.add("", FieldType.of(exp.getOutType()));
     });
     return builder.build();
   }
@@ -48,5 +48,9 @@ public interface OneDBExpression {
     FieldType outType = FieldType.of(proto.getOutType());
     List<OneDBExpression> elements = proto.getInList().stream().map(ele -> OneDBExpression.fromProto(ele)).collect(Collectors.toList());
     return new OneDBOperator(opType, outType, elements,funcType);
+  }
+
+  public static List<OneDBExpression> fromProto(List<ExpressionProto> protos) {
+    return protos.stream().map(proto -> fromProto(proto)).collect(Collectors.toList());
   }
 }

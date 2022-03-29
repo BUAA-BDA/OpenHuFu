@@ -1,25 +1,19 @@
 package com.hufudb.onedb.core.sql.schema;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 
 import com.hufudb.onedb.core.client.OwnerClient;
-import com.google.protobuf.TextFormat;
-import com.google.protobuf.TextFormat.ParseException;
 import com.hufudb.onedb.core.client.OneDBClient;
 import com.hufudb.onedb.core.data.Header;
+import com.hufudb.onedb.core.sql.enumerator.OneDBEnumerator;
 import com.hufudb.onedb.core.sql.rel.OneDBTable;
 import com.hufudb.onedb.core.table.OneDBTableInfo;
 import com.hufudb.onedb.core.zk.OneDBZkClient;
 import com.hufudb.onedb.core.zk.ZkConfig;
-import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
 
 import org.apache.calcite.linq4j.AbstractEnumerable;
 import org.apache.calcite.linq4j.Enumerable;
@@ -141,25 +135,19 @@ public class OneDBSchema extends AbstractSchema {
     return client.getOwnerClient(endpoint);
   }
 
-  @Deprecated
-  public ExecutorService getExecutorService() {
-    return client.getExecutorService();
-  }
-
   public Expression getExpression() {
     return Schemas.unwrap(super.getExpression(parentSchema, "onedb"), OneDBSchema.class);
   }
 
   @SuppressWarnings("unused")
   public Enumerable<Object> query(long contextId) {
-    OneDBQueryProto.Builder builder = OneDBQueryProto.newBuilder();
     return new AbstractEnumerable<Object>() {
       Enumerator<Object> enumerator;
 
       @Override
       public Enumerator<Object> enumerator() {
         if (enumerator == null) {
-          this.enumerator = client.oneDBQuery(contextId);
+          this.enumerator = new OneDBEnumerator(OneDBSchema.this, contextId);
 
         } else {
           this.enumerator.reset();

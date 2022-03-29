@@ -1,25 +1,12 @@
 package com.hufudb.onedb.core.client;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
-import com.google.protobuf.Empty;
-import com.hufudb.onedb.core.config.OneDBConfig;
-import com.hufudb.onedb.core.data.BasicDataSet;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.data.Row;
-import com.hufudb.onedb.core.data.StreamBuffer;
-import com.hufudb.onedb.core.sql.enumerator.RowEnumerator;
-import com.hufudb.onedb.core.sql.expression.OneDBQuery;
+import com.hufudb.onedb.core.sql.rel.OneDBImplementor;
 import com.hufudb.onedb.core.sql.rel.OneDBQueryContext;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
 import com.hufudb.onedb.core.table.OneDBTableInfo;
@@ -31,9 +18,6 @@ import org.apache.calcite.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
-import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
-
 /*
 * client for all DB
 */
@@ -43,23 +27,17 @@ public class OneDBClient {
   private final OneDBSchema schema;
   private final Map<String, OwnerClient> ownerMap;
   private final Map<String, OneDBTableInfo> tableMap;
-  private final ExecutorService executorService;
-
+  private final OneDBImplementor implementor;
 
   public OneDBClient(OneDBSchema schema) {
     this.schema = schema;
     ownerMap = new ConcurrentHashMap<>();
     tableMap = new ConcurrentHashMap<>();
-    this.executorService = Executors.newFixedThreadPool(OneDBConfig.CLIENT_THREAD_NUM);
+    implementor = new OneDBImplementor(this);
   }
-
 
   Map<String, OneDBTableInfo> getTableMap() {
     return tableMap;
-  }
-
-  public ExecutorService getExecutorService() {
-    return executorService;
   }
 
   public OwnerClient addOwner(String endpoint) {
@@ -148,60 +126,13 @@ public class OneDBClient {
   }
 
   /*
-  * onedb query
-  */
-  public Enumerator<Row> oneDBQuery(String tableName, OneDBQueryProto query) {
-    List<Pair<OwnerClient, String>> tableClients = getTableClients(tableName);
-    StreamBuffer<DataSetProto> streamProto = oneDBQuery(query, tableClients);
-    Header header = OneDBQuery.generateHeader(query);
-    if (query.getAggExpCount() > 0) {
-      BasicDataSet localDataSet = BasicDataSet.of(header);
-      while (streamProto.hasNext()) {
-        localDataSet.mergeDataSet(BasicDataSet.fromProto(streamProto.next()));
-      }
-      return localDataSet;
-    } else {
-      return new RowEnumerator(streamProto, query.getFetch());
-    }
-  }
-
+   * onedb query
+   */
   // todo: execute query in this function
-  public Enumerator<Object> oneDBQuery(Long contextId) {
+  public Enumerator<Row> oneDBQuery(long contextId) {
     OneDBQueryContext context = OneDBQueryContext.getContext(contextId);
-    LOG.info("execute query id[{}]: {}", contextId, context.toProtoStr());
-    return new EmptyEnumerator<>();
-  }
-
-  private StreamBuffer<DataSetProto> oneDBQuery(OneDBQueryProto query, List<Pair<OwnerClient, String>> tableClients) {
-    StreamBuffer<DataSetProto> iterator = new StreamBuffer<>(tableClients.size());
-    List<Callable<Boolean>> tasks = new ArrayList<Callable<Boolean>>();
-    for (Pair<OwnerClient, String> entry : tableClients) {
-      tasks.add(() -> {
-        try {
-          OneDBQueryProto localQuery = query.toBuilder().setTableName(entry.getValue()).build();
-          Iterator<DataSetProto> it = entry.getKey().oneDBQuery(localQuery);
-          while (it.hasNext()) {
-            iterator.add(it.next());
-          }
-          return true;
-        } catch (Exception e) {
-          e.printStackTrace();
-          return false;
-        } finally {
-          iterator.finish();
-        }
-      });
-    }
-    try {
-      List<Future<Boolean>> statusList = executorService.invokeAll(tasks);
-      for (Future<Boolean> status : statusList) {
-        if (!status.get()) {
-          LOG.error("error in oneDBQuery");
-        }
-      }
-    } catch (InterruptedException | ExecutionException e) {
-      LOG.error("Error in OneDBQuery for {}", e.getMessage());
-    }
-    return iterator;
+    return implementor.implement(context.toProto());
+    // LOG.info("execute query id[{}]: {}", contextId, context.toProtoStr());
+    // return new EmptyEnumerator<>();
   }
 }

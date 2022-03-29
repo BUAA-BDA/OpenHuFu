@@ -28,7 +28,6 @@ public class OneDBQuery {
   public OneDBQuery left;
   public OneDBQuery right;
 
-  // OneDBQueryProto.Builder builder;
 
   public OneDBQueryProto toProto() {
     OneDBQueryProto.Builder builder = OneDBQueryProto.newBuilder();
@@ -51,26 +50,7 @@ public class OneDBQuery {
     return new OneDBQuery(proto.getTableName(), selectExps, filterExps, aggExps, fetch);
   }
 
-  public static Header generateHeader(OneDBQueryProto proto) {
-    if (proto.getAggExpCount() > 0) {
-      return OneDBExpression.generateHeader(
-          proto.getAggExpList().stream().map(p -> OneDBExpression.fromProto(p)).collect(Collectors.toList()));
-    } else {
-      return OneDBExpression.generateHeader(proto.getSelectExpList().stream().map(p -> OneDBExpression.fromProto(p))
-          .collect(Collectors.toList()));
-    }
-  }
-
-  public Header generateHeader() {
-    if (aggExps.size() > 0) {
-      return OneDBExpression.generateHeader(aggExps);
-    } else {
-      return OneDBExpression.generateHeader(selectExps);
-    }
-  }
-
   public OneDBQuery() {
-    // this.builder = OneDBQueryProto.newBuilder();
     this.selectExps = new ArrayList<>();
     this.filterExps = new ArrayList<>();
     this.aggExps = new ArrayList<>();
@@ -78,11 +58,6 @@ public class OneDBQuery {
 
   public OneDBQuery(String tableName, List<OneDBExpression> selectExps, List<OneDBExpression> filterExps,
       List<OneDBExpression> aggExps, int fetch) {
-    // builder.setTableName(tableName)
-    //     .addAllSelectExp(selectExps.stream().map(exp -> exp.toProto()).collect(Collectors.toList()))
-    //     .addAllWhereExp(filterExps.stream().map(exp -> exp.toProto()).collect(Collectors.toList()))
-    //     .addAllAggExp(aggExps.stream().map(exp -> exp.toProto()).collect(Collectors.toList()))
-    //     .setFetch(fetch);
     this.tableName = tableName;
     this.selectExps = selectExps;
     this.filterExps = filterExps;

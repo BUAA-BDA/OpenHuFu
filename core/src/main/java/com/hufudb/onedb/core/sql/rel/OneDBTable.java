@@ -168,30 +168,24 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
       return enumerable.enumerator();
     }
 
-    public Enumerable<Object> query(String queryStr) {
-      OneDBQueryProto.Builder builder = OneDBQueryProto.newBuilder();
-      try {
-        TextFormat.getParser().merge(queryStr, builder);
-      } catch (ParseException e) {
-        e.printStackTrace();
-      }
-      return getTable().query(builder.build());
+    public Enumerable<Object> query(long contextId) {
+      return getTable().query(contextId);
     }
   }
 
   public Enumerable<Object> query() {
     System.out.println("Should not use this method");
-    return query(null);
+    return query(-1);
   }
 
-  public Enumerable<Object> query(OneDBQueryProto query) {
+  public Enumerable<Object> query(long contextId) {
     return new AbstractEnumerable<Object>() {
       Enumerator<Object> enumerator;
 
       @Override
       public Enumerator<Object> enumerator() {
         if (enumerator == null) {
-          this.enumerator = new OneDBEnumerator(getTableName(), schema, query);
+          this.enumerator = new OneDBEnumerator(OneDBTable.this.getSchema(), contextId);
         } else {
           this.enumerator.reset();
         }

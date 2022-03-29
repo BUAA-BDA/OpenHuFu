@@ -26,7 +26,7 @@ import com.hufudb.onedb.core.data.StreamObserverDataSet;
 import com.hufudb.onedb.core.data.TableInfo;
 import com.hufudb.onedb.core.data.utils.POJOPublishedTableInfo;
 import com.hufudb.onedb.core.data.PublishedTableInfo;
-import com.hufudb.onedb.core.sql.expression.OneDBQuery;
+import com.hufudb.onedb.core.sql.rel.OneDBQueryContext;
 import com.hufudb.onedb.core.zk.DBZkClient;
 import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
 import com.hufudb.onedb.rpc.OneDBCommon.HeaderProto;
@@ -70,11 +70,10 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
 
   @Override
   public void oneDBQuery(OneDBQueryProto request, StreamObserver<DataSetProto> responseObserver) {
-    OneDBQuery query = OneDBQuery.fromProto(request);
-    Header header = query.generateHeader();
+    Header header = OneDBQueryContext.generateHeader(request);
     StreamObserverDataSet obDataSet = new StreamObserverDataSet(responseObserver, header);
     try {
-      oneDBQueryInternal(query, obDataSet);
+      oneDBQueryInternal(request, obDataSet);
     } catch (SQLException e) {
       LOG.error("error when query table [{}]", request.getTableName());
       e.printStackTrace();
@@ -129,6 +128,7 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
   protected Header getPublishedTableHeader(String publishedTableName) {
     PublishedTableInfo info = publishedTableInfoMap.get(publishedTableName);
     if (info == null) {
+      LOG.warn("Published table [{}] not found", publishedTableName);
       return Header.EMPTY;
     } else {
       return info.getFakeHeader();
@@ -235,5 +235,5 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
 
   protected abstract TableInfo loadTableInfo(String tableName);
 
-  protected abstract void oneDBQueryInternal(OneDBQuery query, DataSet dataSet) throws SQLException;
+  protected abstract void oneDBQueryInternal(OneDBQueryProto query, DataSet dataSet) throws SQLException;
 }
