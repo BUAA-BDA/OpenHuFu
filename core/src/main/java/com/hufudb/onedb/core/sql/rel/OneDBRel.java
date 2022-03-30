@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
+import com.hufudb.onedb.core.sql.expression.OneDBOpType;
 import com.hufudb.onedb.core.sql.expression.OneDBOperator;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
 import com.hufudb.onedb.rpc.OneDBCommon.ExpressionProto;
@@ -66,8 +67,15 @@ public interface OneDBRel extends RelNode {
       parentContext.setRight(rightContext);
       currentContext = parentContext;
       ImmutableList.Builder<ExpressionProto> builder = ImmutableList.builder();
-        builder.addAll(currentContext.getLeft().getSelectExpList())
-            .addAll(currentContext.getRight().getSelectExpList());
+      int idx = 0;
+      for (ExpressionProto exp : currentContext.getLeft().getSelectExpList()) {
+        builder.add(ExpressionProto.newBuilder().setOpType(OneDBOpType.REF.ordinal()).setOutType(exp.getOutType()).setRef(idx).build());
+        ++idx;
+      }
+      for (ExpressionProto exp : currentContext.getRight().getSelectExpList()) {
+        builder.add(ExpressionProto.newBuilder().setOpType(OneDBOpType.REF.ordinal()).setOutType(exp.getOutType()).setRef(idx).build());
+        ++idx;
+      }
       setSelectExpProtos(builder.build());
     }
 

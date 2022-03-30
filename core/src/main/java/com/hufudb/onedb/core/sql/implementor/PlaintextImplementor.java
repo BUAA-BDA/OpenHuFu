@@ -72,12 +72,12 @@ public class PlaintextImplementor {
     if (proto.getWhereExpCount() > 0) {
       dataSet.filter(proto.getWhereExpList());
     }
-    if (proto.getSelectExpCount() > 0) {
-      dataSet.filter(proto.getSelectExpList());
-    }
-    if (proto.getAggExpCount() > 0) {
-      dataSet.filter(proto.getAggExpList());
-    }
+    // if (proto.getSelectExpCount() > 0) {
+    //   dataSet.filter(proto.getSelectExpList());
+    // }
+    // if (proto.getAggExpCount() > 0) {
+    //   dataSet.filter(proto.getAggExpList());
+    // }
     // todo: add sort and limit
     return dataSet;
   }
