@@ -12,17 +12,17 @@ import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
 import com.hufudb.onedb.rpc.OneDBCommon.RowsProto;
 
 public class BasicDataSet implements EnumerableDataSet {
-  Header header;
-  List<Row> rows;
-  int cursor = 0;
-  Row current = null;
+  protected Header header;
+  protected List<Row> rows;
+  protected int cursor = 0;
+  protected Row current = null;
 
-  BasicDataSet(Header header, List<Row> rows) {
+  protected BasicDataSet(Header header, List<Row> rows) {
     this.header = header;
     this.rows = rows;
   }
 
-  BasicDataSet(Header header) {
+  protected BasicDataSet(Header header) {
     this.header = header;
     rows = new ArrayList<>();
   }

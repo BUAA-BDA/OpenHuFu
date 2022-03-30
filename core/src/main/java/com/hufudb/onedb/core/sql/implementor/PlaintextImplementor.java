@@ -14,14 +14,13 @@ import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.config.OneDBConfig;
 import com.hufudb.onedb.core.data.BasicDataSet;
 import com.hufudb.onedb.core.data.Header;
-import com.hufudb.onedb.core.data.Row;
 import com.hufudb.onedb.core.data.StreamBuffer;
+import com.hufudb.onedb.core.data.query.QueryableDataSet;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
+import com.hufudb.onedb.core.sql.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
 import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
-import com.hufudb.onedb.core.sql.enumerator.RowEnumerator;
 
-import org.apache.calcite.linq4j.Enumerator;
 import org.apache.calcite.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,35 +36,50 @@ public class PlaintextImplementor {
     this.executorService = Executors.newFixedThreadPool(OneDBConfig.CLIENT_THREAD_NUM);
   }
 
-  public Enumerator<Row> implement(OneDBQueryProto proto) {
+  public QueryableDataSet implement(OneDBQueryProto proto) {
     if (isLeaf(proto)) {
       return implementSingle(proto);
     } else {
-      Enumerator<Row> left = implement(proto.getLeft());
-      Enumerator<Row> right = implement(proto.getRight());
+      QueryableDataSet left = implement(proto.getLeft());
+      QueryableDataSet right = implement(proto.getRight());
       return implementBinary(proto, left, right);
     }
   }
 
-  Enumerator<Row> implementSingle(OneDBQueryProto proto) {
+  // for single query, where and select has already implemented in owner side
+  // only need to implement aggregate, sort and limit
+  QueryableDataSet implementSingle(OneDBQueryProto proto) {
     String tableName = proto.getTableName();
     assert !tableName.isEmpty();
     List<Pair<OwnerClient, String>> tableClients = client.getTableClients(tableName);
     StreamBuffer<DataSetProto> streamProto = tableQuery(proto, tableClients);
     Header header = OneDBExpression.generateHeader(proto.getSelectExpList());
-    if (proto.getAggExpCount() > 0) {
-      BasicDataSet localDataSet = BasicDataSet.of(header);
-      while (streamProto.hasNext()) {
-        localDataSet.mergeDataSet(BasicDataSet.fromProto(streamProto.next()));
-      }
-      return localDataSet;
-    } else {
-      return new RowEnumerator(streamProto, proto.getFetch());
+    // todo: optimze for streamDataSet
+    BasicDataSet localDataSet = BasicDataSet.of(header);
+    while (streamProto.hasNext()) {
+      localDataSet.mergeDataSet(BasicDataSet.fromProto(streamProto.next()));
     }
+    QueryableDataSet queryable = QueryableDataSet.fromBasic(localDataSet);
+    if (proto.getAggExpCount() > 0) {
+      queryable.aggregate(proto.getAggExpList());
+    }
+    // todo: add sort and limit
+    return queryable;
   }
 
-  Enumerator<Row> implementBinary(OneDBQueryProto proto, Enumerator<Row> left, Enumerator<Row> right) {
-    return new RowEnumerator(null, 0);
+  QueryableDataSet implementBinary(OneDBQueryProto proto, QueryableDataSet left, QueryableDataSet right) {
+    QueryableDataSet dataSet = QueryableDataSet.join(left, right, new OneDBJoinInfo(proto));
+    if (proto.getWhereExpCount() > 0) {
+      dataSet.filter(proto.getWhereExpList());
+    }
+    if (proto.getSelectExpCount() > 0) {
+      dataSet.filter(proto.getSelectExpList());
+    }
+    if (proto.getAggExpCount() > 0) {
+      dataSet.filter(proto.getAggExpList());
+    }
+    // todo: add sort and limit
+    return dataSet;
   }
 
   private StreamBuffer<DataSetProto> tableQuery(OneDBQueryProto query, List<Pair<OwnerClient, String>> tableClients) {
