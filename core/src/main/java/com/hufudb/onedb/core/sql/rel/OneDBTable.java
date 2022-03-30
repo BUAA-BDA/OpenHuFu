@@ -41,8 +41,6 @@ import org.apache.calcite.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
-
 public class OneDBTable extends AbstractQueryableTable implements TranslatableTable {
   private static final Logger LOG = LoggerFactory.getLogger(OneDBTable.class);
 

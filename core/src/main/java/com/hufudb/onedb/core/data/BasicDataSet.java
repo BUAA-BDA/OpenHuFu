@@ -11,18 +11,19 @@ import org.apache.commons.lang3.SerializationUtils;
 import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
 import com.hufudb.onedb.rpc.OneDBCommon.RowsProto;
 
-public class BasicDataSet extends EnumerableDataSet {
+public class BasicDataSet implements EnumerableDataSet {
+  Header header;
   List<Row> rows;
   int cursor = 0;
   Row current = null;
 
   BasicDataSet(Header header, List<Row> rows) {
-    super(header);
+    this.header = header;
     this.rows = rows;
   }
 
   BasicDataSet(Header header) {
-    super(header);
+    this.header = header;
     rows = new ArrayList<>();
   }
 
@@ -44,6 +45,11 @@ public class BasicDataSet extends EnumerableDataSet {
 
   public static BasicDataSet of(Header header) {
     return new BasicDataSet(header);
+  }
+
+  @Override
+  public Header getHeader() {
+    return header;
   }
 
   @Override
@@ -94,7 +100,7 @@ public class BasicDataSet extends EnumerableDataSet {
   }
 
   @Override
-  List<Row> getRows() {
+  public List<Row> getRows() {
     return rows;
   }
 }

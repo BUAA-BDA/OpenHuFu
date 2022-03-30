@@ -6,11 +6,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.data.Row;
-import com.hufudb.onedb.core.sql.rel.OneDBImplementor;
+import com.hufudb.onedb.core.sql.implementor.PlaintextImplementor;
 import com.hufudb.onedb.core.sql.rel.OneDBQueryContext;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
 import com.hufudb.onedb.core.table.OneDBTableInfo;
-import com.hufudb.onedb.core.utils.EmptyEnumerator;
 
 import org.apache.calcite.linq4j.Enumerator;
 import org.apache.calcite.schema.Table;
@@ -27,13 +26,13 @@ public class OneDBClient {
   private final OneDBSchema schema;
   private final Map<String, OwnerClient> ownerMap;
   private final Map<String, OneDBTableInfo> tableMap;
-  private final OneDBImplementor implementor;
+  private final PlaintextImplementor implementor;
 
   public OneDBClient(OneDBSchema schema) {
     this.schema = schema;
     ownerMap = new ConcurrentHashMap<>();
     tableMap = new ConcurrentHashMap<>();
-    implementor = new OneDBImplementor(this);
+    implementor = new PlaintextImplementor(this);
   }
 
   Map<String, OneDBTableInfo> getTableMap() {
@@ -132,7 +131,5 @@ public class OneDBClient {
   public Enumerator<Row> oneDBQuery(long contextId) {
     OneDBQueryContext context = OneDBQueryContext.getContext(contextId);
     return implementor.implement(context.toProto());
-    // LOG.info("execute query id[{}]: {}", contextId, context.toProtoStr());
-    // return new EmptyEnumerator<>();
   }
 }

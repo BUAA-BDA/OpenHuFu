@@ -149,16 +149,16 @@ public class PostgresqlService extends OwnerService {
   }
 
   String generateSQL(OneDBQueryProto query) {
-    String tableName = getOriginTableName(query.getTableName());
+    String originTableName = getOriginTableName(query.getTableName());
     Header tableHeader = getPublishedTableHeader(query.getTableName());
-    LOG.info("{}: {}", tableName, tableHeader);
+    LOG.info("{}: {}", originTableName, tableHeader);
     List<String> filters = OneDBTranslator.tranlateExps(tableHeader, OneDBExpression.fromProto(query.getWhereExpList()));
     List<String> selects = OneDBTranslator.tranlateExps(tableHeader, OneDBExpression.fromProto(query.getSelectExpList()));
     if (query.getAggExpCount() > 0) {
       selects = OneDBTranslator.translateAgg(selects, OneDBExpression.fromProto(query.getAggExpList()));
     }
     // select clause
-    StringBuilder sql = new StringBuilder(String.format("SELECT %s from %s", String.join(",", selects), tableName));
+    StringBuilder sql = new StringBuilder(String.format("SELECT %s from %s", String.join(",", selects), originTableName));
     // where clause
     if (filters.size() != 0) {
       sql.append(String.format(" where %s", String.join(" AND ", filters)));

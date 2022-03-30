@@ -2,16 +2,9 @@ package com.hufudb.onedb.core.data;
 
 import java.util.List;
 
-public abstract class DataSet {
-  final Header header;
+public interface DataSet {
 
-  DataSet(Header header) {
-    this.header = header;
-  }
-
-  public Header getHeader() {
-    return header;
-  }
+  public Header getHeader();
 
   public abstract int getRowCount();
 
@@ -21,5 +14,5 @@ public abstract class DataSet {
 
   public abstract void mergeDataSet(DataSet dataSet);
 
-  abstract List<Row> getRows();
+  public abstract List<Row> getRows();
 }

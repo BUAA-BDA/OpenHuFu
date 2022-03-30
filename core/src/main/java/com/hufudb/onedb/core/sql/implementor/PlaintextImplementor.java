@@ -1,4 +1,4 @@
-package com.hufudb.onedb.core.sql.rel;
+package com.hufudb.onedb.core.sql.implementor;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -8,7 +8,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
 
 import com.hufudb.onedb.core.client.OneDBClient;
 import com.hufudb.onedb.core.client.OwnerClient;
@@ -27,14 +26,13 @@ import org.apache.calcite.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-public class OneDBImplementor {
-  private static final Logger LOG = LoggerFactory.getLogger(OneDBClient.class);
+public class PlaintextImplementor {
+  private static final Logger LOG = LoggerFactory.getLogger(PlaintextImplementor.class);
 
   private final OneDBClient client;
   private final ExecutorService executorService;
 
-  public OneDBImplementor(OneDBClient client) {
+  public PlaintextImplementor(OneDBClient client) {
     this.client = client;
     this.executorService = Executors.newFixedThreadPool(OneDBConfig.CLIENT_THREAD_NUM);
   }
@@ -54,8 +52,7 @@ public class OneDBImplementor {
     assert !tableName.isEmpty();
     List<Pair<OwnerClient, String>> tableClients = client.getTableClients(tableName);
     StreamBuffer<DataSetProto> streamProto = tableQuery(proto, tableClients);
-    Header header = OneDBExpression
-        .generateHeader(proto.getSelectExpList());
+    Header header = OneDBExpression.generateHeader(proto.getSelectExpList());
     if (proto.getAggExpCount() > 0) {
       BasicDataSet localDataSet = BasicDataSet.of(header);
       while (streamProto.hasNext()) {
@@ -108,4 +105,3 @@ public class OneDBImplementor {
     return !(proto.hasLeft() && proto.hasRight());
   }
 }
-
