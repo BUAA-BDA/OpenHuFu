@@ -5,10 +5,12 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Row;
 
+// plaintext interpreter for onedb expression
 public class ExpressionInterpreter {
-  // Function<Comparable, Comparable, Comparable> num;
+
   public static Comparable implement(Row row, OneDBExpression e) {
     switch (e.getOpType()) {
       case REF:
@@ -85,5 +87,33 @@ public class ExpressionInterpreter {
                 || comparable instanceof Short
                     ? new BigDecimal(((Number) comparable).longValue())
                     : new BigDecimal(((Number) comparable).doubleValue());
+  }
+
+  public static Comparable cast(Comparable in, final FieldType type) {
+    switch(type) {
+      case STRING:
+        return in;
+      case BOOLEAN:
+        return in;
+      case BYTE:
+        return number(in).byteValue();
+      case SHORT:
+        return number(in).shortValue();
+      case INT:
+        return number(in).intValue();
+      case DATE:
+      case TIME:
+      case TIMESTAMP:
+      case LONG:
+        return number(in).longValue();
+      case FLOAT:
+        return number(in).floatValue();
+      case DOUBLE:
+        return number(in).doubleValue();
+      case POINT:
+        return in;
+      default:
+        throw new UnsupportedOperationException("field type not support");
+    }
   }
 }

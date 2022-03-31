@@ -1,6 +1,5 @@
 package com.hufudb.onedb.core.sql.rel;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -9,7 +8,6 @@ import com.google.protobuf.TextFormat;
 import com.google.protobuf.TextFormat.ParseException;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
-import com.hufudb.onedb.rpc.OneDBCommon.ExpressionProto;
 import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
 
 public class OneDBQueryContext {
@@ -70,9 +68,9 @@ public class OneDBQueryContext {
 
   public static Header generateHeader(OneDBQueryProto proto) {
     if (proto.getAggExpCount() > 0) {
-      return OneDBExpression.generateHeader(proto.getAggExpList());
+      return OneDBExpression.generateHeaderFromProto(proto.getAggExpList());
     } else {
-      return OneDBExpression.generateHeader(proto.getSelectExpList());
+      return OneDBExpression.generateHeaderFromProto(proto.getSelectExpList());
     }
   }
 

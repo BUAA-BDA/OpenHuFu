@@ -44,6 +44,12 @@ public class Header {
     return fields.get(index).type;
   }
 
+  public List<FieldType> getTypeList() {
+    ImmutableList.Builder<FieldType> types = ImmutableList.builder();
+    fields.stream().forEach(field -> types.add(field.getType()));
+    return types.build();
+  }
+
   public int getTypeId(int index) {
     return fields.get(index).type.ordinal();
   }

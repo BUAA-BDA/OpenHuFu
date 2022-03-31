@@ -53,7 +53,7 @@ public class PlaintextImplementor {
     assert !tableName.isEmpty();
     List<Pair<OwnerClient, String>> tableClients = client.getTableClients(tableName);
     StreamBuffer<DataSetProto> streamProto = tableQuery(proto, tableClients);
-    Header header = OneDBExpression.generateHeader(proto.getSelectExpList());
+    Header header = OneDBExpression.generateHeaderFromProto(proto.getSelectExpList());
     // todo: optimze for streamDataSet
     BasicDataSet localDataSet = BasicDataSet.of(header);
     while (streamProto.hasNext()) {
@@ -72,9 +72,9 @@ public class PlaintextImplementor {
     if (proto.getWhereExpCount() > 0) {
       dataSet.filter(proto.getWhereExpList());
     }
-    // if (proto.getSelectExpCount() > 0) {
-    //   dataSet.filter(proto.getSelectExpList());
-    // }
+    if (proto.getSelectExpCount() > 0) {
+      dataSet.select(proto.getSelectExpList());
+    }
     // if (proto.getAggExpCount() > 0) {
     //   dataSet.filter(proto.getAggExpList());
     // }
