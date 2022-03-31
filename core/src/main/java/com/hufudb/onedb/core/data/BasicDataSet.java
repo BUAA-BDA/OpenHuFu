@@ -24,15 +24,6 @@ public class BasicDataSet implements EnumerableDataSet {
     rows = new ArrayList<>();
   }
 
-  public DataSetProto toProto() {
-    DataSetProto.Builder proto = DataSetProto.newBuilder();
-    proto.setHeader(header.toProto());
-    RowsProto.Builder rowsProto = RowsProto.newBuilder();
-    rows.stream()
-        .forEach(row -> rowsProto.addRow(ByteString.copyFrom(SerializationUtils.serialize(row))));
-    return proto.setRows(rowsProto).build();
-  }
-
   public static BasicDataSet fromProto(DataSetProto proto) {
     Header header = Header.fromProto(proto.getHeader());
     RowsProto rowsProto = proto.getRows();
@@ -45,6 +36,15 @@ public class BasicDataSet implements EnumerableDataSet {
 
   public static BasicDataSet of(Header header) {
     return new BasicDataSet(header);
+  }
+
+  public DataSetProto toProto() {
+    DataSetProto.Builder proto = DataSetProto.newBuilder();
+    proto.setHeader(header.toProto());
+    RowsProto.Builder rowsProto = RowsProto.newBuilder();
+    rows.stream()
+        .forEach(row -> rowsProto.addRow(ByteString.copyFrom(SerializationUtils.serialize(row))));
+    return proto.setRows(rowsProto).build();
   }
 
   @Override

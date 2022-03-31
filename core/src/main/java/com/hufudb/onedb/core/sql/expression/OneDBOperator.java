@@ -18,20 +18,10 @@ import org.apache.calcite.sql.validate.SqlUserDefinedFunction;
  * tree node of expression tree
  */
 public class OneDBOperator implements OneDBExpression {
-  public enum FuncType {
-    NONE,
-    ABS;
-
-    public static FuncType of(int id) {
-      return FuncType.values()[id];
-    }
-  }
-
   OneDBOpType opType;
   FieldType outType;
   List<OneDBExpression> inputs;
   FuncType funcType;
-
   OneDBOperator(
       OneDBOpType opType, FieldType outType, List<OneDBExpression> inputs, FuncType funcType) {
     this.opType = opType;
@@ -39,27 +29,6 @@ public class OneDBOperator implements OneDBExpression {
     this.inputs = inputs;
     this.funcType = funcType;
   }
-
-  public ExpressionProto toProto() {
-    ExpressionProto.Builder builder = ExpressionProto.newBuilder();
-    builder.setOpType(opType.ordinal());
-    builder.setOutType(outType.ordinal());
-    builder.addAllIn(inputs.stream().map(e -> e.toProto()).collect(Collectors.toList()));
-    builder.setFunc(funcType.ordinal());
-    return builder.build();
-  }
-
-  public List<OneDBExpression> getInputs() {
-    return inputs;
-  }
-
-  public FuncType getFuncType() {
-    return funcType;
-  }
-
-  /*
-   * functions to build operator tree
-   */
 
   public static OneDBExpression fromRexNode(RexNode node) {
     return new OperatorBuilder(ImmutableList.of(node)).build().get(0);
@@ -85,6 +54,46 @@ public class OneDBOperator implements OneDBExpression {
 
   public static List<OneDBExpression> fromRexNodes(RexProgram program, List<OneDBExpression> ins) {
     return new OperatorBuilder(program.getExprList(), program.getProjectList(), ins).build();
+  }
+
+  /*
+   * functions to build operator tree
+   */
+
+  public ExpressionProto toProto() {
+    ExpressionProto.Builder builder = ExpressionProto.newBuilder();
+    builder.setOpType(opType.ordinal());
+    builder.setOutType(outType.ordinal());
+    builder.addAllIn(inputs.stream().map(e -> e.toProto()).collect(Collectors.toList()));
+    builder.setFunc(funcType.ordinal());
+    return builder.build();
+  }
+
+  public List<OneDBExpression> getInputs() {
+    return inputs;
+  }
+
+  public FuncType getFuncType() {
+    return funcType;
+  }
+
+  @Override
+  public FieldType getOutType() {
+    return outType;
+  }
+
+  @Override
+  public OneDBOpType getOpType() {
+    return opType;
+  }
+
+  public enum FuncType {
+    NONE,
+    ABS;
+
+    public static FuncType of(int id) {
+      return FuncType.values()[id];
+    }
   }
 
   private static class OperatorBuilder {
@@ -279,15 +288,5 @@ public class OneDBOperator implements OneDBExpression {
       FieldType type = TypeConverter.convert2OneDBType(call.getType().getSqlTypeName());
       return new OneDBOperator(op, type, eles, func);
     }
-  }
-
-  @Override
-  public FieldType getOutType() {
-    return outType;
-  }
-
-  @Override
-  public OneDBOpType getOpType() {
-    return opType;
   }
 }

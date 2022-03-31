@@ -12,7 +12,7 @@ import org.apache.zookeeper.data.ACL;
 
 public class DBZkClient extends ZkClient {
   private final String dbRootPath;
-  private List<ACL> DB_AUTH;
+  private final List<ACL> DB_AUTH;
 
   public DBZkClient(String servers, String zkRootPath, String endpoint, byte[] digest)
       throws IOException, KeeperException, InterruptedException {

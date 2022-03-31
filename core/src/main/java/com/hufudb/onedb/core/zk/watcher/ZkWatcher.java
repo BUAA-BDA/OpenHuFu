@@ -13,13 +13,13 @@ public abstract class ZkWatcher implements Watcher {
   protected final OneDBSchema schema;
   protected final String path;
 
-  protected static String buildPath(String rootPath, String nodeName) {
-    return rootPath + "/" + nodeName;
-  }
-
   public ZkWatcher(OneDBSchema schema, ZooKeeper zk, String path) {
     this.schema = schema;
     this.zk = zk;
     this.path = path;
+  }
+
+  protected static String buildPath(String rootPath, String nodeName) {
+    return rootPath + "/" + nodeName;
   }
 }

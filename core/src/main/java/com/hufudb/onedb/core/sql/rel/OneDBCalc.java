@@ -26,6 +26,20 @@ public class OneDBCalc extends Calc implements OneDBRel {
     super(cluster, traitSet, ImmutableList.of(), input, program);
   }
 
+  public static OneDBCalc create(final RelNode input, final RexProgram program) {
+    final RelOptCluster cluster = input.getCluster();
+    final RelMetadataQuery mq = cluster.getMetadataQuery();
+    final RelTraitSet traitSet =
+        cluster
+            .traitSet()
+            .replace(OneDBRel.CONVENTION)
+            .replaceIfs(
+                RelCollationTraitDef.INSTANCE, () -> RelMdCollation.calc(mq, input, program))
+            .replaceIf(
+                RelDistributionTraitDef.INSTANCE, () -> RelMdDistribution.calc(mq, input, program));
+    return new OneDBCalc(cluster, traitSet, input, program);
+  }
+
   @Override
   public RelOptCost computeSelfCost(RelOptPlanner planner, RelMetadataQuery mq) {
     RelNode child = ((RelSubset) getInput()).getBest();
@@ -49,19 +63,5 @@ public class OneDBCalc extends Calc implements OneDBRel {
   @Override
   public Calc copy(RelTraitSet traits, RelNode child, RexProgram program) {
     return new OneDBCalc(getCluster(), traits, child, program);
-  }
-
-  public static OneDBCalc create(final RelNode input, final RexProgram program) {
-    final RelOptCluster cluster = input.getCluster();
-    final RelMetadataQuery mq = cluster.getMetadataQuery();
-    final RelTraitSet traitSet =
-        cluster
-            .traitSet()
-            .replace(OneDBRel.CONVENTION)
-            .replaceIfs(
-                RelCollationTraitDef.INSTANCE, () -> RelMdCollation.calc(mq, input, program))
-            .replaceIf(
-                RelDistributionTraitDef.INSTANCE, () -> RelMdDistribution.calc(mq, input, program));
-    return new OneDBCalc(cluster, traitSet, input, program);
   }
 }

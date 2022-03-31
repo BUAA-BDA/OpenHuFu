@@ -28,22 +28,6 @@ public class OneDBFilterRule extends RelRule<OneDBFilterRule.OneDBFilterRuleConf
     return disjunctions.size() == 1;
   }
 
-  @Value.Immutable
-  public interface OneDBFilterRuleConfig extends RelRule.Config {
-    OneDBFilterRuleConfig DEFAULT =
-        ImmutableOneDBFilterRuleConfig.builder()
-            .operandSupplier(
-                b0 ->
-                    b0.operand(LogicalFilter.class)
-                        .oneInput(b1 -> b1.operand(OneDBTableScan.class).noInputs()))
-            .build();
-
-    @Override
-    default OneDBFilterRule toRule() {
-      return new OneDBFilterRule(this);
-    }
-  }
-
   @Override
   public void onMatch(RelOptRuleCall call) {
     LogicalFilter filter = call.rel(0);
@@ -63,5 +47,21 @@ public class OneDBFilterRule extends RelRule<OneDBFilterRule.OneDBFilterRuleConf
         traitSet,
         convert(filter.getInput(), OneDBRel.CONVENTION),
         filter.getCondition());
+  }
+
+  @Value.Immutable
+  public interface OneDBFilterRuleConfig extends RelRule.Config {
+    OneDBFilterRuleConfig DEFAULT =
+        ImmutableOneDBFilterRuleConfig.builder()
+            .operandSupplier(
+                b0 ->
+                    b0.operand(LogicalFilter.class)
+                        .oneInput(b1 -> b1.operand(OneDBTableScan.class).noInputs()))
+            .build();
+
+    @Override
+    default OneDBFilterRule toRule() {
+      return new OneDBFilterRule(this);
+    }
   }
 }

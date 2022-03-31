@@ -43,6 +43,22 @@ public class Row implements Serializable {
     return new Row(values);
   }
 
+  public static Row merge(Row left, Row right) {
+    Object[] values = Arrays.copyOf(left.values, left.size() + right.size());
+    System.arraycopy(right.values, 0, values, left.size(), right.size());
+    return new Row(values);
+  }
+
+  /**
+   * Create a RowBuilder object that eases creation of a new row.
+   *
+   * @param size Number of columns in output data.
+   * @return New RowBuilder object.
+   */
+  public static RowBuilder newBuilder(int size) {
+    return new RowBuilder(size);
+  }
+
   @Override
   public int hashCode() {
     return Arrays.hashCode(values);
@@ -74,22 +90,6 @@ public class Row implements Serializable {
 
   public int size() {
     return values.length;
-  }
-
-  public static Row merge(Row left, Row right) {
-    Object[] values = Arrays.copyOf(left.values, left.size() + right.size());
-    System.arraycopy(right.values, 0, values, left.size(), right.size());
-    return new Row(values);
-  }
-
-  /**
-   * Create a RowBuilder object that eases creation of a new row.
-   *
-   * @param size Number of columns in output data.
-   * @return New RowBuilder object.
-   */
-  public static RowBuilder newBuilder(int size) {
-    return new RowBuilder(size);
   }
 
   /** Utility class to build row objects. */

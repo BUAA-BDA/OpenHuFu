@@ -19,12 +19,11 @@ import org.slf4j.LoggerFactory;
 
 public class OneDBTableInfo {
   private static final Logger LOG = LoggerFactory.getLogger(OneDBSchema.class);
-
-  private String name;
-  private Header header;
-  private Map<String, Integer> columnMap;
-  private List<Pair<OwnerClient, String>> tableList;
   private final ReadWriteLock lock;
+  private final String name;
+  private final Header header;
+  private final Map<String, Integer> columnMap;
+  private List<Pair<OwnerClient, String>> tableList;
 
   public OneDBTableInfo(String name, Header header) {
     this.name = name;

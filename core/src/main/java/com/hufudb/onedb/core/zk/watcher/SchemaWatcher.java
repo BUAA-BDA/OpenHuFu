@@ -11,7 +11,7 @@ import org.apache.zookeeper.Watcher.Event.KeeperState;
 import org.apache.zookeeper.ZooKeeper;
 
 public class SchemaWatcher extends ZkWatcher {
-  private OneDBZkClient zkClient;
+  private final OneDBZkClient zkClient;
 
   public SchemaWatcher(OneDBSchema schema, ZooKeeper zk, String path, OneDBZkClient zkClient) {
     super(schema, zk, path);

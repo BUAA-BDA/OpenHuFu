@@ -11,7 +11,7 @@ public class RowEnumerator implements Enumerator<Row> {
 
   private final Enumerator<Row> enumerator;
   private int cnt;
-  private int limitCount;
+  private final int limitCount;
 
   public RowEnumerator(StreamBuffer<DataSetProto> iter, int limitCount) {
     enumerator = new StreamEnumerator(iter);

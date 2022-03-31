@@ -18,7 +18,7 @@ public class GlobalTableWatcher extends ZkWatcher {
 
   public GlobalTableWatcher(OneDBSchema schema, ZooKeeper zk, String path) {
     super(schema, zk, path);
-    String dic[] = path.split("/");
+    String[] dic = path.split("/");
     String tableName = dic[dic.length - 1];
     this.tableInfo = schema.getOneDBTableInfo(tableName);
   }

@@ -51,11 +51,6 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
     this.tableInfo = new OneDBTableInfo(tableName, header);
   }
 
-  @Override
-  public RelDataType getRowType(RelDataTypeFactory typeFactory) {
-    return protoRowType.apply(typeFactory);
-  }
-
   static Table create(
       OneDBSchema schema, String tableName, Header header, RelProtoDataType protoRowType) {
     return new OneDBTable(tableName, schema, header, protoRowType);
@@ -83,7 +78,7 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
               "Header of {} {} {} mismatch with {} {} {}",
               localInfos.get(0).getKey(),
               localInfos.get(0).getValue().getName(),
-              standard.toString(),
+              standard,
               pair.getKey(),
               standard.getName(),
               standard.getHeader());
@@ -154,29 +149,13 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
     return RelDataTypeImpl.proto(fieldInfo.build());
   }
 
-  public void addOwner(OwnerClient client, String localName) {
-    tableInfo.addLocalTable(client, localName);
+  @Override
+  public RelDataType getRowType(RelDataTypeFactory typeFactory) {
+    return protoRowType.apply(typeFactory);
   }
 
-  public static class OneDBQueryable<T> extends AbstractTableQueryable<T> {
-    public OneDBQueryable(
-        QueryProvider queryProvider, SchemaPlus schema, OneDBTable table, String tableName) {
-      super(queryProvider, schema, table, tableName);
-    }
-
-    private OneDBTable getTable() {
-      return (OneDBTable) table;
-    }
-
-    @Override
-    public Enumerator<T> enumerator() {
-      final Enumerable<T> enumerable = (Enumerable<T>) getTable().query();
-      return enumerable.enumerator();
-    }
-
-    public Enumerable<Object> query(long contextId) {
-      return getTable().query(contextId);
-    }
+  public void addOwner(OwnerClient client, String localName) {
+    tableInfo.addLocalTable(client, localName);
   }
 
   public Enumerable<Object> query() {
@@ -227,5 +206,26 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
 
   protected OneDBSchema getSchema() {
     return schema;
+  }
+
+  public static class OneDBQueryable<T> extends AbstractTableQueryable<T> {
+    public OneDBQueryable(
+        QueryProvider queryProvider, SchemaPlus schema, OneDBTable table, String tableName) {
+      super(queryProvider, schema, table, tableName);
+    }
+
+    private OneDBTable getTable() {
+      return (OneDBTable) table;
+    }
+
+    @Override
+    public Enumerator<T> enumerator() {
+      final Enumerable<T> enumerable = (Enumerable<T>) getTable().query();
+      return enumerable.enumerator();
+    }
+
+    public Enumerable<Object> query(long contextId) {
+      return getTable().query(contextId);
+    }
   }
 }

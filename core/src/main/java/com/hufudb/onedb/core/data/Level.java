@@ -9,11 +9,11 @@ public enum Level {
   PUBLIC,
   @SerializedName(
       "protected") // protected columns can be scanned but data source information will be hidden
-                   // from client and other dataServers
+  // from client and other dataServers
   PROTECTED,
   @SerializedName(
       "private") // can't scan private columns directly, only statistics including COUNT, SUM, AVG
-                 // can use on these columns
+  // can use on these columns
   PRIVATE;
 
   public static Level of(int ordinal) {

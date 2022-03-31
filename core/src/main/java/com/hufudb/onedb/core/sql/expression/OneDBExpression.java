@@ -8,13 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public interface OneDBExpression {
-  public ExpressionProto toProto();
-
-  public FieldType getOutType();
-
-  public OneDBOpType getOpType();
-
-  public static Header generateHeader(List<OneDBExpression> exps) {
+  static Header generateHeader(List<OneDBExpression> exps) {
     Header.Builder builder = Header.newBuilder();
     exps.stream()
         .forEach(
@@ -24,7 +18,7 @@ public interface OneDBExpression {
     return builder.build();
   }
 
-  public static Header generateHeaderFromProto(List<ExpressionProto> exps) {
+  static Header generateHeaderFromProto(List<ExpressionProto> exps) {
     Header.Builder builder = Header.newBuilder();
     exps.stream()
         .forEach(
@@ -34,7 +28,7 @@ public interface OneDBExpression {
     return builder.build();
   }
 
-  public static OneDBExpression fromProto(ExpressionProto proto) {
+  static OneDBExpression fromProto(ExpressionProto proto) {
     OneDBOpType opType = OneDBOpType.of(proto.getOpType());
     switch (opType) {
       case REF:
@@ -55,7 +49,13 @@ public interface OneDBExpression {
     return new OneDBOperator(opType, outType, elements, funcType);
   }
 
-  public static List<OneDBExpression> fromProto(List<ExpressionProto> protos) {
+  static List<OneDBExpression> fromProto(List<ExpressionProto> protos) {
     return protos.stream().map(proto -> fromProto(proto)).collect(Collectors.toList());
   }
+
+  ExpressionProto toProto();
+
+  FieldType getOutType();
+
+  OneDBOpType getOpType();
 }

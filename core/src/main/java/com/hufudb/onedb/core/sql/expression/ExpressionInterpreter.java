@@ -37,17 +37,17 @@ public class ExpressionInterpreter {
     switch (op.getOpType()) {
         // binary
       case GT:
-        return (Boolean) (inputs.get(0).compareTo(inputs.get(1)) > 0);
+        return inputs.get(0).compareTo(inputs.get(1)) > 0;
       case GE:
-        return (Boolean) (inputs.get(0).compareTo(inputs.get(1)) >= 0);
+        return inputs.get(0).compareTo(inputs.get(1)) >= 0;
       case LT:
-        return (Boolean) (inputs.get(0).compareTo(inputs.get(1)) < 0);
+        return inputs.get(0).compareTo(inputs.get(1)) < 0;
       case LE:
-        return (Boolean) (inputs.get(0).compareTo(inputs.get(1)) <= 0);
+        return inputs.get(0).compareTo(inputs.get(1)) <= 0;
       case EQ:
-        return (Boolean) (inputs.get(0).compareTo(inputs.get(1)) == 0);
+        return inputs.get(0).compareTo(inputs.get(1)) == 0;
       case NE:
-        return (Boolean) (inputs.get(0).compareTo(inputs.get(1)) != 0);
+        return inputs.get(0).compareTo(inputs.get(1)) != 0;
       case PLUS:
         return number(inputs.get(0)).add(number(inputs.get(1)));
       case MINUS:
@@ -70,7 +70,7 @@ public class ExpressionInterpreter {
       case MINUS_PRE:
         return number(inputs.get(0)).negate();
       case NOT:
-        return (Boolean) inputs.get(0);
+        return inputs.get(0);
         // todo: support scalar functions
       default:
         throw new UnsupportedOperationException("operator not support in intereperter");

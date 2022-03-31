@@ -32,14 +32,14 @@ public abstract class ZkClient implements Watcher {
     }
   }
 
+  protected static String buildPath(String rootPath, String nodeName) {
+    return rootPath + "/" + nodeName;
+  }
+
   protected void initRootPath() throws KeeperException, InterruptedException {
     LOG.info("root path: {}; endpoint path: {}", zkRootPath, endpointRootPath);
     createRecursive(endpointRootPath, Ids.OPEN_ACL_UNSAFE);
     createRecursive(schemaRootPath, Ids.OPEN_ACL_UNSAFE);
-  }
-
-  protected static String buildPath(String rootPath, String nodeName) {
-    return rootPath + "/" + nodeName;
   }
 
   protected boolean createRecursive(String path, List<ACL> acls) {

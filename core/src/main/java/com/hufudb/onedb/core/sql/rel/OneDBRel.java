@@ -16,9 +16,9 @@ import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.core.JoinInfo;
 
 public interface OneDBRel extends RelNode {
-  void implement(Implementor implementor);
-
   Convention CONVENTION = new Convention.Impl("OneDB", OneDBRel.class);
+
+  void implement(Implementor implementor);
 
   class Implementor {
     OneDBSchema schema;

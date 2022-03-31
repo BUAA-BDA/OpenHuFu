@@ -7,8 +7,6 @@ public enum Status {
   kOk(0),
   kError(1);
 
-  private final int id;
-
   private static final Map<Integer, Status> MAP = new HashMap<>();
 
   static {
@@ -16,6 +14,8 @@ public enum Status {
       MAP.put(s.id, s);
     }
   }
+
+  private final int id;
 
   Status(int id) {
     this.id = id;

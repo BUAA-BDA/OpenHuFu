@@ -25,9 +25,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class PostgresqlService extends OwnerService {
   private static final Logger LOG = LoggerFactory.getLogger(PostgresqlService.class);
+  private final String catalog;
   private DatabaseMetaData metaData;
   private Connection connection;
-  private final String catalog;
 
   public PostgresqlService(
       String hostname,

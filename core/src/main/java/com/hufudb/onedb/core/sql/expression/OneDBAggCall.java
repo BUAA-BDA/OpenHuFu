@@ -11,71 +11,9 @@ import java.util.stream.Collectors;
 import org.apache.calcite.rel.core.AggregateCall;
 
 public class OneDBAggCall implements OneDBExpression {
-  public enum AggregateType {
-    COUNT("COUNT"),
-    AVG("AVG"),
-    MAX("MAX"),
-    MIN("MIN"),
-    SUM("SUM"),
-    UNSUPPORT("UNSUPPORT");
-
-    private final String name;
-    private static final Map<String, AggregateType> MAP = new HashMap<>();
-
-    static {
-      for (AggregateType type : values()) {
-        MAP.put(type.name, type);
-      }
-    }
-
-    AggregateType(String name) {
-      this.name = name;
-    }
-
-    public static AggregateType of(String typeString) {
-      return MAP.get(typeString);
-    }
-
-    public static AggregateType of(int id) {
-      return values()[id];
-    }
-
-    public static AggregateType of(AggregateCall call) {
-      switch (call.getAggregation().getKind()) {
-        case COUNT:
-          return MAP.get("COUNT");
-        case AVG:
-          return MAP.get("AVG");
-        case MAX:
-          return MAP.get("MAX");
-        case MIN:
-          return MAP.get("MIN");
-        case SUM:
-          return MAP.get("SUM");
-        default:
-          return MAP.get("UNSUPPORT");
-      }
-    }
-  }
-
   AggregateType aggType;
   List<Integer> in;
   FieldType outType;
-
-  @Override
-  public ExpressionProto toProto() {
-    // todo: fix fromIndex type
-    return ExpressionProto.newBuilder()
-        .setOpType(OneDBOpType.AGG_FUNC.ordinal())
-        .setFunc(aggType.ordinal())
-        .setOutType(outType.ordinal())
-        .addAllIn(
-            in.stream()
-                .map(i -> OneDBReference.fromIndex(outType, i).toProto())
-                .collect(Collectors.toList()))
-        .build();
-  }
-
   OneDBAggCall(AggregateType aggType, List<Integer> args, FieldType type) {
     this.aggType = aggType;
     this.in = args;
@@ -111,6 +49,20 @@ public class OneDBAggCall implements OneDBExpression {
   }
 
   @Override
+  public ExpressionProto toProto() {
+    // todo: fix fromIndex type
+    return ExpressionProto.newBuilder()
+        .setOpType(OneDBOpType.AGG_FUNC.ordinal())
+        .setFunc(aggType.ordinal())
+        .setOutType(outType.ordinal())
+        .addAllIn(
+            in.stream()
+                .map(i -> OneDBReference.fromIndex(outType, i).toProto())
+                .collect(Collectors.toList()))
+        .build();
+  }
+
+  @Override
   public FieldType getOutType() {
     return outType;
   }
@@ -118,5 +70,53 @@ public class OneDBAggCall implements OneDBExpression {
   @Override
   public OneDBOpType getOpType() {
     return OneDBOpType.AGG_FUNC;
+  }
+
+  public enum AggregateType {
+    COUNT("COUNT"),
+    AVG("AVG"),
+    MAX("MAX"),
+    MIN("MIN"),
+    SUM("SUM"),
+    UNSUPPORT("UNSUPPORT");
+
+    private static final Map<String, AggregateType> MAP = new HashMap<>();
+
+    static {
+      for (AggregateType type : values()) {
+        MAP.put(type.name, type);
+      }
+    }
+
+    private final String name;
+
+    AggregateType(String name) {
+      this.name = name;
+    }
+
+    public static AggregateType of(String typeString) {
+      return MAP.get(typeString);
+    }
+
+    public static AggregateType of(int id) {
+      return values()[id];
+    }
+
+    public static AggregateType of(AggregateCall call) {
+      switch (call.getAggregation().getKind()) {
+        case COUNT:
+          return MAP.get("COUNT");
+        case AVG:
+          return MAP.get("AVG");
+        case MAX:
+          return MAP.get("MAX");
+        case MIN:
+          return MAP.get("MIN");
+        case SUM:
+          return MAP.get("SUM");
+        default:
+          return MAP.get("UNSUPPORT");
+      }
+    }
   }
 }

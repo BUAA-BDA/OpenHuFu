@@ -15,20 +15,7 @@ public class OneDBQueryContext {
   //
   // global OneDBQueryContext pool, queryContext are saved in this structure
   static final Map<Long, OneDBQueryContext> contexts = new ConcurrentHashMap<>();
-  private static AtomicLong counter = new AtomicLong(0);
-
-  public static OneDBQueryContext getContext(long cid) {
-    return contexts.get(cid);
-  }
-
-  public static void saveContext(OneDBQueryContext context) {
-    contexts.put(context.getContextId(), context);
-  }
-
-  public static void deleteContext(long id) {
-    contexts.remove(id);
-  }
-
+  private static final AtomicLong counter = new AtomicLong(0);
   //
   // context for a single query
   //
@@ -45,6 +32,18 @@ public class OneDBQueryContext {
     counter.compareAndSet(Long.MAX_VALUE, 0);
     id = counter.addAndGet(1);
     builder = OneDBQueryProto.newBuilder();
+  }
+
+  public static OneDBQueryContext getContext(long cid) {
+    return contexts.get(cid);
+  }
+
+  public static void saveContext(OneDBQueryContext context) {
+    contexts.put(context.getContextId(), context);
+  }
+
+  public static void deleteContext(long id) {
+    contexts.remove(id);
   }
 
   public static OneDBQueryContext fromProto(OneDBQueryProto.Builder proto) {

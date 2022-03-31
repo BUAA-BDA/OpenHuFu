@@ -5,9 +5,9 @@ import java.util.List;
 
 public class PublishedTableInfo {
 
-  private TableInfo fakeTableInfo;
-  private TableInfo originTableInfo;
-  private List<Integer> mappings;
+  private final TableInfo fakeTableInfo;
+  private final TableInfo originTableInfo;
+  private final List<Integer> mappings;
 
   public PublishedTableInfo(
       TableInfo tableInfo,

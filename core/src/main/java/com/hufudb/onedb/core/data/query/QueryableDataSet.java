@@ -36,14 +36,14 @@ public class QueryableDataSet extends BasicDataSet {
     return new QueryableDataSet(header);
   }
 
-  public List<FieldType> getTypeList() {
-    return header.getTypeList();
-  }
-
   // todo: now we just implement the equi-join, add theta join implement later
   public static QueryableDataSet join(
       QueryableDataSet left, QueryableDataSet right, OneDBJoinInfo joinInfo) {
     return PlaintextNestedLoopJoin.apply(left, right, joinInfo);
+  }
+
+  public List<FieldType> getTypeList() {
+    return header.getTypeList();
   }
 
   public QueryableDataSet filter(List<ExpressionProto> fil) {

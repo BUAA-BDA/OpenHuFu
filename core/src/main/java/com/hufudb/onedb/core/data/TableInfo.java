@@ -32,10 +32,6 @@ public class TableInfo {
     }
   }
 
-  public LocalTableInfoProto toProto() {
-    return LocalTableInfoProto.newBuilder().setName(name).setHeader(header.toProto()).build();
-  }
-
   public static TableInfo fromProto(LocalTableInfoProto proto) {
     return new TableInfo(proto.getName(), Header.fromProto(proto.getHeader()));
   }
@@ -54,10 +50,35 @@ public class TableInfo {
     return new TableInfo(name, new Header(fields));
   }
 
+  public static Builder newBuilder() {
+    return new Builder();
+  }
+
+  public LocalTableInfoProto toProto() {
+    return LocalTableInfoProto.newBuilder().setName(name).setHeader(header.toProto()).build();
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public Header getHeader() {
+    return header;
+  }
+
+  public Integer getColumnIndex(String name) {
+    return columnIndex.get(name);
+  }
+
+  @Override
+  public String toString() {
+    return String.format("[%s](%s)", name, header);
+  }
+
   public static class Builder {
-    protected String tableName;
     protected final Header.Builder builder;
     protected final Map<String, Integer> columnIndex;
+    protected String tableName;
 
     protected Builder() {
       this.builder = Header.newBuilder();
@@ -90,26 +111,5 @@ public class TableInfo {
     public TableInfo build() {
       return new TableInfo(tableName, builder.build(), columnIndex);
     }
-  }
-
-  public static Builder newBuilder() {
-    return new Builder();
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public Header getHeader() {
-    return header;
-  }
-
-  public Integer getColumnIndex(String name) {
-    return columnIndex.get(name);
-  }
-
-  @Override
-  public String toString() {
-    return String.format("[%s](%s)", name, header);
   }
 }

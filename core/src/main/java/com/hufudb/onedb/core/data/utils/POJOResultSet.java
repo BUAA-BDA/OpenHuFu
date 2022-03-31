@@ -18,22 +18,6 @@ public class POJOResultSet {
     this.rows = rows;
   }
 
-  public POJOHeader getHeader() {
-    return header;
-  }
-
-  public void setHeader(POJOHeader header) {
-    this.header = header;
-  }
-
-  public List<List<String>> getRows() {
-    return rows;
-  }
-
-  public void setRows(List<List<String>> rows) {
-    this.rows = rows;
-  }
-
   public static POJOResultSet fromResultSet(ResultSet rs) {
     try {
       ResultSetMetaData meta = rs.getMetaData();
@@ -55,5 +39,21 @@ public class POJOResultSet {
       e.printStackTrace();
       return new POJOResultSet();
     }
+  }
+
+  public POJOHeader getHeader() {
+    return header;
+  }
+
+  public void setHeader(POJOHeader header) {
+    this.header = header;
+  }
+
+  public List<List<String>> getRows() {
+    return rows;
+  }
+
+  public void setRows(List<List<String>> rows) {
+    this.rows = rows;
   }
 }

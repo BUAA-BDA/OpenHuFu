@@ -12,9 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class OneDBSchemaFactory implements SchemaFactory {
-  private static final Logger LOG = LoggerFactory.getLogger(OneDBSchemaFactory.class);
-
   public static final OneDBSchemaFactory INSTANCE = new OneDBSchemaFactory();
+  private static final Logger LOG = LoggerFactory.getLogger(OneDBSchemaFactory.class);
 
   private OneDBSchemaFactory() {}
 

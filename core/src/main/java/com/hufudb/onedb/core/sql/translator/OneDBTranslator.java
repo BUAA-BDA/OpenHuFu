@@ -27,20 +27,20 @@ public class OneDBTranslator {
     this.exps = aggs;
   }
 
-  List<String> translateAllExps() {
-    return exps.stream().map(exp -> translate(exp)).collect(Collectors.toList());
-  }
-
-  public List<String> translateAgg() {
-    return exps.stream().map(exp -> aggregateFunc((OneDBAggCall) exp)).collect(Collectors.toList());
-  }
-
   public static List<String> tranlateExps(Header inputHeader, List<OneDBExpression> exps) {
     return new OneDBTranslator(inputHeader, exps).translateAllExps();
   }
 
   public static List<String> translateAgg(List<String> exps, List<OneDBExpression> aggs) {
     return new OneDBTranslator(exps, aggs).translateAgg();
+  }
+
+  List<String> translateAllExps() {
+    return exps.stream().map(exp -> translate(exp)).collect(Collectors.toList());
+  }
+
+  public List<String> translateAgg() {
+    return exps.stream().map(exp -> aggregateFunc((OneDBAggCall) exp)).collect(Collectors.toList());
   }
 
   protected String translate(OneDBExpression exp) {
@@ -86,20 +86,20 @@ public class OneDBTranslator {
     FieldType type = literal.getOutType();
     switch (type) {
       case BOOLEAN:
-        return String.valueOf((Boolean) literal.getValue());
+        return String.valueOf(literal.getValue());
       case BYTE:
       case SHORT:
       case INT:
-        return String.valueOf((Integer) literal.getValue());
+        return String.valueOf(literal.getValue());
       case LONG:
       case DATE:
       case TIME:
       case TIMESTAMP:
-        return String.valueOf((Long) literal.getValue());
+        return String.valueOf(literal.getValue());
       case FLOAT:
-        return String.valueOf((Float) literal.getValue());
+        return String.valueOf(literal.getValue());
       case DOUBLE:
-        return String.valueOf((Double) literal.getValue());
+        return String.valueOf(literal.getValue());
       default:
         throw new RuntimeException("can't translate literal " + literal);
     }

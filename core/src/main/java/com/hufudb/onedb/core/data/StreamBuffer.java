@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory;
 public class StreamBuffer<E> implements Iterator<E> {
   private static final Logger LOG = LoggerFactory.getLogger(StreamBuffer.class);
 
-  private Queue<E> queue;
-  private AtomicInteger productorNum;
-  private Lock lock;
+  private final Queue<E> queue;
+  private final AtomicInteger productorNum;
+  private final Lock lock;
 
   public StreamBuffer(int productorNum) {
     queue = new ConcurrentLinkedQueue<E>();

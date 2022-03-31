@@ -7,12 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StreamObserverDataSet implements DataSet {
-  private int BATCH_SIZE = 100;
   private final StreamObserver<DataSetProto> observer;
+  private final int BATCH_SIZE = 100;
   private int count;
   private int rowCount;
-  private Header header;
-  private List<Row> rows;
+  private final Header header;
+  private final List<Row> rows;
 
   public StreamObserverDataSet(final StreamObserver<DataSetProto> observer, Header header) {
     this.header = header;

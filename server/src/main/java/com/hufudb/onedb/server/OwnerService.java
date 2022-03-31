@@ -35,6 +35,7 @@ import org.springframework.stereotype.Service;
 public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
   private static final Logger LOG = LoggerFactory.getLogger(OwnerService.class);
   protected final Map<String, OwnerClient> dbClientMap; // endpoint -> rpc_client
+  protected final String endpoint;
   private final Map<String, TableInfo> localTableInfoMap; // localName -> localTableInfo
   private final ReadWriteLock localLock;
   private final Map<String, PublishedTableInfo>
@@ -42,7 +43,6 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
   private final ReadWriteLock publishedLock;
   // private final ExecutorService executorService;
   private final DBZkClient zkClient;
-  protected final String endpoint;
 
   public OwnerService(String zkServers, String zkRootPath, String endpoint, String digest) {
     this.dbClientMap = new HashMap<>();
@@ -89,7 +89,7 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
   public void getTableHeader(GeneralRequest request, StreamObserver<HeaderProto> responseObserver) {
     Header fakeHeader = getPublishedTableHeader(request.getValue());
     HeaderProto headerProto = fakeHeader.toProto();
-    LOG.info("Get header of table {} {}", request.getValue(), fakeHeader.toString());
+    LOG.info("Get header of table {} {}", request.getValue(), fakeHeader);
     responseObserver.onNext(headerProto);
     responseObserver.onCompleted();
   }
@@ -237,7 +237,6 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
     LOG.error("change catalog operation is not supported in your database");
     return false;
   }
-  ;
 
   // must call this function in subclass's constructor
   public abstract void loadAllTableInfo();

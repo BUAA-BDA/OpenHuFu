@@ -13,8 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class OneDBTableFactory implements TableFactory {
-  private static final Logger LOG = LoggerFactory.getLogger(OneDBTableFactory.class);
   public static final OneDBTableFactory INSTANCE = new OneDBTableFactory();
+  private static final Logger LOG = LoggerFactory.getLogger(OneDBTableFactory.class);
 
   private OneDBTableFactory() {}
 

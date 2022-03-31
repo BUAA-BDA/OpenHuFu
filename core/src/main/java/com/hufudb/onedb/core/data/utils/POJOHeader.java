@@ -15,20 +15,20 @@ public class POJOHeader {
     this.fields = fields;
   }
 
-  public List<Field> getFields() {
-    return fields;
-  }
-
-  public void setFields(List<Field> fields) {
-    this.fields = fields;
-  }
-
   public static POJOHeader fromHeader(Header header) {
     return new POJOHeader(ImmutableList.copyOf(header.getFields()));
   }
 
   public static Builder newBuilder() {
     return new Builder();
+  }
+
+  public List<Field> getFields() {
+    return fields;
+  }
+
+  public void setFields(List<Field> fields) {
+    this.fields = fields;
   }
 
   @Override
@@ -41,7 +41,7 @@ public class POJOHeader {
   }
 
   public static class Builder {
-    private List<Field> fields;
+    private final List<Field> fields;
 
     private Builder() {
       fields = new ArrayList<Field>();
