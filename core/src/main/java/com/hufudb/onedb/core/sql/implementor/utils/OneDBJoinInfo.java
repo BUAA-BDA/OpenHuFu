@@ -1,9 +1,8 @@
 package com.hufudb.onedb.core.sql.implementor.utils;
 
-import java.util.List;
-
 import com.hufudb.onedb.rpc.OneDBCommon.ExpressionProto;
 import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProtoOrBuilder;
+import java.util.List;
 
 public class OneDBJoinInfo {
   List<Integer> leftKeys;

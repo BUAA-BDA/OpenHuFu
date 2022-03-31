@@ -2,14 +2,12 @@ package com.hufudb.onedb.core.sql.expression;
 
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.TypeConverter;
-
+import com.hufudb.onedb.rpc.OneDBCommon.ExpressionProto;
 import org.apache.calcite.rex.RexLiteral;
 
-import com.hufudb.onedb.rpc.OneDBCommon.ExpressionProto;
-
 /*
-* leaf node of expression tree
-*/
+ * leaf node of expression tree
+ */
 public class OneDBLiteral implements OneDBExpression {
   FieldType type;
   Object value;
@@ -25,64 +23,65 @@ public class OneDBLiteral implements OneDBExpression {
     return new OneDBLiteral(type, value);
   }
 
-
   public static OneDBExpression fromProto(ExpressionProto proto) {
     FieldType type = FieldType.of(proto.getOutType());
     Object value;
     switch (type) {
-    case BOOLEAN:
-      value = proto.getB();
-      break;
-    case BYTE:
-    case SHORT:
-    case INT:
-      value = proto.getI32();
-      break;
-    case LONG:
-    case DATE:
-    case TIME:
-    case TIMESTAMP:
-      value = proto.getI64();
-      break;
-    case FLOAT:
-      value = proto.getF32();
-      break;
-    case DOUBLE:
-      value = proto.getF64();
-      break;
-    case STRING:
-      value = proto.getStr();
-      break;
-    default:
-      throw new RuntimeException("can't translate " + proto);
+      case BOOLEAN:
+        value = proto.getB();
+        break;
+      case BYTE:
+      case SHORT:
+      case INT:
+        value = proto.getI32();
+        break;
+      case LONG:
+      case DATE:
+      case TIME:
+      case TIMESTAMP:
+        value = proto.getI64();
+        break;
+      case FLOAT:
+        value = proto.getF32();
+        break;
+      case DOUBLE:
+        value = proto.getF64();
+        break;
+      case STRING:
+        value = proto.getStr();
+        break;
+      default:
+        throw new RuntimeException("can't translate " + proto);
     }
     return new OneDBLiteral(type, value);
   }
 
   @Override
   public ExpressionProto toProto() {
-    ExpressionProto.Builder builder = ExpressionProto.newBuilder().setOpType(OneDBOpType.LITERAL.ordinal())
-        .setOutType(type.ordinal());
+    ExpressionProto.Builder builder =
+        ExpressionProto.newBuilder()
+            .setOpType(OneDBOpType.LITERAL.ordinal())
+            .setOutType(type.ordinal());
     switch (type) {
-    case BOOLEAN:
-      return builder.setB((Boolean) value).build();
-    case BYTE:
-    case SHORT:
-    case INT:
-      return builder.setI32(((Number) value).intValue()).build();
-    case LONG:
-    case DATE:
-    case TIME:
-    case TIMESTAMP:
-      return builder.setI64(((Number) value).longValue()).build();
-    case FLOAT:
-      return builder.setF32(((Number) value).floatValue()).build();
-    case DOUBLE:
-      return builder.setF64(((Number) value).doubleValue()).build();
-    case STRING:
-      return builder.setStr((String) value).build();
-    default:
-      throw new RuntimeException("can't translate " + type);
+      case BOOLEAN:
+        return builder.setB((Boolean) value).build();
+      case BYTE:
+      case SHORT:
+      case INT:
+        return builder.setI32(((Number) value).intValue()).build();
+      case LONG:
+      case DATE:
+      case TIME:
+      case TIMESTAMP:
+        return builder.setI64(((Number) value).longValue()).build();
+      case FLOAT:
+        return builder.setF32(((Number) value).floatValue()).build();
+      case DOUBLE:
+        return builder.setF64(((Number) value).doubleValue()).build();
+      case STRING:
+        return builder.setStr((String) value).build();
+      default:
+        throw new RuntimeException("can't translate " + type);
     }
   }
 

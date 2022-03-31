@@ -1,12 +1,11 @@
 package com.hufudb.onedb.core.data;
 
+import com.hufudb.onedb.rpc.OneDBCommon.LocalTableInfoProto;
+import com.hufudb.onedb.rpc.OneDBCommon.LocalTableListProto;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import com.hufudb.onedb.rpc.OneDBCommon.LocalTableInfoProto;
-import com.hufudb.onedb.rpc.OneDBCommon.LocalTableListProto;
 
 public class TableInfo {
 
@@ -27,7 +26,7 @@ public class TableInfo {
     this.columnIndex = new HashMap<>();
     for (int i = 0; i < header.size(); ++i) {
       if (columnIndex.containsKey(name)) {
-        throw new RuntimeException("column " + name +  " already exist");
+        throw new RuntimeException("column " + name + " already exist");
       }
       columnIndex.put(header.getName(i), i);
     }
@@ -43,7 +42,8 @@ public class TableInfo {
 
   public static List<TableInfo> fromProto(LocalTableListProto proto) {
     return proto.getTableList().stream()
-        .map(info -> TableInfo.fromProto(info)).collect(Collectors.toList());
+        .map(info -> TableInfo.fromProto(info))
+        .collect(Collectors.toList());
   }
 
   public static TableInfo of(String name, Header header) {
@@ -71,7 +71,7 @@ public class TableInfo {
 
     public Builder add(String name, FieldType type) {
       if (columnIndex.containsKey(name)) {
-        throw new RuntimeException("column " + name +  " already exist");
+        throw new RuntimeException("column " + name + " already exist");
       }
       columnIndex.put(name, builder.size());
       builder.add(name, type);
@@ -80,7 +80,7 @@ public class TableInfo {
 
     public Builder add(String name, FieldType type, Level level) {
       if (columnIndex.containsKey(name)) {
-        throw new RuntimeException("column " + name +  " already exist");
+        throw new RuntimeException("column " + name + " already exist");
       }
       columnIndex.put(name, builder.size());
       builder.add(name, type, level);
@@ -96,11 +96,9 @@ public class TableInfo {
     return new Builder();
   }
 
-
   public String getName() {
     return name;
   }
-
 
   public Header getHeader() {
     return header;

@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@ConditionalOnProperty(name = { "owner.db.enable" }, havingValue = "true")
+@ConditionalOnProperty(
+    name = {"owner.db.enable"},
+    havingValue = "true")
 public class OwnerController {
   private static final Logger LOG = LoggerFactory.getLogger(OwnerController.class);
   private final OwnerService service;

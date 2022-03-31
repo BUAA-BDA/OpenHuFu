@@ -1,12 +1,11 @@
 package com.hufudb.onedb.server.data;
 
-import java.util.List;
-
 import com.hufudb.onedb.core.data.Level;
+import java.util.List;
 
 public interface ServerConfig {
 
-  abstract public Table getTable(String tableName);
+  public abstract Table getTable(String tableName);
 
   public static class Table {
     public String name;

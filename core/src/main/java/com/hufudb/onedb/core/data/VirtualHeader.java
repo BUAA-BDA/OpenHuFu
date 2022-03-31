@@ -3,8 +3,8 @@ package com.hufudb.onedb.core.data;
 import java.util.List;
 
 /*
- * 
-*/
+ *
+ */
 public class VirtualHeader extends Header {
 
   private List<Integer> mapping;
@@ -14,8 +14,8 @@ public class VirtualHeader extends Header {
   }
 
   VirtualHeader(List<Field> fields, List<Integer> mappings) {
-      super(fields);
-      this.mapping = mappings;
+    super(fields);
+    this.mapping = mappings;
   }
 
   static VirtualHeader of(PublishedTableInfo tableInfo) {
@@ -45,9 +45,9 @@ public class VirtualHeader extends Header {
     int idx = mapping.get(index);
     return super.getLevel(idx);
   }
-  
+
   @Override
   public int size() {
-      return mapping.size();
+    return mapping.size();
   }
 }

@@ -1,22 +1,21 @@
 package com.hufudb.onedb.core.zk;
 
+import com.hufudb.onedb.core.config.OneDBConfig;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.ACL;
 
-import com.hufudb.onedb.core.config.OneDBConfig;
-
 public class DBZkClient extends ZkClient {
   private final String dbRootPath;
   private List<ACL> DB_AUTH;
 
-  public DBZkClient(String servers, String zkRootPath, String endpoint, byte[] digest) throws IOException, KeeperException, InterruptedException {
+  public DBZkClient(String servers, String zkRootPath, String endpoint, byte[] digest)
+      throws IOException, KeeperException, InterruptedException {
     super(servers, zkRootPath);
     this.dbRootPath = buildPath(endpointRootPath, endpoint);
     this.zk = new ZooKeeper(servers, OneDBConfig.ZK_TIME_OUT, this, false);
@@ -36,7 +35,8 @@ public class DBZkClient extends ZkClient {
     }
   }
 
-  public boolean registerTable(String schema, String globalTableName, String endpoint, String localTableName) {
+  public boolean registerTable(
+      String schema, String globalTableName, String endpoint, String localTableName) {
     String directory = buildPath(schemaRootPath, schema);
     String tablePath = buildPath(directory, globalTableName);
     String registerPath = buildPath(tablePath, endpoint);

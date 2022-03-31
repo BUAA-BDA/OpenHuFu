@@ -1,17 +1,5 @@
 package com.hufudb.onedb.server.postgresql;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.data.DataSet;
 import com.hufudb.onedb.core.data.Header;
@@ -23,6 +11,16 @@ import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.translator.OneDBTranslator;
 import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
 import com.hufudb.onedb.server.OwnerService;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 @Service
 public class PostgresqlService extends OwnerService {
@@ -31,7 +29,14 @@ public class PostgresqlService extends OwnerService {
   private Connection connection;
   private final String catalog;
 
-  public PostgresqlService(String hostname, int port, String catalog, String url, String user, String passwd, List<POJOPublishedTableInfo> infos) {
+  public PostgresqlService(
+      String hostname,
+      int port,
+      String catalog,
+      String url,
+      String user,
+      String passwd,
+      List<POJOPublishedTableInfo> infos) {
     super(null, null, String.format("%s:%d", hostname, port), null);
     this.catalog = catalog;
     try {
@@ -44,13 +49,18 @@ public class PostgresqlService extends OwnerService {
     }
   }
 
-  public PostgresqlService(String hostname, int port, String catalog, String url, String user, String passwd) {
+  public PostgresqlService(
+      String hostname, int port, String catalog, String url, String user, String passwd) {
     this(hostname, port, catalog, url, user, passwd, ImmutableList.of());
   }
 
   PostgresqlService(PostgresqlConfig config) {
-    super(config.zkservers, config.zkroot,
-        String.format("%s:%d", config.hostname == null ? "localhost" : config.hostname, config.port), config.digest);
+    super(
+        config.zkservers,
+        config.zkroot,
+        String.format(
+            "%s:%d", config.hostname == null ? "localhost" : config.hostname, config.port),
+        config.digest);
     this.catalog = config.catalog;
     try {
       Class.forName("org.postgresql.Driver");
@@ -66,7 +76,7 @@ public class PostgresqlService extends OwnerService {
   public void loadAllTableInfo() {
     try {
       metaData = connection.getMetaData();
-      ResultSet rs = metaData.getTables(catalog, null, "%", new String[] { "TABLE" });
+      ResultSet rs = metaData.getTables(catalog, null, "%", new String[] {"TABLE"});
       while (rs.next()) {
         addLocalTableInfo(loadTableInfo(rs.getString("TABLE_NAME")));
       }
@@ -84,7 +94,8 @@ public class PostgresqlService extends OwnerService {
       tableInfoBuilder.setTableName(tableName);
       while (rc.next()) {
         String columnName = rc.getString("COLUMN_NAME");
-        tableInfoBuilder.add(columnName, PostgresqlTypeConverter.convert(rc.getString("TYPE_NAME")), Level.PUBLIC);
+        tableInfoBuilder.add(
+            columnName, PostgresqlTypeConverter.convert(rc.getString("TYPE_NAME")), Level.PUBLIC);
       }
       return tableInfoBuilder.build();
     } catch (SQLException e) {
@@ -103,45 +114,45 @@ public class PostgresqlService extends OwnerService {
           continue;
         }
         switch (header.getType(i)) {
-        case BYTE:
-          builder.set(i, rs.getByte(i + 1));
-          break;
-        case SHORT:
-          builder.set(i, rs.getShort(i + 1));
-          break;
-        case INT:
-          builder.set(i, rs.getInt(i + 1));
-          break;
-        case LONG:
-          builder.set(i, rs.getLong(i + 1));
-          break;
-        case FLOAT:
-          builder.set(i, rs.getFloat(i + 1));
-          break;
-        case DOUBLE:
-          builder.set(i, rs.getDouble(i + 1));
-          break;
-        case STRING:
-          builder.set(i, rs.getString(i + 1));
-          break;
-        case BOOLEAN:
-          builder.set(i, rs.getBoolean(i + 1));
-          break;
-        case DATE:
-          // Divide by 86400000L to prune time field
-          Long date = rs.getDate(i + 1).getTime() / 86400000L;
-          builder.set(i, date);
-          break;
-        case TIME:
-          Long time = rs.getTime(i + 1).getTime();
-          builder.set(i, time);
-          break;
-        case TIMESTAMP:
-          Long timeStamp = rs.getTimestamp(i + 1).getTime();
-          builder.set(i, timeStamp);
-          break;
-        default:
-          break;
+          case BYTE:
+            builder.set(i, rs.getByte(i + 1));
+            break;
+          case SHORT:
+            builder.set(i, rs.getShort(i + 1));
+            break;
+          case INT:
+            builder.set(i, rs.getInt(i + 1));
+            break;
+          case LONG:
+            builder.set(i, rs.getLong(i + 1));
+            break;
+          case FLOAT:
+            builder.set(i, rs.getFloat(i + 1));
+            break;
+          case DOUBLE:
+            builder.set(i, rs.getDouble(i + 1));
+            break;
+          case STRING:
+            builder.set(i, rs.getString(i + 1));
+            break;
+          case BOOLEAN:
+            builder.set(i, rs.getBoolean(i + 1));
+            break;
+          case DATE:
+            // Divide by 86400000L to prune time field
+            Long date = rs.getDate(i + 1).getTime() / 86400000L;
+            builder.set(i, date);
+            break;
+          case TIME:
+            Long time = rs.getTime(i + 1).getTime();
+            builder.set(i, time);
+            break;
+          case TIMESTAMP:
+            Long timeStamp = rs.getTimestamp(i + 1).getTime();
+            builder.set(i, timeStamp);
+            break;
+          default:
+            break;
         }
       }
       dataSet.addRow(builder.build());
@@ -152,13 +163,20 @@ public class PostgresqlService extends OwnerService {
     String originTableName = getOriginTableName(query.getTableName());
     Header tableHeader = getPublishedTableHeader(query.getTableName());
     LOG.info("{}: {}", originTableName, tableHeader);
-    List<String> filters = OneDBTranslator.tranlateExps(tableHeader, OneDBExpression.fromProto(query.getWhereExpList()));
-    List<String> selects = OneDBTranslator.tranlateExps(tableHeader, OneDBExpression.fromProto(query.getSelectExpList()));
+    List<String> filters =
+        OneDBTranslator.tranlateExps(
+            tableHeader, OneDBExpression.fromProto(query.getWhereExpList()));
+    List<String> selects =
+        OneDBTranslator.tranlateExps(
+            tableHeader, OneDBExpression.fromProto(query.getSelectExpList()));
     if (query.getAggExpCount() > 0) {
-      selects = OneDBTranslator.translateAgg(selects, OneDBExpression.fromProto(query.getAggExpList()));
+      selects =
+          OneDBTranslator.translateAgg(selects, OneDBExpression.fromProto(query.getAggExpList()));
     }
     // select clause
-    StringBuilder sql = new StringBuilder(String.format("SELECT %s from %s", String.join(",", selects), originTableName));
+    StringBuilder sql =
+        new StringBuilder(
+            String.format("SELECT %s from %s", String.join(",", selects), originTableName));
     // where clause
     if (filters.size() != 0) {
       sql.append(String.format(" where %s", String.join(" AND ", filters)));

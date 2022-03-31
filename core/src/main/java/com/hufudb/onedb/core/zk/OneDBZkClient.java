@@ -1,19 +1,16 @@
 package com.hufudb.onedb.core.zk;
 
-import java.util.List;
-
-import org.apache.calcite.schema.Table;
-import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.ZooDefs.Ids;
-
 import com.hufudb.onedb.core.sql.rel.OneDBTable;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
 import com.hufudb.onedb.core.table.TableMeta;
 import com.hufudb.onedb.core.zk.watcher.EndpointWatcher;
 import com.hufudb.onedb.core.zk.watcher.GlobalTableWatcher;
 import com.hufudb.onedb.core.zk.watcher.LocalTableWatcher;
-
+import java.util.List;
+import org.apache.calcite.schema.Table;
+import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.KeeperException;
+import org.apache.zookeeper.ZooDefs.Ids;
 
 public class OneDBZkClient extends ZkClient {
 
@@ -38,14 +35,15 @@ public class OneDBZkClient extends ZkClient {
   }
 
   private void watchEndpoints() throws KeeperException, InterruptedException {
-    List<String> endpoints = zk.getChildren(endpointRootPath, new EndpointWatcher(schema, zk, endpointRootPath));
+    List<String> endpoints =
+        zk.getChildren(endpointRootPath, new EndpointWatcher(schema, zk, endpointRootPath));
     for (String endpoint : endpoints) {
       schema.addOwner(endpoint);
     }
   }
 
   private void watchSchemaDirectory() throws KeeperException, InterruptedException {
-    if (zk.exists(schemaDirectoryPath, false) == null)  {
+    if (zk.exists(schemaDirectoryPath, false) == null) {
       LOG.info("Create Schema Directory: {}", schemaDirectoryPath);
       zk.create(schemaDirectoryPath, null, Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
     } else {

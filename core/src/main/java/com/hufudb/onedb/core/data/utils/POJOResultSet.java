@@ -1,13 +1,11 @@
 package com.hufudb.onedb.core.data.utils;
 
+import com.hufudb.onedb.core.data.TypeConverter;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.hufudb.onedb.core.data.TypeConverter;
-
 
 public class POJOResultSet {
   POJOHeader header;
@@ -23,12 +21,15 @@ public class POJOResultSet {
   public POJOHeader getHeader() {
     return header;
   }
+
   public void setHeader(POJOHeader header) {
     this.header = header;
   }
+
   public List<List<String>> getRows() {
     return rows;
   }
+
   public void setRows(List<List<String>> rows) {
     this.rows = rows;
   }

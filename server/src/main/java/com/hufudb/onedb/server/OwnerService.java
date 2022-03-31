@@ -1,5 +1,24 @@
 package com.hufudb.onedb.server;
 
+import com.hufudb.onedb.core.client.OwnerClient;
+import com.hufudb.onedb.core.data.DataSet;
+import com.hufudb.onedb.core.data.Field;
+import com.hufudb.onedb.core.data.Header;
+import com.hufudb.onedb.core.data.Level;
+import com.hufudb.onedb.core.data.PublishedTableInfo;
+import com.hufudb.onedb.core.data.StreamObserverDataSet;
+import com.hufudb.onedb.core.data.TableInfo;
+import com.hufudb.onedb.core.data.utils.POJOPublishedTableInfo;
+import com.hufudb.onedb.core.sql.rel.OneDBQueryContext;
+import com.hufudb.onedb.core.zk.DBZkClient;
+import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
+import com.hufudb.onedb.rpc.OneDBCommon.HeaderProto;
+import com.hufudb.onedb.rpc.OneDBCommon.LocalTableListProto;
+import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
+import com.hufudb.onedb.rpc.OneDBService.GeneralRequest;
+import com.hufudb.onedb.rpc.OneDBService.GeneralResponse;
+import com.hufudb.onedb.rpc.ServiceGrpc;
+import io.grpc.stub.StreamObserver;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,30 +27,9 @@ import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
-import io.grpc.stub.StreamObserver;
-import com.hufudb.onedb.rpc.OneDBService.GeneralRequest;
-import com.hufudb.onedb.rpc.OneDBService.GeneralResponse;
-import com.hufudb.onedb.rpc.ServiceGrpc;
-import com.hufudb.onedb.core.client.OwnerClient;
-import com.hufudb.onedb.core.data.DataSet;
-import com.hufudb.onedb.core.data.Field;
-import com.hufudb.onedb.core.data.Header;
-import com.hufudb.onedb.core.data.Level;
-import com.hufudb.onedb.core.data.StreamObserverDataSet;
-import com.hufudb.onedb.core.data.TableInfo;
-import com.hufudb.onedb.core.data.utils.POJOPublishedTableInfo;
-import com.hufudb.onedb.core.data.PublishedTableInfo;
-import com.hufudb.onedb.core.sql.rel.OneDBQueryContext;
-import com.hufudb.onedb.core.zk.DBZkClient;
-import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
-import com.hufudb.onedb.rpc.OneDBCommon.HeaderProto;
-import com.hufudb.onedb.rpc.OneDBCommon.LocalTableListProto;
-import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
 
 @Service
 public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
@@ -39,7 +37,8 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
   protected final Map<String, OwnerClient> dbClientMap; // endpoint -> rpc_client
   private final Map<String, TableInfo> localTableInfoMap; // localName -> localTableInfo
   private final ReadWriteLock localLock;
-  private final Map<String, PublishedTableInfo> publishedTableInfoMap; // publishedTableName -> publishedTableInfo
+  private final Map<String, PublishedTableInfo>
+      publishedTableInfoMap; // publishedTableName -> publishedTableInfo
   private final ReadWriteLock publishedLock;
   // private final ExecutorService executorService;
   private final DBZkClient zkClient;
@@ -97,15 +96,16 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
 
   public List<PublishedTableInfo> getAllPublishedTable() {
     publishedLock.readLock().lock();
-    List<PublishedTableInfo> infos = publishedTableInfoMap.values().stream().map(
-        vinfo -> vinfo).collect(Collectors.toList());
+    List<PublishedTableInfo> infos =
+        publishedTableInfoMap.values().stream().map(vinfo -> vinfo).collect(Collectors.toList());
     publishedLock.readLock().unlock();
     return infos;
   }
 
   // todo: rename the funciton and rpc
   @Override
-  public void getAllLocalTable(GeneralRequest request, StreamObserver<LocalTableListProto> responseObserver) {
+  public void getAllLocalTable(
+      GeneralRequest request, StreamObserver<LocalTableListProto> responseObserver) {
     LocalTableListProto.Builder builder = LocalTableListProto.newBuilder();
     getAllPublishedTable().forEach(info -> builder.addTable(info.getFakeTableInfo().toProto()));
     responseObserver.onNext(builder.build());
@@ -113,9 +113,13 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
     responseObserver.onCompleted();
   }
 
-  final protected boolean registerTable2Zk(String schema, String globalName, String localName) {
+  protected final boolean registerTable2Zk(String schema, String globalName, String localName) {
     if (zkClient == null) {
-      LOG.warn("DBZkClient is not initialized, fail to register {} to {}/{}", localName, schema, globalName);
+      LOG.warn(
+          "DBZkClient is not initialized, fail to register {} to {}/{}",
+          localName,
+          schema,
+          globalName);
       return true;
     }
     return zkClient.registerTable(schema, globalName, endpoint, localName);
@@ -144,28 +148,31 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
     }
   }
 
-  final public void addLocalTableInfo(TableInfo tableInfo) {
+  public final void addLocalTableInfo(TableInfo tableInfo) {
     localLock.writeLock().lock();
     LOG.info("Add Local Table {}", tableInfo);
     localTableInfoMap.put(tableInfo.getName(), tableInfo);
     localLock.writeLock().unlock();
   }
 
-  final public TableInfo getLocalTableInfo(String tableName) {
+  public final TableInfo getLocalTableInfo(String tableName) {
     localLock.readLock().lock();
     TableInfo info = localTableInfoMap.get(tableName);
     localLock.readLock().unlock();
     return info;
   }
 
-  final public List<TableInfo> getAllFakeTable() {
+  public final List<TableInfo> getAllFakeTable() {
     localLock.readLock().lock();
-    List<TableInfo> results = publishedTableInfoMap.values().stream().map(info -> info.getFakeTableInfo()).collect(Collectors.toList());
+    List<TableInfo> results =
+        publishedTableInfoMap.values().stream()
+            .map(info -> info.getFakeTableInfo())
+            .collect(Collectors.toList());
     localLock.readLock().unlock();
     return results;
   }
 
-  final public List<TableInfo> getAllLocalTable() {
+  public final List<TableInfo> getAllLocalTable() {
     List<TableInfo> infos = new ArrayList<>();
     localLock.readLock().lock();
     for (TableInfo info : localTableInfoMap.values()) {
@@ -205,7 +212,8 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
         mappings.add(originNames.get(i));
       }
     }
-    return new PublishedTableInfo(originInfo, publishedTableInfo.getPublishedTableName(), pFields, mappings);
+    return new PublishedTableInfo(
+        originInfo, publishedTableInfo.getPublishedTableName(), pFields, mappings);
   }
 
   public boolean addPublishedTable(POJOPublishedTableInfo publishedTableInfo) {
@@ -228,12 +236,14 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
   public boolean changeCatalog(String catalog) {
     LOG.error("change catalog operation is not supported in your database");
     return false;
-  };
+  }
+  ;
 
   // must call this function in subclass's constructor
   public abstract void loadAllTableInfo();
 
   protected abstract TableInfo loadTableInfo(String tableName);
 
-  protected abstract void oneDBQueryInternal(OneDBQueryProto query, DataSet dataSet) throws SQLException;
+  protected abstract void oneDBQueryInternal(OneDBQueryProto query, DataSet dataSet)
+      throws SQLException;
 }

@@ -1,9 +1,7 @@
 package com.hufudb.onedb.core.sql.rel;
 
-import java.lang.reflect.Method;
-
 import com.google.common.collect.ImmutableMap;
-
+import java.lang.reflect.Method;
 import org.apache.calcite.linq4j.tree.Types;
 
 public enum OneDBMethod {

@@ -1,14 +1,10 @@
 package com.hufudb.onedb.core.sql.rel;
 
-import java.util.List;
-
-import javax.annotation.Nullable;
-
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.sql.expression.OneDBReference;
 import com.hufudb.onedb.core.sql.rule.OneDBRules;
-
+import java.util.List;
 import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelOptCost;
 import org.apache.calcite.plan.RelOptPlanner;
@@ -20,14 +16,18 @@ import org.apache.calcite.rel.core.TableScan;
 import org.apache.calcite.rel.metadata.RelMetadataQuery;
 import org.apache.calcite.rel.rules.JoinCommuteRule;
 import org.apache.calcite.rel.rules.JoinPushThroughJoinRule;
-import org.apache.calcite.rel.rules.SortJoinTransposeRule;
 import org.apache.calcite.rel.type.RelDataType;
 
 public class OneDBTableScan extends TableScan implements OneDBRel {
   final OneDBTable oneDBTable;
   final RelDataType projectRowType;
 
-  public OneDBTableScan(RelOptCluster cluster, RelTraitSet traitSet, RelOptTable table, OneDBTable oneDBTable, RelDataType projectRowType) {
+  public OneDBTableScan(
+      RelOptCluster cluster,
+      RelTraitSet traitSet,
+      RelOptTable table,
+      OneDBTable oneDBTable,
+      RelDataType projectRowType) {
     super(cluster, traitSet, ImmutableList.of(), table);
     this.oneDBTable = oneDBTable;
     this.projectRowType = projectRowType;
@@ -47,11 +47,13 @@ public class OneDBTableScan extends TableScan implements OneDBRel {
     return this;
   }
 
-  @Override public RelDataType deriveRowType() {
+  @Override
+  public RelDataType deriveRowType() {
     return projectRowType != null ? projectRowType : super.deriveRowType();
   }
 
-  @Override public void register(RelOptPlanner planner) {
+  @Override
+  public void register(RelOptPlanner planner) {
     planner.addRule(OneDBRules.TO_ENUMERABLE);
     for (RelOptRule rule : OneDBRules.RULES) {
       planner.addRule(rule);

@@ -1,10 +1,8 @@
 package com.hufudb.onedb.core.table;
 
-import java.util.Map;
-
 import com.hufudb.onedb.core.sql.rel.OneDBTable;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
-
+import java.util.Map;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rel.type.RelDataTypeImpl;
 import org.apache.calcite.rel.type.RelProtoDataType;
@@ -18,8 +16,7 @@ public class OneDBTableFactory implements TableFactory {
   private static final Logger LOG = LoggerFactory.getLogger(OneDBTableFactory.class);
   public static final OneDBTableFactory INSTANCE = new OneDBTableFactory();
 
-  private OneDBTableFactory() {
-  }
+  private OneDBTableFactory() {}
 
   @Override
   public Table create(SchemaPlus schema, String tableName, Map operand, RelDataType rowType) {

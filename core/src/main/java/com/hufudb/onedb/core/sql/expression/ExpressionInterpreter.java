@@ -1,12 +1,11 @@
 package com.hufudb.onedb.core.sql.expression;
 
+import com.hufudb.onedb.core.data.FieldType;
+import com.hufudb.onedb.core.data.Row;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import com.hufudb.onedb.core.data.FieldType;
-import com.hufudb.onedb.core.data.Row;
 
 // plaintext interpreter for onedb expression
 public class ExpressionInterpreter {
@@ -33,21 +32,22 @@ public class ExpressionInterpreter {
   }
 
   static Comparable implementOperator(Row row, OneDBOperator op) {
-    List<Comparable> inputs = op.getInputs().stream().map(exp -> implement(row, exp)).collect(Collectors.toList());
+    List<Comparable> inputs =
+        op.getInputs().stream().map(exp -> implement(row, exp)).collect(Collectors.toList());
     switch (op.getOpType()) {
-      // binary
+        // binary
       case GT:
-        return (Boolean)(inputs.get(0).compareTo(inputs.get(1)) > 0);
+        return (Boolean) (inputs.get(0).compareTo(inputs.get(1)) > 0);
       case GE:
-        return (Boolean)(inputs.get(0).compareTo(inputs.get(1)) >= 0);
+        return (Boolean) (inputs.get(0).compareTo(inputs.get(1)) >= 0);
       case LT:
-        return (Boolean)(inputs.get(0).compareTo(inputs.get(1)) < 0);
+        return (Boolean) (inputs.get(0).compareTo(inputs.get(1)) < 0);
       case LE:
-        return (Boolean)(inputs.get(0).compareTo(inputs.get(1)) <= 0);
+        return (Boolean) (inputs.get(0).compareTo(inputs.get(1)) <= 0);
       case EQ:
-        return (Boolean)(inputs.get(0).compareTo(inputs.get(1)) == 0);
+        return (Boolean) (inputs.get(0).compareTo(inputs.get(1)) == 0);
       case NE:
-        return (Boolean)(inputs.get(0).compareTo(inputs.get(1)) != 0);
+        return (Boolean) (inputs.get(0).compareTo(inputs.get(1)) != 0);
       case PLUS:
         return number(inputs.get(0)).add(number(inputs.get(1)));
       case MINUS:
@@ -62,7 +62,7 @@ public class ExpressionInterpreter {
         return ((Boolean) inputs.get(0)) && ((Boolean) inputs.get(1));
       case OR:
         return ((Boolean) inputs.get(0)) || ((Boolean) inputs.get(1));
-      // unary
+        // unary
       case AS:
         return inputs.get(0);
       case PLUS_PRE:
@@ -71,7 +71,7 @@ public class ExpressionInterpreter {
         return number(inputs.get(0)).negate();
       case NOT:
         return (Boolean) inputs.get(0);
-      // todo: support scalar functions
+        // todo: support scalar functions
       default:
         throw new UnsupportedOperationException("operator not support in intereperter");
     }
@@ -83,14 +83,14 @@ public class ExpressionInterpreter {
         : comparable instanceof BigInteger
             ? new BigDecimal((BigInteger) comparable)
             : comparable instanceof Long
-                || comparable instanceof Integer
-                || comparable instanceof Short
-                    ? new BigDecimal(((Number) comparable).longValue())
-                    : new BigDecimal(((Number) comparable).doubleValue());
+                    || comparable instanceof Integer
+                    || comparable instanceof Short
+                ? new BigDecimal(((Number) comparable).longValue())
+                : new BigDecimal(((Number) comparable).doubleValue());
   }
 
   public static Comparable cast(Comparable in, final FieldType type) {
-    switch(type) {
+    switch (type) {
       case STRING:
         return in;
       case BOOLEAN:

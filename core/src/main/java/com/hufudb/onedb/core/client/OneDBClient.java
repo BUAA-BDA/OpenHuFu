@@ -1,16 +1,15 @@
 package com.hufudb.onedb.core.client;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.data.Row;
 import com.hufudb.onedb.core.sql.implementor.PlaintextImplementor;
 import com.hufudb.onedb.core.sql.rel.OneDBQueryContext;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
 import com.hufudb.onedb.core.table.OneDBTableInfo;
-
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.calcite.linq4j.Enumerator;
 import org.apache.calcite.schema.Table;
 import org.apache.calcite.util.Pair;
@@ -18,8 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /*
-* client for all DB
-*/
+ * client for all DB
+ */
 public class OneDBClient {
   private static final Logger LOG = LoggerFactory.getLogger(OneDBClient.class);
 

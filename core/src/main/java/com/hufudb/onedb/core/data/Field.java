@@ -69,7 +69,11 @@ public class Field {
 
   @Override
   public boolean equals(Object obj) {
-    return obj == this || (obj instanceof Field && ((Field) obj).name.equals(this.name) && ((Field) obj).type.equals(this.type) && ((Field) obj).level.equals(this.level));
+    return obj == this
+        || (obj instanceof Field
+            && ((Field) obj).name.equals(this.name)
+            && ((Field) obj).type.equals(this.type)
+            && ((Field) obj).level.equals(this.level));
   }
 
   @Override

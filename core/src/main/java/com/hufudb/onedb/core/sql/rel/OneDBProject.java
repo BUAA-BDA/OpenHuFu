@@ -1,11 +1,9 @@
 package com.hufudb.onedb.core.sql.rel;
 
-import java.util.List;
-
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.expression.OneDBOperator;
-
+import java.util.List;
 import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelOptCost;
 import org.apache.calcite.plan.RelOptPlanner;
@@ -17,7 +15,11 @@ import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rex.RexNode;
 
 public class OneDBProject extends Project implements OneDBRel {
-  public OneDBProject(RelOptCluster cluster, RelTraitSet traitSet, RelNode input, List<? extends RexNode> projects,
+  public OneDBProject(
+      RelOptCluster cluster,
+      RelTraitSet traitSet,
+      RelNode input,
+      List<? extends RexNode> projects,
       RelDataType rowType) {
     super(cluster, traitSet, ImmutableList.of(), input, projects, rowType);
     assert getConvention() == OneDBProject.CONVENTION;
@@ -25,7 +27,8 @@ public class OneDBProject extends Project implements OneDBRel {
   }
 
   @Override
-  public Project copy(RelTraitSet traitSet, RelNode input, List<RexNode> projects, RelDataType rowType) {
+  public Project copy(
+      RelTraitSet traitSet, RelNode input, List<RexNode> projects, RelDataType rowType) {
     return new OneDBProject(getCluster(), traitSet, input, projects, rowType);
   }
 
@@ -37,7 +40,8 @@ public class OneDBProject extends Project implements OneDBRel {
   @Override
   public void implement(Implementor implementor) {
     implementor.visitChild(getInput());
-    List<OneDBExpression> exps = OneDBOperator.fromRexNodes(getProjects(), implementor.getCurrentOutput());
+    List<OneDBExpression> exps =
+        OneDBOperator.fromRexNodes(getProjects(), implementor.getCurrentOutput());
     implementor.setSelectExps(exps);
   }
 }

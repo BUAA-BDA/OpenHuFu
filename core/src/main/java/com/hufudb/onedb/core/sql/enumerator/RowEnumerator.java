@@ -1,12 +1,11 @@
 package com.hufudb.onedb.core.sql.enumerator;
 
-import org.apache.calcite.linq4j.Enumerator;
-
 import com.hufudb.onedb.core.data.BasicDataSet;
 import com.hufudb.onedb.core.data.Row;
 import com.hufudb.onedb.core.data.StreamBuffer;
 import com.hufudb.onedb.core.utils.EmptyEnumerator;
 import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
+import org.apache.calcite.linq4j.Enumerator;
 
 public class RowEnumerator implements Enumerator<Row> {
 
@@ -48,7 +47,7 @@ public class RowEnumerator implements Enumerator<Row> {
     enumerator.close();
   }
 
-  static public class StreamEnumerator implements Enumerator<Row> {
+  public static class StreamEnumerator implements Enumerator<Row> {
     StreamBuffer<DataSetProto> iter;
     BasicDataSet backup;
     Row current;

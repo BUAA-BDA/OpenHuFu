@@ -1,12 +1,10 @@
 package com.hufudb.onedb.core.data;
 
+import com.google.common.collect.ImmutableList;
+import com.hufudb.onedb.rpc.OneDBCommon.HeaderProto;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import com.google.common.collect.ImmutableList;
-
-import com.hufudb.onedb.rpc.OneDBCommon.HeaderProto;
 
 public class Header {
   public static final Header EMPTY = new Header(ImmutableList.of());
@@ -21,11 +19,14 @@ public class Header {
   }
 
   protected Header(HeaderProto proto) {
-    this.fields = proto.getFieldList().stream().map(f -> Field.fromProto(f)).collect(Collectors.toList());
+    this.fields =
+        proto.getFieldList().stream().map(f -> Field.fromProto(f)).collect(Collectors.toList());
   }
 
   public HeaderProto toProto() {
-    return HeaderProto.newBuilder().addAllField(fields.stream().map(f -> f.toProto()).collect(Collectors.toList())).build();
+    return HeaderProto.newBuilder()
+        .addAllField(fields.stream().map(f -> f.toProto()).collect(Collectors.toList()))
+        .build();
   }
 
   public static Header fromProto(HeaderProto proto) {
@@ -81,7 +82,7 @@ public class Header {
 
   public static class Builder {
     private List<Field> fields;
-    
+
     private Builder() {
       fields = new ArrayList<Field>();
     }

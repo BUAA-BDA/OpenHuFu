@@ -1,15 +1,13 @@
 package com.hufudb.onedb.core.zk.watcher;
 
+import com.hufudb.onedb.core.sql.schema.OneDBSchema;
+import com.hufudb.onedb.core.table.OneDBTableInfo;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher.Event.EventType;
 import org.apache.zookeeper.Watcher.Event.KeeperState;
 import org.apache.zookeeper.ZooKeeper;
-
-import com.hufudb.onedb.core.sql.schema.OneDBSchema;
-import com.hufudb.onedb.core.table.OneDBTableInfo;
 
 /*
  * Watch the number of local table of specific global table
@@ -47,7 +45,8 @@ public class GlobalTableWatcher extends ZkWatcher {
     for (String endpoint : endpoints) {
       String localPath = buildPath(path, endpoint);
       try {
-        String localName = new String(zk.getData(localPath, new LocalTableWatcher(schema, zk, localPath), null));
+        String localName =
+            new String(zk.getData(localPath, new LocalTableWatcher(schema, zk, localPath), null));
         schema.addLocalTable(tableInfo.getName(), endpoint, localName);
       } catch (Exception e) {
         LOG.error("Error when get Local Table in {} : {}", endpoint, e.getMessage());
@@ -71,7 +70,7 @@ public class GlobalTableWatcher extends ZkWatcher {
     String path = event.getPath();
     switch (type) {
       case NodeChildrenChanged:
-        synchronized(this) {
+        synchronized (this) {
           try {
             List<String> children = zk.getChildren(path, this);
             watchLocalTableChange(children);

@@ -1,13 +1,11 @@
 package com.hufudb.onedb.core.sql.expression;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.sql.expression.OneDBOperator.FuncType;
-
 import com.hufudb.onedb.rpc.OneDBCommon.ExpressionProto;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public interface OneDBExpression {
   public ExpressionProto toProto();
@@ -18,17 +16,21 @@ public interface OneDBExpression {
 
   public static Header generateHeader(List<OneDBExpression> exps) {
     Header.Builder builder = Header.newBuilder();
-    exps.stream().forEach(exp -> {
-      builder.add("", exp.getOutType());
-    });
+    exps.stream()
+        .forEach(
+            exp -> {
+              builder.add("", exp.getOutType());
+            });
     return builder.build();
   }
 
   public static Header generateHeaderFromProto(List<ExpressionProto> exps) {
     Header.Builder builder = Header.newBuilder();
-    exps.stream().forEach(exp -> {
-      builder.add("", FieldType.of(exp.getOutType()));
-    });
+    exps.stream()
+        .forEach(
+            exp -> {
+              builder.add("", FieldType.of(exp.getOutType()));
+            });
     return builder.build();
   }
 
@@ -46,8 +48,11 @@ public interface OneDBExpression {
     }
     FuncType funcType = FuncType.of(proto.getFunc());
     FieldType outType = FieldType.of(proto.getOutType());
-    List<OneDBExpression> elements = proto.getInList().stream().map(ele -> OneDBExpression.fromProto(ele)).collect(Collectors.toList());
-    return new OneDBOperator(opType, outType, elements,funcType);
+    List<OneDBExpression> elements =
+        proto.getInList().stream()
+            .map(ele -> OneDBExpression.fromProto(ele))
+            .collect(Collectors.toList());
+    return new OneDBOperator(opType, outType, elements, funcType);
   }
 
   public static List<OneDBExpression> fromProto(List<ExpressionProto> protos) {

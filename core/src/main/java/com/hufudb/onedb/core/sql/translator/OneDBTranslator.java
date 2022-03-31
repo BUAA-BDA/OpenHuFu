@@ -1,8 +1,5 @@
 package com.hufudb.onedb.core.sql.translator;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.sql.expression.OneDBAggCall;
@@ -12,6 +9,8 @@ import com.hufudb.onedb.core.sql.expression.OneDBOpType;
 import com.hufudb.onedb.core.sql.expression.OneDBOperator;
 import com.hufudb.onedb.core.sql.expression.OneDBOperator.FuncType;
 import com.hufudb.onedb.core.sql.expression.OneDBReference;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class OneDBTranslator {
   Header inputHeader;
@@ -29,12 +28,11 @@ public class OneDBTranslator {
   }
 
   List<String> translateAllExps() {
-    return exps.stream().map(exp -> translate(exp))
-        .collect(Collectors.toList());
+    return exps.stream().map(exp -> translate(exp)).collect(Collectors.toList());
   }
 
   public List<String> translateAgg() {
-    return exps.stream().map(exp -> aggregateFunc((OneDBAggCall)exp)).collect(Collectors.toList());
+    return exps.stream().map(exp -> aggregateFunc((OneDBAggCall) exp)).collect(Collectors.toList());
   }
 
   public static List<String> tranlateExps(Header inputHeader, List<OneDBExpression> exps) {
@@ -48,12 +46,12 @@ public class OneDBTranslator {
   protected String translate(OneDBExpression exp) {
     switch (exp.getOpType()) {
       case REF:
-        return inputRef((OneDBReference)exp);
+        return inputRef((OneDBReference) exp);
       case LITERAL:
-        return literal((OneDBLiteral)exp);
+        return literal((OneDBLiteral) exp);
       case PLUS:
       case MINUS:
-      // binary
+        // binary
       case GT:
       case GE:
       case LT:
@@ -65,22 +63,22 @@ public class OneDBTranslator {
       case MOD:
       case AND:
       case OR:
-        return binary((OneDBOperator)exp);
-      // unary
+        return binary((OneDBOperator) exp);
+        // unary
       case AS:
       case NOT:
       case PLUS_PRE:
       case MINUS_PRE:
-        return unary((OneDBOperator)exp);
+        return unary((OneDBOperator) exp);
       case SCALAR_FUNC:
-        return scalarFunc((OneDBOperator)exp);
+        return scalarFunc((OneDBOperator) exp);
       default:
         throw new RuntimeException("can't translate " + exp);
     }
   }
 
   protected String inputRef(OneDBReference ref) {
-    int idx= ref.getIdx();
+    int idx = ref.getIdx();
     return inputHeader.getName(idx);
   }
 
@@ -88,20 +86,20 @@ public class OneDBTranslator {
     FieldType type = literal.getOutType();
     switch (type) {
       case BOOLEAN:
-        return String.valueOf((Boolean)literal.getValue());
+        return String.valueOf((Boolean) literal.getValue());
       case BYTE:
       case SHORT:
       case INT:
-        return String.valueOf((Integer)literal.getValue());
+        return String.valueOf((Integer) literal.getValue());
       case LONG:
       case DATE:
       case TIME:
       case TIMESTAMP:
-        return String.valueOf((Long)literal.getValue());
+        return String.valueOf((Long) literal.getValue());
       case FLOAT:
-        return String.valueOf((Float)literal.getValue());
+        return String.valueOf((Float) literal.getValue());
       case DOUBLE:
-        return String.valueOf((Double)literal.getValue());
+        return String.valueOf((Double) literal.getValue());
       default:
         throw new RuntimeException("can't translate literal " + literal);
     }
@@ -176,7 +174,8 @@ public class OneDBTranslator {
 
   protected String scalarFunc(OneDBOperator exp) {
     FuncType func = exp.getFuncType();
-    List<String> inputs = exp.getInputs().stream().map(e -> translate(e)).collect(Collectors.toList());
+    List<String> inputs =
+        exp.getInputs().stream().map(e -> translate(e)).collect(Collectors.toList());
     switch (func) {
       case ABS:
         if (inputs.size() != 1) {

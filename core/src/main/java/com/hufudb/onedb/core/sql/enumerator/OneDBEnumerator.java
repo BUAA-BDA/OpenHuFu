@@ -4,7 +4,6 @@ import com.hufudb.onedb.core.client.OneDBClient;
 import com.hufudb.onedb.core.data.Row;
 import com.hufudb.onedb.core.sql.rel.OneDBQueryContext;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
-
 import org.apache.calcite.linq4j.Enumerator;
 
 public class OneDBEnumerator implements Enumerator<Object> {

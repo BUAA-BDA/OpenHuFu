@@ -1,11 +1,10 @@
 package com.hufudb.onedb.core.zk.watcher;
 
+import com.hufudb.onedb.core.sql.schema.OneDBSchema;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher.Event.EventType;
 import org.apache.zookeeper.Watcher.Event.KeeperState;
 import org.apache.zookeeper.ZooKeeper;
-
-import com.hufudb.onedb.core.sql.schema.OneDBSchema;
 
 public class LocalTableWatcher extends ZkWatcher {
   private String endpoint;

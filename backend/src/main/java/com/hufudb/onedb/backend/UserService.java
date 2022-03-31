@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserService extends OneDB {
-    public UserService() {
-        super();
-    }
+  public UserService() {
+    super();
+  }
 }

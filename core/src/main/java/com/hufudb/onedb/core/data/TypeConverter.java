@@ -1,7 +1,6 @@
 package com.hufudb.onedb.core.data;
 
 import java.sql.Types;
-
 import org.apache.calcite.sql.type.ExtraSqlTypes;
 import org.apache.calcite.sql.type.SqlTypeName;
 

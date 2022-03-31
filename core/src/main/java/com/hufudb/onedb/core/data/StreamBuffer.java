@@ -1,16 +1,14 @@
 package com.hufudb.onedb.core.data;
 
+import com.hufudb.onedb.core.config.OneDBConfig;
 import java.util.Iterator;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.hufudb.onedb.core.config.OneDBConfig;
 
 public class StreamBuffer<E> implements Iterator<E> {
   private static final Logger LOG = LoggerFactory.getLogger(StreamBuffer.class);
@@ -32,9 +30,7 @@ public class StreamBuffer<E> implements Iterator<E> {
     }
   }
 
-  /**
-   * every productor can only call this function once
-   */
+  /** every productor can only call this function once */
   public void finish() {
     productorNum.decrementAndGet();
   }

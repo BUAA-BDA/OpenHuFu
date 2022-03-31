@@ -4,7 +4,7 @@ import com.hufudb.onedb.core.data.FieldType;
 
 public class PostgresqlTypeConverter {
   public static FieldType convert(String typeName) {
-    switch(typeName) {
+    switch (typeName) {
       case "real":
       case "float4":
         return FieldType.FLOAT;

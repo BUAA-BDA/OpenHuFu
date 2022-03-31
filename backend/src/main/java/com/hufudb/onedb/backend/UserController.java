@@ -25,7 +25,7 @@ public class UserController {
   private final UserService clientService;
 
   UserController(UserService service) {
-      this.clientService = service;
+    this.clientService = service;
   }
 
   // for endpoints

@@ -1,11 +1,10 @@
 package com.hufudb.onedb.core.data.utils;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.data.Field;
 import com.hufudb.onedb.core.data.PublishedTableInfo;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class POJOPublishedTableInfo {
   public String publishedName;
@@ -13,7 +12,10 @@ public class POJOPublishedTableInfo {
   public List<Field> publishedFields;
   public List<Integer> originColumns;
 
-  public POJOPublishedTableInfo(String publishedTableName, String originTableName, List<Field> publishedFields,
+  public POJOPublishedTableInfo(
+      String publishedTableName,
+      String originTableName,
+      List<Field> publishedFields,
       List<Integer> originColumns) {
     this.publishedName = publishedTableName;
     this.originName = originTableName;
@@ -22,8 +24,11 @@ public class POJOPublishedTableInfo {
   }
 
   public static POJOPublishedTableInfo from(PublishedTableInfo info) {
-    return new POJOPublishedTableInfo(info.getPublishedTableName(), info.getOriginTableName(),
-        ImmutableList.copyOf(info.getFakeTableInfo().getHeader().getFields()), info.getMappings());
+    return new POJOPublishedTableInfo(
+        info.getPublishedTableName(),
+        info.getOriginTableName(),
+        ImmutableList.copyOf(info.getFakeTableInfo().getHeader().getFields()),
+        info.getMappings());
   }
 
   public static List<POJOPublishedTableInfo> from(List<PublishedTableInfo> tableInfos) {

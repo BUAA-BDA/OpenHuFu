@@ -16,10 +16,8 @@ public class Row implements Serializable {
   /**
    * Creates a Row.
    *
-   * <p>
-   * Makes a defensive copy of the array, so the Row is immutable. (If you're
-   * worried about the extra copy, call {@link #of(Object)}. But the JIT probably
-   * avoids the copy.)
+   * <p>Makes a defensive copy of the array, so the Row is immutable. (If you're worried about the
+   * extra copy, call {@link #of(Object)}. But the JIT probably avoids the copy.)
    */
   public static Row asCopy(Object... values) {
     return new Row(values.clone());
@@ -27,17 +25,17 @@ public class Row implements Serializable {
 
   /** Creates a Row with one column value. */
   public static Row of(Object value0) {
-    return new Row(new Object[] { value0 });
+    return new Row(new Object[] {value0});
   }
 
   /** Creates a Row with two column values. */
   public static Row of(Object value0, Object value1) {
-    return new Row(new Object[] { value0, value1 });
+    return new Row(new Object[] {value0, value1});
   }
 
   /** Creates a Row with three column values. */
   public static Row of(Object value0, Object value1, Object value2) {
-    return new Row(new Object[] { value0, value1, value2 });
+    return new Row(new Object[] {value0, value1, value2});
   }
 
   /** Creates a Row with variable number of values. */
@@ -94,9 +92,7 @@ public class Row implements Serializable {
     return new RowBuilder(size);
   }
 
-  /**
-   * Utility class to build row objects.
-   */
+  /** Utility class to build row objects. */
   public static class RowBuilder {
     Object[] values;
 
@@ -128,5 +124,4 @@ public class Row implements Serializable {
       return values.length;
     }
   }
-
 }

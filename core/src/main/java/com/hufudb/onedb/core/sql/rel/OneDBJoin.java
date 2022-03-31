@@ -1,9 +1,7 @@
 package com.hufudb.onedb.core.sql.rel;
 
-import java.util.Set;
-
 import com.google.common.collect.ImmutableList;
-
+import java.util.Set;
 import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelOptCost;
 import org.apache.calcite.plan.RelOptPlanner;
@@ -18,8 +16,14 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class OneDBJoin extends Join implements OneDBRel {
 
-  public OneDBJoin(RelOptCluster cluster, RelTraitSet traitSet, RelNode left, RelNode right,
-      RexNode condition, Set<CorrelationId> variablesSet, JoinRelType joinType) {
+  public OneDBJoin(
+      RelOptCluster cluster,
+      RelTraitSet traitSet,
+      RelNode left,
+      RelNode right,
+      RexNode condition,
+      Set<CorrelationId> variablesSet,
+      JoinRelType joinType) {
     super(cluster, traitSet, ImmutableList.of(), left, right, condition, variablesSet, joinType);
   }
 
@@ -39,8 +43,14 @@ public class OneDBJoin extends Join implements OneDBRel {
   }
 
   @Override
-  public Join copy(RelTraitSet traitSet, RexNode conditionExpr, RelNode left, RelNode right, JoinRelType joinType,
+  public Join copy(
+      RelTraitSet traitSet,
+      RexNode conditionExpr,
+      RelNode left,
+      RelNode right,
+      JoinRelType joinType,
       boolean semiJoinDone) {
-    return new OneDBJoin(getCluster(), traitSet, left, right, conditionExpr, variablesSet, joinType);
+    return new OneDBJoin(
+        getCluster(), traitSet, left, right, conditionExpr, variablesSet, joinType);
   }
 }

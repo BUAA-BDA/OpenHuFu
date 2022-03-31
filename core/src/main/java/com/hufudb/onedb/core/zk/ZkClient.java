@@ -1,7 +1,7 @@
 package com.hufudb.onedb.core.zk;
 
+import com.hufudb.onedb.core.config.OneDBConfig;
 import java.util.List;
-
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
@@ -11,9 +11,6 @@ import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.ACL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.hufudb.onedb.core.config.OneDBConfig;
-
 
 public abstract class ZkClient implements Watcher {
   protected static Logger LOG = LoggerFactory.getLogger(ZkClient.class);
@@ -48,7 +45,7 @@ public abstract class ZkClient implements Watcher {
   protected boolean createRecursive(String path, List<ACL> acls) {
     int idx = 0;
     LOG.info("Creating path {} recursively", path);
-    while(true) {
+    while (true) {
       idx = path.indexOf("/", idx + 1);
       String tmp = idx == -1 ? path : path.substring(0, idx);
       try {
@@ -69,7 +66,7 @@ public abstract class ZkClient implements Watcher {
 
   @Override
   public void process(WatchedEvent event) {
-    switch(event.getState()) {
+    switch (event.getState()) {
       case SyncConnected:
         break;
       case Expired:

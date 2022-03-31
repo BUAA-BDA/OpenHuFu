@@ -1,17 +1,16 @@
 package com.hufudb.onedb.core.sql.rel;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
-
 import com.google.protobuf.TextFormat;
 import com.google.protobuf.TextFormat.ParseException;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class OneDBQueryContext {
-  // 
+  //
   // global context management
   //
   // global OneDBQueryContext pool, queryContext are saved in this structure

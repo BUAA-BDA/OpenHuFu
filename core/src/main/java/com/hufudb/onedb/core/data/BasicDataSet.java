@@ -1,15 +1,12 @@
 package com.hufudb.onedb.core.data;
 
+import com.google.protobuf.ByteString;
+import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
+import com.hufudb.onedb.rpc.OneDBCommon.RowsProto;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import com.google.protobuf.ByteString;
-
 import org.apache.commons.lang3.SerializationUtils;
-
-import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
-import com.hufudb.onedb.rpc.OneDBCommon.RowsProto;
 
 public class BasicDataSet implements EnumerableDataSet {
   protected Header header;
@@ -31,15 +28,18 @@ public class BasicDataSet implements EnumerableDataSet {
     DataSetProto.Builder proto = DataSetProto.newBuilder();
     proto.setHeader(header.toProto());
     RowsProto.Builder rowsProto = RowsProto.newBuilder();
-    rows.stream().forEach(row -> rowsProto.addRow(ByteString.copyFrom(SerializationUtils.serialize(row))));
+    rows.stream()
+        .forEach(row -> rowsProto.addRow(ByteString.copyFrom(SerializationUtils.serialize(row))));
     return proto.setRows(rowsProto).build();
   }
 
   public static BasicDataSet fromProto(DataSetProto proto) {
     Header header = Header.fromProto(proto.getHeader());
     RowsProto rowsProto = proto.getRows();
-    List<Row> rows = rowsProto.getRowList().stream()
-        .map(bytes -> (Row) SerializationUtils.deserialize(bytes.toByteArray())).collect(Collectors.toList());
+    List<Row> rows =
+        rowsProto.getRowList().stream()
+            .map(bytes -> (Row) SerializationUtils.deserialize(bytes.toByteArray()))
+            .collect(Collectors.toList());
     return new BasicDataSet(header, rows);
   }
 
