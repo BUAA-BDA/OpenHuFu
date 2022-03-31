@@ -27,10 +27,6 @@ public class Field {
     this(name, FieldType.values()[type]);
   }
 
-  public FieldProto toProto() {
-    return FieldProto.newBuilder().setName(name).setType(type.ordinal()).build();
-  }
-
   public static Field fromProto(FieldProto proto) {
     return new Field(proto.getName(), proto.getType());
   }
@@ -41,6 +37,10 @@ public class Field {
 
   public static Field of(String name, FieldType type, Level level) {
     return new Field(name, type, level);
+  }
+
+  public FieldProto toProto() {
+    return FieldProto.newBuilder().setName(name).setType(type.ordinal()).build();
   }
 
   public String getName() {
@@ -69,7 +69,11 @@ public class Field {
 
   @Override
   public boolean equals(Object obj) {
-    return obj == this || (obj instanceof Field && ((Field) obj).name.equals(this.name) && ((Field) obj).type.equals(this.type) && ((Field) obj).level.equals(this.level));
+    return obj == this
+        || (obj instanceof Field
+            && ((Field) obj).name.equals(this.name)
+            && ((Field) obj).type.equals(this.type)
+            && ((Field) obj).level.equals(this.level));
   }
 
   @Override

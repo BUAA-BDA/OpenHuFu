@@ -1,8 +1,5 @@
 package com.hufudb.onedb.core.sql.rel;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
@@ -11,16 +8,17 @@ import com.hufudb.onedb.core.sql.expression.OneDBOperator;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
 import com.hufudb.onedb.rpc.OneDBCommon.ExpressionProto;
 import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
-
+import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.calcite.linq4j.tree.Expression;
 import org.apache.calcite.plan.Convention;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.core.JoinInfo;
 
 public interface OneDBRel extends RelNode {
-  void implement(Implementor implementor);
-
   Convention CONVENTION = new Convention.Impl("OneDB", OneDBRel.class);
+
+  void implement(Implementor implementor);
 
   class Implementor {
     OneDBSchema schema;
@@ -69,11 +67,21 @@ public interface OneDBRel extends RelNode {
       ImmutableList.Builder<ExpressionProto> builder = ImmutableList.builder();
       int idx = 0;
       for (ExpressionProto exp : currentContext.getLeft().getSelectExpList()) {
-        builder.add(ExpressionProto.newBuilder().setOpType(OneDBOpType.REF.ordinal()).setOutType(exp.getOutType()).setRef(idx).build());
+        builder.add(
+            ExpressionProto.newBuilder()
+                .setOpType(OneDBOpType.REF.ordinal())
+                .setOutType(exp.getOutType())
+                .setRef(idx)
+                .build());
         ++idx;
       }
       for (ExpressionProto exp : currentContext.getRight().getSelectExpList()) {
-        builder.add(ExpressionProto.newBuilder().setOpType(OneDBOpType.REF.ordinal()).setOutType(exp.getOutType()).setRef(idx).build());
+        builder.add(
+            ExpressionProto.newBuilder()
+                .setOpType(OneDBOpType.REF.ordinal())
+                .setOutType(exp.getOutType())
+                .setRef(idx)
+                .build());
         ++idx;
       }
       setSelectExpProtos(builder.build());
@@ -92,7 +100,8 @@ public interface OneDBRel extends RelNode {
     // todo: pass proto
     public void setSelectExps(List<OneDBExpression> exps) {
       currentContext.clearSelectExp();
-      currentContext.addAllSelectExp(exps.stream().map(exp -> exp.toProto()).collect(Collectors.toList()));
+      currentContext.addAllSelectExp(
+          exps.stream().map(exp -> exp.toProto()).collect(Collectors.toList()));
     }
 
     void setSelectExpProtos(List<ExpressionProto> exps) {
@@ -106,7 +115,8 @@ public interface OneDBRel extends RelNode {
 
     public void setAggExps(List<OneDBExpression> exps) {
       currentContext.clearAggExp();
-      currentContext.addAllAggExp(exps.stream().map(exp -> exp.toProto()).collect(Collectors.toList()));
+      currentContext.addAllAggExp(
+          exps.stream().map(exp -> exp.toProto()).collect(Collectors.toList()));
     }
 
     public void setOffset(int offset) {
@@ -120,7 +130,10 @@ public interface OneDBRel extends RelNode {
     public void setJoinCondition(JoinInfo joinInfo) {
       if (!joinInfo.nonEquiConditions.isEmpty()) {
         currentContext.clearJoinCond();
-        currentContext.addAllJoinCond(OneDBOperator.fromRexNodes(joinInfo.nonEquiConditions, getCurrentOutput()).stream().map(exp -> exp.toProto()).collect(Collectors.toList()));
+        currentContext.addAllJoinCond(
+            OneDBOperator.fromRexNodes(joinInfo.nonEquiConditions, getCurrentOutput()).stream()
+                .map(exp -> exp.toProto())
+                .collect(Collectors.toList()));
       }
       currentContext.addAllLeftKey(joinInfo.leftKeys).addAllRightKey(joinInfo.rightKeys);
     }

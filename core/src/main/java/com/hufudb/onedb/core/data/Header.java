@@ -1,12 +1,10 @@
 package com.hufudb.onedb.core.data;
 
+import com.google.common.collect.ImmutableList;
+import com.hufudb.onedb.rpc.OneDBCommon.HeaderProto;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import com.google.common.collect.ImmutableList;
-
-import com.hufudb.onedb.rpc.OneDBCommon.HeaderProto;
 
 public class Header {
   public static final Header EMPTY = new Header(ImmutableList.of());
@@ -21,11 +19,8 @@ public class Header {
   }
 
   protected Header(HeaderProto proto) {
-    this.fields = proto.getFieldList().stream().map(f -> Field.fromProto(f)).collect(Collectors.toList());
-  }
-
-  public HeaderProto toProto() {
-    return HeaderProto.newBuilder().addAllField(fields.stream().map(f -> f.toProto()).collect(Collectors.toList())).build();
+    this.fields =
+        proto.getFieldList().stream().map(f -> Field.fromProto(f)).collect(Collectors.toList());
   }
 
   public static Header fromProto(HeaderProto proto) {
@@ -34,6 +29,16 @@ public class Header {
 
   public static Header joinHeader(Header left, Header right) {
     return newBuilder().merge(left).merge(right).build();
+  }
+
+  public static Builder newBuilder() {
+    return new Builder();
+  }
+
+  public HeaderProto toProto() {
+    return HeaderProto.newBuilder()
+        .addAllField(fields.stream().map(f -> f.toProto()).collect(Collectors.toList()))
+        .build();
   }
 
   public List<Field> getFields() {
@@ -67,10 +72,6 @@ public class Header {
     return new Field(ori.name, ori.type, ori.level);
   }
 
-  public static Builder newBuilder() {
-    return new Builder();
-  }
-
   public int size() {
     return fields.size();
   }
@@ -79,9 +80,23 @@ public class Header {
     return new Header(fields);
   }
 
+  @Override
+  public boolean equals(Object obj) {
+    return obj == this || (obj instanceof Header && fields.equals(((Header) obj).fields));
+  }
+
+  @Override
+  public String toString() {
+    List<String> columnStr = new ArrayList<>();
+    for (Field field : fields) {
+      columnStr.add(field.toString());
+    }
+    return String.join(" | ", columnStr);
+  }
+
   public static class Builder {
-    private List<Field> fields;
-    
+    private final List<Field> fields;
+
     private Builder() {
       fields = new ArrayList<Field>();
     }
@@ -113,19 +128,5 @@ public class Header {
     public int size() {
       return fields.size();
     }
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    return obj == this || (obj instanceof Header && fields.equals(((Header) obj).fields));
-  }
-
-  @Override
-  public String toString() {
-    List<String> columnStr = new ArrayList<>();
-    for (Field field : fields) {
-      columnStr.add(field.toString());
-    }
-    return String.join(" | ", columnStr);
   }
 }

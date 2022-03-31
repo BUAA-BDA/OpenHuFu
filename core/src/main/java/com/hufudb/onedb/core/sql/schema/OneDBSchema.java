@@ -1,20 +1,18 @@
 package com.hufudb.onedb.core.sql.schema;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.client.OneDBClient;
+import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.sql.enumerator.OneDBEnumerator;
 import com.hufudb.onedb.core.sql.rel.OneDBTable;
 import com.hufudb.onedb.core.table.OneDBTableInfo;
 import com.hufudb.onedb.core.zk.OneDBZkClient;
 import com.hufudb.onedb.core.zk.ZkConfig;
-
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.apache.calcite.linq4j.AbstractEnumerable;
 import org.apache.calcite.linq4j.Enumerable;
 import org.apache.calcite.linq4j.Enumerator;
@@ -60,13 +58,13 @@ public class OneDBSchema extends AbstractSchema {
   }
 
   public OneDBTableInfo getOneDBTableInfo(String tableName) {
-    return ((OneDBTable)getTable(tableName)).getTableInfo();
+    return ((OneDBTable) getTable(tableName)).getTableInfo();
   }
 
   public List<OneDBTableInfo> getAllOneDBTableInfo() {
     List<OneDBTableInfo> infos = new ArrayList<>();
     for (Table table : tableMap.values()) {
-      infos.add(((OneDBTable)table).getTableInfo());
+      infos.add(((OneDBTable) table).getTableInfo());
     }
     return infos;
   }

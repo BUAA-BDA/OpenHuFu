@@ -1,7 +1,5 @@
 package com.hufudb.onedb.core.data.query;
 
-import java.util.List;
-
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.data.BasicDataSet;
 import com.hufudb.onedb.core.data.FieldType;
@@ -12,6 +10,7 @@ import com.hufudb.onedb.core.data.query.join.PlaintextNestedLoopJoin;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.rpc.OneDBCommon.ExpressionProto;
+import java.util.List;
 
 public class QueryableDataSet extends BasicDataSet {
   public static final QueryableDataSet EMPTY = new QueryableDataSet(Header.EMPTY);
@@ -37,13 +36,14 @@ public class QueryableDataSet extends BasicDataSet {
     return new QueryableDataSet(header);
   }
 
-  public List<FieldType> getTypeList() {
-    return header.getTypeList();
+  // todo: now we just implement the equi-join, add theta join implement later
+  public static QueryableDataSet join(
+      QueryableDataSet left, QueryableDataSet right, OneDBJoinInfo joinInfo) {
+    return PlaintextNestedLoopJoin.apply(left, right, joinInfo);
   }
 
-  // todo: now we just implement the equi-join, add theta join implement later
-  public static QueryableDataSet join(QueryableDataSet left, QueryableDataSet right, OneDBJoinInfo joinInfo) {
-    return PlaintextNestedLoopJoin.apply(left, right, joinInfo);
+  public List<FieldType> getTypeList() {
+    return header.getTypeList();
   }
 
   public QueryableDataSet filter(List<ExpressionProto> fil) {

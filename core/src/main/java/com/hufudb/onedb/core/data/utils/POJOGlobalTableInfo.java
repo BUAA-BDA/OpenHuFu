@@ -1,10 +1,9 @@
 package com.hufudb.onedb.core.data.utils;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.hufudb.onedb.core.table.OneDBTableInfo;
 import com.hufudb.onedb.core.table.TableMeta.LocalTableMeta;
+import java.util.ArrayList;
+import java.util.List;
 
 public class POJOGlobalTableInfo {
   String name;
@@ -30,12 +29,15 @@ public class POJOGlobalTableInfo {
   public String getName() {
     return name;
   }
+
   public void setName(String name) {
     this.name = name;
   }
+
   public POJOHeader getHeader() {
     return header;
   }
+
   public void setHeader(POJOHeader header) {
     this.header = header;
   }

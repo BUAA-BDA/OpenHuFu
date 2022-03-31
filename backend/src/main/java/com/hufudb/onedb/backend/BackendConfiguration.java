@@ -33,23 +33,31 @@ public class BackendConfiguration {
 
   @Value("${owner.db.type}")
   private String type;
+
   @Value("${owner.db.url}")
   private String url;
+
   @Value("${owner.db.catalog}")
   private String catalog;
+
   @Value("${owner.db.user}")
   private String user;
+
   @Value("${owner.db.passwd}")
   private String passwd;
+
   @Value("${owner.grpc.port}")
   private int port;
+
   @Value("${owner.grpc.hostname}")
   private String hostname;
+
   @Value("${owner.schema.path}")
   private String ownerConfigPath;
 
   @Value("${user.endpoint:}")
   private List<String> endpoints;
+
   @Value("${user.schema.path:}")
   private String userConfigPath;
 
@@ -58,11 +66,15 @@ public class BackendConfiguration {
   private List<POJOPublishedTableInfo> tableInfos;
 
   @Bean
-  @ConditionalOnProperty(name={"owner.db.enable"}, havingValue = "true")
+  @ConditionalOnProperty(
+      name = {"owner.db.enable"},
+      havingValue = "true")
   public OwnerService initService() {
     try (Reader reader = Files.newBufferedReader(Paths.get(ownerConfigPath))) {
-      tableInfos = new Gson().fromJson(reader, new TypeToken<ArrayList<POJOPublishedTableInfo>>() {}.getType());
-    } catch (IOException|JsonSyntaxException e) {
+      tableInfos =
+          new Gson()
+              .fromJson(reader, new TypeToken<ArrayList<POJOPublishedTableInfo>>() {}.getType());
+    } catch (IOException | JsonSyntaxException e) {
       tableInfos = ImmutableList.of();
       LOG.warn("fail to read schema.path");
     }
@@ -85,20 +97,22 @@ public class BackendConfiguration {
       for (TableMeta meta : tableMetas) {
         client.createOneDBTable(meta);
       }
-    } catch (IOException|JsonSyntaxException e) {
+    } catch (IOException | JsonSyntaxException e) {
       LOG.warn("fail to load global table config");
     }
   }
 
   @Bean
-  @ConditionalOnProperty(name={"owner.db.enable"}, havingValue = "true")
+  @ConditionalOnProperty(
+      name = {"owner.db.enable"},
+      havingValue = "true")
   public CommandLineRunner Server(OneDB client, OwnerService service) {
     LOG.info("init Server");
     return args -> {
       OwnerServer server = null;
       switch (type) {
         case "postgresql":
-          server = new PostgresqlServer(port, (PostgresqlService)service);
+          server = new PostgresqlServer(port, (PostgresqlService) service);
           break;
         default:
           LOG.error("database {} is not supported", type);
@@ -116,7 +130,9 @@ public class BackendConfiguration {
   }
 
   @Bean
-  @ConditionalOnProperty(name={"owner.db.enable"}, havingValue = "false")
+  @ConditionalOnProperty(
+      name = {"owner.db.enable"},
+      havingValue = "false")
   CommandLineRunner Client(OneDB client) {
     return args -> {
       initClient(client);

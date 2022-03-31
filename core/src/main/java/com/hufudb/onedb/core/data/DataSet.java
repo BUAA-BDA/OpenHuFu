@@ -4,15 +4,15 @@ import java.util.List;
 
 public interface DataSet {
 
-  public Header getHeader();
+  Header getHeader();
 
-  public abstract int getRowCount();
+  int getRowCount();
 
-  public abstract void addRow(Row row);
+  void addRow(Row row);
 
-  public abstract void addRows(List<Row> rows);
+  void addRows(List<Row> rows);
 
-  public abstract void mergeDataSet(DataSet dataSet);
+  void mergeDataSet(DataSet dataSet);
 
-  public abstract List<Row> getRows();
+  List<Row> getRows();
 }

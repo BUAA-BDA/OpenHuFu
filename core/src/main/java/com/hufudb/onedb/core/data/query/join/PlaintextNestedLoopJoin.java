@@ -1,17 +1,17 @@
 package com.hufudb.onedb.core.data.query.join;
 
-import java.util.List;
-
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.data.Row;
 import com.hufudb.onedb.core.data.query.QueryableDataSet;
 import com.hufudb.onedb.core.data.query.filter.PlaintextFilter;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.implementor.utils.OneDBJoinInfo;
+import java.util.List;
 
 public class PlaintextNestedLoopJoin {
 
-  public static QueryableDataSet apply(QueryableDataSet left, QueryableDataSet right, OneDBJoinInfo joinInfo) {
+  public static QueryableDataSet apply(
+      QueryableDataSet left, QueryableDataSet right, OneDBJoinInfo joinInfo) {
     List<Integer> leftKeys = joinInfo.getLeftKeys();
     List<Integer> rightKeys = joinInfo.getRightKeys();
     List<Row> leftData = left.getRows();

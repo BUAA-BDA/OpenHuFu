@@ -1,15 +1,12 @@
 package com.hufudb.onedb.core.sql.expression;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.data.TypeConverter;
-
-import org.apache.calcite.rex.RexInputRef;
-
 import com.hufudb.onedb.rpc.OneDBCommon.ExpressionProto;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.calcite.rex.RexInputRef;
 
 public class OneDBReference implements OneDBExpression {
   FieldType type;
@@ -33,7 +30,8 @@ public class OneDBReference implements OneDBExpression {
   }
 
   public static OneDBExpression fromInputRef(RexInputRef ref) {
-    return new OneDBReference(TypeConverter.convert2OneDBType(ref.getType().getSqlTypeName()), ref.getIndex());
+    return new OneDBReference(
+        TypeConverter.convert2OneDBType(ref.getType().getSqlTypeName()), ref.getIndex());
   }
 
   public static OneDBExpression fromProto(ExpressionProto proto) {
@@ -44,7 +42,11 @@ public class OneDBReference implements OneDBExpression {
 
   @Override
   public ExpressionProto toProto() {
-    return ExpressionProto.newBuilder().setOpType(OneDBOpType.REF.ordinal()).setOutType(type.ordinal()).setRef(idx).build();
+    return ExpressionProto.newBuilder()
+        .setOpType(OneDBOpType.REF.ordinal())
+        .setOutType(type.ordinal())
+        .setRef(idx)
+        .build();
   }
 
   @Override

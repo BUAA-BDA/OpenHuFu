@@ -1,7 +1,6 @@
 package com.hufudb.onedb.core.sql.rel;
 
 import java.util.List;
-
 import org.apache.calcite.adapter.enumerable.EnumerableRel;
 import org.apache.calcite.adapter.enumerable.EnumerableRelImplementor;
 import org.apache.calcite.adapter.enumerable.PhysType;
@@ -39,22 +38,27 @@ public class OneDBToEnumerableConverter extends ConverterImpl implements Enumera
     final OneDBRel.Implementor oImplementor = new OneDBRel.Implementor();
     try {
       oImplementor.visitChild(getInput());
-    } catch(Exception e) {
+    } catch (Exception e) {
       e.printStackTrace();
     }
     return implement(implementor, oImplementor, pref);
   }
 
-  public Result implement(EnumerableRelImplementor implementor, OneDBRel.Implementor oImplementor, Prefer pref) {
+  public Result implement(
+      EnumerableRelImplementor implementor, OneDBRel.Implementor oImplementor, Prefer pref) {
     final BlockBuilder builder = new BlockBuilder();
-    final PhysType physType = PhysTypeImpl.of(implementor.getTypeFactory(), getRowType(), pref.preferArray());
+    final PhysType physType =
+        PhysTypeImpl.of(implementor.getTypeFactory(), getRowType(), pref.preferArray());
     // build and save context for the query
     OneDBQueryContext context = oImplementor.buildContext();
     OneDBQueryContext.saveContext(context);
     // get OneDBSchema for query
     Expression schema = oImplementor.getSchemaExpression();
     // call the query method on onedbschema
-    Expression enumerable = builder.append("enumerable", Expressions.call(schema, "query", Expressions.constant(context.getContextId())));
+    Expression enumerable =
+        builder.append(
+            "enumerable",
+            Expressions.call(schema, "query", Expressions.constant(context.getContextId())));
     builder.add(Expressions.return_(null, enumerable));
     return implementor.result(physType, builder.toBlock());
   }

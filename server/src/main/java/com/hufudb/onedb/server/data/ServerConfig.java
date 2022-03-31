@@ -1,14 +1,13 @@
 package com.hufudb.onedb.server.data;
 
-import java.util.List;
-
 import com.hufudb.onedb.core.data.Level;
+import java.util.List;
 
 public interface ServerConfig {
 
-  abstract public Table getTable(String tableName);
+  Table getTable(String tableName);
 
-  public static class Table {
+  class Table {
     public String name;
     public List<Column> columns;
     public List<Mapping> mappings;
@@ -23,12 +22,12 @@ public interface ServerConfig {
     }
   }
 
-  public static class Column {
+  class Column {
     public String name;
     public Level level;
   }
 
-  public static class Mapping {
+  class Mapping {
     public String schema;
     public String name;
   }

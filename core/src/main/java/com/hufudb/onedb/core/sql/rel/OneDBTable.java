@@ -1,10 +1,5 @@
 package com.hufudb.onedb.core.sql.rel;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.data.TableInfo;
@@ -13,7 +8,10 @@ import com.hufudb.onedb.core.sql.enumerator.OneDBEnumerator;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
 import com.hufudb.onedb.core.table.OneDBTableInfo;
 import com.hufudb.onedb.core.table.TableMeta;
-
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.calcite.adapter.java.AbstractQueryableTable;
 import org.apache.calcite.linq4j.AbstractEnumerable;
 import org.apache.calcite.linq4j.Enumerable;
@@ -53,12 +51,8 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
     this.tableInfo = new OneDBTableInfo(tableName, header);
   }
 
-  @Override
-  public RelDataType getRowType(RelDataTypeFactory typeFactory) {
-    return protoRowType.apply(typeFactory);
-  }
-
-  static Table create(OneDBSchema schema, String tableName, Header header, RelProtoDataType protoRowType) {
+  static Table create(
+      OneDBSchema schema, String tableName, Header header, RelProtoDataType protoRowType) {
     return new OneDBTable(tableName, schema, header, protoRowType);
   }
 
@@ -72,14 +66,22 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
         client = schema.addOwner(fedMeta.endpoint);
       }
       Header header = client.getTableHeader(fedMeta.localName);
-      LOG.info("Table {} header {} from {}", fedMeta.localName, header.toString(), fedMeta.endpoint);
+      LOG.info(
+          "Table {} header {} from {}", fedMeta.localName, header.toString(), fedMeta.endpoint);
       localInfos.add(Pair.of(client, TableInfo.of(fedMeta.localName, header)));
     }
     if (localInfos.size() > 0) {
       TableInfo standard = localInfos.get(0).getValue();
       for (Pair<OwnerClient, TableInfo> pair : localInfos) {
         if (!standard.getHeader().equals(pair.getValue().getHeader())) {
-          LOG.warn("Header of {} {} {} mismatch with {} {} {}", localInfos.get(0).getKey(), localInfos.get(0).getValue().getName(), standard.toString(), pair.getKey(), standard.getName(), standard.getHeader());
+          LOG.warn(
+              "Header of {} {} {} mismatch with {} {} {}",
+              localInfos.get(0).getKey(),
+              localInfos.get(0).getValue().getName(),
+              standard,
+              pair.getKey(),
+              standard.getName(),
+              standard.getHeader());
           return null;
         }
       }
@@ -98,8 +100,10 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
     return table;
   }
 
-  public static Table create(OneDBSchema schema, String tableName, Map operand, RelProtoDataType protoRowType) {
-    List<LinkedHashMap<String, Object>> feds = (List<LinkedHashMap<String, Object>>) operand.get("feds");
+  public static Table create(
+      OneDBSchema schema, String tableName, Map operand, RelProtoDataType protoRowType) {
+    List<LinkedHashMap<String, Object>> feds =
+        (List<LinkedHashMap<String, Object>>) operand.get("feds");
     OneDBTable table = null;
     for (LinkedHashMap<String, Object> fed : feds) {
       String endpoint = fed.get("endpoint").toString();
@@ -145,28 +149,13 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
     return RelDataTypeImpl.proto(fieldInfo.build());
   }
 
-  public void addOwner(OwnerClient client, String localName) {
-    tableInfo.addLocalTable(client, localName);
+  @Override
+  public RelDataType getRowType(RelDataTypeFactory typeFactory) {
+    return protoRowType.apply(typeFactory);
   }
 
-  public static class OneDBQueryable<T> extends AbstractTableQueryable<T> {
-    public OneDBQueryable(QueryProvider queryProvider, SchemaPlus schema, OneDBTable table, String tableName) {
-      super(queryProvider, schema, table, tableName);
-    }
-
-    private OneDBTable getTable() {
-      return (OneDBTable) table;
-    }
-
-    @Override
-    public Enumerator<T> enumerator() {
-      final Enumerable<T> enumerable = (Enumerable<T>) getTable().query();
-      return enumerable.enumerator();
-    }
-
-    public Enumerable<Object> query(long contextId) {
-      return getTable().query(contextId);
-    }
+  public void addOwner(OwnerClient client, String localName) {
+    tableInfo.addLocalTable(client, localName);
   }
 
   public Enumerable<Object> query() {
@@ -191,14 +180,16 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
   }
 
   @Override
-  public <T> Queryable<T> asQueryable(QueryProvider queryProvider, SchemaPlus schema, String tableName) {
+  public <T> Queryable<T> asQueryable(
+      QueryProvider queryProvider, SchemaPlus schema, String tableName) {
     return new OneDBQueryable<>(queryProvider, schema, this, tableName);
   }
 
   @Override
   public RelNode toRel(ToRelContext context, RelOptTable relOptTable) {
     final RelOptCluster cluster = context.getCluster();
-    return new OneDBTableScan(cluster, cluster.traitSetOf(OneDBRel.CONVENTION), relOptTable, this, null);
+    return new OneDBTableScan(
+        cluster, cluster.traitSetOf(OneDBRel.CONVENTION), relOptTable, this, null);
   }
 
   public OneDBTableInfo getTableInfo() {
@@ -215,5 +206,26 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
 
   protected OneDBSchema getSchema() {
     return schema;
+  }
+
+  public static class OneDBQueryable<T> extends AbstractTableQueryable<T> {
+    public OneDBQueryable(
+        QueryProvider queryProvider, SchemaPlus schema, OneDBTable table, String tableName) {
+      super(queryProvider, schema, table, tableName);
+    }
+
+    private OneDBTable getTable() {
+      return (OneDBTable) table;
+    }
+
+    @Override
+    public Enumerator<T> enumerator() {
+      final Enumerable<T> enumerable = (Enumerable<T>) getTable().query();
+      return enumerable.enumerator();
+    }
+
+    public Enumerable<Object> query(long contextId) {
+      return getTable().query(contextId);
+    }
   }
 }

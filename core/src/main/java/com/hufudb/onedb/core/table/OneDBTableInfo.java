@@ -1,5 +1,10 @@
 package com.hufudb.onedb.core.table;
 
+import com.google.common.collect.ImmutableList;
+import com.hufudb.onedb.core.client.OwnerClient;
+import com.hufudb.onedb.core.data.Header;
+import com.hufudb.onedb.core.sql.schema.OneDBSchema;
+import com.hufudb.onedb.core.table.TableMeta.LocalTableMeta;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,13 +12,6 @@ import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
-
-import com.google.common.collect.ImmutableList;
-import com.hufudb.onedb.core.client.OwnerClient;
-import com.hufudb.onedb.core.data.Header;
-import com.hufudb.onedb.core.sql.schema.OneDBSchema;
-import com.hufudb.onedb.core.table.TableMeta.LocalTableMeta;
-
 import org.apache.calcite.util.Pair;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -21,12 +19,11 @@ import org.slf4j.LoggerFactory;
 
 public class OneDBTableInfo {
   private static final Logger LOG = LoggerFactory.getLogger(OneDBSchema.class);
-
-  private String name;
-  private Header header;
-  private Map<String, Integer> columnMap;
-  private List<Pair<OwnerClient, String>> tableList;
   private final ReadWriteLock lock;
+  private final String name;
+  private final Header header;
+  private final Map<String, Integer> columnMap;
+  private List<Pair<OwnerClient, String>> tableList;
 
   public OneDBTableInfo(String name, Header header) {
     this.name = name;
@@ -51,7 +48,12 @@ public class OneDBTableInfo {
       tableList.add(Pair.of(client, localName));
       lock.writeLock().unlock();
     } else {
-      LOG.warn("Table {} header {} mismatch with global table {} header {}", localName, header, name, this.header);
+      LOG.warn(
+          "Table {} header {} mismatch with global table {} header {}",
+          localName,
+          header,
+          name,
+          this.header);
     }
   }
 
@@ -69,7 +71,12 @@ public class OneDBTableInfo {
       tableList.add(Pair.of(client, localName));
       lock.writeLock().unlock();
     } else {
-      LOG.warn("Table {} header {} mismatch with global table {} header {}", localName, header, name, this.header);
+      LOG.warn(
+          "Table {} header {} mismatch with global table {} header {}",
+          localName,
+          header,
+          name,
+          this.header);
     }
   }
 
@@ -131,18 +138,22 @@ public class OneDBTableInfo {
   public List<String> getEndpoints() {
     List<String> endpoints = new ArrayList<>();
     lock.readLock().lock();
-    endpoints = tableList.stream().map(pair -> pair.getKey().getEndpoint()).collect(Collectors.toList());
+    endpoints =
+        tableList.stream().map(pair -> pair.getKey().getEndpoint()).collect(Collectors.toList());
     lock.readLock().unlock();
     return endpoints;
   }
 
   public List<LocalTableMeta> getMappings() {
-    return getTableList().stream().map(p -> new LocalTableMeta(p.left.getEndpoint(), p.right)).collect(Collectors.toList());
+    return getTableList().stream()
+        .map(p -> new LocalTableMeta(p.left.getEndpoint(), p.right))
+        .collect(Collectors.toList());
   }
 
   @Override
   public String toString() {
-    List<String> mappings = getMappings().stream().map(p -> p.toString()).collect(Collectors.toList());
+    List<String> mappings =
+        getMappings().stream().map(p -> p.toString()).collect(Collectors.toList());
     return String.format("[%s](%s){%s}", name, header, StringUtils.join(mappings, ","));
   }
 }

@@ -1,7 +1,6 @@
 package com.hufudb.onedb.core.sql.rel;
 
 import com.hufudb.onedb.core.sql.expression.OneDBOperator;
-
 import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelOptCost;
 import org.apache.calcite.plan.RelOptPlanner;
@@ -12,7 +11,8 @@ import org.apache.calcite.rel.metadata.RelMetadataQuery;
 import org.apache.calcite.rex.RexNode;
 
 public class OneDBFilter extends Filter implements OneDBRel {
-  public OneDBFilter(RelOptCluster cluster, RelTraitSet traitSet, RelNode child, RexNode condition) {
+  public OneDBFilter(
+      RelOptCluster cluster, RelTraitSet traitSet, RelNode child, RexNode condition) {
     super(cluster, traitSet, child, condition);
   }
 

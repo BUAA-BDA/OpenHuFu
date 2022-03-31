@@ -1,20 +1,18 @@
 package com.hufudb.onedb.core.data;
 
+import com.google.common.collect.ImmutableList;
+import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
+import io.grpc.stub.StreamObserver;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.common.collect.ImmutableList;
-
-import io.grpc.stub.StreamObserver;
-import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
-
 public class StreamObserverDataSet implements DataSet {
-  private int BATCH_SIZE = 100;
   private final StreamObserver<DataSetProto> observer;
+  private final int BATCH_SIZE = 100;
   private int count;
   private int rowCount;
-  private Header header;
-  private List<Row> rows;
+  private final Header header;
+  private final List<Row> rows;
 
   public StreamObserverDataSet(final StreamObserver<DataSetProto> observer, Header header) {
     this.header = header;
@@ -26,7 +24,7 @@ public class StreamObserverDataSet implements DataSet {
 
   @Override
   public Header getHeader() {
-      return header;
+    return header;
   }
 
   public void addRow(Row row) {
@@ -41,8 +39,8 @@ public class StreamObserverDataSet implements DataSet {
   public void addRows(List<Row> rows) {
     int size = rows.size();
     int i = 0;
-    for (; i + BATCH_SIZE < size; i+= BATCH_SIZE) {
-      this.rows.addAll(rows.subList(i , i + BATCH_SIZE));
+    for (; i + BATCH_SIZE < size; i += BATCH_SIZE) {
+      this.rows.addAll(rows.subList(i, i + BATCH_SIZE));
       send();
     }
     if (i < size) {

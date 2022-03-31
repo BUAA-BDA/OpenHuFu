@@ -1,14 +1,5 @@
 package com.hufudb.onedb.core.sql.implementor;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
 import com.hufudb.onedb.core.client.OneDBClient;
 import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.config.OneDBConfig;
@@ -20,7 +11,14 @@ import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
 import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
-
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import org.apache.calcite.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +65,8 @@ public class PlaintextImplementor {
     return queryable;
   }
 
-  QueryableDataSet implementBinary(OneDBQueryProto proto, QueryableDataSet left, QueryableDataSet right) {
+  QueryableDataSet implementBinary(
+      OneDBQueryProto proto, QueryableDataSet left, QueryableDataSet right) {
     QueryableDataSet dataSet = QueryableDataSet.join(left, right, new OneDBJoinInfo(proto));
     if (proto.getWhereExpCount() > 0) {
       dataSet.filter(proto.getWhereExpList());
@@ -82,25 +81,27 @@ public class PlaintextImplementor {
     return dataSet;
   }
 
-  private StreamBuffer<DataSetProto> tableQuery(OneDBQueryProto query, List<Pair<OwnerClient, String>> tableClients) {
+  private StreamBuffer<DataSetProto> tableQuery(
+      OneDBQueryProto query, List<Pair<OwnerClient, String>> tableClients) {
     StreamBuffer<DataSetProto> iterator = new StreamBuffer<>(tableClients.size());
     List<Callable<Boolean>> tasks = new ArrayList<Callable<Boolean>>();
     for (Pair<OwnerClient, String> entry : tableClients) {
-      tasks.add(() -> {
-        try {
-          OneDBQueryProto localQuery = query.toBuilder().setTableName(entry.getValue()).build();
-          Iterator<DataSetProto> it = entry.getKey().oneDBQuery(localQuery);
-          while (it.hasNext()) {
-            iterator.add(it.next());
-          }
-          return true;
-        } catch (Exception e) {
-          e.printStackTrace();
-          return false;
-        } finally {
-          iterator.finish();
-        }
-      });
+      tasks.add(
+          () -> {
+            try {
+              OneDBQueryProto localQuery = query.toBuilder().setTableName(entry.getValue()).build();
+              Iterator<DataSetProto> it = entry.getKey().oneDBQuery(localQuery);
+              while (it.hasNext()) {
+                iterator.add(it.next());
+              }
+              return true;
+            } catch (Exception e) {
+              e.printStackTrace();
+              return false;
+            } finally {
+              iterator.finish();
+            }
+          });
     }
     try {
       List<Future<Boolean>> statusList = executorService.invokeAll(tasks);

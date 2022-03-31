@@ -1,12 +1,10 @@
 package com.hufudb.onedb.core.sql.schema;
 
+import com.google.common.collect.ImmutableList;
+import com.hufudb.onedb.core.zk.ZkConfig;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import com.google.common.collect.ImmutableList;
-import com.hufudb.onedb.core.zk.ZkConfig;
-
 import org.apache.calcite.schema.Schema;
 import org.apache.calcite.schema.SchemaFactory;
 import org.apache.calcite.schema.SchemaPlus;
@@ -14,12 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class OneDBSchemaFactory implements SchemaFactory {
+  public static final OneDBSchemaFactory INSTANCE = new OneDBSchemaFactory();
   private static final Logger LOG = LoggerFactory.getLogger(OneDBSchemaFactory.class);
 
-  public static final OneDBSchemaFactory INSTANCE = new OneDBSchemaFactory();
-
-  private OneDBSchemaFactory() {
-  }
+  private OneDBSchemaFactory() {}
 
   @Override
   public Schema create(SchemaPlus parentSchema, String name, Map<String, Object> operand) {

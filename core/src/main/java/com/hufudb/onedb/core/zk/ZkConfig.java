@@ -8,7 +8,11 @@ public class ZkConfig {
   public String passwd;
 
   public boolean valid() {
-    return servers != null && zkRoot != null && schemaName != null && user != null && passwd != null;
+    return servers != null
+        && zkRoot != null
+        && schemaName != null
+        && user != null
+        && passwd != null;
   }
 
   public byte[] getDigest() {

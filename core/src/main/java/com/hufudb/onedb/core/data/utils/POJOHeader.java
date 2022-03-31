@@ -1,26 +1,17 @@
 package com.hufudb.onedb.core.data.utils;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.data.Field;
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.data.Level;
+import java.util.ArrayList;
+import java.util.List;
 
 public class POJOHeader {
   public List<Field> fields;
 
   public POJOHeader(List<Field> fields) {
-    this.fields = fields;
-  }
-
-  public List<Field> getFields() {
-    return fields;
-  }
-
-  public void setFields(List<Field> fields) {
     this.fields = fields;
   }
 
@@ -30,6 +21,14 @@ public class POJOHeader {
 
   public static Builder newBuilder() {
     return new Builder();
+  }
+
+  public List<Field> getFields() {
+    return fields;
+  }
+
+  public void setFields(List<Field> fields) {
+    this.fields = fields;
   }
 
   @Override
@@ -42,8 +41,8 @@ public class POJOHeader {
   }
 
   public static class Builder {
-    private List<Field> fields;
-    
+    private final List<Field> fields;
+
     private Builder() {
       fields = new ArrayList<Field>();
     }

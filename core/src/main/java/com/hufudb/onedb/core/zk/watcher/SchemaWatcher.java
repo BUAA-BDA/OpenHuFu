@@ -1,19 +1,17 @@
 package com.hufudb.onedb.core.zk.watcher;
 
+import com.hufudb.onedb.core.sql.schema.OneDBSchema;
+import com.hufudb.onedb.core.zk.OneDBZkClient;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher.Event.EventType;
 import org.apache.zookeeper.Watcher.Event.KeeperState;
 import org.apache.zookeeper.ZooKeeper;
 
-import com.hufudb.onedb.core.sql.schema.OneDBSchema;
-import com.hufudb.onedb.core.zk.OneDBZkClient;
-
 public class SchemaWatcher extends ZkWatcher {
-  private OneDBZkClient zkClient;
+  private final OneDBZkClient zkClient;
 
   public SchemaWatcher(OneDBSchema schema, ZooKeeper zk, String path, OneDBZkClient zkClient) {
     super(schema, zk, path);
@@ -64,7 +62,7 @@ public class SchemaWatcher extends ZkWatcher {
     String path = event.getPath();
     switch (type) {
       case NodeChildrenChanged:
-        synchronized(this) {
+        synchronized (this) {
           try {
             List<String> children = zk.getChildren(path, this);
             watchGlobalTableChange(children);

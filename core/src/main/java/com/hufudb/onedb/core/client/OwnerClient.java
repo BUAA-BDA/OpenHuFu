@@ -1,18 +1,5 @@
 package com.hufudb.onedb.core.client;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.grpc.Channel;
-import io.grpc.ManagedChannelBuilder;
-import io.grpc.StatusRuntimeException;
-import com.hufudb.onedb.rpc.OneDBService.GeneralRequest;
-import com.hufudb.onedb.rpc.OneDBService.GeneralResponse;
-import com.hufudb.onedb.rpc.ServiceGrpc;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.data.TableInfo;
 import com.hufudb.onedb.core.utils.EmptyIterator;
@@ -20,10 +7,21 @@ import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
 import com.hufudb.onedb.rpc.OneDBCommon.HeaderProto;
 import com.hufudb.onedb.rpc.OneDBCommon.LocalTableListProto;
 import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
+import com.hufudb.onedb.rpc.OneDBService.GeneralRequest;
+import com.hufudb.onedb.rpc.OneDBService.GeneralResponse;
+import com.hufudb.onedb.rpc.ServiceGrpc;
+import io.grpc.Channel;
+import io.grpc.ManagedChannelBuilder;
+import io.grpc.StatusRuntimeException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
-* client for a single DB
-*/
+ * client for a single DB
+ */
 public class OwnerClient {
   private static final Logger LOG = LoggerFactory.getLogger(OwnerClient.class);
 
@@ -32,12 +30,18 @@ public class OwnerClient {
   private String endpoint;
 
   public OwnerClient(String host, int port) {
-    this(ManagedChannelBuilder.forAddress(host, port).usePlaintext().maxInboundMessageSize(1024 * 1024 * 80));
+    this(
+        ManagedChannelBuilder.forAddress(host, port)
+            .usePlaintext()
+            .maxInboundMessageSize(1024 * 1024 * 80));
     this.endpoint = String.format("%s:%d", host, port);
   }
 
   public OwnerClient(String endpoint) {
-    this(ManagedChannelBuilder.forTarget(endpoint).usePlaintext().maxInboundMessageSize(1024 * 1024 * 80));
+    this(
+        ManagedChannelBuilder.forTarget(endpoint)
+            .usePlaintext()
+            .maxInboundMessageSize(1024 * 1024 * 80));
     this.endpoint = endpoint;
   }
 
@@ -94,8 +98,8 @@ public class OwnerClient {
 
   public Header getTableHeader(String tableName) {
     try {
-      HeaderProto proto = blockingStub
-              .getTableHeader(GeneralRequest.newBuilder().setValue(tableName).build());
+      HeaderProto proto =
+          blockingStub.getTableHeader(GeneralRequest.newBuilder().setValue(tableName).build());
       return Header.fromProto(proto);
     } catch (StatusRuntimeException e) {
       LOG.error("RPC failed in getTableHeader: {}", e.getStatus());
@@ -105,8 +109,8 @@ public class OwnerClient {
 
   public List<TableInfo> getAllLocalTable() {
     try {
-      LocalTableListProto proto = blockingStub
-              .getAllLocalTable(GeneralRequest.newBuilder().build());
+      LocalTableListProto proto =
+          blockingStub.getAllLocalTable(GeneralRequest.newBuilder().build());
       return TableInfo.fromProto(proto);
     } catch (StatusRuntimeException e) {
       LOG.error("RPC failed in getAllLocalTable: {}", e.getStatus());

@@ -1,15 +1,13 @@
 package com.hufudb.onedb.core.zk.watcher;
 
+import com.hufudb.onedb.core.sql.schema.OneDBSchema;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher.Event.EventType;
 import org.apache.zookeeper.Watcher.Event.KeeperState;
 import org.apache.zookeeper.ZooKeeper;
-
-import com.hufudb.onedb.core.sql.schema.OneDBSchema;
 
 public class EndpointWatcher extends ZkWatcher {
 
@@ -57,7 +55,7 @@ public class EndpointWatcher extends ZkWatcher {
     String path = event.getPath();
     switch (type) {
       case NodeChildrenChanged:
-        synchronized(this) {
+        synchronized (this) {
           try {
             List<String> children = zk.getChildren(path, this);
             watchEndpoint(children);
