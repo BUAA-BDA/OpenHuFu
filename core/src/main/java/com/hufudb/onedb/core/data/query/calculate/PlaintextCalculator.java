@@ -1,4 +1,4 @@
-package com.hufudb.onedb.core.data.query.calculator;
+package com.hufudb.onedb.core.data.query.calculate;
 
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Row;

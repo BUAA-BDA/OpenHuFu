@@ -74,9 +74,9 @@ public class PlaintextImplementor {
     if (proto.getSelectExpCount() > 0) {
       dataSet.select(proto.getSelectExpList());
     }
-    // if (proto.getAggExpCount() > 0) {
-    //   dataSet.filter(proto.getAggExpList());
-    // }
+    if (proto.getAggExpCount() > 0) {
+      dataSet.aggregate(proto.getAggExpList());
+    }
     // todo: add sort and limit
     return dataSet;
   }

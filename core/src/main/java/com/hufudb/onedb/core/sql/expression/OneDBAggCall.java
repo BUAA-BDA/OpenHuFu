@@ -72,6 +72,14 @@ public class OneDBAggCall implements OneDBExpression {
     return OneDBOpType.AGG_FUNC;
   }
 
+  public AggregateType getAggType() {
+    return aggType;
+  }
+
+  public List<Integer> getInputRef() {
+    return in;
+  }
+
   public enum AggregateType {
     COUNT("COUNT"),
     AVG("AVG"),
