@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
-import com.hufudb.onedb.core.sql.expression.OneDBReference;
+import com.hufudb.onedb.core.sql.expression.OneDBOperator;
 
 import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelOptCost;
@@ -31,13 +31,13 @@ public class OneDBProject extends Project implements OneDBRel {
 
   @Override
   public RelOptCost computeSelfCost(RelOptPlanner planner, RelMetadataQuery mq) {
-    return planner.getCostFactory().makeZeroCost();
+    return super.computeSelfCost(planner, mq).multiplyBy(.05);
   }
 
   @Override
   public void implement(Implementor implementor) {
-    implementor.visitChild(0, getInput());
-    List<OneDBExpression> exps = OneDBReference.fromHeader(implementor.getHeader(), getProjects());
+    implementor.visitChild(getInput());
+    List<OneDBExpression> exps = OneDBOperator.fromRexNodes(getProjects(), implementor.getCurrentOutput());
     implementor.setSelectExps(exps);
   }
 }

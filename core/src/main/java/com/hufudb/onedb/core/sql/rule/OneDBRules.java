@@ -13,9 +13,11 @@ public class OneDBRules {
 
   public static final OneDBProjectRule PROJECT = OneDBProjectRule.DEFAULT_CONFIG.toRule(OneDBProjectRule.class);
 
-  public static final OneDBCalcRule CALC = OneDBCalcRule.OneDBCalcRuleConfig.DEFAULT.toRule();
+  public static final OneDBCalcRule CALC = OneDBCalcRule.DEFAULT_CONFIG.toRule(OneDBCalcRule.class);
 
   public static final OneDBAggregateRule AGGREGATE = OneDBAggregateRule.DEFAULT_CONFIG.toRule(OneDBAggregateRule.class);
 
-  public static final RelOptRule[] RULES = { FILTER, PROJECT, CALC, AGGREGATE };
+  public static final OneDBJoinRule JOIN = OneDBJoinRule.DEFAULT_CONFIG.toRule(OneDBJoinRule.class);
+
+  public static final RelOptRule[] RULES = { FILTER, PROJECT, CALC, AGGREGATE, JOIN };
 }

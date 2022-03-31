@@ -24,12 +24,12 @@ public class OneDBAggregate extends Aggregate implements OneDBRel {
 
   @Override
   public RelOptCost computeSelfCost(RelOptPlanner planner, RelMetadataQuery mq) {
-    return super.computeSelfCost(planner, mq).multiplyBy(0.5);
+    return super.computeSelfCost(planner, mq).multiplyBy(0.05);
   }
 
   @Override
   public void implement(Implementor implementor) {
-    implementor.visitChild(0, getInput());
+    implementor.visitChild(getInput());
     implementor.setAggExps(OneDBAggCall.fromAggregates(aggCalls));
   }
 

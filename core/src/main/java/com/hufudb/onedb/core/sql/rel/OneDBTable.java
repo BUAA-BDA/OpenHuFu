@@ -5,8 +5,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.protobuf.TextFormat;
-import com.google.protobuf.TextFormat.ParseException;
 import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.data.TableInfo;
@@ -40,8 +38,6 @@ import org.apache.calcite.sql.type.SqlTypeName;
 import org.apache.calcite.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
 
 public class OneDBTable extends AbstractQueryableTable implements TranslatableTable {
   private static final Logger LOG = LoggerFactory.getLogger(OneDBTable.class);
@@ -168,30 +164,24 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
       return enumerable.enumerator();
     }
 
-    public Enumerable<Object> query(String queryStr) {
-      OneDBQueryProto.Builder builder = OneDBQueryProto.newBuilder();
-      try {
-        TextFormat.getParser().merge(queryStr, builder);
-      } catch (ParseException e) {
-        e.printStackTrace();
-      }
-      return getTable().query(builder.build());
+    public Enumerable<Object> query(long contextId) {
+      return getTable().query(contextId);
     }
   }
 
   public Enumerable<Object> query() {
     System.out.println("Should not use this method");
-    return query(null);
+    return query(-1);
   }
 
-  public Enumerable<Object> query(OneDBQueryProto query) {
+  public Enumerable<Object> query(long contextId) {
     return new AbstractEnumerable<Object>() {
       Enumerator<Object> enumerator;
 
       @Override
       public Enumerator<Object> enumerator() {
         if (enumerator == null) {
-          this.enumerator = new OneDBEnumerator(getTableName(), schema, query);
+          this.enumerator = new OneDBEnumerator(OneDBTable.this.getSchema(), contextId);
         } else {
           this.enumerator.reset();
         }
@@ -221,5 +211,9 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
 
   public String getTableName() {
     return tableInfo.getName();
+  }
+
+  protected OneDBSchema getSchema() {
+    return schema;
   }
 }

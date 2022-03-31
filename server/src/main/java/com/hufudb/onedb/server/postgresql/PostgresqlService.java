@@ -19,8 +19,9 @@ import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.data.Row;
 import com.hufudb.onedb.core.data.TableInfo;
 import com.hufudb.onedb.core.data.utils.POJOPublishedTableInfo;
-import com.hufudb.onedb.core.sql.expression.OneDBQuery;
+import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.translator.OneDBTranslator;
+import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
 import com.hufudb.onedb.server.OwnerService;
 
 @Service
@@ -147,16 +148,17 @@ public class PostgresqlService extends OwnerService {
     }
   }
 
-  String generateSQL(OneDBQuery query) {
-    String tableName = getOriginTableName(query.tableName);
-    Header tableHeader = getPublishedTableHeader(query.tableName);
-    List<String> filters = OneDBTranslator.tranlateExps(tableHeader, query.filterExps);
-    List<String> selects = OneDBTranslator.tranlateExps(tableHeader, query.selectExps);
-    if (!query.aggExps.isEmpty()) {
-      selects = OneDBTranslator.translateAgg(selects, query.aggExps);
+  String generateSQL(OneDBQueryProto query) {
+    String originTableName = getOriginTableName(query.getTableName());
+    Header tableHeader = getPublishedTableHeader(query.getTableName());
+    LOG.info("{}: {}", originTableName, tableHeader);
+    List<String> filters = OneDBTranslator.tranlateExps(tableHeader, OneDBExpression.fromProto(query.getWhereExpList()));
+    List<String> selects = OneDBTranslator.tranlateExps(tableHeader, OneDBExpression.fromProto(query.getSelectExpList()));
+    if (query.getAggExpCount() > 0) {
+      selects = OneDBTranslator.translateAgg(selects, OneDBExpression.fromProto(query.getAggExpList()));
     }
     // select clause
-    StringBuilder sql = new StringBuilder(String.format("SELECT %s from %s", String.join(",", selects), tableName));
+    StringBuilder sql = new StringBuilder(String.format("SELECT %s from %s", String.join(",", selects), originTableName));
     // where clause
     if (filters.size() != 0) {
       sql.append(String.format(" where %s", String.join(" AND ", filters)));
@@ -173,7 +175,7 @@ public class PostgresqlService extends OwnerService {
   }
 
   @Override
-  protected void oneDBQueryInternal(OneDBQuery query, DataSet dataSet) throws SQLException {
+  protected void oneDBQueryInternal(OneDBQueryProto query, DataSet dataSet) throws SQLException {
     String sql = generateSQL(query);
     if (sql.isEmpty()) {
       return;

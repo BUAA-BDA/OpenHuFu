@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.calcite.linq4j.tree.Types;
 
 public enum OneDBMethod {
-  ONEDB_TABLE_QUERY(OneDBTable.OneDBQueryable.class, "query", String.class);
+  ONEDB_TABLE_QUERY(OneDBTable.OneDBQueryable.class, "query", Long.class);
 
   public final Method method;
 

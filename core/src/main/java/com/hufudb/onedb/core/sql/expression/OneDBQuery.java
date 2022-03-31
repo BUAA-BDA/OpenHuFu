@@ -11,6 +11,8 @@ import org.apache.calcite.plan.RelOptTable;
 
 import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
 
+// todo: remove this class and directly use OneDBQueryProto to reduce conversion overhead
+@Deprecated
 public class OneDBQuery {
   public String tableName;
   public Header header;
@@ -21,6 +23,11 @@ public class OneDBQuery {
   public List<OneDBExpression> aggExps;
   public int offset = 0;
   public int fetch = 0;
+  public boolean hasJoin = false;
+  public List<OneDBExpression> joinCondition;
+  public OneDBQuery left;
+  public OneDBQuery right;
+
 
   public OneDBQueryProto toProto() {
     OneDBQueryProto.Builder builder = OneDBQueryProto.newBuilder();
@@ -41,23 +48,6 @@ public class OneDBQuery {
         .collect(Collectors.toList());
     int fetch = proto.getFetch();
     return new OneDBQuery(proto.getTableName(), selectExps, filterExps, aggExps, fetch);
-  }
-
-  public static Header generateHeader(OneDBQueryProto proto) {
-    if (proto.getAggExpCount() > 0) {
-      return OneDBExpression.generateHeader(proto.getAggExpList().stream().map(p -> OneDBExpression.fromProto(p)).collect(Collectors.toList()));
-    } else {
-      return OneDBExpression.generateHeader(proto.getSelectExpList().stream().map(p -> OneDBExpression.fromProto(p))
-      .collect(Collectors.toList()));
-    }
-  }
-
-  public Header generateHeader() {
-    if (aggExps.size() > 0) {
-      return OneDBExpression.generateHeader(aggExps);
-    } else {
-      return OneDBExpression.generateHeader(selectExps);
-    }
   }
 
   public OneDBQuery() {

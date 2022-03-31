@@ -32,12 +32,22 @@ public class Header {
     return new Header(proto);
   }
 
+  public static Header joinHeader(Header left, Header right) {
+    return newBuilder().merge(left).merge(right).build();
+  }
+
   public List<Field> getFields() {
     return fields;
   }
 
   public FieldType getType(int index) {
     return fields.get(index).type;
+  }
+
+  public List<FieldType> getTypeList() {
+    ImmutableList.Builder<FieldType> types = ImmutableList.builder();
+    fields.stream().forEach(field -> types.add(field.getType()));
+    return types.build();
   }
 
   public int getTypeId(int index) {
@@ -88,6 +98,11 @@ public class Header {
 
     public Builder add(Field field) {
       fields.add(field);
+      return this;
+    }
+
+    public Builder merge(Header header) {
+      fields.addAll(header.getFields());
       return this;
     }
 

@@ -5,17 +5,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 
 import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.client.OneDBClient;
 import com.hufudb.onedb.core.data.Header;
+import com.hufudb.onedb.core.sql.enumerator.OneDBEnumerator;
 import com.hufudb.onedb.core.sql.rel.OneDBTable;
 import com.hufudb.onedb.core.table.OneDBTableInfo;
 import com.hufudb.onedb.core.zk.OneDBZkClient;
 import com.hufudb.onedb.core.zk.ZkConfig;
 
+import org.apache.calcite.linq4j.AbstractEnumerable;
+import org.apache.calcite.linq4j.Enumerable;
+import org.apache.calcite.linq4j.Enumerator;
+import org.apache.calcite.linq4j.tree.Expression;
 import org.apache.calcite.schema.SchemaPlus;
+import org.apache.calcite.schema.Schemas;
 import org.apache.calcite.schema.Table;
 import org.apache.calcite.schema.impl.AbstractSchema;
 import org.slf4j.Logger;
@@ -130,8 +135,25 @@ public class OneDBSchema extends AbstractSchema {
     return client.getOwnerClient(endpoint);
   }
 
-  @Deprecated
-  public ExecutorService getExecutorService() {
-    return client.getExecutorService();
+  public Expression getExpression() {
+    return Schemas.unwrap(super.getExpression(parentSchema, "onedb"), OneDBSchema.class);
+  }
+
+  @SuppressWarnings("unused")
+  public Enumerable<Object> query(long contextId) {
+    return new AbstractEnumerable<Object>() {
+      Enumerator<Object> enumerator;
+
+      @Override
+      public Enumerator<Object> enumerator() {
+        if (enumerator == null) {
+          this.enumerator = new OneDBEnumerator(OneDBSchema.this, contextId);
+
+        } else {
+          this.enumerator.reset();
+        }
+        return this.enumerator;
+      }
+    };
   }
 }

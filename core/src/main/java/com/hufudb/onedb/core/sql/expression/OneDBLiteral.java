@@ -69,16 +69,16 @@ public class OneDBLiteral implements OneDBExpression {
     case BYTE:
     case SHORT:
     case INT:
-      return builder.setI32((Integer) value).build();
+      return builder.setI32(((Number) value).intValue()).build();
     case LONG:
     case DATE:
     case TIME:
     case TIMESTAMP:
-      return builder.setI64((Long) value).build();
+      return builder.setI64(((Number) value).longValue()).build();
     case FLOAT:
-      return builder.setF32((Float) value).build();
+      return builder.setF32(((Number) value).floatValue()).build();
     case DOUBLE:
-      return builder.setF64((Double) value).build();
+      return builder.setF64(((Number) value).doubleValue()).build();
     case STRING:
       return builder.setStr((String) value).build();
     default:

@@ -55,9 +55,16 @@ message ExpressionProto {
 
 message OneDBQueryProto {
   string tableName = 1;
-  repeated ExpressionProto selectExp = 2;
-  repeated ExpressionProto whereExp = 3;
-  repeated ExpressionProto aggExp = 4;
-  repeated string order = 5;
-  int32 fetch = 6;
+  repeated string columnNames = 2;
+  repeated ExpressionProto selectExp = 3;
+  repeated ExpressionProto whereExp = 4;
+  repeated ExpressionProto aggExp = 5;
+  repeated string order = 6;
+  int32 fetch = 7;
+  int32 offset = 8;
+  OneDBQueryProto left = 9;
+  OneDBQueryProto right = 10;
+  repeated int32 leftKey = 11;
+  repeated int32 rightKey = 12;
+  repeated ExpressionProto joinCond = 13;
 }

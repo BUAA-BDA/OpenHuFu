@@ -8,19 +8,25 @@ import com.google.common.collect.ImmutableList;
 import io.grpc.stub.StreamObserver;
 import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
 
-public class StreamObserverDataSet extends DataSet {
+public class StreamObserverDataSet implements DataSet {
   private int BATCH_SIZE = 100;
   private final StreamObserver<DataSetProto> observer;
   private int count;
   private int rowCount;
+  private Header header;
   private List<Row> rows;
 
   public StreamObserverDataSet(final StreamObserver<DataSetProto> observer, Header header) {
-    super(header);
+    this.header = header;
     this.observer = observer;
     count = 0;
     rowCount = 0;
     rows = new ArrayList<>();
+  }
+
+  @Override
+  public Header getHeader() {
+      return header;
   }
 
   public void addRow(Row row) {
@@ -57,7 +63,7 @@ public class StreamObserverDataSet extends DataSet {
 
   // can't get rows from stream dataset
   @Override
-  List<Row> getRows() {
+  public List<Row> getRows() {
     return ImmutableList.of();
   }
 

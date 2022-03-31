@@ -70,6 +70,17 @@ public class OneDBOperator implements OneDBExpression {
     return new OperatorBuilder(ImmutableList.of(node), ins).build().get(0);
   }
 
+  public static List<OneDBExpression> fromRexNodes(List<RexNode> nodes, List<OneDBExpression> ins) {
+    return nodes.stream().map(node -> {
+      if (node instanceof RexInputRef) {
+        int i = ((RexInputRef)node).getIndex();
+        return new OneDBReference(ins.get(i).getOutType(), i);
+      } else {
+        return OneDBOperator.fromRexNode(node, ins);
+      }
+    }).collect(Collectors.toList());
+  }
+
   public static List<OneDBExpression> fromRexNodes(RexProgram program, List<OneDBExpression> ins) {
     return new OperatorBuilder(program.getExprList(), program.getProjectList(), ins).build();
   }

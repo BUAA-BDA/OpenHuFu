@@ -33,6 +33,28 @@
         }
       ],
       "originColumns": [0, 2, 1]
+    },
+    {
+      "originName": "student",
+      "publishedName": "student3",
+      "publishedFields": [
+        {
+          "name": "name",
+          "type": "STRING",
+          "level": "public"
+        },
+        {
+          "name": "score",
+          "type": "INT",
+          "level": "public"
+        },
+        {
+          "name": "age",
+          "type": "INT",
+          "level": "hidden"
+        }
+      ],
+      "originColumns": [0, 2, 1]
     }
   ]
 }

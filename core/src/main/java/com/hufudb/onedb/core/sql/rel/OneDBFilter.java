@@ -18,12 +18,12 @@ public class OneDBFilter extends Filter implements OneDBRel {
 
   @Override
   public RelOptCost computeSelfCost(RelOptPlanner planner, RelMetadataQuery mq) {
-    return super.computeSelfCost(planner, mq).multiplyBy(0.1);
+    return super.computeSelfCost(planner, mq).multiplyBy(0.05);
   }
 
   @Override
   public void implement(Implementor implementor) {
-    implementor.visitChild(0, getInput());
+    implementor.visitChild(getInput());
     implementor.addFilterExps(OneDBOperator.fromRexNode(condition, implementor.getCurrentOutput()));
   }
 
