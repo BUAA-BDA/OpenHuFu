@@ -142,14 +142,20 @@ public interface OneDBRel extends RelNode {
       return currentContext.hasLeft() && currentContext.hasRight();
     }
 
+    public boolean hasAgg() {
+      return currentContext.getAggExpCount() > 0;
+    }
+
     public Header getHeader() {
       return OneDBExpression.generateHeaderFromProto(currentContext.getSelectExpList());
     }
 
     public List<OneDBExpression> getCurrentOutput() {
-      return currentContext.getSelectExpList().stream()
-          .map(exp -> OneDBExpression.fromProto(exp))
-          .collect(Collectors.toList());
+      if (currentContext.getAggExpCount() > 0) {
+        return OneDBExpression.fromProto(currentContext.getAggExpList());
+      } else {
+        return OneDBExpression.fromProto(currentContext.getSelectExpList());
+      }
     }
   }
 }
