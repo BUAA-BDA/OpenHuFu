@@ -14,6 +14,7 @@ public class OneDBAggCall implements OneDBExpression {
   AggregateType aggType;
   List<Integer> in;
   FieldType outType;
+
   OneDBAggCall(AggregateType aggType, List<Integer> args, FieldType type) {
     this.aggType = aggType;
     this.in = args;
@@ -37,8 +38,7 @@ public class OneDBAggCall implements OneDBExpression {
     if (!OneDBOpType.of(proto.getOpType()).equals(OneDBOpType.AGG_FUNC)) {
       throw new RuntimeException("not aggregate");
     }
-    List<Integer> inputs =
-        proto.getInList().stream().map(in -> in.getRef()).collect(Collectors.toList());
+    List<Integer> inputs = proto.getInList().stream().map(in -> in.getRef()).collect(Collectors.toList());
     return new OneDBAggCall(
         AggregateType.of(proto.getFunc()), inputs, FieldType.of(proto.getOutType()));
   }
@@ -73,6 +73,10 @@ public class OneDBAggCall implements OneDBExpression {
 
   public List<Integer> getInputRef() {
     return in;
+  }
+
+  public static OneDBAggCall create(AggregateType type, List<Integer> in, FieldType out) {
+    return new OneDBAggCall(type, in, out);
   }
 
   public enum AggregateType {

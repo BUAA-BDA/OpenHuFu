@@ -9,6 +9,7 @@ import com.hufudb.onedb.core.sql.expression.OneDBOpType;
 import com.hufudb.onedb.core.sql.expression.OneDBOperator;
 import com.hufudb.onedb.core.sql.expression.OneDBOperator.FuncType;
 import com.hufudb.onedb.core.sql.expression.OneDBReference;
+import com.hufudb.onedb.core.sql.expression.OneDBAggCall.AggregateType;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -188,6 +189,20 @@ public class OneDBTranslator {
   }
 
   protected String aggregateFunc(OneDBAggCall exp) {
-    return null;
+    AggregateType type = exp.getAggType();
+    switch(type) {
+      case SUM:
+        return String.format("SUM(%s)", inputExps.get(exp.getInputRef().get(0)));
+      case COUNT:
+        return String.format("COUNT(*)");
+      case AVG:
+        return String.format("AVG(%s)", inputExps.get(exp.getInputRef().get(0)));
+      case MAX:
+        return String.format("MAX(%s)", inputExps.get(exp.getInputRef().get(0)));
+      case MIN:
+        return String.format("MIN(%s)", inputExps.get(exp.getInputRef().get(0)));
+      default:
+        throw new RuntimeException("can't translate aggFunc " + exp);
+    }
   }
 }
