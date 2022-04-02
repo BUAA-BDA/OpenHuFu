@@ -26,7 +26,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import org.apache.calcite.util.Pair;
 import org.slf4j.Logger;
@@ -72,7 +71,6 @@ public class PlaintextImplementor {
       List<OneDBExpression> originExps = OneDBExpression.fromProto(proto.getAggExpList());
       List<OneDBAggCall> localAggregation = new ArrayList<>();
       for (OneDBExpression exp : originExps) {
-        // todo: rewrite exps
         aggFunctions.add(rewriteAggregation(exp, localAggregation));
         types.add(exp.getOutType());
       }

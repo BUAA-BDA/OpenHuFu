@@ -126,7 +126,6 @@ public class OneDBClient {
   /*
    * onedb query
    */
-  // todo: execute query in this function
   public Enumerator<Row> oneDBQuery(long contextId) {
     OneDBQueryContext context = OneDBQueryContext.getContext(contextId);
     return implementor.implement(context.toProto());

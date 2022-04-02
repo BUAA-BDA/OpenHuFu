@@ -29,7 +29,6 @@ public class OneDBAggCall implements OneDBExpression {
               AggregateType aggType = AggregateType.of(call);
               FieldType outType = TypeConverter.convert2OneDBType(call.getType().getSqlTypeName());
               result.add(new OneDBAggCall(aggType, call.getArgList(), outType));
-              // todo: consider AVG in horizontal partition
             });
     return result;
   }

@@ -37,7 +37,6 @@ public class QueryableDataSet extends BasicDataSet {
     return new QueryableDataSet(header);
   }
 
-  // todo: now we just implement the equi-join, add theta join implement later
   public static QueryableDataSet join(
       QueryableDataSet left, QueryableDataSet right, OneDBJoinInfo joinInfo) {
     return PlaintextNestedLoopJoin.apply(left, right, joinInfo);

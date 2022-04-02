@@ -229,7 +229,8 @@ public class PlaintextAggregation {
       return new Builder(exp);
     }
 
-    public static PlaintextCombination.Builder newHorizontalParitionBuilder(OneDBExpression exp, List<OneDBAggCall> localAggCalls) {
+    public static PlaintextCombination.Builder newHorizontalParitionBuilder(OneDBExpression exp,
+        List<OneDBAggCall> localAggCalls) {
       return new Builder(exp, localAggCalls);
     }
 
@@ -252,7 +253,7 @@ public class PlaintextAggregation {
     public static class Builder {
       OneDBExpression exp;
       List<AggregateFunction<Row, Comparable>> in;
-      List<OneDBAggCall> localAggCalls; //for horizontal partitioned table only
+      List<OneDBAggCall> localAggCalls; // for horizontal partitioned table only
       List<OneDBAggCall> convertedAggCalls; // for horizontal parititioned table only
 
       Builder(OneDBExpression exp) {
@@ -306,16 +307,20 @@ public class PlaintextAggregation {
 
       private OneDBExpression convertAvg(OneDBAggCall agg) {
         // convert avg into sum / count
-        OneDBAggCall localSum = OneDBAggCall.create(AggregateType.SUM, agg.getInputRef(), agg.getOutType());
-        OneDBAggCall partitionSum = OneDBAggCall.create(AggregateType.SUM, ImmutableList.of(localAggCalls.size()), agg.getOutType());
+        OneDBAggCall localSum =
+            OneDBAggCall.create(AggregateType.SUM, agg.getInputRef(), agg.getOutType());
+        OneDBAggCall partitionSum = OneDBAggCall.create(AggregateType.SUM,
+            ImmutableList.of(localAggCalls.size()), agg.getOutType());
         localAggCalls.add(localSum);
         convertedAggCalls.add(partitionSum);
-        OneDBAggCall localCount = OneDBAggCall.create(AggregateType.COUNT, ImmutableList.of(), agg.getOutType());
-        OneDBAggCall partitionCount = OneDBAggCall.create(AggregateType.SUM, ImmutableList.of(localAggCalls.size()), agg.getOutType());
+        OneDBAggCall localCount =
+            OneDBAggCall.create(AggregateType.COUNT, ImmutableList.of(), agg.getOutType());
+        OneDBAggCall partitionCount = OneDBAggCall.create(AggregateType.SUM,
+            ImmutableList.of(localAggCalls.size()), agg.getOutType());
         localAggCalls.add(localCount);
         convertedAggCalls.add(partitionCount);
-        return OneDBOperator.create(OneDBOpType.DIVIDE, agg.getOutType(), new ArrayList<>(Arrays.asList(partitionSum, partitionCount)),
-            FuncType.NONE);
+        return OneDBOperator.create(OneDBOpType.DIVIDE, agg.getOutType(),
+            new ArrayList<>(Arrays.asList(partitionSum, partitionCount)), FuncType.NONE);
       }
 
       private OneDBExpression convertCount(OneDBAggCall agg) {
@@ -367,14 +372,10 @@ public class PlaintextAggregation {
   }
 
   private static BigDecimal number(Comparable comparable) {
-    return comparable instanceof BigDecimal
-        ? (BigDecimal) comparable
-        : comparable instanceof BigInteger
-            ? new BigDecimal((BigInteger) comparable)
-            : comparable instanceof Long
-                || comparable instanceof Integer
-                || comparable instanceof Short
-                    ? new BigDecimal(((Number) comparable).longValue())
+    return comparable instanceof BigDecimal ? (BigDecimal) comparable
+        : comparable instanceof BigInteger ? new BigDecimal((BigInteger) comparable)
+            : comparable instanceof Long || comparable instanceof Integer
+                || comparable instanceof Short ? new BigDecimal(((Number) comparable).longValue())
                     : new BigDecimal(((Number) comparable).doubleValue());
   }
 }
