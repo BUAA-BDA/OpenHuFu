@@ -22,6 +22,7 @@ public class OneDBOperator implements OneDBExpression {
   FieldType outType;
   List<OneDBExpression> inputs;
   FuncType funcType;
+
   OneDBOperator(
       OneDBOpType opType, FieldType outType, List<OneDBExpression> inputs, FuncType funcType) {
     this.opType = opType;
@@ -54,6 +55,11 @@ public class OneDBOperator implements OneDBExpression {
 
   public static List<OneDBExpression> fromRexNodes(RexProgram program, List<OneDBExpression> ins) {
     return new OperatorBuilder(program.getExprList(), program.getProjectList(), ins).build();
+  }
+
+  public static OneDBOperator create(OneDBOpType opType, FieldType outType, List<OneDBExpression> inputs,
+      FuncType funcType) {
+    return new OneDBOperator(opType, outType, inputs, funcType);
   }
 
   /*
@@ -128,11 +134,11 @@ public class OneDBOperator implements OneDBExpression {
 
     OneDBExpression buildOp(RexNode node) {
       switch (node.getKind()) {
-          // leaf node
+        // leaf node
         case LITERAL:
         case INPUT_REF:
           return leaf(node);
-          // binary
+        // binary
         case GREATER_THAN:
         case GREATER_THAN_OR_EQUAL:
         case LESS_THAN:
@@ -147,13 +153,13 @@ public class OneDBOperator implements OneDBExpression {
         case AND:
         case OR:
           return binary((RexCall) node);
-          // unary
+        // unary
         case AS:
         case NOT:
         case PLUS_PREFIX:
         case MINUS_PREFIX:
           return unary((RexCall) node);
-          // local_ref
+        // local_ref
         case LOCAL_REF:
           return localRef((RexLocalRef) node);
         case OTHER_FUNCTION:
@@ -229,8 +235,7 @@ public class OneDBOperator implements OneDBExpression {
         default:
           throw new RuntimeException("can't translate " + call);
       }
-      List<OneDBExpression> eles =
-          ImmutableList.of(buildOp(call.operands.get(0)), buildOp(call.operands.get(1)));
+      List<OneDBExpression> eles = ImmutableList.of(buildOp(call.operands.get(0)), buildOp(call.operands.get(1)));
       FieldType type = TypeConverter.convert2OneDBType(call.getType().getSqlTypeName());
       return new OneDBOperator(op, type, eles, FuncType.NONE);
     }
@@ -283,8 +288,7 @@ public class OneDBOperator implements OneDBExpression {
         default:
           throw new RuntimeException("can't translate " + call);
       }
-      List<OneDBExpression> eles =
-          call.operands.stream().map(r -> buildOp(r)).collect(Collectors.toList());
+      List<OneDBExpression> eles = call.operands.stream().map(r -> buildOp(r)).collect(Collectors.toList());
       FieldType type = TypeConverter.convert2OneDBType(call.getType().getSqlTypeName());
       return new OneDBOperator(op, type, eles, func);
     }

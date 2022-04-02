@@ -4,7 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.data.BasicDataSet;
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Header;
-import com.hufudb.onedb.core.data.query.calculator.PlaintextCalculator;
+import com.hufudb.onedb.core.data.query.aggregate.PlaintextAggregation;
+import com.hufudb.onedb.core.data.query.calculate.PlaintextCalculator;
 import com.hufudb.onedb.core.data.query.filter.PlaintextFilter;
 import com.hufudb.onedb.core.data.query.join.PlaintextNestedLoopJoin;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
@@ -36,7 +37,6 @@ public class QueryableDataSet extends BasicDataSet {
     return new QueryableDataSet(header);
   }
 
-  // todo: now we just implement the equi-join, add theta join implement later
   public static QueryableDataSet join(
       QueryableDataSet left, QueryableDataSet right, OneDBJoinInfo joinInfo) {
     return PlaintextNestedLoopJoin.apply(left, right, joinInfo);
@@ -61,7 +61,9 @@ public class QueryableDataSet extends BasicDataSet {
   }
 
   public QueryableDataSet aggregate(List<ExpressionProto> agg) {
-    return EMPTY;
+    List<OneDBExpression> aggs = OneDBExpression.fromProto(agg);
+    header = OneDBExpression.generateHeader(aggs);
+    return PlaintextAggregation.apply(this, aggs);
   }
 
   public QueryableDataSet sort() {

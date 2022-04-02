@@ -18,7 +18,7 @@ public class OneDBJoinRule extends ConverterRule {
     super(config);
   }
 
-  // todo: extend this function
+  // todo: extend this function for left / right / outer join
   @Override
   public RelNode convert(RelNode rel) {
     LogicalJoin join = (LogicalJoin) rel;

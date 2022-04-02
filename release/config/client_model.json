@@ -7,7 +7,7 @@
       "type": "custom",
       "factory": "com.hufudb.onedb.core.sql.schema.OneDBSchemaFactory",
       "operand": {
-        "endpoints": ["localhost:12345"]
+        "endpoints": ["localhost:12345", "localhost:12346", "localhost:12347"]
       },
       "tables": [
         {
@@ -17,6 +17,14 @@
             "feds": [
               {
                 "endpoint": "localhost:12345",
+                "name": "student1"
+              },
+              {
+                "endpoint": "localhost:12346",
+                "name": "student1"
+              },
+              {
+                "endpoint": "localhost:12347",
                 "name": "student1"
               }
             ]

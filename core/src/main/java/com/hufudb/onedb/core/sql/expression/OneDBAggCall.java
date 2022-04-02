@@ -14,6 +14,7 @@ public class OneDBAggCall implements OneDBExpression {
   AggregateType aggType;
   List<Integer> in;
   FieldType outType;
+
   OneDBAggCall(AggregateType aggType, List<Integer> args, FieldType type) {
     this.aggType = aggType;
     this.in = args;
@@ -27,13 +28,7 @@ public class OneDBAggCall implements OneDBExpression {
             call -> {
               AggregateType aggType = AggregateType.of(call);
               FieldType outType = TypeConverter.convert2OneDBType(call.getType().getSqlTypeName());
-              if (aggType.equals(AggregateType.AVG)) {
-                result.add(
-                    new OneDBAggCall(AggregateType.COUNT, call.getArgList(), FieldType.LONG));
-                result.add(new OneDBAggCall(AggregateType.SUM, call.getArgList(), outType));
-              } else {
-                result.add(new OneDBAggCall(aggType, call.getArgList(), outType));
-              }
+              result.add(new OneDBAggCall(aggType, call.getArgList(), outType));
             });
     return result;
   }
@@ -42,8 +37,7 @@ public class OneDBAggCall implements OneDBExpression {
     if (!OneDBOpType.of(proto.getOpType()).equals(OneDBOpType.AGG_FUNC)) {
       throw new RuntimeException("not aggregate");
     }
-    List<Integer> inputs =
-        proto.getInList().stream().map(in -> in.getRef()).collect(Collectors.toList());
+    List<Integer> inputs = proto.getInList().stream().map(in -> in.getRef()).collect(Collectors.toList());
     return new OneDBAggCall(
         AggregateType.of(proto.getFunc()), inputs, FieldType.of(proto.getOutType()));
   }
@@ -70,6 +64,18 @@ public class OneDBAggCall implements OneDBExpression {
   @Override
   public OneDBOpType getOpType() {
     return OneDBOpType.AGG_FUNC;
+  }
+
+  public AggregateType getAggType() {
+    return aggType;
+  }
+
+  public List<Integer> getInputRef() {
+    return in;
+  }
+
+  public static OneDBAggCall create(AggregateType type, List<Integer> in, FieldType out) {
+    return new OneDBAggCall(type, in, out);
   }
 
   public enum AggregateType {
