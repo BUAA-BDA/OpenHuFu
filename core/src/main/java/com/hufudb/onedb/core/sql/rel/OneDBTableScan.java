@@ -14,6 +14,7 @@ import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.core.TableScan;
 import org.apache.calcite.rel.metadata.RelMetadataQuery;
+import org.apache.calcite.rel.rules.CoreRules;
 import org.apache.calcite.rel.rules.JoinCommuteRule;
 import org.apache.calcite.rel.rules.JoinPushThroughJoinRule;
 import org.apache.calcite.rel.type.RelDataType;
@@ -61,6 +62,7 @@ public class OneDBTableScan extends TableScan implements OneDBRel {
     planner.removeRule(JoinCommuteRule.Config.DEFAULT.toRule());
     planner.removeRule(JoinPushThroughJoinRule.LEFT);
     planner.removeRule(JoinPushThroughJoinRule.RIGHT);
+    planner.removeRule(CoreRules.AGGREGATE_REDUCE_FUNCTIONS);
   }
 
   @Override
