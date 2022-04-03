@@ -17,7 +17,9 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -169,17 +171,28 @@ public class PostgresqlService extends OwnerService {
     List<String> selects =
         OneDBTranslator.tranlateExps(
             tableHeader, OneDBExpression.fromProto(query.getSelectExpList()));
+    List<String> groups = query.getGroupList().stream()
+        .map(ref -> tableHeader.getName(ref)).collect(Collectors.toList());
     if (query.getAggExpCount() > 0) {
       selects =
           OneDBTranslator.translateAgg(selects, OneDBExpression.fromProto(query.getAggExpList()));
+    }
+    if (!groups.isEmpty()) {
+      List<String> tmpSelects = new ArrayList<>();
+      tmpSelects.addAll(groups);
+      tmpSelects.addAll(selects);
+      selects = tmpSelects;
     }
     // select clause
     StringBuilder sql =
         new StringBuilder(
             String.format("SELECT %s from %s", String.join(",", selects), originTableName));
     // where clause
-    if (filters.size() != 0) {
+    if (!filters.isEmpty()) {
       sql.append(String.format(" where %s", String.join(" AND ", filters)));
+    }
+    if (!groups.isEmpty()) {
+      sql.append(String.format(" group by %s", String.join(",", groups)));
     }
     LOG.info(sql.toString());
     return sql.toString();

@@ -45,7 +45,11 @@ public class OneDBOperator implements OneDBExpression {
             node -> {
               if (node instanceof RexInputRef) {
                 int i = ((RexInputRef) node).getIndex();
-                return new OneDBReference(ins.get(i).getOutType(), i);
+                if (ins.get(i) instanceof RexInputRef) {
+                  return new OneDBReference(ins.get(i).getOutType(), i);
+                } else {
+                  return ins.get(i);
+                }
               } else {
                 return OneDBOperator.fromRexNode(node, ins);
               }

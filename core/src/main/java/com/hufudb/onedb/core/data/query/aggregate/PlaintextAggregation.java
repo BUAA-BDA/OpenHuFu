@@ -310,10 +310,8 @@ public class PlaintextAggregation {
         // convert avg into sum / count
         OneDBAggCall localSum =
             OneDBAggCall.create(AggregateType.SUM, agg.getInputRef(), agg.getOutType());
-        localAggCalls.add(localSum);
         OneDBAggCall localCount =
             OneDBAggCall.create(AggregateType.COUNT, ImmutableList.of(), agg.getOutType());
-        localAggCalls.add(localCount);
         return OneDBOperator.create(OneDBOpType.DIVIDE, agg.getOutType(),
             new ArrayList<>(Arrays.asList(localSum, localCount)), FuncType.NONE);
       }

@@ -119,6 +119,11 @@ public interface OneDBRel extends RelNode {
           exps.stream().map(exp -> exp.toProto()).collect(Collectors.toList()));
     }
 
+    public void setGroupSet(List<Integer> groups) {
+      currentContext.clearGroup();
+      currentContext.addAllGroup(groups);
+    }
+
     public void setOffset(int offset) {
       currentContext.setOffset(offset);
     }
@@ -151,11 +156,7 @@ public interface OneDBRel extends RelNode {
     }
 
     public List<OneDBExpression> getCurrentOutput() {
-      if (currentContext.getAggExpCount() > 0) {
-        return OneDBExpression.fromProto(currentContext.getAggExpList());
-      } else {
-        return OneDBExpression.fromProto(currentContext.getSelectExpList());
-      }
+      return OneDBQueryContext.getOutputExpressions(getQuery(), schema);
     }
   }
 }

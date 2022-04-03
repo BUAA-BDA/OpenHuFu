@@ -14,6 +14,7 @@ import com.hufudb.onedb.core.data.query.aggregate.PlaintextAggregation;
 import com.hufudb.onedb.core.data.query.aggregate.PlaintextAggregation.PlaintextCombination;
 import com.hufudb.onedb.core.sql.expression.OneDBAggCall;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
+import com.hufudb.onedb.core.sql.expression.OneDBReference;
 import com.hufudb.onedb.core.sql.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.sql.rel.OneDBQueryContext;
 import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
@@ -96,7 +97,7 @@ public class PlaintextImplementor {
     List<Pair<OwnerClient, String>> tableClients = client.getTableClients(tableName);
     StreamBuffer<DataSetProto> streamProto = tableQuery(proto, tableClients);
 
-    Header header = OneDBQueryContext.generateHeader(proto);
+    Header header = OneDBQueryContext.generateHeaderForSingleTable(proto, client.getHeader(tableName));
     // todo: optimze for streamDataSet
     BasicDataSet localDataSet = BasicDataSet.of(header);
     while (streamProto.hasNext()) {

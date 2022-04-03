@@ -59,12 +59,13 @@ message OneDBQueryProto {
   repeated ExpressionProto selectExp = 3;
   repeated ExpressionProto whereExp = 4;
   repeated ExpressionProto aggExp = 5;
-  repeated string order = 6;
-  int32 fetch = 7;
-  int32 offset = 8;
-  OneDBQueryProto left = 9;
-  OneDBQueryProto right = 10;
-  repeated int32 leftKey = 11;
-  repeated int32 rightKey = 12;
-  repeated ExpressionProto joinCond = 13;
+  repeated int32 group = 6;
+  repeated string order = 7;
+  int32 fetch = 8;
+  int32 offset = 9;
+  OneDBQueryProto left = 10;
+  OneDBQueryProto right = 11;
+  repeated int32 leftKey = 12;
+  repeated int32 rightKey = 13;
+  repeated ExpressionProto joinCond = 14;
 }

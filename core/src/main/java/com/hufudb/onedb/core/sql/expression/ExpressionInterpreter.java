@@ -4,6 +4,7 @@ import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Row;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -55,7 +56,7 @@ public class ExpressionInterpreter {
       case TIMES:
         return number(inputs.get(0)).multiply(number(inputs.get(1)));
       case DIVIDE:
-        return number(inputs.get(0)).divide(number(inputs.get(1)));
+        return number(inputs.get(0)).divide(number(inputs.get(1)), MathContext.DECIMAL64);
       case MOD:
         return number(inputs.get(0)).remainder(number(inputs.get(1)));
       case AND:

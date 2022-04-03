@@ -33,6 +33,7 @@ public class OneDBAggregate extends Aggregate implements OneDBRel {
   public void implement(Implementor implementor) {
     implementor.visitChild(getInput());
     implementor.setAggExps(OneDBAggCall.fromAggregates(aggCalls));
+    implementor.setGroupSet(getGroupSet().asList());
   }
 
   @Override
