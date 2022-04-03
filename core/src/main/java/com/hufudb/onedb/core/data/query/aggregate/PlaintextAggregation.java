@@ -296,12 +296,13 @@ public class PlaintextAggregation {
         if (exp instanceof OneDBAggCall) {
           // if the root exp is agg call just convert it
           OneDBExpression convertedExp = convertForAgg((OneDBAggCall) exp);
-          return getAggregateFunc(convertedExp);
+          if (convertedExp instanceof OneDBAggCall) {
+            return getAggregateFunc(convertedExp);
+          } else {
+            exp = convertedExp;
+          }
         }
         visitForHorizontalPartition(exp);
-        for (OneDBAggCall agg : convertedAggCalls) {
-          in.add(getAggregateFunc(agg));
-        }
         return new PlaintextCombination(exp, in);
       }
 
@@ -309,18 +310,12 @@ public class PlaintextAggregation {
         // convert avg into sum / count
         OneDBAggCall localSum =
             OneDBAggCall.create(AggregateType.SUM, agg.getInputRef(), agg.getOutType());
-        OneDBAggCall partitionSum = OneDBAggCall.create(AggregateType.SUM,
-            ImmutableList.of(localAggCalls.size()), agg.getOutType());
         localAggCalls.add(localSum);
-        convertedAggCalls.add(partitionSum);
         OneDBAggCall localCount =
             OneDBAggCall.create(AggregateType.COUNT, ImmutableList.of(), agg.getOutType());
-        OneDBAggCall partitionCount = OneDBAggCall.create(AggregateType.SUM,
-            ImmutableList.of(localAggCalls.size()), agg.getOutType());
         localAggCalls.add(localCount);
-        convertedAggCalls.add(partitionCount);
         return OneDBOperator.create(OneDBOpType.DIVIDE, agg.getOutType(),
-            new ArrayList<>(Arrays.asList(partitionSum, partitionCount)), FuncType.NONE);
+            new ArrayList<>(Arrays.asList(localSum, localCount)), FuncType.NONE);
       }
 
       private OneDBExpression convertCount(OneDBAggCall agg) {
@@ -353,11 +348,11 @@ public class PlaintextAggregation {
           for (int i = 0; i < children.size(); ++i) {
             OneDBExpression child = children.get(i);
             if (child instanceof OneDBAggCall) {
-              int id = in.size();
               OneDBExpression convertedChild = convertForAgg((OneDBAggCall) child);
               if (convertedChild instanceof OneDBAggCall) {
-                in.add(getAggregateFunc((OneDBAggCall) child));
+                int id = in.size();
                 children.set(i, OneDBReference.fromIndex(child.getOutType(), id));
+                in.add(getAggregateFunc((OneDBAggCall) convertedChild));
               } else {
                 children.set(i, convertedChild);
                 visitForHorizontalPartition(convertedChild);
