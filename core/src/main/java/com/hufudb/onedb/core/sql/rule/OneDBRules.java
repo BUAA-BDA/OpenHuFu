@@ -14,7 +14,7 @@ public class OneDBRules {
   public static final OneDBAggregateRule AGGREGATE =
       OneDBAggregateRule.DEFAULT_CONFIG.toRule(OneDBAggregateRule.class);
   public static final OneDBSortRule SORT = OneDBSortRule.DEFAULT_CONFIG.toRule(OneDBSortRule.class);
-  public static final OneDBLimitRule LIMIT = OneDBLimitRule.OneDBLimitRuleConfig.DEFAULT.toRule();
+  public static final OneDBLimitRule LIMIT = (OneDBLimitRule) OneDBLimitRule.INSTANCE;
   public static final OneDBJoinRule JOIN = OneDBJoinRule.DEFAULT_CONFIG.toRule(OneDBJoinRule.class);
   public static final RelOptRule[] RULES = {FILTER, PROJECT, CALC, AGGREGATE, SORT, LIMIT, JOIN};
 

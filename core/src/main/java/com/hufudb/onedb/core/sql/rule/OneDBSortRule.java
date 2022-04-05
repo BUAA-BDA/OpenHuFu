@@ -29,6 +29,9 @@ public class OneDBSortRule extends ConverterRule {
   @Override
   public RelNode convert(RelNode relNode) {
     final Sort sort = (Sort) relNode;
+    if (sort.offset != null || sort.fetch != null) {
+      return null;
+    }
     final RelTraitSet traitSet = sort.getTraitSet().replace(OneDBRel.CONVENTION);
     final RelNode input = sort.getInput();
     return new OneDBSort(

@@ -3,61 +3,37 @@ package com.hufudb.onedb.core.sql.rule;
 import com.hufudb.onedb.core.sql.rel.OneDBLimit;
 import com.hufudb.onedb.core.sql.rel.OneDBRel;
 
-import com.hufudb.onedb.core.sql.rel.OneDBToEnumerableConverter;
-import org.apache.calcite.adapter.enumerable.EnumerableLimit;
-
+import org.apache.calcite.plan.RelOptRule;
 import org.apache.calcite.plan.RelOptRuleCall;
-import org.apache.calcite.plan.RelRule;
 import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.rel.RelNode;
 
-import org.immutables.value.Value;
+import org.apache.calcite.rel.core.Sort;
 
-public class OneDBLimitRule extends RelRule<OneDBLimitRule.OneDBLimitRuleConfig> {
+public class OneDBLimitRule extends RelOptRule {
 
-  protected OneDBLimitRule(OneDBLimitRuleConfig config) {
-    super(config);
-  }
+  public static final RelOptRule INSTANCE = new OneDBLimitRule();
 
-  @Override
-  public boolean matches(RelOptRuleCall call) {
-    return true;
+  protected OneDBLimitRule() {
+    super(operand(Sort.class, any()), "OneDBLimitRule");
   }
 
   @Override
   public void onMatch(RelOptRuleCall call) {
-    final EnumerableLimit limit = call.rel(0);
-    final RelNode converted = convert(limit);
-    if (converted != null) {
-      call.transformTo(converted);
+    final Sort sort = call.rel(0);
+    if (sort.offset == null && sort.fetch == null) {
+      return;
     }
 
-  }
+    RelTraitSet origTraitSet = sort.getTraitSet();
+    RelTraitSet traitSet = origTraitSet.replace(OneDBRel.CONVENTION).simplify();
 
-
-  public RelNode convert(RelNode relNode) {
-    final EnumerableLimit limit = (EnumerableLimit) relNode;
-    final RelTraitSet traitSet = limit.getTraitSet().replace(OneDBRel.CONVENTION);
-    return new OneDBLimit(
-            limit.getCluster(),
-            traitSet,
-            convert(limit.getInput(), OneDBLimit.CONVENTION),
-            limit.offset,
-            limit.fetch);
-  }
-
-  @Value.Immutable
-  public interface OneDBLimitRuleConfig extends RelRule.Config {
-    OneDBLimitRule.OneDBLimitRuleConfig DEFAULT = ImmutableOneDBLimitRuleConfig.builder()
-            .operandSupplier(
-                    b0 ->
-                            b0.operand(EnumerableLimit.class)
-                                    .oneInput(b1 -> b1.operand(OneDBToEnumerableConverter.class).anyInputs()))
-            .build();
-
-    @Override
-    default OneDBLimitRule toRule() {
-      return new OneDBLimitRule(this);
+    RelNode input = sort.getInput();
+    if (!sort.getCollation().getFieldCollations().isEmpty()) {
+      input = sort.copy(sort.getTraitSet(), input, sort.getCollation(), null, null);
     }
+    RelNode x = convert(input, input.getTraitSet().replace(OneDBRel.CONVENTION));
+    call.transformTo(new OneDBLimit(sort.getCluster(), traitSet, x, sort.offset, sort.fetch));
   }
+
 }
