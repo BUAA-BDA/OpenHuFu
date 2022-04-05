@@ -156,7 +156,7 @@ public interface OneDBRel extends RelNode {
     }
 
     public List<OneDBExpression> getCurrentOutput() {
-      return OneDBQueryContext.getOutputExpressions(getQuery(), schema);
+      return OneDBQueryContext.getOutputExpressions(currentContext.build());
     }
   }
 }

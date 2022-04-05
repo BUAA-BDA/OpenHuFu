@@ -11,6 +11,7 @@ import com.hufudb.onedb.core.data.query.join.PlaintextNestedLoopJoin;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.rpc.OneDBCommon.ExpressionProto;
+import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
 import java.util.List;
 
 public class QueryableDataSet extends BasicDataSet {
@@ -59,6 +60,10 @@ public class QueryableDataSet extends BasicDataSet {
     header = OneDBExpression.generateHeader(calcs);
     return PlaintextCalculator.apply(this, calcs);
   }
+
+  // public QueryableDataSet aggregate(OneDBQueryProto proto) {
+  //   List<OneDBExpression> aggs = OneDBExpression.fromProto(proto.getAggExpList());
+  // }
 
   public QueryableDataSet aggregate(List<ExpressionProto> agg) {
     List<OneDBExpression> aggs = OneDBExpression.fromProto(agg);

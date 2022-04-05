@@ -2,6 +2,7 @@ package com.hufudb.onedb.core.data.query.aggregate;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -139,7 +140,7 @@ public class PlaintextAggregateFunctions {
       if (count == 0) {
         return 0;
       }
-      return sum.divide(BigDecimal.valueOf(count));
+      return sum.divide(BigDecimal.valueOf(count), MathContext.DECIMAL64);
     }
 
     @Override

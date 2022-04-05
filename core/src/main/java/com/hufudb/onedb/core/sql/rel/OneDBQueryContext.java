@@ -6,7 +6,6 @@ import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.expression.OneDBReference;
-import com.hufudb.onedb.core.sql.schema.OneDBSchema;
 import com.hufudb.onedb.rpc.OneDBCommon.ExpressionProto;
 import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
 import java.util.Map;
@@ -75,15 +74,15 @@ public class OneDBQueryContext {
     return proto.hasLeft() && proto.hasRight();
   }
 
-  public static Header getOutputHeader(OneDBQueryProto proto, OneDBSchema schema) {
-    return OneDBExpression.generateHeader(getOutputExpressions(proto, schema));
+  public static Header getOutputHeader(OneDBQueryProto proto) {
+    return OneDBExpression.generateHeader(getOutputExpressions(proto));
   }
 
-  public static List<OneDBExpression> getOutputExpressions(OneDBQueryProto proto, OneDBSchema schema) {
+  public static List<OneDBExpression> getOutputExpressions(OneDBQueryProto proto) {
     if (hasJoin(proto)) {
       return getJoinOutput(proto);
     } else {
-      return getSingleTableOutput(proto, schema.getHeader(proto.getTableName()));
+      return getSingleTableOutput(proto);
     }
   }
 
@@ -105,12 +104,13 @@ public class OneDBQueryContext {
     }
   }
 
-  public static List<OneDBExpression> getSingleTableOutput(OneDBQueryProto proto, Header tableHeader) {
+  public static List<OneDBExpression> getSingleTableOutput(OneDBQueryProto proto) {
     if (proto.getAggExpCount() > 0) {
       if (proto.getGroupCount() > 0) {
         List<OneDBExpression> outputs = new ArrayList<>();
+        List<ExpressionProto> selects = proto.getSelectExpList();
         outputs.addAll(proto.getGroupList().stream()
-            .map(ref -> OneDBReference.fromIndex(tableHeader, ref))
+            .map(ref -> OneDBReference.fromIndex(FieldType.of(selects.get(ref).getOutType()), ref))
             .collect(Collectors.toList()));
         outputs.addAll(OneDBExpression.fromProto(proto.getAggExpList()));
         return outputs;
@@ -122,8 +122,8 @@ public class OneDBQueryContext {
     }
   }
 
-  public static Header generateHeaderForSingleTable(OneDBQueryProto proto, Header tableHeader) {
-    return OneDBExpression.generateHeader(getSingleTableOutput(proto, tableHeader));
+  public static Header generateHeaderForSingleTable(OneDBQueryProto proto) {
+    return OneDBExpression.generateHeader(getSingleTableOutput(proto));
   }
 
   public OneDBQueryProto toProto() {

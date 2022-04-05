@@ -96,7 +96,7 @@ public class PlaintextImplementor {
     List<Pair<OwnerClient, String>> tableClients = client.getTableClients(tableName);
     StreamBuffer<DataSetProto> streamProto = tableQuery(proto, tableClients);
 
-    Header header = OneDBQueryContext.generateHeaderForSingleTable(proto, client.getHeader(tableName));
+    Header header = OneDBQueryContext.generateHeaderForSingleTable(proto);
     // todo: optimze for streamDataSet
     BasicDataSet localDataSet = BasicDataSet.of(header);
     while (streamProto.hasNext()) {
