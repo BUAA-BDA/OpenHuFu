@@ -86,6 +86,6 @@ public class QueryableDataSet extends BasicDataSet {
         this.rows = this.rows.subList(offset, Math.min(this.getRowCount(), offset + fetch));
       }
     }
-    return EMPTY;
+    return this;
   }
 }
