@@ -79,6 +79,12 @@ public class PlaintextAggregateFunctions {
     public Comparable aggregate() {
       return sum;
     }
+
+    @Override
+    public AggregateFunction<Row, Comparable> patternCopy() {
+      // TODO Auto-generated method stub
+      return null;
+    }
   }
 
   public static class PlaintextCount implements AggregateFunction<Row, Comparable> {
@@ -97,12 +103,24 @@ public class PlaintextAggregateFunctions {
     public Comparable aggregate() {
       return count;
     }
+
+    @Override
+    public AggregateFunction<Row, Comparable> patternCopy() {
+      // TODO Auto-generated method stub
+      return null;
+    }
   }
 
   public static class PlaintextAverage implements AggregateFunction<Row, Comparable> {
     long count;
     BigDecimal sum;
-    int inputRef;
+    final int inputRef;
+
+    PlaintextAverage(int inputRef) {
+      this.count = 0;
+      this.sum = BigDecimal.valueOf(0);
+      this.inputRef = inputRef;
+    }
 
     PlaintextAverage(OneDBAggCall agg) {
       this.count = 0;
@@ -123,6 +141,11 @@ public class PlaintextAggregateFunctions {
       }
       return sum.divide(BigDecimal.valueOf(count));
     }
+
+    @Override
+    public AggregateFunction<Row, Comparable> patternCopy() {
+        return new PlaintextAverage(inputRef);
+    }
   }
 
   public static class PlaintextMax implements AggregateFunction<Row, Comparable> {
@@ -134,7 +157,12 @@ public class PlaintextAggregateFunctions {
     };
 
     Comparable maxValue;
-    int inputRef;
+    final int inputRef;
+
+    PlaintextMax(int inputRef) {
+      this.maxValue = MIN;
+      this.inputRef = inputRef;
+    }
 
     PlaintextMax(OneDBAggCall agg) {
       this.maxValue = MIN;
@@ -153,6 +181,11 @@ public class PlaintextAggregateFunctions {
     public Comparable aggregate() {
       // todo: consider no value condition
       return maxValue;
+    }
+
+    @Override
+    public AggregateFunction<Row, Comparable> patternCopy() {
+      return new PlaintextMax(inputRef);
     }
   }
 
@@ -185,10 +218,16 @@ public class PlaintextAggregateFunctions {
       // todo: consider no value condition
       return minValue;
     }
+
+    @Override
+    public AggregateFunction<Row, Comparable> patternCopy() {
+      // TODO Auto-generated method stub
+      return null;
+    }
   }
 
   public static class PlaintextCombination implements AggregateFunction<Row, Comparable> {
-    OneDBExpression exp;
+    final OneDBExpression exp;
     List<AggregateFunction<Row, Comparable>> in;
 
     private PlaintextCombination(OneDBExpression exp, List<AggregateFunction<Row, Comparable>> in) {
@@ -219,6 +258,12 @@ public class PlaintextAggregateFunctions {
         inputRow.set(i, in.get(i).aggregate());
       }
       return ExpressionInterpreter.implement(inputRow.build(), exp);
+    }
+
+    @Override
+    public AggregateFunction<Row, Comparable> patternCopy() {
+      // TODO Auto-generated method stub
+      return null;
     }
 
     public static class Builder {
