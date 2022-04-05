@@ -14,7 +14,7 @@ public class OneDBToEnumerableConverterRule extends ConverterRule {
               RelNode.class,
               OneDBRel.CONVENTION,
               EnumerableConvention.INSTANCE,
-              "FedSpatialToEnumerableConverterRule")
+              "OneDBToEnumerableConverterRule")
           .withRuleFactory(OneDBToEnumerableConverterRule::new);
 
   protected OneDBToEnumerableConverterRule(Config config) {

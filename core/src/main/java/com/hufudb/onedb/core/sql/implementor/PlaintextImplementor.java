@@ -103,6 +103,7 @@ public class PlaintextImplementor {
       localDataSet.mergeDataSet(BasicDataSet.fromProto(streamProto.next()));
     }
     QueryableDataSet queryable = QueryableDataSet.fromBasic(localDataSet);
+    queryable.sort(proto.getOrderList());
     if (proto.getAggExpCount() > 0) {
       queryable = PlaintextAggregation.applyAggregateFunctions(queryable, aggFunctions, types);
     }
@@ -118,6 +119,9 @@ public class PlaintextImplementor {
     }
     if (proto.getSelectExpCount() > 0) {
       dataSet.select(proto.getSelectExpList());
+    }
+    if (proto.getOrderCount() > 0) {
+      dataSet.sort(proto.getOrderList());
     }
     if (proto.getAggExpCount() > 0) {
       dataSet.aggregate(proto.getAggExpList());

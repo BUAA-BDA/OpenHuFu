@@ -169,6 +169,18 @@ public class PostgresqlService extends OwnerService {
     List<String> selects =
         OneDBTranslator.tranlateExps(
             tableHeader, OneDBExpression.fromProto(query.getSelectExpList()));
+    // order by
+    List<String> order = query.getOrderList();
+    StringBuilder orderClause = new StringBuilder();
+    if (!order.isEmpty()) {
+      for (int i = 0; i < order.size(); i++) {
+        String[] tmp = order.get(i).split(" ");
+        orderClause.append(selects.get(Integer.parseInt(tmp[0]))).append(" ").append(tmp[1]);
+        if (i != order.size() - 1) {
+          orderClause.append(" , ");
+        }
+      }
+    }
     if (query.getAggExpCount() > 0) {
       selects =
           OneDBTranslator.translateAgg(selects, OneDBExpression.fromProto(query.getAggExpList()));
@@ -181,6 +193,10 @@ public class PostgresqlService extends OwnerService {
     if (filters.size() != 0) {
       sql.append(String.format(" where %s", String.join(" AND ", filters)));
     }
+    if (orderClause.length() > 0) {
+      sql.append(" ORDER BY ");
+    }
+    sql.append(orderClause);
     LOG.info(sql.toString());
     return sql.toString();
   }
