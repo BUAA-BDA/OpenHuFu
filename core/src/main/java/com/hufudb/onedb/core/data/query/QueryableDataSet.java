@@ -73,7 +73,19 @@ public class QueryableDataSet extends BasicDataSet {
   }
 
   public QueryableDataSet limit(int offset, int fetch) {
-    this.rows.subList(offset, fetch);
+    if (fetch == 0) {
+      if (offset >= this.getRowCount()) {
+        this.rows.clear();
+      } else {
+        this.rows = this.rows.subList(offset, this.getRowCount());
+      }
+    } else {
+      if (offset >= this.getRowCount()) {
+        this.rows.clear();
+      } else {
+        this.rows = this.rows.subList(offset, Math.min(this.getRowCount(), offset + fetch));
+      }
+    }
     return EMPTY;
   }
 }

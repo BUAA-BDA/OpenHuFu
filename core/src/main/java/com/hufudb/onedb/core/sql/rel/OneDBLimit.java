@@ -43,7 +43,7 @@ public class OneDBLimit extends SingleRel implements OneDBRel {
   public void implement(Implementor implementor) {
     implementor.visitChild(getInput());
     if (offset != null) {
-      implementor.setOffset(RexLiteral.intValue(fetch));
+      implementor.setOffset(RexLiteral.intValue(offset));
     }
     if (fetch != null) {
       implementor.setFetch(RexLiteral.intValue(fetch));

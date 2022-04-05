@@ -197,6 +197,9 @@ public class PostgresqlService extends OwnerService {
       sql.append(" ORDER BY ");
     }
     sql.append(orderClause);
+    if (query.getFetch() != 0) {
+      sql.append(" LIMIT ").append(query.getFetch() + query.getOffset());
+    }
     LOG.info(sql.toString());
     return sql.toString();
   }

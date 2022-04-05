@@ -3,19 +3,23 @@ package com.hufudb.onedb.core.sql.rule;
 import com.hufudb.onedb.core.sql.rel.OneDBLimit;
 import com.hufudb.onedb.core.sql.rel.OneDBRel;
 
-import org.apache.calcite.plan.RelOptRule;
 import org.apache.calcite.plan.RelOptRuleCall;
+import org.apache.calcite.plan.RelRule;
 import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.rel.RelNode;
-
 import org.apache.calcite.rel.core.Sort;
+import org.immutables.value.Value;
 
-public class OneDBLimitRule extends RelOptRule {
+public class OneDBLimitRule extends RelRule<OneDBLimitRule.OneDBLimitRuleConfig> {
 
-  public static final RelOptRule INSTANCE = new OneDBLimitRule();
+  protected OneDBLimitRule(OneDBLimitRuleConfig config) {
+    super(config);
+  }
 
-  protected OneDBLimitRule() {
-    super(operand(Sort.class, any()), "OneDBLimitRule");
+
+  @Override
+  public boolean matches(RelOptRuleCall call) {
+    return true;
   }
 
   @Override
@@ -24,10 +28,8 @@ public class OneDBLimitRule extends RelOptRule {
     if (sort.offset == null && sort.fetch == null) {
       return;
     }
-
     RelTraitSet origTraitSet = sort.getTraitSet();
     RelTraitSet traitSet = origTraitSet.replace(OneDBRel.CONVENTION).simplify();
-
     RelNode input = sort.getInput();
     if (!sort.getCollation().getFieldCollations().isEmpty()) {
       input = sort.copy(sort.getTraitSet(), input, sort.getCollation(), null, null);
@@ -36,4 +38,14 @@ public class OneDBLimitRule extends RelOptRule {
     call.transformTo(new OneDBLimit(sort.getCluster(), traitSet, x, sort.offset, sort.fetch));
   }
 
+  @Value.Immutable
+  public interface OneDBLimitRuleConfig extends RelRule.Config {
+    OneDBLimitRule.OneDBLimitRuleConfig DEFAULT = ImmutableOneDBLimitRuleConfig.builder()
+            .operandSupplier(b0 -> b0.operand(Sort.class).anyInputs()).build();
+
+    @Override
+    default OneDBLimitRule toRule() {
+      return new OneDBLimitRule(this);
+    }
+  }
 }
