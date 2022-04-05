@@ -8,6 +8,7 @@ import com.hufudb.onedb.core.data.query.aggregate.PlaintextAggregation;
 import com.hufudb.onedb.core.data.query.calculate.PlaintextCalculator;
 import com.hufudb.onedb.core.data.query.filter.PlaintextFilter;
 import com.hufudb.onedb.core.data.query.join.PlaintextNestedLoopJoin;
+import com.hufudb.onedb.core.data.query.sort.PlaintextSort;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.rpc.OneDBCommon.ExpressionProto;
@@ -66,12 +67,25 @@ public class QueryableDataSet extends BasicDataSet {
     return PlaintextAggregation.apply(this, aggs);
   }
 
-  public QueryableDataSet sort() {
-    return EMPTY;
+
+  public QueryableDataSet sort(List<String> orders) {
+    return PlaintextSort.apply(this, orders);
   }
 
   public QueryableDataSet limit(int offset, int fetch) {
-    this.rows.subList(offset, fetch);
-    return EMPTY;
+    if (fetch == 0) {
+      if (offset >= this.getRowCount()) {
+        this.rows.clear();
+      } else {
+        this.rows = this.rows.subList(offset, this.getRowCount());
+      }
+    } else {
+      if (offset >= this.getRowCount()) {
+        this.rows.clear();
+      } else {
+        this.rows = this.rows.subList(offset, Math.min(this.getRowCount(), offset + fetch));
+      }
+    }
+    return this;
   }
 }

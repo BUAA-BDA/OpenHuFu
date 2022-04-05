@@ -104,6 +104,10 @@ public interface OneDBRel extends RelNode {
           exps.stream().map(exp -> exp.toProto()).collect(Collectors.toList()));
     }
 
+    public void setOrderExps(List<String> orderExps) {
+      currentContext.addAllOrder(orderExps);
+    }
+
     void setSelectExpProtos(List<ExpressionProto> exps) {
       currentContext.clearSelectExp();
       currentContext.addAllSelectExp(exps);
