@@ -10,6 +10,7 @@ import com.hufudb.onedb.core.data.query.filter.PlaintextFilter;
 import com.hufudb.onedb.core.data.query.join.PlaintextNestedLoopJoin;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.implementor.utils.OneDBJoinInfo;
+import com.hufudb.onedb.core.sql.rel.OneDBQueryContext;
 import com.hufudb.onedb.rpc.OneDBCommon.ExpressionProto;
 import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
 import java.util.List;
@@ -38,8 +39,8 @@ public class QueryableDataSet extends BasicDataSet {
     return new QueryableDataSet(header);
   }
 
-  public static QueryableDataSet join(
-      QueryableDataSet left, QueryableDataSet right, OneDBJoinInfo joinInfo) {
+  public static QueryableDataSet join(QueryableDataSet left, QueryableDataSet right,
+      OneDBJoinInfo joinInfo) {
     return PlaintextNestedLoopJoin.apply(left, right, joinInfo);
   }
 
@@ -47,28 +48,21 @@ public class QueryableDataSet extends BasicDataSet {
     return header.getTypeList();
   }
 
-  public QueryableDataSet filter(List<ExpressionProto> fil) {
-    return PlaintextFilter.apply(this, OneDBExpression.fromProto(fil));
+  public QueryableDataSet filter(OneDBQueryProto proto) {
+    return PlaintextFilter.apply(this, OneDBExpression.fromProto(proto.getWhereExpList()));
   }
 
-  public QueryableDataSet filter(ExpressionProto fil) {
-    return PlaintextFilter.apply(this, ImmutableList.of(OneDBExpression.fromProto(fil)));
-  }
-
-  public QueryableDataSet select(List<ExpressionProto> sel) {
-    List<OneDBExpression> calcs = OneDBExpression.fromProto(sel);
+  public QueryableDataSet select(OneDBQueryProto proto) {
+    List<OneDBExpression> calcs = OneDBExpression.fromProto(proto.getSelectExpList());
     header = OneDBExpression.generateHeader(calcs);
     return PlaintextCalculator.apply(this, calcs);
   }
 
-  // public QueryableDataSet aggregate(OneDBQueryProto proto) {
-  //   List<OneDBExpression> aggs = OneDBExpression.fromProto(proto.getAggExpList());
-  // }
-
-  public QueryableDataSet aggregate(List<ExpressionProto> agg) {
-    List<OneDBExpression> aggs = OneDBExpression.fromProto(agg);
-    header = OneDBExpression.generateHeader(aggs);
-    return PlaintextAggregation.apply(this, aggs);
+  public QueryableDataSet aggregate(OneDBQueryProto proto) {
+    List<OneDBExpression> aggs = OneDBExpression.fromProto(proto.getAggExpList());
+    List<OneDBExpression> selects = OneDBExpression.fromProto(proto.getSelectExpList());
+    header = OneDBQueryContext.getOutputHeader(proto);
+    return PlaintextAggregation.apply(this, proto.getGroupList(), selects, aggs);
   }
 
   public QueryableDataSet sort() {

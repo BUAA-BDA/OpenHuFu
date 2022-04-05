@@ -6,6 +6,7 @@ import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Row;
@@ -64,11 +65,16 @@ public class PlaintextAggregateFunctions {
 
   public static class PlaintextSum implements AggregateFunction<Row, Comparable> {
     BigDecimal sum;
-    int inputRef;
+    final int inputRef;
 
     PlaintextSum(OneDBAggCall agg) {
       this.sum = BigDecimal.valueOf(0);
       this.inputRef = ((OneDBAggCall) agg).getInputRef().get(0);
+    }
+
+    PlaintextSum(int inputRef) {
+      this.sum = BigDecimal.valueOf(0);
+      this.inputRef = inputRef;
     }
 
     @Override
@@ -83,13 +89,16 @@ public class PlaintextAggregateFunctions {
 
     @Override
     public AggregateFunction<Row, Comparable> patternCopy() {
-      // TODO Auto-generated method stub
-      return null;
+      return new PlaintextSum(null);
     }
   }
 
   public static class PlaintextCount implements AggregateFunction<Row, Comparable> {
     long count;
+
+    PlaintextCount() {
+      this.count = 0;
+    }
 
     PlaintextCount(OneDBAggCall agg) {
       this.count = 0;
@@ -107,8 +116,7 @@ public class PlaintextAggregateFunctions {
 
     @Override
     public AggregateFunction<Row, Comparable> patternCopy() {
-      // TODO Auto-generated method stub
-      return null;
+      return new PlaintextCount();
     }
   }
 
@@ -206,6 +214,10 @@ public class PlaintextAggregateFunctions {
       this.inputRef = ((OneDBAggCall) agg).getInputRef().get(0);
     }
 
+    PlaintextMin(int inputRef) {
+      this.inputRef = inputRef;
+    }
+
     @Override
     public void add(Row ele) {
       Comparable c = (Comparable) ele.getObject(inputRef);
@@ -222,8 +234,7 @@ public class PlaintextAggregateFunctions {
 
     @Override
     public AggregateFunction<Row, Comparable> patternCopy() {
-      // TODO Auto-generated method stub
-      return null;
+      return new PlaintextMin(inputRef);
     }
   }
 
@@ -263,8 +274,8 @@ public class PlaintextAggregateFunctions {
 
     @Override
     public AggregateFunction<Row, Comparable> patternCopy() {
-      // TODO Auto-generated method stub
-      return null;
+      List<AggregateFunction<Row, Comparable>> inCopy = in.stream().map(i -> i.patternCopy()).collect(Collectors.toList());
+      return new PlaintextCombination(exp, inCopy);
     }
 
     public static class Builder {

@@ -10,6 +10,7 @@ import com.hufudb.onedb.core.data.Row;
 import com.hufudb.onedb.core.data.StreamBuffer;
 import com.hufudb.onedb.core.data.query.QueryableDataSet;
 import com.hufudb.onedb.core.data.query.aggregate.AggregateFunction;
+import com.hufudb.onedb.core.data.query.aggregate.Aggregator;
 import com.hufudb.onedb.core.data.query.aggregate.PlaintextAggregation;
 import com.hufudb.onedb.core.data.query.aggregate.PlaintextAggregateFunctions.PlaintextCombination;
 import com.hufudb.onedb.core.sql.expression.OneDBAggCall;
@@ -70,6 +71,9 @@ public class PlaintextImplementor {
       OneDBQueryProto.Builder queryBuilder = proto.toBuilder();
       List<OneDBExpression> originExps = OneDBExpression.fromProto(proto.getAggExpList());
       List<OneDBAggCall> localAggregation = new ArrayList<>();
+      for (Integer ref : proto.getGroupList()) {
+        types.add(FieldType.of(proto.getSelectExp(ref).getOutType()));
+      }
       for (OneDBExpression exp : originExps) {
         aggFunctions.add(rewriteAggregation(exp, localAggregation));
         types.add(exp.getOutType());
@@ -93,6 +97,7 @@ public class PlaintextImplementor {
     if (proto.getAggExpCount() > 0) {
       proto = rewriteAggregations(proto, aggFunctions, types);
     }
+    Aggregator aggregator = Aggregator.create(proto.getGroupList(), aggFunctions, types);
     List<Pair<OwnerClient, String>> tableClients = client.getTableClients(tableName);
     StreamBuffer<DataSetProto> streamProto = tableQuery(proto, tableClients);
 
@@ -104,7 +109,7 @@ public class PlaintextImplementor {
     }
     QueryableDataSet queryable = QueryableDataSet.fromBasic(localDataSet);
     if (proto.getAggExpCount() > 0) {
-      queryable = PlaintextAggregation.applyAggregateFunctions(queryable, aggFunctions, types);
+      queryable = PlaintextAggregation.applyAggregateFunctions(queryable, aggregator);
     }
     // todo: add sort and limit
     return queryable;
@@ -114,13 +119,13 @@ public class PlaintextImplementor {
       QueryableDataSet right) {
     QueryableDataSet dataSet = QueryableDataSet.join(left, right, new OneDBJoinInfo(proto));
     if (proto.getWhereExpCount() > 0) {
-      dataSet.filter(proto.getWhereExpList());
+      dataSet.filter(proto);
     }
     if (proto.getSelectExpCount() > 0) {
-      dataSet.select(proto.getSelectExpList());
+      dataSet.select(proto);
     }
     if (proto.getAggExpCount() > 0) {
-      dataSet.aggregate(proto.getAggExpList());
+      dataSet.aggregate(proto);
     }
     // todo: add sort and limit
     return dataSet;
