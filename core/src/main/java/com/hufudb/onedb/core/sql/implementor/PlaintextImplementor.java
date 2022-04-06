@@ -1,5 +1,6 @@
 package com.hufudb.onedb.core.sql.implementor;
 
+import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.client.OneDBClient;
 import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.config.OneDBConfig;
@@ -10,10 +11,12 @@ import com.hufudb.onedb.core.data.Row;
 import com.hufudb.onedb.core.data.StreamBuffer;
 import com.hufudb.onedb.core.data.query.QueryableDataSet;
 import com.hufudb.onedb.core.data.query.aggregate.AggregateFunction;
+import com.hufudb.onedb.core.data.query.aggregate.Aggregator;
 import com.hufudb.onedb.core.data.query.aggregate.PlaintextAggregation;
-import com.hufudb.onedb.core.data.query.aggregate.PlaintextAggregation.PlaintextCombination;
+import com.hufudb.onedb.core.data.query.aggregate.PlaintextAggregateFunctions.PlaintextCombination;
 import com.hufudb.onedb.core.sql.expression.OneDBAggCall;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
+import com.hufudb.onedb.core.sql.expression.OneDBAggCall.AggregateType;
 import com.hufudb.onedb.core.sql.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.sql.rel.OneDBQueryContext;
 import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
@@ -62,17 +65,27 @@ public class PlaintextImplementor {
   }
 
   // rewrite aggregate exps for single table query
-  OneDBQueryProto rewriteAggregations(OneDBQueryProto proto,
-      List<AggregateFunction<Row, Comparable>> aggFunctions, List<FieldType> types) {
+  OneDBQueryProto rewriteAggregations(OneDBQueryProto proto, List<Integer> groups,
+      List<FieldType> groupTypes, List<AggregateFunction<Row, Comparable>> aggFunctions,
+      List<FieldType> aggTypes) {
     if (proto.getAggExpCount() == 0) {
       return proto;
     } else {
       OneDBQueryProto.Builder queryBuilder = proto.toBuilder();
       List<OneDBExpression> originExps = OneDBExpression.fromProto(proto.getAggExpList());
       List<OneDBAggCall> localAggregation = new ArrayList<>();
+      int id = 0;
+      for (Integer ref : proto.getGroupList()) {
+        FieldType type = FieldType.of(proto.getSelectExp(ref).getOutType());
+        localAggregation
+            .add(OneDBAggCall.create(AggregateType.GROUPKEY, ImmutableList.of(ref), type));
+        groupTypes.add(type);
+        groups.add(id);
+        ++id;
+      }
       for (OneDBExpression exp : originExps) {
         aggFunctions.add(rewriteAggregation(exp, localAggregation));
-        types.add(exp.getOutType());
+        aggTypes.add(exp.getOutType());
       }
       queryBuilder.clearAggExp();
       queryBuilder.addAllAggExp(
@@ -88,15 +101,18 @@ public class PlaintextImplementor {
     assert !tableName.isEmpty();
     // horizontal partitioned table aggregation requires extra rewrite
     // for example: AVG(X) -> SUM(X) / COUNT(X)
+    List<Integer> groups = new ArrayList<>();
     List<AggregateFunction<Row, Comparable>> aggFunctions = new ArrayList<>();
-    List<FieldType> types = new ArrayList<>();
+    List<FieldType> groupTypes = new ArrayList<>();
+    List<FieldType> aggTypes = new ArrayList<>();
     if (proto.getAggExpCount() > 0) {
-      proto = rewriteAggregations(proto, aggFunctions, types);
+      proto = rewriteAggregations(proto, groups, groupTypes, aggFunctions, aggTypes);
     }
+    Aggregator aggregator = Aggregator.create(groups, groupTypes, aggFunctions, aggTypes);
     List<Pair<OwnerClient, String>> tableClients = client.getTableClients(tableName);
     StreamBuffer<DataSetProto> streamProto = tableQuery(proto, tableClients);
 
-    Header header = OneDBQueryContext.generateHeader(proto);
+    Header header = OneDBQueryContext.getOutputHeader(proto);
     // todo: optimze for streamDataSet
     BasicDataSet localDataSet = BasicDataSet.of(header);
     while (streamProto.hasNext()) {
@@ -110,7 +126,7 @@ public class PlaintextImplementor {
       queryable.limit(proto.getOffset(), proto.getFetch());
     }
     if (proto.getAggExpCount() > 0) {
-      queryable = PlaintextAggregation.applyAggregateFunctions(queryable, aggFunctions, types);
+      queryable = PlaintextAggregation.applyAggregateFunctions(queryable, aggregator);
     }
     return queryable;
   }
@@ -119,10 +135,10 @@ public class PlaintextImplementor {
       QueryableDataSet right) {
     QueryableDataSet dataSet = QueryableDataSet.join(left, right, new OneDBJoinInfo(proto));
     if (proto.getWhereExpCount() > 0) {
-      dataSet.filter(proto.getWhereExpList());
+      dataSet = dataSet.filter(proto);
     }
     if (proto.getSelectExpCount() > 0) {
-      dataSet.select(proto.getSelectExpList());
+      dataSet = dataSet.select(proto);
     }
     if (proto.getOrderCount() > 0) {
       dataSet.sort(proto.getOrderList());
@@ -131,7 +147,7 @@ public class PlaintextImplementor {
       dataSet.limit(proto.getOffset(), proto.getFetch());
     }
     if (proto.getAggExpCount() > 0) {
-      dataSet.aggregate(proto.getAggExpList());
+      dataSet = dataSet.aggregate(proto);
     }
     // todo: add sort and limit
     return dataSet;

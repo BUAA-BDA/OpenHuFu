@@ -30,9 +30,14 @@
           "name": "age",
           "type": "INT",
           "level": "hidden"
+        },
+        {
+          "name": "dept_name",
+          "type": "STRING",
+          "level": "hidden"
         }
       ],
-      "originColumns": [0, 2, 1]
+      "originColumns": [0, 2, 1, 3]
     },
     {
       "originName": "student",
@@ -52,9 +57,14 @@
           "name": "age",
           "type": "INT",
           "level": "hidden"
+        },
+        {
+          "name": "dept_name",
+          "type": "STRING",
+          "level": "hidden"
         }
       ],
-      "originColumns": [0, 2, 1]
+      "originColumns": [0, 2, 1, 3]
     }
   ]
 }

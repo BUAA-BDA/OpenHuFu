@@ -191,6 +191,8 @@ public class OneDBTranslator {
   protected String aggregateFunc(OneDBAggCall exp) {
     AggregateType type = exp.getAggType();
     switch(type) {
+      case GROUPKEY:
+        return inputExps.get(exp.getInputRef().get(0));
       case SUM:
         return String.format("SUM(%s)", inputExps.get(exp.getInputRef().get(0)));
       case COUNT:

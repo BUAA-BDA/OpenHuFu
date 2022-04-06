@@ -25,6 +25,10 @@ public class OneDBReference implements OneDBExpression {
     return exps;
   }
 
+  public static OneDBExpression fromIndex(Header header, int i) {
+    return new OneDBReference(header.getType(i), i);
+  }
+
   public static OneDBExpression fromIndex(FieldType type, int i) {
     return new OneDBReference(type, i);
   }

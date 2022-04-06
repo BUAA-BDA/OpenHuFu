@@ -38,8 +38,8 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
   protected final String endpoint;
   private final Map<String, TableInfo> localTableInfoMap; // localName -> localTableInfo
   private final ReadWriteLock localLock;
-  private final Map<String, PublishedTableInfo>
-      publishedTableInfoMap; // publishedTableName -> publishedTableInfo
+  private final Map<String, PublishedTableInfo> publishedTableInfoMap; // publishedTableName ->
+                                                                       // publishedTableInfo
   private final ReadWriteLock publishedLock;
   // private final ExecutorService executorService;
   private final DBZkClient zkClient;
@@ -69,7 +69,7 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
 
   @Override
   public void oneDBQuery(OneDBQueryProto request, StreamObserver<DataSetProto> responseObserver) {
-    Header header = OneDBQueryContext.generateHeader(request);
+    Header header = OneDBQueryContext.getOutputHeader(request);
     StreamObserverDataSet obDataSet = new StreamObserverDataSet(responseObserver, header);
     try {
       oneDBQueryInternal(request, obDataSet);
@@ -104,8 +104,8 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
 
   // todo: rename the funciton and rpc
   @Override
-  public void getAllLocalTable(
-      GeneralRequest request, StreamObserver<LocalTableListProto> responseObserver) {
+  public void getAllLocalTable(GeneralRequest request,
+      StreamObserver<LocalTableListProto> responseObserver) {
     LocalTableListProto.Builder builder = LocalTableListProto.newBuilder();
     getAllPublishedTable().forEach(info -> builder.addTable(info.getFakeTableInfo().toProto()));
     responseObserver.onNext(builder.build());
@@ -115,10 +115,7 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
 
   protected final boolean registerTable2Zk(String schema, String globalName, String localName) {
     if (zkClient == null) {
-      LOG.warn(
-          "DBZkClient is not initialized, fail to register {} to {}/{}",
-          localName,
-          schema,
+      LOG.warn("DBZkClient is not initialized, fail to register {} to {}/{}", localName, schema,
           globalName);
       return true;
     }
@@ -164,10 +161,8 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
 
   public final List<TableInfo> getAllFakeTable() {
     localLock.readLock().lock();
-    List<TableInfo> results =
-        publishedTableInfoMap.values().stream()
-            .map(info -> info.getFakeTableInfo())
-            .collect(Collectors.toList());
+    List<TableInfo> results = publishedTableInfoMap.values().stream()
+        .map(info -> info.getFakeTableInfo()).collect(Collectors.toList());
     localLock.readLock().unlock();
     return results;
   }
@@ -212,8 +207,8 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
         mappings.add(originNames.get(i));
       }
     }
-    return new PublishedTableInfo(
-        originInfo, publishedTableInfo.getPublishedTableName(), pFields, mappings);
+    return new PublishedTableInfo(originInfo, publishedTableInfo.getPublishedTableName(), pFields,
+        mappings);
   }
 
   public boolean addPublishedTable(POJOPublishedTableInfo publishedTableInfo) {

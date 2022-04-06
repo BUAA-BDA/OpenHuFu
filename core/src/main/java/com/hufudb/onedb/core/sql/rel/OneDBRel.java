@@ -1,6 +1,7 @@
 package com.hufudb.onedb.core.sql.rel;
 
 import com.google.common.collect.ImmutableList;
+import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.expression.OneDBOpType;
@@ -123,6 +124,11 @@ public interface OneDBRel extends RelNode {
           exps.stream().map(exp -> exp.toProto()).collect(Collectors.toList()));
     }
 
+    public void setGroupSet(List<Integer> groups) {
+      currentContext.clearGroup();
+      currentContext.addAllGroup(groups);
+    }
+
     public void setOffset(int offset) {
       currentContext.setOffset(offset);
     }
@@ -155,11 +161,11 @@ public interface OneDBRel extends RelNode {
     }
 
     public List<OneDBExpression> getCurrentOutput() {
-      if (currentContext.getAggExpCount() > 0) {
-        return OneDBExpression.fromProto(currentContext.getAggExpList());
-      } else {
-        return OneDBExpression.fromProto(currentContext.getSelectExpList());
-      }
+      return OneDBQueryContext.getOutputExpressions(currentContext.build());
+    }
+
+    public List<FieldType> getOutputTypes() {
+      return OneDBQueryContext.getOutputTypes(currentContext.build());
     }
   }
 }

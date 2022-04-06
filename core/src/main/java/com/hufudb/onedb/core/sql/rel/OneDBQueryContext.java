@@ -2,12 +2,15 @@ package com.hufudb.onedb.core.sql.rel;
 
 import com.google.protobuf.TextFormat;
 import com.google.protobuf.TextFormat.ParseException;
+import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
 import java.util.Map;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 public class OneDBQueryContext {
   //
@@ -64,11 +67,42 @@ public class OneDBQueryContext {
     return new OneDBQueryContext(builder);
   }
 
-  public static Header generateHeader(OneDBQueryProto proto) {
+  public static boolean hasJoin(OneDBQueryProto proto) {
+    return proto.hasLeft() && proto.hasRight();
+  }
+
+  public static Header getOutputHeader(OneDBQueryProto proto) {
+    Header.Builder builder = Header.newBuilder();
+    List<FieldType> types = getOutputTypes(proto);
+    types.stream().forEach(type -> builder.add("", type));
+    return builder.build();
+  }
+
+  public static List<FieldType> getOutputTypes(OneDBQueryProto proto) {
     if (proto.getAggExpCount() > 0) {
-      return OneDBExpression.generateHeaderFromProto(proto.getAggExpList());
+      return proto.getAggExpList().stream().map(agg -> FieldType.of(agg.getOutType()))
+          .collect(Collectors.toList());
     } else {
-      return OneDBExpression.generateHeaderFromProto(proto.getSelectExpList());
+      return proto.getSelectExpList().stream().map(sel -> FieldType.of(sel.getOutType()))
+          .collect(Collectors.toList());
+    }
+  }
+
+  public static List<FieldType> getOutputTypes(OneDBQueryProto proto, List<Integer> indexs) {
+    if (proto.getAggExpCount() > 0) {
+      return indexs.stream().map(id -> FieldType.of(proto.getAggExp(id).getOutType()))
+          .collect(Collectors.toList());
+    } else {
+      return indexs.stream().map(id -> FieldType.of(proto.getSelectExp(id).getOutType()))
+          .collect(Collectors.toList());
+    }
+  }
+
+  public static List<OneDBExpression> getOutputExpressions(OneDBQueryProto proto) {
+    if (proto.getAggExpCount() > 0) {
+      return OneDBExpression.fromProto(proto.getAggExpList());
+    } else {
+      return OneDBExpression.fromProto(proto.getSelectExpList());
     }
   }
 
