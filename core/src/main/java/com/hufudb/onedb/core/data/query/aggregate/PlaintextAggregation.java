@@ -12,15 +12,16 @@ public class PlaintextAggregation {
   public static QueryableDataSet apply(QueryableDataSet input, List<Integer> groups, List<OneDBExpression> selects,
       List<OneDBExpression> aggs) {
     List<AggregateFunction<Row, Comparable>> aggFunctions = new ArrayList<>();
-    List<FieldType> types = new ArrayList<>();
-    // for (Integer ref : groups) {
-    //   types.add(selects.get(ref).getOutType());
-    // }
+    List<FieldType> groupTypes = new ArrayList<>();
+    List<FieldType> aggTypes = new ArrayList<>();
+    for (Integer ref : groups) {
+      groupTypes.add(selects.get(ref).getOutType());
+    }
     for (OneDBExpression exp : aggs) {
       aggFunctions.add(PlaintextAggregateFunctions.getAggregateFunc(exp));
-      types.add(exp.getOutType());
+      aggTypes.add(exp.getOutType());
     }
-    Aggregator aggregator = Aggregator.create(groups, aggFunctions, types);
+    Aggregator aggregator = Aggregator.create(groups, groupTypes, aggFunctions, aggTypes);
     return applyAggregateFunctions(input, aggregator);
   }
 

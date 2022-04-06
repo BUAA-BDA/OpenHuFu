@@ -69,7 +69,7 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
 
   @Override
   public void oneDBQuery(OneDBQueryProto request, StreamObserver<DataSetProto> responseObserver) {
-    Header header = OneDBQueryContext.generateHeaderForSingleTable(request);
+    Header header = OneDBQueryContext.getOutputHeader(request);
     StreamObserverDataSet obDataSet = new StreamObserverDataSet(responseObserver, header);
     try {
       oneDBQueryInternal(request, obDataSet);

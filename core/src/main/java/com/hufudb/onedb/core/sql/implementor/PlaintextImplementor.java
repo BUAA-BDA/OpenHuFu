@@ -66,7 +66,8 @@ public class PlaintextImplementor {
 
   // rewrite aggregate exps for single table query
   OneDBQueryProto rewriteAggregations(OneDBQueryProto proto, List<Integer> groups,
-      List<AggregateFunction<Row, Comparable>> aggFunctions, List<FieldType> types) {
+      List<FieldType> groupTypes, List<AggregateFunction<Row, Comparable>> aggFunctions,
+      List<FieldType> aggTypes) {
     if (proto.getAggExpCount() == 0) {
       return proto;
     } else {
@@ -76,14 +77,15 @@ public class PlaintextImplementor {
       int id = 0;
       for (Integer ref : proto.getGroupList()) {
         FieldType type = FieldType.of(proto.getSelectExp(ref).getOutType());
-        localAggregation.add(OneDBAggCall.create(AggregateType.GROUPKEY, ImmutableList.of(ref), type));
-        types.add(type);
+        localAggregation
+            .add(OneDBAggCall.create(AggregateType.GROUPKEY, ImmutableList.of(ref), type));
+        groupTypes.add(type);
         groups.add(id);
         ++id;
       }
       for (OneDBExpression exp : originExps) {
         aggFunctions.add(rewriteAggregation(exp, localAggregation));
-        types.add(exp.getOutType());
+        aggTypes.add(exp.getOutType());
       }
       queryBuilder.clearAggExp();
       queryBuilder.addAllAggExp(
@@ -101,15 +103,16 @@ public class PlaintextImplementor {
     // for example: AVG(X) -> SUM(X) / COUNT(X)
     List<Integer> groups = new ArrayList<>();
     List<AggregateFunction<Row, Comparable>> aggFunctions = new ArrayList<>();
-    List<FieldType> types = new ArrayList<>();
+    List<FieldType> groupTypes = new ArrayList<>();
+    List<FieldType> aggTypes = new ArrayList<>();
     if (proto.getAggExpCount() > 0) {
-      proto = rewriteAggregations(proto, groups, aggFunctions, types);
+      proto = rewriteAggregations(proto, groups, groupTypes, aggFunctions, aggTypes);
     }
-    Aggregator aggregator = Aggregator.create(groups, aggFunctions, types);
+    Aggregator aggregator = Aggregator.create(groups, groupTypes, aggFunctions, aggTypes);
     List<Pair<OwnerClient, String>> tableClients = client.getTableClients(tableName);
     StreamBuffer<DataSetProto> streamProto = tableQuery(proto, tableClients);
 
-    Header header = OneDBQueryContext.generateHeaderForSingleTable(proto);
+    Header header = OneDBQueryContext.getOutputHeader(proto);
     // todo: optimze for streamDataSet
     BasicDataSet localDataSet = BasicDataSet.of(header);
     while (streamProto.hasNext()) {
@@ -127,13 +130,13 @@ public class PlaintextImplementor {
       QueryableDataSet right) {
     QueryableDataSet dataSet = QueryableDataSet.join(left, right, new OneDBJoinInfo(proto));
     if (proto.getWhereExpCount() > 0) {
-      dataSet.filter(proto);
+      dataSet = dataSet.filter(proto);
     }
     if (proto.getSelectExpCount() > 0) {
-      dataSet.select(proto);
+      dataSet = dataSet.select(proto);
     }
     if (proto.getAggExpCount() > 0) {
-      dataSet.aggregate(proto);
+      dataSet = dataSet.aggregate(proto);
     }
     // todo: add sort and limit
     return dataSet;

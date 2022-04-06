@@ -98,42 +98,11 @@ public class OneDBQueryContext {
   }
 
   public static List<OneDBExpression> getOutputExpressions(OneDBQueryProto proto) {
-    if (hasJoin(proto)) {
-      return getJoinOutput(proto);
-    } else {
-      return getSingleTableOutput(proto);
-    }
-  }
-
-  public static List<OneDBExpression> getJoinOutput(OneDBQueryProto proto) {
-    if (proto.getAggExpCount() > 0) {
-      if (proto.getGroupCount() > 0) {
-        List<OneDBExpression> outputs = new ArrayList<>();
-        outputs.addAll(proto.getGroupList().stream()
-            .map(ref -> OneDBReference
-                .fromIndex(FieldType.of(proto.getSelectExp(ref).getOutType()), ref))
-            .collect(Collectors.toList()));
-        outputs.addAll(OneDBExpression.fromProto(proto.getAggExpList()));
-        return outputs;
-      } else {
-        return OneDBExpression.fromProto(proto.getAggExpList());
-      }
-    } else {
-      return OneDBExpression.fromProto(proto.getSelectExpList());
-    }
-  }
-
-  public static List<OneDBExpression> getSingleTableOutput(OneDBQueryProto proto) {
     if (proto.getAggExpCount() > 0) {
       return OneDBExpression.fromProto(proto.getAggExpList());
     } else {
       return OneDBExpression.fromProto(proto.getSelectExpList());
     }
-  }
-
-  // todo: consider group
-  public static Header generateHeaderForSingleTable(OneDBQueryProto proto) {
-    return OneDBExpression.generateHeader(getSingleTableOutput(proto));
   }
 
   public OneDBQueryProto toProto() {

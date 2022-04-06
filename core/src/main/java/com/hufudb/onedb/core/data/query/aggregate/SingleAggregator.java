@@ -55,4 +55,9 @@ public class SingleAggregator implements Aggregator {
   public List<FieldType> getOutputTypes() {
     return types;
   }
+
+  @Override
+  public int size() {
+    return aggFunc.size();
+  }
 }

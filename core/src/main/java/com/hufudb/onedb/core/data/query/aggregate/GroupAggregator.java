@@ -17,13 +17,23 @@ public class GroupAggregator implements Aggregator {
   final List<FieldType> types;
   Iterator<Map.Entry<Row, SingleAggregator>> iterator;
 
-  public GroupAggregator(List<Integer> groups, List<AggregateFunction<Row, Comparable>> aggFunc, List<FieldType> types) {
+  GroupAggregator(List<Integer> groups, List<FieldType> groupTypes, SingleAggregator baseAggregator) {
     this.groups = groups;
-    this.baseAggregator = new SingleAggregator(aggFunc, types.subList(groups.size(), types.size()));
+    this.types = groupTypes;
+    this.baseAggregator = baseAggregator;
+    this.aggLength = baseAggregator.size();
+    this.aggregatorMap = new HashMap<>();
+    this.keyBuilder = Row.newBuilder(groups.size());
+    this.iterator = null;
+  }
+
+  public GroupAggregator(List<Integer> groups, List<FieldType> groupTypes, List<AggregateFunction<Row, Comparable>> aggFunc, List<FieldType> aggOutputTypes) {
+    this.groups = groups;
+    this.types = groupTypes;
+    this.baseAggregator = new SingleAggregator(aggFunc, aggOutputTypes);
     this.aggLength = aggFunc.size();
     this.aggregatorMap = new HashMap<>();
     this.keyBuilder = Row.newBuilder(groups.size());
-    this.types = types;
     this.iterator = null;
   }
 
@@ -60,7 +70,7 @@ public class GroupAggregator implements Aggregator {
 
   @Override
   public AggregateFunction<Row, Row> patternCopy() {
-    return new GroupAggregator(groups, null, types);
+    return new GroupAggregator(groups, types, baseAggregator.patternCopy());
   }
 
   @Override
@@ -79,5 +89,10 @@ public class GroupAggregator implements Aggregator {
   @Override
   public List<FieldType> getOutputTypes() {
     return types;
+  }
+
+  @Override
+  public int size() {
+    return baseAggregator.size();
   }
 }
