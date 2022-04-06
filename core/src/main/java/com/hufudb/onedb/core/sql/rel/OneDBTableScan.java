@@ -5,6 +5,9 @@ import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.sql.expression.OneDBReference;
 import com.hufudb.onedb.core.sql.rule.OneDBRules;
 import java.util.List;
+
+import org.apache.calcite.adapter.enumerable.EnumerableLimitRule;
+import org.apache.calcite.adapter.enumerable.EnumerableProjectToCalcRule;
 import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelOptCost;
 import org.apache.calcite.plan.RelOptPlanner;
@@ -63,6 +66,8 @@ public class OneDBTableScan extends TableScan implements OneDBRel {
     planner.removeRule(JoinPushThroughJoinRule.LEFT);
     planner.removeRule(JoinPushThroughJoinRule.RIGHT);
     planner.removeRule(CoreRules.AGGREGATE_REDUCE_FUNCTIONS);
+    planner.removeRule(EnumerableProjectToCalcRule.Config.DEFAULT.toRule());
+    planner.removeRule(EnumerableLimitRule.Config.DEFAULT.toRule());
   }
 
   @Override

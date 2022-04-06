@@ -173,6 +173,18 @@ public class PostgresqlService extends OwnerService {
             tableHeader, OneDBExpression.fromProto(query.getSelectExpList()));
     List<String> groups = query.getGroupList().stream()
         .map(ref -> tableHeader.getName(ref)).collect(Collectors.toList());
+    // order by
+    List<String> order = query.getOrderList();
+    StringBuilder orderClause = new StringBuilder();
+    if (!order.isEmpty()) {
+      for (int i = 0; i < order.size(); i++) {
+        String[] tmp = order.get(i).split(" ");
+        orderClause.append(selects.get(Integer.parseInt(tmp[0]))).append(" ").append(tmp[1]);
+        if (i != order.size() - 1) {
+          orderClause.append(" , ");
+        }
+      }
+    }
     if (query.getAggExpCount() > 0) {
       selects =
           OneDBTranslator.translateAgg(selects, OneDBExpression.fromProto(query.getAggExpList()));
@@ -187,6 +199,13 @@ public class PostgresqlService extends OwnerService {
     }
     if (!groups.isEmpty()) {
       sql.append(String.format(" group by %s", String.join(",", groups)));
+    }
+    if (orderClause.length() > 0) {
+      sql.append(" ORDER BY ");
+    }
+    sql.append(orderClause);
+    if (query.getFetch() != 0) {
+      sql.append(" LIMIT ").append(query.getFetch() + query.getOffset());
     }
     LOG.info(sql.toString());
     return sql.toString();
