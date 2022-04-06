@@ -11,7 +11,7 @@ import com.hufudb.onedb.core.data.Row.RowBuilder;
 public class GroupAggregator implements Aggregator {
   final List<Integer> groups;
   final SingleAggregator baseAggregator;
-  final int length;
+  final int aggLength;
   final Map<Row, SingleAggregator> aggregatorMap;
   final RowBuilder keyBuilder;
   final List<FieldType> types;
@@ -20,7 +20,7 @@ public class GroupAggregator implements Aggregator {
   public GroupAggregator(List<Integer> groups, List<AggregateFunction<Row, Comparable>> aggFunc, List<FieldType> types) {
     this.groups = groups;
     this.baseAggregator = new SingleAggregator(aggFunc, types.subList(groups.size(), types.size()));
-    this.length = groups.size() + aggFunc.size();
+    this.aggLength = aggFunc.size();
     this.aggregatorMap = new HashMap<>();
     this.keyBuilder = Row.newBuilder(groups.size());
     this.types = types;
@@ -49,16 +49,11 @@ public class GroupAggregator implements Aggregator {
       reset();
     }
     Map.Entry<Row, SingleAggregator> entry = iterator.next();
-    Row key = entry.getKey();
     Row value = entry.getValue().aggregate();
-    RowBuilder builder = Row.newBuilder(length);
-    // add key
-    for (int i = 0; i < groups.size(); ++i) {
-      builder.set(i, key.getObject(i));
-    }
+    RowBuilder builder = Row.newBuilder(aggLength);
     // add agg result
-    for (int i = groups.size(); i < length; ++i) {
-      builder.set(i, value.getObject(i - groups.size()));
+    for (int i = 0; i < aggLength; ++i) {
+      builder.set(i, value.getObject(i));
     }
     return builder.build();
   }
@@ -79,5 +74,10 @@ public class GroupAggregator implements Aggregator {
   @Override
   public void reset() {
     iterator = aggregatorMap.entrySet().iterator();
+  }
+
+  @Override
+  public List<FieldType> getOutputTypes() {
+    return types;
   }
 }

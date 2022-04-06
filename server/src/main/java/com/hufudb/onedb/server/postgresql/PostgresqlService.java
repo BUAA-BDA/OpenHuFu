@@ -177,12 +177,6 @@ public class PostgresqlService extends OwnerService {
       selects =
           OneDBTranslator.translateAgg(selects, OneDBExpression.fromProto(query.getAggExpList()));
     }
-    if (!groups.isEmpty()) {
-      List<String> tmpSelects = new ArrayList<>();
-      tmpSelects.addAll(groups);
-      tmpSelects.addAll(selects);
-      selects = tmpSelects;
-    }
     // select clause
     StringBuilder sql =
         new StringBuilder(

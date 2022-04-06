@@ -1,5 +1,6 @@
 package com.hufudb.onedb.core.sql.expression;
 
+import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.TypeConverter;
 import com.hufudb.onedb.rpc.OneDBCommon.ExpressionProto;
@@ -22,37 +23,35 @@ public class OneDBAggCall implements OneDBExpression {
   }
 
   public static List<OneDBExpression> fromAggregates(List<AggregateCall> calls) {
-    List<OneDBExpression> result = new ArrayList<>();
-    calls.stream()
-        .forEach(
-            call -> {
-              AggregateType aggType = AggregateType.of(call);
-              FieldType outType = TypeConverter.convert2OneDBType(call.getType().getSqlTypeName());
-              result.add(new OneDBAggCall(aggType, call.getArgList(), outType));
-            });
-    return result;
+    return calls.stream().map(call -> {
+      AggregateType aggType = AggregateType.of(call);
+      FieldType outType = TypeConverter.convert2OneDBType(call.getType().getSqlTypeName());
+      return new OneDBAggCall(aggType, call.getArgList(), outType);
+    }).collect(Collectors.toList());
+  }
+
+  public static List<OneDBExpression> fromGroups(List<Integer> groups, List<FieldType> outTypes) {
+    return groups.stream()
+        .map(g -> new OneDBAggCall(AggregateType.GROUPKEY, ImmutableList.of(g), outTypes.get(g)))
+        .collect(Collectors.toList());
   }
 
   public static OneDBAggCall fromProto(ExpressionProto proto) {
     if (!OneDBOpType.of(proto.getOpType()).equals(OneDBOpType.AGG_FUNC)) {
       throw new RuntimeException("not aggregate");
     }
-    List<Integer> inputs = proto.getInList().stream().map(in -> in.getRef()).collect(Collectors.toList());
-    return new OneDBAggCall(
-        AggregateType.of(proto.getFunc()), inputs, FieldType.of(proto.getOutType()));
+    List<Integer> inputs =
+        proto.getInList().stream().map(in -> in.getRef()).collect(Collectors.toList());
+    return new OneDBAggCall(AggregateType.of(proto.getFunc()), inputs,
+        FieldType.of(proto.getOutType()));
   }
 
   @Override
   public ExpressionProto toProto() {
     // todo: fix fromIndex type
-    return ExpressionProto.newBuilder()
-        .setOpType(OneDBOpType.AGG_FUNC.ordinal())
-        .setFunc(aggType.ordinal())
-        .setOutType(outType.ordinal())
-        .addAllIn(
-            in.stream()
-                .map(i -> OneDBReference.fromIndex(outType, i).toProto())
-                .collect(Collectors.toList()))
+    return ExpressionProto.newBuilder().setOpType(OneDBOpType.AGG_FUNC.ordinal())
+        .setFunc(aggType.ordinal()).setOutType(outType.ordinal()).addAllIn(in.stream()
+            .map(i -> OneDBReference.fromIndex(outType, i).toProto()).collect(Collectors.toList()))
         .build();
   }
 
@@ -79,12 +78,8 @@ public class OneDBAggCall implements OneDBExpression {
   }
 
   public enum AggregateType {
-    COUNT("COUNT"),
-    AVG("AVG"),
-    MAX("MAX"),
-    MIN("MIN"),
-    SUM("SUM"),
-    UNSUPPORT("UNSUPPORT");
+    GROUPKEY("GROUPKEY"), // used for group by key
+    COUNT("COUNT"), AVG("AVG"), MAX("MAX"), MIN("MIN"), SUM("SUM"), UNSUPPORT("UNSUPPORT");
 
     private static final Map<String, AggregateType> MAP = new HashMap<>();
 

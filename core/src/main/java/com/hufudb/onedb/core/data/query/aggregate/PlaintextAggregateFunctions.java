@@ -45,6 +45,8 @@ public class PlaintextAggregateFunctions {
   public static AggregateFunction getAggregateFunc(OneDBExpression exp) {
     if (exp instanceof OneDBAggCall) {
       switch (((OneDBAggCall) exp).getAggType()) {
+        case GROUPKEY:
+          return new PlaintextGroupKey((OneDBAggCall) exp);
         case COUNT:
           return new PlaintextCount((OneDBAggCall) exp);
         case SUM:
@@ -60,6 +62,36 @@ public class PlaintextAggregateFunctions {
       }
     } else {
       return PlaintextCombination.newBuilder(exp).build();
+    }
+  }
+
+  public static class PlaintextGroupKey implements AggregateFunction<Row, Comparable> {
+    Comparable key;
+    final int inputRef;
+
+    PlaintextGroupKey(OneDBAggCall agg) {
+      this.key = null;
+      this.inputRef = ((OneDBAggCall) agg).getInputRef().get(0);
+    }
+
+    PlaintextGroupKey(int inputRef) {
+      this.key = null;
+      this.inputRef = inputRef;
+    }
+
+    @Override
+    public void add(Row ele) {
+      key = (Comparable) ele.getObject(inputRef);
+    }
+
+    @Override
+    public Comparable aggregate() {
+      return key;
+    }
+
+    @Override
+    public AggregateFunction<Row, Comparable> patternCopy() {
+      return new PlaintextGroupKey(inputRef);
     }
   }
 
@@ -89,7 +121,7 @@ public class PlaintextAggregateFunctions {
 
     @Override
     public AggregateFunction<Row, Comparable> patternCopy() {
-      return new PlaintextSum(null);
+      return new PlaintextSum(inputRef);
     }
   }
 
@@ -153,7 +185,7 @@ public class PlaintextAggregateFunctions {
 
     @Override
     public AggregateFunction<Row, Comparable> patternCopy() {
-        return new PlaintextAverage(inputRef);
+      return new PlaintextAverage(inputRef);
     }
   }
 
@@ -274,7 +306,8 @@ public class PlaintextAggregateFunctions {
 
     @Override
     public AggregateFunction<Row, Comparable> patternCopy() {
-      List<AggregateFunction<Row, Comparable>> inCopy = in.stream().map(i -> i.patternCopy()).collect(Collectors.toList());
+      List<AggregateFunction<Row, Comparable>> inCopy =
+          in.stream().map(i -> i.patternCopy()).collect(Collectors.toList());
       return new PlaintextCombination(exp, inCopy);
     }
 

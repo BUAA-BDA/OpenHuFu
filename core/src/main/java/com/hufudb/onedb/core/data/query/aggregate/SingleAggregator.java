@@ -50,4 +50,9 @@ public class SingleAggregator implements Aggregator {
   public void reset() {
     next = true;
   }
+
+  @Override
+  public List<FieldType> getOutputTypes() {
+    return types;
+  }
 }

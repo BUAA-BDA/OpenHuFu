@@ -7,6 +7,7 @@ import com.hufudb.onedb.core.data.Row;
 public interface Aggregator extends AggregateFunction<Row, Row> {
   boolean hasNext();
   void reset();
+  List<FieldType> getOutputTypes();
 
   public static Aggregator create(List<Integer> groups, List<AggregateFunction<Row, Comparable>> aggFunc, List<FieldType> types) {
     if (groups.isEmpty()) {

@@ -75,7 +75,26 @@ public class OneDBQueryContext {
   }
 
   public static Header getOutputHeader(OneDBQueryProto proto) {
-    return OneDBExpression.generateHeader(getOutputExpressions(proto));
+    Header.Builder builder = Header.newBuilder();
+    List<FieldType> types = getOutputTypes(proto);
+    types.stream().forEach(type -> builder.add("", type));
+    return builder.build();
+  }
+
+  public static List<FieldType> getOutputTypes(OneDBQueryProto proto) {
+    if (proto.getAggExpCount() > 0) {
+      return proto.getAggExpList().stream().map(agg -> FieldType.of(agg.getOutType())).collect(Collectors.toList());
+    } else {
+      return proto.getSelectExpList().stream().map(sel -> FieldType.of(sel.getOutType())).collect(Collectors.toList());
+    }
+  }
+
+  public static List<FieldType> getOutputTypes(OneDBQueryProto proto, List<Integer> indexs) {
+    if (proto.getAggExpCount() > 0) {
+      return indexs.stream().map(id -> FieldType.of(proto.getAggExp(id).getOutType())).collect(Collectors.toList());
+    } else {
+      return indexs.stream().map(id -> FieldType.of(proto.getSelectExp(id).getOutType())).collect(Collectors.toList());
+    }
   }
 
   public static List<OneDBExpression> getOutputExpressions(OneDBQueryProto proto) {
@@ -106,22 +125,13 @@ public class OneDBQueryContext {
 
   public static List<OneDBExpression> getSingleTableOutput(OneDBQueryProto proto) {
     if (proto.getAggExpCount() > 0) {
-      if (proto.getGroupCount() > 0) {
-        List<OneDBExpression> outputs = new ArrayList<>();
-        List<ExpressionProto> selects = proto.getSelectExpList();
-        outputs.addAll(proto.getGroupList().stream()
-            .map(ref -> OneDBReference.fromIndex(FieldType.of(selects.get(ref).getOutType()), ref))
-            .collect(Collectors.toList()));
-        outputs.addAll(OneDBExpression.fromProto(proto.getAggExpList()));
-        return outputs;
-      } else {
-        return OneDBExpression.fromProto(proto.getAggExpList());
-      }
+      return OneDBExpression.fromProto(proto.getAggExpList());
     } else {
       return OneDBExpression.fromProto(proto.getSelectExpList());
     }
   }
 
+  // todo: consider group
   public static Header generateHeaderForSingleTable(OneDBQueryProto proto) {
     return OneDBExpression.generateHeader(getSingleTableOutput(proto));
   }

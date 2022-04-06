@@ -1,5 +1,6 @@
 package com.hufudb.onedb.core.sql.implementor;
 
+import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.client.OneDBClient;
 import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.config.OneDBConfig;
@@ -15,6 +16,7 @@ import com.hufudb.onedb.core.data.query.aggregate.PlaintextAggregation;
 import com.hufudb.onedb.core.data.query.aggregate.PlaintextAggregateFunctions.PlaintextCombination;
 import com.hufudb.onedb.core.sql.expression.OneDBAggCall;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
+import com.hufudb.onedb.core.sql.expression.OneDBAggCall.AggregateType;
 import com.hufudb.onedb.core.sql.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.sql.rel.OneDBQueryContext;
 import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
@@ -63,7 +65,7 @@ public class PlaintextImplementor {
   }
 
   // rewrite aggregate exps for single table query
-  OneDBQueryProto rewriteAggregations(OneDBQueryProto proto,
+  OneDBQueryProto rewriteAggregations(OneDBQueryProto proto, List<Integer> groups,
       List<AggregateFunction<Row, Comparable>> aggFunctions, List<FieldType> types) {
     if (proto.getAggExpCount() == 0) {
       return proto;
@@ -71,8 +73,13 @@ public class PlaintextImplementor {
       OneDBQueryProto.Builder queryBuilder = proto.toBuilder();
       List<OneDBExpression> originExps = OneDBExpression.fromProto(proto.getAggExpList());
       List<OneDBAggCall> localAggregation = new ArrayList<>();
+      int id = 0;
       for (Integer ref : proto.getGroupList()) {
-        types.add(FieldType.of(proto.getSelectExp(ref).getOutType()));
+        FieldType type = FieldType.of(proto.getSelectExp(ref).getOutType());
+        localAggregation.add(OneDBAggCall.create(AggregateType.GROUPKEY, ImmutableList.of(ref), type));
+        types.add(type);
+        groups.add(id);
+        ++id;
       }
       for (OneDBExpression exp : originExps) {
         aggFunctions.add(rewriteAggregation(exp, localAggregation));
@@ -92,12 +99,13 @@ public class PlaintextImplementor {
     assert !tableName.isEmpty();
     // horizontal partitioned table aggregation requires extra rewrite
     // for example: AVG(X) -> SUM(X) / COUNT(X)
+    List<Integer> groups = new ArrayList<>();
     List<AggregateFunction<Row, Comparable>> aggFunctions = new ArrayList<>();
     List<FieldType> types = new ArrayList<>();
     if (proto.getAggExpCount() > 0) {
-      proto = rewriteAggregations(proto, aggFunctions, types);
+      proto = rewriteAggregations(proto, groups, aggFunctions, types);
     }
-    Aggregator aggregator = Aggregator.create(proto.getGroupList(), aggFunctions, types);
+    Aggregator aggregator = Aggregator.create(groups, aggFunctions, types);
     List<Pair<OwnerClient, String>> tableClients = client.getTableClients(tableName);
     StreamBuffer<DataSetProto> streamProto = tableQuery(proto, tableClients);
 
