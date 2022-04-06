@@ -16,13 +16,8 @@ import org.apache.calcite.rel.metadata.RelMetadataQuery;
 import org.apache.calcite.util.ImmutableBitSet;
 
 public class OneDBAggregate extends Aggregate implements OneDBRel {
-  public OneDBAggregate(
-      RelOptCluster cluster,
-      RelTraitSet traitSet,
-      RelNode input,
-      ImmutableBitSet groupSet,
-      List<ImmutableBitSet> groupSets,
-      List<AggregateCall> aggCalls) {
+  public OneDBAggregate(RelOptCluster cluster, RelTraitSet traitSet, RelNode input,
+      ImmutableBitSet groupSet, List<ImmutableBitSet> groupSets, List<AggregateCall> aggCalls) {
     super(cluster, traitSet, ImmutableList.of(), input, groupSet, groupSets, aggCalls);
   }
 
@@ -43,12 +38,8 @@ public class OneDBAggregate extends Aggregate implements OneDBRel {
   }
 
   @Override
-  public Aggregate copy(
-      RelTraitSet traitSet,
-      RelNode input,
-      ImmutableBitSet groupSet,
-      List<ImmutableBitSet> groupSets,
-      List<AggregateCall> aggCalls) {
+  public Aggregate copy(RelTraitSet traitSet, RelNode input, ImmutableBitSet groupSet,
+      List<ImmutableBitSet> groupSets, List<AggregateCall> aggCalls) {
     return new OneDBAggregate(getCluster(), traitSet, input, groupSet, groupSets, aggCalls);
   }
 }

@@ -5,11 +5,8 @@ import com.google.protobuf.TextFormat.ParseException;
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
-import com.hufudb.onedb.core.sql.expression.OneDBReference;
-import com.hufudb.onedb.rpc.OneDBCommon.ExpressionProto;
 import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
 import java.util.Map;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -83,17 +80,21 @@ public class OneDBQueryContext {
 
   public static List<FieldType> getOutputTypes(OneDBQueryProto proto) {
     if (proto.getAggExpCount() > 0) {
-      return proto.getAggExpList().stream().map(agg -> FieldType.of(agg.getOutType())).collect(Collectors.toList());
+      return proto.getAggExpList().stream().map(agg -> FieldType.of(agg.getOutType()))
+          .collect(Collectors.toList());
     } else {
-      return proto.getSelectExpList().stream().map(sel -> FieldType.of(sel.getOutType())).collect(Collectors.toList());
+      return proto.getSelectExpList().stream().map(sel -> FieldType.of(sel.getOutType()))
+          .collect(Collectors.toList());
     }
   }
 
   public static List<FieldType> getOutputTypes(OneDBQueryProto proto, List<Integer> indexs) {
     if (proto.getAggExpCount() > 0) {
-      return indexs.stream().map(id -> FieldType.of(proto.getAggExp(id).getOutType())).collect(Collectors.toList());
+      return indexs.stream().map(id -> FieldType.of(proto.getAggExp(id).getOutType()))
+          .collect(Collectors.toList());
     } else {
-      return indexs.stream().map(id -> FieldType.of(proto.getSelectExp(id).getOutType())).collect(Collectors.toList());
+      return indexs.stream().map(id -> FieldType.of(proto.getSelectExp(id).getOutType()))
+          .collect(Collectors.toList());
     }
   }
 

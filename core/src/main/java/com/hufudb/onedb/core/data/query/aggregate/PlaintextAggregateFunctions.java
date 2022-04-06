@@ -8,10 +8,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableList;
-import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Row;
 import com.hufudb.onedb.core.data.Row.RowBuilder;
-import com.hufudb.onedb.core.data.query.QueryableDataSet;
 import com.hufudb.onedb.core.sql.expression.ExpressionInterpreter;
 import com.hufudb.onedb.core.sql.expression.OneDBAggCall;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
@@ -22,26 +20,6 @@ import com.hufudb.onedb.core.sql.expression.OneDBAggCall.AggregateType;
 import com.hufudb.onedb.core.sql.expression.OneDBOperator.FuncType;
 
 public class PlaintextAggregateFunctions {
-  public static QueryableDataSet applyAggregateFunctions(QueryableDataSet input,
-      List<AggregateFunction<Row, Comparable>> aggFunctions, List<FieldType> types) {
-    // aggregate input rows
-    List<Row> rows = input.getRows();
-    int length = aggFunctions.size();
-    for (Row row : rows) {
-      for (int i = 0; i < length; ++i) {
-        aggFunctions.get(i).add(row);
-      }
-    }
-    // get result
-    RowBuilder builder = Row.newBuilder(length);
-    for (int i = 0; i < length; ++i) {
-      builder.set(i, ExpressionInterpreter.cast(aggFunctions.get(i).aggregate(), types.get(i)));
-    }
-    rows.clear();
-    rows.add(builder.build());
-    return input;
-  }
-
   public static AggregateFunction getAggregateFunc(OneDBExpression exp) {
     if (exp instanceof OneDBAggCall) {
       switch (((OneDBAggCall) exp).getAggType()) {
