@@ -1,0 +1,29 @@
+version: '3.3'
+
+services:
+  postgres_1:
+    image: postgres
+    restart: "no"
+    container_name: postgres_1
+    environment:
+      POSTGRES_PASSWORD: onedb
+    volumes:
+      - $PWD/config/db1.sql:/docker-entrypoint-initdb.d/init.sql
+
+  postgres_2:
+    image: postgres
+    restart: "no"
+    container_name: postgres_2
+    environment:
+      POSTGRES_PASSWORD: onedb
+    volumes:
+      - $PWD/config/db2.sql:/docker-entrypoint-initdb.d/init.sql
+
+  postgres_3:
+    image: postgres
+    restart: "no"
+    container_name: postgres_3
+    environment:
+      POSTGRES_PASSWORD: onedb
+    volumes:
+      - $PWD/config/db3.sql:/docker-entrypoint-initdb.d/init.sql

@@ -1,39 +1,6 @@
 version: '3.3'
 
 services:
-  postgres_1:
-    image: postgres
-    restart: "no"
-    container_name: postgres_1
-    ports:
-      - 13101:5432
-    environment:
-      POSTGRES_PASSWORD: onedb
-    volumes:
-      - $PWD/db/db1.sql:/docker-entrypoint-initdb.d/init.sql
-
-  postgres_2:
-    image: postgres
-    restart: "no"
-    container_name: postgres_2
-    ports:
-      - 13102:5432
-    environment:
-      POSTGRES_PASSWORD: onedb
-    volumes:
-      - $PWD/db/db2.sql:/docker-entrypoint-initdb.d/init.sql
-
-  postgres_3:
-    image: postgres
-    restart: "no"
-    container_name: postgres_3
-    ports:
-      - 13103:5432
-    environment:
-      POSTGRES_PASSWORD: onedb
-    volumes:
-      - $PWD/db/db3.sql:/docker-entrypoint-initdb.d/init.sql
-
   owner_1:
     image: maven:3.8-openjdk-11
     container_name: owner_1
@@ -47,7 +14,6 @@ services:
       - $PWD/config:/root/onedb/config
       - $PWD/log:/root/onedb/log
     depends_on:
-      - "builder"
       - "postgres_1"
 
   owner_2:
@@ -63,8 +29,7 @@ services:
       - $PWD/config:/root/onedb/config
       - $PWD/log:/root/onedb/log
     depends_on:
-      - "builder"
-      - "postgres_2"
+      - "postgres_1"
 
   owner_3:
     image: maven:3.8-openjdk-11
@@ -79,5 +44,4 @@ services:
       - $PWD/config:/root/onedb/config
       - $PWD/log:/root/onedb/log
     depends_on:
-      - "builder"
-      - "postgres_3"
+      - "postgres_1"

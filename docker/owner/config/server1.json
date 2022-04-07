@@ -1,0 +1,70 @@
+{
+  "port": 12345,
+  "hostname": "localhost",
+  "url": "jdbc:postgresql://db:5432/postgres",
+  "catalog": "postgres",
+  "user": "postgres",
+  "passwd": "onedb",
+  "tables": [
+    {
+      "originName": "student",
+      "publishedName": "student1",
+      "publishedFields": [],
+      "originColumns": []
+    },
+    {
+      "originName": "student",
+      "publishedName": "student2",
+      "publishedFields": [
+        {
+          "name": "name",
+          "type": "STRING",
+          "level": "public"
+        },
+        {
+          "name": "score",
+          "type": "INT",
+          "level": "public"
+        },
+        {
+          "name": "age",
+          "type": "INT",
+          "level": "hidden"
+        },
+        {
+          "name": "dept_name",
+          "type": "STRING",
+          "level": "hidden"
+        }
+      ],
+      "originColumns": [0, 2, 1, 3]
+    },
+    {
+      "originName": "student",
+      "publishedName": "student3",
+      "publishedFields": [
+        {
+          "name": "name",
+          "type": "STRING",
+          "level": "public"
+        },
+        {
+          "name": "score",
+          "type": "INT",
+          "level": "public"
+        },
+        {
+          "name": "age",
+          "type": "INT",
+          "level": "hidden"
+        },
+        {
+          "name": "dept_name",
+          "type": "STRING",
+          "level": "hidden"
+        }
+      ],
+      "originColumns": [0, 2, 1, 3]
+    }
+  ]
+}

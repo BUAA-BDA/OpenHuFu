@@ -1,0 +1,16 @@
+{
+  "port": 12347,
+  "hostname": "localhost",
+  "url": "jdbc:postgresql://db:5432/postgres",
+  "catalog": "postgres",
+  "user": "postgres",
+  "passwd": "onedb",
+  "tables": [
+    {
+      "originName": "student",
+      "publishedName": "student1",
+      "publishedFields": [],
+      "originColumns": []
+    }
+  ]
+}
