@@ -40,14 +40,19 @@ public class OneDBClient {
 
   public OwnerClient addOwner(String endpoint) {
     if (hasOwner(endpoint)) {
-      LOG.info("DB at {} already exists", endpoint);
+      LOG.info("owner at {} already exists", endpoint);
       return getOwnerClient(endpoint);
     }
-    OwnerClient client = new OwnerClient(endpoint);
-    if (client != null) {
-      ownerMap.put(endpoint, client);
+    OwnerClient client = null;
+    try {
+      client = new OwnerClient(endpoint);
+      if (client != null) {
+        ownerMap.put(endpoint, client);
+      }
+      LOG.info("add DB {}", endpoint);
+    } catch (Exception e) {
+      LOG.warn("fail to add owner {}", endpoint);
     }
-    LOG.info("add DB {}", endpoint);
     return client;
   }
 

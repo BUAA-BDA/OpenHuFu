@@ -1,7 +1,7 @@
 {
-  "port": 12346,
+  "port": 12345,
   "hostname": "localhost",
-  "url": "jdbc:postgresql://db:5432/postgres",
+  "url": "jdbc:postgresql://postgres2:5432/postgres",
   "catalog": "postgres",
   "user": "postgres",
   "passwd": "onedb",
