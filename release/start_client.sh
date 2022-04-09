@@ -1,1 +1,1 @@
-java -jar ./bin/onedb_client.jar -m ./config/client_model.json
+java -jar ./bin/onedb_user_client.jar -m ./config/client_model.json

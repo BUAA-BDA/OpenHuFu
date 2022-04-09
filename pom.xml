@@ -14,9 +14,10 @@
 
   <modules>
     <module>core</module>
-    <module>client</module>
+    <module>user-client</module>
     <module>owner-core</module>
     <module>owner-postgresql</module>
+    <module>owner-mysql</module>
   </modules>
 
   <properties>
