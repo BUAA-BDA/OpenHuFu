@@ -19,7 +19,6 @@ public class OneDBSchemaFactory implements SchemaFactory {
 
   @Override
   public Schema create(SchemaPlus parentSchema, String name, Map<String, Object> operand) {
-    // List<String> endpoints = (List<String>) operand.get("endpoints");
     List<String> endpoints = new ArrayList<>();
     List<Map<String, Object>> tables = new ArrayList<>();
     if (operand.containsKey("endpoints")) {

@@ -1,0 +1,61 @@
+{
+    "version": "1.0",
+    "defaultSchema": "onedb",
+    "schemas": [
+      {
+        "name": "onedb",
+        "type": "custom",
+        "factory": "com.hufudb.onedb.core.sql.schema.OneDBSchemaFactory",
+        "operand": {
+          "endpoints": ["owner1:12345", "owner2:12345", "owner3:12345"]
+        },
+        "tables": [
+          {
+            "name": "student1",
+            "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
+            "operand": {
+              "feds": [
+                {
+                  "endpoint": "owner1:12345",
+                  "name": "student1"
+                },
+                {
+                  "endpoint": "owner2:12345",
+                  "name": "student1"
+                },
+                {
+                  "endpoint": "owner3:12345",
+                  "name": "student1"
+                }
+              ]
+            }
+          },
+          {
+            "name": "student2",
+            "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
+            "operand": {
+              "feds": [
+                {
+                  "endpoint": "owner1:12345",
+                  "name": "student2"
+                }
+              ]
+            }
+          },
+          {
+            "name": "student3",
+            "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
+            "operand": {
+              "feds": [
+                {
+                  "endpoint": "owner1:12345",
+                  "name": "student3"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+  

@@ -110,7 +110,7 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
       String localName = fed.get("name").toString();
       OwnerClient client = schema.getDBClient(endpoint);
       if (client == null) {
-        LOG.warn("endpont {} not exist", endpoint);
+        LOG.warn("endpoint {} not exist", endpoint);
         throw new RuntimeException("endpoint not exist");
       }
       Header header = client.getTableHeader(localName);
