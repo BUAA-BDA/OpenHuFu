@@ -1,4 +1,4 @@
-package com.hufudb.onedb.server.postgresql;
+package com.hufudb.onedb.owner.postgresql;
 
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.data.DataSet;
@@ -9,8 +9,8 @@ import com.hufudb.onedb.core.data.TableInfo;
 import com.hufudb.onedb.core.data.utils.POJOPublishedTableInfo;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.translator.OneDBTranslator;
+import com.hufudb.onedb.owner.OwnerService;
 import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
-import com.hufudb.onedb.server.OwnerService;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;

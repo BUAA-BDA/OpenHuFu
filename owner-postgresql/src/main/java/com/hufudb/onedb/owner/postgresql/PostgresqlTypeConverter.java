@@ -1,4 +1,4 @@
-package com.hufudb.onedb.server.postgresql;
+package com.hufudb.onedb.owner.postgresql;
 
 import com.hufudb.onedb.core.data.FieldType;
 

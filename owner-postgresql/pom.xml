@@ -9,16 +9,16 @@
     <artifactId>onedb</artifactId>
     <version>0.1-SNAPSHOT</version>
   </parent>
-  <artifactId>server</artifactId>
+  <artifactId>owner-postgresql</artifactId>
   <version>0.1-SNAPSHOT</version>
-  <name>server</name>
+  <name>owner-postgresql</name>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <dependencies>
     <dependency>
       <groupId>com.hufudb.onedb</groupId>
-      <artifactId>core</artifactId>
+      <artifactId>owner-core</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
@@ -31,11 +31,6 @@
       <artifactId>junit</artifactId>
       <version>3.8.1</version>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
-      <version>2.6.2</version>
     </dependency>
   </dependencies>
 
@@ -58,7 +53,7 @@
           </descriptorRefs>
           <archive>
             <manifest>
-              <mainClass>com.hufudb.onedb.server.postgresql.PostgresqlServer</mainClass>
+              <mainClass>com.hufudb.onedb.owner.postgresql.PostgresqlServer</mainClass>
             </manifest>
           </archive>
         </configuration>

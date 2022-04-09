@@ -1,7 +1,7 @@
-package com.hufudb.onedb.server.postgresql;
+package com.hufudb.onedb.owner.postgresql;
 
 import com.google.gson.Gson;
-import com.hufudb.onedb.server.OwnerServer;
+import com.hufudb.onedb.owner.OwnerServer;
 import io.grpc.ServerBuilder;
 import java.io.IOException;
 import java.io.Reader;

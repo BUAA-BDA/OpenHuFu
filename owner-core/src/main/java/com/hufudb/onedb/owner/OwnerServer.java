@@ -1,4 +1,4 @@
-package com.hufudb.onedb.server;
+package com.hufudb.onedb.owner;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;

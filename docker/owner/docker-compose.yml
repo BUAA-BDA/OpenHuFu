@@ -6,7 +6,7 @@ services:
     container_name: owner1
     working_dir: /root/onedb
     restart: "no"
-    command: nohup java -jar ./bin/onedb_server.jar -c ./config/server1.json > ./log/owner1.log &
+    command: nohup java -jar ./bin/onedb_postgresql_owner.jar -c ./config/server1.json > ./log/owner1.log &
     volumes:
       - $PWD/../../release/bin:/root/onedb/bin
       - $PWD/config:/root/onedb/config
@@ -22,7 +22,7 @@ services:
     container_name: owner2
     working_dir: /root/onedb
     restart: "no"
-    command: nohup java -jar ./bin/onedb_server.jar -c ./config/server2.json > ./log/owner2.log &
+    command: nohup java -jar ./bin/onedb_postgresql_owner.jar -c ./config/server2.json > ./log/owner2.log &
     volumes:
       - $PWD/../../release/bin:/root/onedb/bin
       - $PWD/config:/root/onedb/config
@@ -38,7 +38,7 @@ services:
     container_name: owner3
     working_dir: /root/onedb
     restart: "no"
-    command: nohup java -jar ./bin/onedb_server.jar -c ./config/server3.json > ./log/owner3.log &
+    command: nohup java -jar ./bin/onedb_postgresql_owner.jar -c ./config/server3.json > ./log/owner3.log &
     volumes:
       - $PWD/../../release/bin:/root/onedb/bin
       - $PWD/config:/root/onedb/config

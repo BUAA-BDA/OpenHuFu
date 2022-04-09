@@ -15,7 +15,8 @@
   <modules>
     <module>core</module>
     <module>client</module>
-    <module>server</module>
+    <module>owner-core</module>
+    <module>owner-postgresql</module>
   </modules>
 
   <properties>
