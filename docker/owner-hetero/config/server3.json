@@ -1,0 +1,16 @@
+{
+  "port": 12345,
+  "hostname": "localhost",
+  "url": "jdbc:mysql://mysql3:3306/mydb",
+  "catalog": "mydb",
+  "user": "root",
+  "passwd": "onedb",
+  "tables": [
+    {
+      "originName": "student",
+      "publishedName": "student1",
+      "publishedFields": [],
+      "originColumns": []
+    }
+  ]
+}

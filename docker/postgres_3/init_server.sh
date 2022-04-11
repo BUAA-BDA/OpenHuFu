@@ -2,7 +2,7 @@
 
 start() {
   echo "starting server $1..."
-  nohup java -jar ../../release/bin/onedb_server.jar -c ./config/server_config_$1.json > ./log/$1.log &
+  nohup java -jar ../../release/bin/onedb_postgresql_owner.jar -c ./config/server_config_$1.json > ./log/$1.log &
   echo $! >> ./log/pid_$1
   echo "postgresql server $1 start"
 }

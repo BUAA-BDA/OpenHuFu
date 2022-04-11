@@ -12,7 +12,7 @@ services:
       - $PWD/config:/root/onedb/config
       - $PWD/log:/root/onedb/log
     networks:
-      - database_owner_net_1
+      - owner_net_1
       - public_net
     ports:
       - 12345:12345
@@ -28,7 +28,7 @@ services:
       - $PWD/config:/root/onedb/config
       - $PWD/log:/root/onedb/log
     networks:
-      - database_owner_net_2
+      - owner_net_2
       - public_net
     ports:
       - 12346:12345
@@ -38,23 +38,24 @@ services:
     container_name: owner3
     working_dir: /root/onedb
     restart: "no"
-    command: nohup java -jar ./bin/onedb_postgresql_owner.jar -c ./config/server3.json > ./log/owner3.log &
+    command: nohup java -jar ./bin/onedb_mysql_owner.jar -c ./config/server3.json > ./log/owner3.log &
     volumes:
       - $PWD/../../release/bin:/root/onedb/bin
       - $PWD/config:/root/onedb/config
       - $PWD/log:/root/onedb/log
     networks:
-      - database_owner_net_3
+      - owner_net_3
       - public_net
     ports:
       - 12347:12345
 
 networks:
-  database_owner_net_1:
+  owner_net_1:
     external: true
-  database_owner_net_2:
+  owner_net_2:
     external: true
-  database_owner_net_3:
+  owner_net_3:
     external: true
   public_net:
     driver: bridge
+    name: public_net
