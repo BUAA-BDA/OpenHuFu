@@ -3,7 +3,8 @@ package com.hufudb.onedb.core.client;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.data.Row;
 import com.hufudb.onedb.core.sql.implementor.PlaintextImplementor;
-import com.hufudb.onedb.core.sql.rel.OneDBQueryContext;
+import com.hufudb.onedb.core.sql.context.OneDBContext;
+import com.hufudb.onedb.core.sql.context.OneDBQueryContextPool;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
 import com.hufudb.onedb.core.table.OneDBTableInfo;
 import java.util.List;
@@ -132,7 +133,7 @@ public class OneDBClient {
    * onedb query
    */
   public Enumerator<Row> oneDBQuery(long contextId) {
-    OneDBQueryContext context = OneDBQueryContext.getContext(contextId);
-    return implementor.implement(context.toProto());
+    OneDBContext context = OneDBQueryContextPool.getContext(contextId);
+    return implementor.implement(context);
   }
 }

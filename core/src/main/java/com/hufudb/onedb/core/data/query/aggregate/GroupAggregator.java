@@ -17,9 +17,9 @@ public class GroupAggregator implements Aggregator {
   final List<FieldType> types;
   Iterator<Map.Entry<Row, SingleAggregator>> iterator;
 
-  GroupAggregator(List<Integer> groups, List<FieldType> groupTypes, SingleAggregator baseAggregator) {
+  GroupAggregator(List<Integer> groups, List<FieldType> outTypes, SingleAggregator baseAggregator) {
     this.groups = groups;
-    this.types = groupTypes;
+    this.types = outTypes;
     this.baseAggregator = baseAggregator;
     this.aggLength = baseAggregator.size();
     this.aggregatorMap = new HashMap<>();
@@ -27,9 +27,9 @@ public class GroupAggregator implements Aggregator {
     this.iterator = null;
   }
 
-  public GroupAggregator(List<Integer> groups, List<FieldType> groupTypes, List<AggregateFunction<Row, Comparable>> aggFunc, List<FieldType> aggOutputTypes) {
+  public GroupAggregator(List<Integer> groups, List<AggregateFunction<Row, Comparable>> aggFunc, List<FieldType> aggOutputTypes) {
     this.groups = groups;
-    this.types = groupTypes;
+    this.types = aggOutputTypes;
     this.baseAggregator = new SingleAggregator(aggFunc, aggOutputTypes);
     this.aggLength = aggFunc.size();
     this.aggregatorMap = new HashMap<>();

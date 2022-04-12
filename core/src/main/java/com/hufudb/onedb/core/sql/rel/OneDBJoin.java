@@ -1,6 +1,7 @@
 package com.hufudb.onedb.core.sql.rel;
 
 import com.google.common.collect.ImmutableList;
+import com.hufudb.onedb.core.sql.context.OneDBContext;
 import java.util.Set;
 import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelOptCost;
@@ -38,8 +39,12 @@ public class OneDBJoin extends Join implements OneDBRel {
 
   @Override
   public void implement(Implementor implementor) {
-    implementor.visitChild(getLeft(), getRight());
-    implementor.setJoinCondition(analyzeCondition());
+    implementor.visitChild((OneDBRel) getLeft());
+    OneDBContext left = implementor.getCurrentContext();
+    implementor.visitChild((OneDBRel) getRight());
+    OneDBContext right = implementor.getCurrentContext();
+    implementor.createBinaryContext(left, right);
+    implementor.setJoinInfo(analyzeCondition(), getJoinType());
   }
 
   @Override

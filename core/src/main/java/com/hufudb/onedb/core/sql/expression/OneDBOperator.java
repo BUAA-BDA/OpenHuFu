@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.TypeConverter;
 import com.hufudb.onedb.rpc.OneDBCommon.ExpressionProto;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.calcite.rex.RexCall;
@@ -239,7 +240,7 @@ public class OneDBOperator implements OneDBExpression {
         default:
           throw new RuntimeException("can't translate " + call);
       }
-      List<OneDBExpression> eles = ImmutableList.of(buildOp(call.operands.get(0)), buildOp(call.operands.get(1)));
+      List<OneDBExpression> eles = Arrays.asList(buildOp(call.operands.get(0)), buildOp(call.operands.get(1)));
       FieldType type = TypeConverter.convert2OneDBType(call.getType().getSqlTypeName());
       return new OneDBOperator(op, type, eles, FuncType.NONE);
     }
@@ -264,7 +265,7 @@ public class OneDBOperator implements OneDBExpression {
         default:
           throw new RuntimeException("can't translate " + call);
       }
-      List<OneDBExpression> eles = ImmutableList.of(buildOp(call.operands.get(0)));
+      List<OneDBExpression> eles = Arrays.asList(buildOp(call.operands.get(0)));
       FieldType type = TypeConverter.convert2OneDBType(call.getType().getSqlTypeName());
       return new OneDBOperator(op, type, eles, FuncType.NONE);
     }

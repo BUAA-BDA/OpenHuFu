@@ -39,11 +39,13 @@ public class OneDBProject extends Project implements OneDBRel {
 
   @Override
   public void implement(Implementor implementor) {
-    implementor.visitChild(getInput());
+    implementor.visitChild((OneDBRel) getInput());
     List<OneDBExpression> exps =
         OneDBOperator.fromRexNodes(getProjects(), implementor.getCurrentOutput());
-    if (implementor.hasAgg()) {
-      implementor.setAggExps(exps);
+    List<OneDBExpression> aggs = implementor.getAggExps();
+    if (aggs != null && !aggs.isEmpty()) {
+      aggs.clear();
+      aggs.addAll(exps);
     } else {
       implementor.setSelectExps(exps);
     }

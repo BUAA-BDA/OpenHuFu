@@ -9,7 +9,7 @@ import com.hufudb.onedb.core.data.PublishedTableInfo;
 import com.hufudb.onedb.core.data.StreamObserverDataSet;
 import com.hufudb.onedb.core.data.TableInfo;
 import com.hufudb.onedb.core.data.utils.POJOPublishedTableInfo;
-import com.hufudb.onedb.core.sql.rel.OneDBQueryContext;
+import com.hufudb.onedb.core.sql.context.OneDBContext;
 import com.hufudb.onedb.core.zk.DBZkClient;
 import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
 import com.hufudb.onedb.rpc.OneDBCommon.HeaderProto;
@@ -69,7 +69,7 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
 
   @Override
   public void oneDBQuery(OneDBQueryProto request, StreamObserver<DataSetProto> responseObserver) {
-    Header header = OneDBQueryContext.getOutputHeader(request);
+    Header header = OneDBContext.getOutputHeader(request);
     StreamObserverDataSet obDataSet = new StreamObserverDataSet(responseObserver, header);
     try {
       oneDBQueryInternal(request, obDataSet);

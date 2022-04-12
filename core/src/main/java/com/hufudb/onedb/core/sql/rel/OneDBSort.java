@@ -39,7 +39,7 @@ public class OneDBSort extends Sort implements OneDBRel {
 
   @Override
   public void implement(Implementor implementor) {
-    implementor.visitChild(getInput());
+    implementor.visitChild((OneDBRel) getInput());
     List<RelFieldCollation> sortCollations = collation.getFieldCollations();
     List<String> fieldOrder = new ArrayList<>();
     if (!sortCollations.isEmpty()) {
