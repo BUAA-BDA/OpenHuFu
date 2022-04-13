@@ -2,6 +2,7 @@ package com.hufudb.onedb.core.sql.context;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.query.QueryableDataSet;
@@ -21,7 +22,6 @@ public class OneDBBinaryContext extends OneDBBaseContext {
   List<OneDBExpression> aggExps;
   List<Integer> groups;
   List<String> orders;
-  List<FieldType> outTypes;
   int fetch;
   int offset;
   OneDBJoinInfo joinInfo;
@@ -118,8 +118,8 @@ public class OneDBBinaryContext extends OneDBBaseContext {
 
   @Override
   public List<FieldType> getOutTypes() {
-    // todo: implement this
-    return outTypes;
+    return getOutExpressions().stream()
+        .map(exp -> exp.getOutType()).collect(Collectors.toList());
   }
 
   @Override

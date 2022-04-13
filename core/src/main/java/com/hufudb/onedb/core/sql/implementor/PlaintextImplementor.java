@@ -139,7 +139,7 @@ public class PlaintextImplementor implements OneDBImplementor {
         OneDBAggCall.create(AggregateType.COUNT, ImmutableList.of(), agg.getOutType());
     int localAvgCountRef = localAggs.size();
     localAggs.add(localAvgCount);
-    OneDBAggCall globalAvgCount = OneDBAggCall.create(AggregateType.COUNT,
+    OneDBAggCall globalAvgCount = OneDBAggCall.create(AggregateType.SUM,
         ImmutableList.of(localAvgCountRef), agg.getOutType());
     return OneDBOperator.create(OneDBOpType.DIVIDE, agg.getOutType(),
         new ArrayList<>(Arrays.asList(globalAvgSum, globalAvgCount)), FuncType.NONE);

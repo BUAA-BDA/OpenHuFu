@@ -64,6 +64,10 @@ public interface OneDBRel extends RelNode {
       input.implement(this);
     }
 
+    public void stepUp() {
+      currentContext = currentContext.getParent();
+    }
+
     public void createLeafContext() {
       OneDBContext parent = currentContext;
       currentContext = new OneDBLeafContext();
@@ -72,10 +76,12 @@ public interface OneDBRel extends RelNode {
     }
 
     public void createBinaryContext(OneDBContext left, OneDBContext right) {
-      OneDBContext parent = currentContext.getParent();
+      OneDBContext parent = currentContext;
       OneDBBinaryContext joinContext = new OneDBBinaryContext(parent, left, right);
       left.setParent(joinContext);
       right.setParent(joinContext);
+      // todo: tricy method, refactor this part
+      parent.updateChild(joinContext, right);
       currentContext = joinContext;
       List<OneDBExpression> exps = new ArrayList<>();
       int idx = 0;

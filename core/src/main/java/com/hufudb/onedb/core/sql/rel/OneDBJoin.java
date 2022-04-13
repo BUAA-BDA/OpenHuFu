@@ -41,8 +41,10 @@ public class OneDBJoin extends Join implements OneDBRel {
   public void implement(Implementor implementor) {
     implementor.visitChild((OneDBRel) getLeft());
     OneDBContext left = implementor.getCurrentContext();
+    implementor.stepUp();
     implementor.visitChild((OneDBRel) getRight());
     OneDBContext right = implementor.getCurrentContext();
+    implementor.stepUp();
     implementor.createBinaryContext(left, right);
     implementor.setJoinInfo(analyzeCondition(), getJoinType());
   }
