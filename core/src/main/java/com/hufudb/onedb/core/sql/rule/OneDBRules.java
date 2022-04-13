@@ -1,6 +1,5 @@
 package com.hufudb.onedb.core.sql.rule;
 
-import com.hufudb.onedb.core.sql.rel.OneDBSort;
 import org.apache.calcite.plan.RelOptRule;
 
 public class OneDBRules {

@@ -65,7 +65,7 @@ public class OneDBTranslator {
       case AND:
       case OR:
         return binary((OneDBOperator) exp);
-        // unary
+      // unary
       case AS:
       case NOT:
       case PLUS_PRE:
@@ -190,13 +190,22 @@ public class OneDBTranslator {
 
   protected String aggregateFunc(OneDBAggCall exp) {
     AggregateType type = exp.getAggType();
-    switch(type) {
+    List<Integer> inputRefs = exp.getInputRef();
+    switch (type) {
       case GROUPKEY:
-        return inputExps.get(exp.getInputRef().get(0));
+        return inputExps.get(inputRefs.get(0));
       case SUM:
-        return String.format("SUM(%s)", inputExps.get(exp.getInputRef().get(0)));
+        return String.format("SUM(%s)", inputExps.get(inputRefs.get(0)));
       case COUNT:
-        return String.format("COUNT(*)");
+        if (inputRefs.isEmpty()) {
+          return String.format("COUNT(*)");
+        } else if (inputRefs.size() == 1) {
+          return String.format("COUNT(%s)", inputExps.get(exp.getInputRef().get(0)));
+        } else {
+          List<String> inputs =
+              inputRefs.stream().map(ref -> inputExps.get(ref)).collect(Collectors.toList());
+          return String.format("COUNT((%s))", String.join(",", inputs));
+        }
       case AVG:
         return String.format("AVG(%s)", inputExps.get(exp.getInputRef().get(0)));
       case MAX:

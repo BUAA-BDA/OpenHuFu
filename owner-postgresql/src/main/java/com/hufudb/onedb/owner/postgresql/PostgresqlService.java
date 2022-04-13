@@ -154,6 +154,7 @@ public class PostgresqlService extends OwnerService {
             builder.set(i, timeStamp);
             break;
           default:
+            builder.set(i, rs.getObject(i + 1));
             break;
         }
       }

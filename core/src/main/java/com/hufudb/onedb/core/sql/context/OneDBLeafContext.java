@@ -1,5 +1,6 @@
 package com.hufudb.onedb.core.sql.context;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import com.hufudb.onedb.core.data.FieldType;
@@ -15,11 +16,11 @@ public class OneDBLeafContext extends OneDBBaseContext {
   OneDBContext parent;
   OneDBContextType contextType;
   String tableName;
-  List<OneDBExpression> selectExps;
-  List<OneDBExpression> whereExps;
-  List<OneDBExpression> aggExps;
-  List<Integer> groups;
-  List<String> orders;
+  List<OneDBExpression> selectExps = new ArrayList<>();
+  List<OneDBExpression> whereExps = new ArrayList<>();
+  List<OneDBExpression> aggExps = new ArrayList<>();
+  List<Integer> groups = new ArrayList<>();
+  List<String> orders = new ArrayList<>();
   List<FieldType> columnTypes;
   int fetch;
   int offset;
@@ -113,7 +114,7 @@ public class OneDBLeafContext extends OneDBBaseContext {
 
   @Override
   public void setSelectExps(List<OneDBExpression> selectExps) {
-    if (this.selectExps == null) {
+    if (this.selectExps.isEmpty()) {
       // for leaf, the first set of select includes all column references
       this.columnTypes =
           selectExps.stream().map(exp -> exp.getOutType()).collect(Collectors.toList());

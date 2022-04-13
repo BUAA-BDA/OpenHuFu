@@ -127,39 +127,84 @@ public class PlaintextImplementor implements OneDBImplementor {
     return PlaintextSort.apply(in, orders);
   }
 
-  private OneDBExpression convertAvg(OneDBAggCall agg, List<OneDBExpression> localAggs) {
-    OneDBAggCall localAvgSum =
-        OneDBAggCall.create(AggregateType.SUM, agg.getInputRef(), agg.getOutType());
-    int localAvgSumRef = localAggs.size();
-    localAggs.add(localAvgSum);
-    OneDBAggCall globalAvgSum =
-        OneDBAggCall.create(AggregateType.SUM, ImmutableList.of(localAvgSumRef), agg.getOutType());
-    // add a sum layer above count
-    OneDBAggCall localAvgCount =
-        OneDBAggCall.create(AggregateType.COUNT, ImmutableList.of(), agg.getOutType());
-    int localAvgCountRef = localAggs.size();
-    localAggs.add(localAvgCount);
-    OneDBAggCall globalAvgCount = OneDBAggCall.create(AggregateType.SUM,
-        ImmutableList.of(localAvgCountRef), agg.getOutType());
-    return OneDBOperator.create(OneDBOpType.DIVIDE, agg.getOutType(),
-        new ArrayList<>(Arrays.asList(globalAvgSum, globalAvgCount)), FuncType.NONE);
+  private OneDBExpression convertAvg(OneDBAggCall agg, List<OneDBExpression> localAggs,
+      List<Integer> localGroups) {
+    if (!agg.isDistinct()) {
+      OneDBAggCall localAvgSum =
+          OneDBAggCall.create(AggregateType.SUM, agg.getInputRef(), agg.getOutType());
+      int localAvgSumRef = localAggs.size();
+      localAggs.add(localAvgSum);
+      OneDBAggCall globalAvgSum = OneDBAggCall.create(AggregateType.SUM,
+          ImmutableList.of(localAvgSumRef), agg.getOutType());
+      // add a sum layer above count
+      int localAvgCntRef = localAggs.size();
+      OneDBAggCall localAvgCount = OneDBAggCall.create(AggregateType.COUNT,
+          ImmutableList.of(localAvgCntRef), agg.getOutType());
+      int localAvgCountRef = localAggs.size();
+      localAggs.add(localAvgCount);
+      OneDBAggCall globalAvgCount = OneDBAggCall.create(AggregateType.SUM,
+          ImmutableList.of(localAvgCountRef), agg.getOutType());
+      return OneDBOperator.create(OneDBOpType.DIVIDE, agg.getOutType(),
+          new ArrayList<>(Arrays.asList(globalAvgSum, globalAvgCount)), FuncType.NONE);
+    } else {
+      int groupKeyIdx = localAggs.size();
+      List<Integer> inputRefs = agg.getInputRef();
+      int inputRef = agg.getInputRef().get(0);
+      localGroups.add(inputRef);
+      localAggs.add(OneDBAggCall.create(AggregateType.GROUPKEY, ImmutableList.of(inputRef), agg.getOutType()));
+      inputRefs.set(0, groupKeyIdx);
+      return agg;
+    }
   }
 
-  private OneDBExpression convertCount(OneDBAggCall agg, List<OneDBExpression> localAggs) {
-    localAggs.add(agg);
-    // add a sum layer above count
-    return OneDBAggCall.create(AggregateType.SUM, ImmutableList.of(localAggs.size() - 1),
-        agg.getOutType());
+  private OneDBExpression convertCount(OneDBAggCall agg, List<OneDBExpression> localAggs,
+      List<Integer> localGroups) {
+    if (!agg.isDistinct()) {
+      localAggs.add(agg);
+      // add a sum layer above count
+      return OneDBAggCall.create(AggregateType.SUM, ImmutableList.of(localAggs.size() - 1),
+          agg.getOutType());
+    } else {
+      List<Integer> inputRefs = agg.getInputRef();
+      for (int i = 0; i < inputRefs.size(); ++i) {
+        int groupKeyIdx = localAggs.size();
+        int inputRef = inputRefs.get(i);
+        localGroups.add(inputRef);
+        localAggs.add(OneDBAggCall.create(AggregateType.GROUPKEY, ImmutableList.of(inputRef), FieldType.UNKOWN));
+        inputRefs.set(i, groupKeyIdx);
+      }
+      return agg;
+    }
+  }
+
+  private OneDBExpression convertSum(OneDBAggCall agg, List<OneDBExpression> localAggs,
+      List<Integer> localGroups) {
+    if (!agg.isDistinct()) {
+      localAggs.add(agg);
+      return OneDBAggCall.create(AggregateType.SUM, ImmutableList.of(localAggs.size() - 1),
+          agg.getOutType());
+    } else {
+      int groupKeyIdx = localAggs.size();
+      List<Integer> inputRefs = agg.getInputRef();
+      int inputRef = agg.getInputRef().get(0);
+      localGroups.add(inputRef);
+      localAggs.add(OneDBAggCall.create(AggregateType.GROUPKEY, ImmutableList.of(inputRef), agg.getOutType()));
+      inputRefs.set(0, groupKeyIdx);
+      return agg;
+    }
   }
 
   // convert agg into two parts: local aggs and global agg, local agg are added into localAggs,
   // global agg is returned
-  private OneDBExpression convertAgg(OneDBAggCall agg, List<OneDBExpression> localAggs) {
+  private OneDBExpression convertAgg(OneDBAggCall agg, List<OneDBExpression> localAggs,
+      List<Integer> localGroups) {
     switch (agg.getAggType()) {
       case AVG: // avg converted to global: div(sum(sumref), sum(countref)), local: sum, count
-        return convertAvg(agg, localAggs);
+        return convertAvg(agg, localAggs, localGroups);
       case COUNT: // count converted global sum(countref), local: count
-        return convertCount(agg, localAggs);
+        return convertCount(agg, localAggs, localGroups);
+      case SUM:
+        return convertSum(agg, localAggs, localGroups);
       default: // others convert directly
         localAggs.add(agg);
         return OneDBAggCall.create(agg.getAggType(), ImmutableList.of(localAggs.size() - 1),
@@ -168,14 +213,15 @@ public class PlaintextImplementor implements OneDBImplementor {
   }
 
   // rewrite exp into global agg and add new local aggs into localAggs
-  private OneDBExpression rewriteAggregate(OneDBExpression exp, List<OneDBExpression> localAggs) {
+  private OneDBExpression rewriteAggregate(OneDBExpression exp, List<OneDBExpression> localAggs,
+      List<Integer> localGroups) {
     // traverse exp tree, and convert each aggCall
     if (exp instanceof OneDBAggCall) {
-      return convertAgg((OneDBAggCall) exp, localAggs);
+      return convertAgg((OneDBAggCall) exp, localAggs, localGroups);
     } else if (exp instanceof OneDBOperator) {
       List<OneDBExpression> children = ((OneDBOperator) exp).getInputs();
       for (int i = 0; i < children.size(); ++i) {
-        OneDBExpression globalExp = rewriteAggregate(children.get(i), localAggs);
+        OneDBExpression globalExp = rewriteAggregate(children.get(i), localAggs, localGroups);
         children.set(i, globalExp);
       }
     }
@@ -190,6 +236,7 @@ public class PlaintextImplementor implements OneDBImplementor {
     List<FieldType> columnTypes = leaf.getColumnTypes();
     List<Integer> globalGroups = new ArrayList<>();
     // add local groups into local aggs as group key function
+    // todo: reduce duplicated group keys in local aggregation
     int idx = 0;
     for (int groupRef : localGroups) {
       FieldType type = columnTypes.get(groupRef);
@@ -198,7 +245,7 @@ public class PlaintextImplementor implements OneDBImplementor {
       ++idx;
     }
     for (OneDBExpression exp : originAggs) {
-      OneDBExpression rewritedExp = rewriteAggregate(exp, localAggs);
+      OneDBExpression rewritedExp = rewriteAggregate(exp, localAggs, localGroups);
       if (rewritedExp instanceof OneDBAggCall
           && ((OneDBAggCall) rewritedExp).getAggType().equals(AggregateType.GROUPKEY)) {
         globalGroups.add(globalAggs.size());

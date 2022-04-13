@@ -4,7 +4,9 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import com.hufudb.onedb.core.data.Row;
 import com.hufudb.onedb.core.data.Row.RowBuilder;
@@ -71,20 +73,38 @@ public class PlaintextAggregateFunctions {
   public static class PlaintextSum implements AggregateFunction<Row, Comparable> {
     BigDecimal sum;
     final int inputRef;
+    final boolean distinct;
+    final Set<Object> distinctSet;
+
+    PlaintextSum(int inputRef, boolean distinct) {
+      this.sum = BigDecimal.valueOf(0);
+      this.inputRef = inputRef;
+      this.distinct = distinct;
+      if (distinct) {
+        this.distinctSet = new HashSet<>();
+      } else {
+        this.distinctSet = null;
+      }
+    }
 
     PlaintextSum(OneDBAggCall agg) {
-      this.sum = BigDecimal.valueOf(0);
-      this.inputRef = ((OneDBAggCall) agg).getInputRef().get(0);
+      this(agg.getInputRef().get(0), agg.isDistinct());
     }
 
     PlaintextSum(int inputRef) {
-      this.sum = BigDecimal.valueOf(0);
-      this.inputRef = inputRef;
+      this(inputRef, false);
     }
 
     @Override
     public void add(Row ele) {
-      sum = sum.add(number((Comparable) ele.getObject(inputRef)));
+      Object e = ele.getObject(inputRef);
+      if (distinct) {
+        if (distinctSet.contains(e)) {
+          return;
+        }
+        distinctSet.add(e);
+      }
+      sum = sum.add(number((Comparable) e));
     }
 
     @Override
@@ -94,23 +114,46 @@ public class PlaintextAggregateFunctions {
 
     @Override
     public AggregateFunction<Row, Comparable> patternCopy() {
-      return new PlaintextSum(inputRef);
+      return new PlaintextSum(inputRef, distinct);
     }
   }
 
   public static class PlaintextCount implements AggregateFunction<Row, Comparable> {
     long count;
+    final List<Integer> inputRefs;
+    final int inputSize;
+    final boolean distinct;
+    final Set<Object> distinctSet;
 
-    PlaintextCount() {
+    PlaintextCount(List<Integer> inputRefs, boolean distinct) {
       this.count = 0;
+      this.inputRefs = inputRefs;
+      this.inputSize = inputRefs.size();
+      this.distinct = distinct;
+      if (distinct) {
+        this.distinctSet = new HashSet<>();
+      } else {
+        this.distinctSet = null;
+      }
     }
 
     PlaintextCount(OneDBAggCall agg) {
-      this.count = 0;
+      this(agg.getInputRef(), agg.isDistinct());
     }
 
     @Override
     public void add(Row ele) {
+      if (distinct) {
+        RowBuilder builder = Row.newBuilder(inputSize);
+        for (int i = 0; i < inputSize; ++i) {
+          builder.set(i, ele.getObject(inputRefs.get(i)));
+        }
+        Row r = builder.build();
+        if (distinctSet.contains(r)) {
+          return;
+        }
+        distinctSet.add(r);
+      }
       count++;
     }
 
@@ -121,7 +164,7 @@ public class PlaintextAggregateFunctions {
 
     @Override
     public AggregateFunction<Row, Comparable> patternCopy() {
-      return new PlaintextCount();
+      return new PlaintextCount(inputRefs, distinct);
     }
   }
 
@@ -129,21 +172,34 @@ public class PlaintextAggregateFunctions {
     long count;
     BigDecimal sum;
     final int inputRef;
+    final boolean distinct;
+    final Set<Object> distinctSet;
 
-    PlaintextAverage(int inputRef) {
+    PlaintextAverage(int inputRef, boolean distinct) {
       this.count = 0;
       this.sum = BigDecimal.valueOf(0);
       this.inputRef = inputRef;
+      this.distinct = distinct;
+      if (distinct) {
+        this.distinctSet = new HashSet<>();
+      } else {
+        this.distinctSet = null;
+      }
     }
 
     PlaintextAverage(OneDBAggCall agg) {
-      this.count = 0;
-      this.sum = BigDecimal.valueOf(0);
-      this.inputRef = ((OneDBAggCall) agg).getInputRef().get(0);
+      this(agg.getInputRef().get(0), agg.isDistinct());
     }
 
     @Override
     public void add(Row ele) {
+      Object e = ele.getObject(inputRef);
+      if (distinct) {
+        if (distinctSet.contains(e)) {
+          return;
+        }
+        distinctSet.add(e);
+      }
       sum = sum.add(number((Comparable) ele.getObject(inputRef)));
       count++;
     }
@@ -158,7 +214,7 @@ public class PlaintextAggregateFunctions {
 
     @Override
     public AggregateFunction<Row, Comparable> patternCopy() {
-      return new PlaintextAverage(inputRef);
+      return new PlaintextAverage(inputRef, distinct);
     }
   }
 
