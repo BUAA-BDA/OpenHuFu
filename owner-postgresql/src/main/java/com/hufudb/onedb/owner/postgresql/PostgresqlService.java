@@ -17,7 +17,6 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -154,6 +153,7 @@ public class PostgresqlService extends OwnerService {
             builder.set(i, timeStamp);
             break;
           default:
+            builder.set(i, rs.getObject(i + 1));
             break;
         }
       }

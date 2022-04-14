@@ -1,10 +1,10 @@
 package com.hufudb.onedb.core.sql.expression;
 
-import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.TypeConverter;
 import com.hufudb.onedb.rpc.OneDBCommon.ExpressionProto;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,24 +15,30 @@ public class OneDBAggCall implements OneDBExpression {
   AggregateType aggType;
   List<Integer> in;
   FieldType outType;
+  boolean distinct;
 
-  OneDBAggCall(AggregateType aggType, List<Integer> args, FieldType type) {
+  OneDBAggCall(AggregateType aggType, List<Integer> args, FieldType type, boolean distinct) {
     this.aggType = aggType;
     this.in = args;
     this.outType = type;
+    this.distinct = distinct;
+  }
+
+  OneDBAggCall(AggregateType aggType, List<Integer> args, FieldType type) {
+    this(aggType, args, type, false);
   }
 
   public static List<OneDBExpression> fromAggregates(List<AggregateCall> calls) {
     return calls.stream().map(call -> {
       AggregateType aggType = AggregateType.of(call);
       FieldType outType = TypeConverter.convert2OneDBType(call.getType().getSqlTypeName());
-      return new OneDBAggCall(aggType, call.getArgList(), outType);
+      return new OneDBAggCall(aggType, new ArrayList<>(call.getArgList()), outType, call.isDistinct());
     }).collect(Collectors.toList());
   }
 
   public static List<OneDBExpression> fromGroups(List<Integer> groups, List<FieldType> outTypes) {
     return groups.stream()
-        .map(g -> new OneDBAggCall(AggregateType.GROUPKEY, ImmutableList.of(g), outTypes.get(g)))
+        .map(g -> new OneDBAggCall(AggregateType.GROUPKEY, Arrays.asList(g), outTypes.get(g)))
         .collect(Collectors.toList());
   }
 
@@ -43,16 +49,15 @@ public class OneDBAggCall implements OneDBExpression {
     List<Integer> inputs =
         proto.getInList().stream().map(in -> in.getRef()).collect(Collectors.toList());
     return new OneDBAggCall(AggregateType.of(proto.getFunc()), inputs,
-        FieldType.of(proto.getOutType()));
+        FieldType.of(proto.getOutType()), proto.getB());
   }
 
   @Override
   public ExpressionProto toProto() {
-    // todo: fix fromIndex type
     return ExpressionProto.newBuilder().setOpType(OneDBOpType.AGG_FUNC.ordinal())
         .setFunc(aggType.ordinal()).setOutType(outType.ordinal()).addAllIn(in.stream()
             .map(i -> OneDBReference.fromIndex(outType, i).toProto()).collect(Collectors.toList()))
-        .build();
+        .setB(distinct).build();
   }
 
   @Override
@@ -71,6 +76,10 @@ public class OneDBAggCall implements OneDBExpression {
 
   public List<Integer> getInputRef() {
     return in;
+  }
+
+  public boolean isDistinct() {
+    return distinct;
   }
 
   public static OneDBAggCall create(AggregateType type, List<Integer> in, FieldType out) {

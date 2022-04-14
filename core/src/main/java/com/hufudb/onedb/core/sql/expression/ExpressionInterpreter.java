@@ -33,22 +33,144 @@ public class ExpressionInterpreter {
   }
 
   static Comparable implementOperator(Row row, OneDBOperator op) {
-    List<Comparable> inputs =
-        op.getInputs().stream().map(exp -> implement(row, exp)).collect(Collectors.toList());
+    List<OneDBExpression> eles = op.getInputs();
     switch (op.getOpType()) {
-        // binary
+      // boolean
+      case AND:
+      case OR:
+      case NOT:
+        return calBoolean(row, op.getOpType(), eles);
+      // compare
       case GT:
-        return inputs.get(0).compareTo(inputs.get(1)) > 0;
       case GE:
-        return inputs.get(0).compareTo(inputs.get(1)) >= 0;
       case LT:
-        return inputs.get(0).compareTo(inputs.get(1)) < 0;
       case LE:
-        return inputs.get(0).compareTo(inputs.get(1)) <= 0;
       case EQ:
-        return inputs.get(0).compareTo(inputs.get(1)) == 0;
       case NE:
-        return inputs.get(0).compareTo(inputs.get(1)) != 0;
+        return compare(row, op.getOpType(), eles.get(0), eles.get(1));
+      // calculate
+      case PLUS:
+      case MINUS:
+      case TIMES:
+      case DIVIDE:
+      case MOD:
+      case PLUS_PRE:
+      case MINUS_PRE:
+        return calculate(row, op.getOpType(), eles);
+      // unary
+      case AS:
+        return implement(row, eles.get(0));
+      case IS_NULL:
+        return implement(row, eles.get(0)) == null;
+      case IS_NOT_NULL:
+        return implement(row, eles.get(0)) != null;
+      case CASE:
+        for (int i = 1; i < eles.size(); i += 2) {
+          if ((Boolean) implement(row, eles.get(i - 1))) {
+            return implement(row, eles.get(i));
+          }
+        }
+        return implement(row, eles.get(eles.size() - 1));
+      // todo: support scalar functions
+      default:
+        throw new UnsupportedOperationException("operator not support in intereperter");
+    }
+  }
+
+  private static BigDecimal number(Comparable comparable) {
+    return comparable instanceof BigDecimal ? (BigDecimal) comparable
+        : comparable instanceof BigInteger ? new BigDecimal((BigInteger) comparable)
+            : comparable instanceof Long || comparable instanceof Integer
+                || comparable instanceof Short ? new BigDecimal(((Number) comparable).longValue())
+                    : new BigDecimal(((Number) comparable).doubleValue());
+  }
+
+  public static Comparable compare(Row row, OneDBOpType compType, OneDBExpression leftExp,
+      OneDBExpression rightExp) {
+    Comparable left = implement(row, leftExp);
+    Comparable right = implement(row, rightExp);
+    if (left == null || right == null) {
+      return null;
+    }
+
+    if (left instanceof Number) {
+      left = number(left);
+    }
+    if (right instanceof Number) {
+      right = number(right);
+    }
+    // noinspection unchecked
+    final int c = left.compareTo(right);
+    switch (compType) {
+      case GT:
+        return c > 0;
+      case GE:
+        return c >= 0;
+      case LT:
+        return c < 0;
+      case LE:
+        return c <= 0;
+      case EQ:
+        return c == 0;
+      case NE:
+        return c != 0;
+      default:
+        throw new UnsupportedOperationException("not support compare type");
+    }
+  }
+
+  public static Comparable calBoolean(Row row, OneDBOpType opType, List<OneDBExpression> inputs) {
+    switch (opType) {
+      case AND: {
+        Comparable left = implement(row, inputs.get(0));
+        if (left == null) {
+          return null;
+        } else if (left.equals(false)) {
+          return false;
+        }
+        Comparable right = implement(row, inputs.get(1));
+        if (right == null) {
+          return null;
+        } else {
+          return right.equals(true);
+        }
+      }
+      case OR: {
+        Comparable left = implement(row, inputs.get(0));
+        if (left.equals(true)) {
+          return true;
+        }
+        Comparable right = implement(row, inputs.get(1));
+        if (right.equals(true)) {
+          return true;
+        } else if (left == null || right == null) {
+          return null;
+        } else {
+          return false;
+        }
+      }
+      case NOT: {
+        Comparable v = implement(row, inputs.get(0));
+        if (v == null) {
+          return v;
+        } else {
+          return !(Boolean) v;
+        }
+      }
+      default:
+        throw new UnsupportedOperationException("not support bool operator");
+    }
+  }
+
+  public static Comparable calculate(Row row, OneDBOpType opType, List<OneDBExpression> exps) {
+    List<Comparable> inputs =
+        exps.stream().map(e -> implement(row, e)).collect(Collectors.toList());
+    for (Comparable in : inputs) {
+      if (in == null) {
+        return null;
+      }
+    }
+    switch (opType) {
       case PLUS:
         return number(inputs.get(0)).add(number(inputs.get(1)));
       case MINUS:
@@ -56,41 +178,22 @@ public class ExpressionInterpreter {
       case TIMES:
         return number(inputs.get(0)).multiply(number(inputs.get(1)));
       case DIVIDE:
-        return number(inputs.get(0)).divide(number(inputs.get(1)), MathContext.DECIMAL64);
+        return number(inputs.get(0)).divide(number(number(inputs.get(1))), MathContext.DECIMAL64);
       case MOD:
         return number(inputs.get(0)).remainder(number(inputs.get(1)));
-      case AND:
-        return ((Boolean) inputs.get(0)) && ((Boolean) inputs.get(1));
-      case OR:
-        return ((Boolean) inputs.get(0)) || ((Boolean) inputs.get(1));
-        // unary
-      case AS:
-        return inputs.get(0);
       case PLUS_PRE:
         return number(inputs.get(0)).plus();
       case MINUS_PRE:
         return number(inputs.get(0)).negate();
-      case NOT:
-        return inputs.get(0);
-        // todo: support scalar functions
       default:
-        throw new UnsupportedOperationException("operator not support in intereperter");
+        throw new UnsupportedOperationException("not support op type");
     }
   }
 
-  private static BigDecimal number(Comparable comparable) {
-    return comparable instanceof BigDecimal
-        ? (BigDecimal) comparable
-        : comparable instanceof BigInteger
-            ? new BigDecimal((BigInteger) comparable)
-            : comparable instanceof Long
-                    || comparable instanceof Integer
-                    || comparable instanceof Short
-                ? new BigDecimal(((Number) comparable).longValue())
-                : new BigDecimal(((Number) comparable).doubleValue());
-  }
-
   public static Comparable cast(Comparable in, final FieldType type) {
+    if (in == null) {
+      return in;
+    }
     switch (type) {
       case STRING:
         return in;

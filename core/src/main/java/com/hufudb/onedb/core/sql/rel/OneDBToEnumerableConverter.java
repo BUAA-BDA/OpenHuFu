@@ -1,6 +1,8 @@
 package com.hufudb.onedb.core.sql.rel;
 
 import java.util.List;
+import com.hufudb.onedb.core.sql.context.OneDBQueryContextPool;
+import com.hufudb.onedb.core.sql.context.OneDBRootContext;
 import org.apache.calcite.adapter.enumerable.EnumerableRel;
 import org.apache.calcite.adapter.enumerable.EnumerableRelImplementor;
 import org.apache.calcite.adapter.enumerable.PhysType;
@@ -16,8 +18,11 @@ import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.convert.ConverterImpl;
 import org.apache.calcite.rel.metadata.RelMetadataQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OneDBToEnumerableConverter extends ConverterImpl implements EnumerableRel {
+  private static final Logger LOG = LoggerFactory.getLogger(OneDBToEnumerableConverter.class);
 
   public OneDBToEnumerableConverter(RelOptCluster cluster, RelTraitSet traits, RelNode input) {
     super(cluster, ConventionTraitDef.INSTANCE, traits, input);
@@ -37,29 +42,32 @@ public class OneDBToEnumerableConverter extends ConverterImpl implements Enumera
   public Result implement(EnumerableRelImplementor implementor, Prefer pref) {
     final OneDBRel.Implementor oImplementor = new OneDBRel.Implementor();
     try {
-      oImplementor.visitChild(getInput());
+      oImplementor.visitChild((OneDBRel) getInput());
     } catch (Exception e) {
       e.printStackTrace();
     }
     return implement(implementor, oImplementor, pref);
   }
 
-  public Result implement(
-      EnumerableRelImplementor implementor, OneDBRel.Implementor oImplementor, Prefer pref) {
+  public Result implement(EnumerableRelImplementor implementor, OneDBRel.Implementor oImplementor,
+      Prefer pref) {
     final BlockBuilder builder = new BlockBuilder();
     final PhysType physType =
         PhysTypeImpl.of(implementor.getTypeFactory(), getRowType(), pref.preferArray());
     // build and save context for the query
-    OneDBQueryContext context = oImplementor.buildContext();
-    OneDBQueryContext.saveContext(context);
+    OneDBRootContext root = oImplementor.getRootContext();
+    OneDBQueryContextPool.saveContext(root);
     // get OneDBSchema for query
     Expression schema = oImplementor.getSchemaExpression();
     // call the query method on onedbschema
-    Expression enumerable =
-        builder.append(
-            "enumerable",
-            Expressions.call(schema, "query", Expressions.constant(context.getContextId())));
+    Expression enumerable = builder.append("enumerable",
+        Expressions.call(schema, "query", Expressions.constant(root.getContextId())));
     builder.add(Expressions.return_(null, enumerable));
-    return implementor.result(physType, builder.toBlock());
+    try {
+      return implementor.result(physType, builder.toBlock());
+    } catch (Exception e) {
+      LOG.error("Fail to execute query: {}", e.getMessage());
+      throw e;
+    }
   }
 }

@@ -13,6 +13,8 @@
   <name>user-client</name>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
   </properties>
   <dependencies>
     <dependency>
@@ -23,7 +25,7 @@
     <dependency>
       <groupId>sqlline</groupId>
       <artifactId>sqlline</artifactId>
-      <version>1.9.0</version>
+      <version>1.12.0</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>

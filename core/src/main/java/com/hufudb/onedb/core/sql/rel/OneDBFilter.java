@@ -11,8 +11,8 @@ import org.apache.calcite.rel.metadata.RelMetadataQuery;
 import org.apache.calcite.rex.RexNode;
 
 public class OneDBFilter extends Filter implements OneDBRel {
-  public OneDBFilter(
-      RelOptCluster cluster, RelTraitSet traitSet, RelNode child, RexNode condition) {
+  public OneDBFilter(RelOptCluster cluster, RelTraitSet traitSet, RelNode child,
+      RexNode condition) {
     super(cluster, traitSet, child, condition);
   }
 
@@ -23,7 +23,7 @@ public class OneDBFilter extends Filter implements OneDBRel {
 
   @Override
   public void implement(Implementor implementor) {
-    implementor.visitChild(getInput());
+    implementor.visitChild((OneDBRel) getInput());
     implementor.addFilterExps(OneDBOperator.fromRexNode(condition, implementor.getCurrentOutput()));
   }
 

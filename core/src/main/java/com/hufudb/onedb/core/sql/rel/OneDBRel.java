@@ -2,19 +2,28 @@ package com.hufudb.onedb.core.sql.rel;
 
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.data.FieldType;
-import com.hufudb.onedb.core.data.Header;
+import com.hufudb.onedb.core.sql.context.OneDBLeafContext;
+import com.hufudb.onedb.core.sql.context.OneDBBinaryContext;
+import com.hufudb.onedb.core.sql.context.OneDBContext;
+import com.hufudb.onedb.core.sql.context.OneDBRootContext;
+import com.hufudb.onedb.core.sql.context.OneDBUnaryContext;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
-import com.hufudb.onedb.core.sql.expression.OneDBOpType;
+import com.hufudb.onedb.core.sql.expression.OneDBJoinType;
 import com.hufudb.onedb.core.sql.expression.OneDBOperator;
+import com.hufudb.onedb.core.sql.expression.OneDBReference;
+import com.hufudb.onedb.core.sql.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
-import com.hufudb.onedb.rpc.OneDBCommon.ExpressionProto;
-import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Stack;
 import org.apache.calcite.linq4j.tree.Expression;
 import org.apache.calcite.plan.Convention;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.core.JoinInfo;
+import org.apache.calcite.rel.core.JoinRelType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public interface OneDBRel extends RelNode {
   Convention CONVENTION = new Convention.Impl("OneDB", OneDBRel.class);
@@ -22,70 +31,69 @@ public interface OneDBRel extends RelNode {
   void implement(Implementor implementor);
 
   class Implementor {
+    static final Logger LOG = LoggerFactory.getLogger(Implementor.class);
+    
     OneDBSchema schema;
-    OneDBQueryContext context;
-    OneDBQueryProto.Builder rootContext;
-    OneDBQueryProto.Builder currentContext;
+    OneDBRootContext rootContext;
+    OneDBContext currentContext;
+    Stack<OneDBContext> stack;
 
     Implementor() {
-      rootContext = OneDBQueryProto.newBuilder();
+      rootContext = new OneDBRootContext();
       currentContext = rootContext;
-      context = new OneDBQueryContext();
-    }
-
-    public OneDBQueryContext buildContext() {
-      context = OneDBQueryContext.fromProto(rootContext);
-      return context;
+      stack = new Stack<>();
     }
 
     public Long getContextId() {
-      return context.getContextId();
+      return rootContext.getContextId();
     }
 
-    public OneDBQueryProto getQuery() {
-      return rootContext.build();
+    public OneDBRootContext getRootContext() {
+      return rootContext;
     }
 
     public Expression getSchemaExpression() {
       return schema.getExpression();
     }
 
-    public void visitChild(RelNode input) {
-      ((OneDBRel) input).implement(this);
+    public OneDBContext getCurrentContext() {
+      return currentContext;
     }
 
-    public void visitChild(RelNode left, RelNode right) {
-      OneDBQueryProto.Builder parentContext = currentContext;
-      OneDBQueryProto.Builder leftContext = OneDBQueryProto.newBuilder();
-      OneDBQueryProto.Builder rightContext = OneDBQueryProto.newBuilder();
-      currentContext = leftContext;
-      ((OneDBRel) left).implement(this);
-      parentContext.setLeft(leftContext);
-      currentContext = rightContext;
-      ((OneDBRel) right).implement(this);
-      parentContext.setRight(rightContext);
-      currentContext = parentContext;
-      ImmutableList.Builder<ExpressionProto> builder = ImmutableList.builder();
+    public void visitChild(OneDBRel input) {
+      input.implement(this);
+    }
+
+    public void stepUp() {
+      currentContext = currentContext.getParent();
+    }
+
+    public void createLeafContext() {
+      OneDBContext parent = currentContext;
+      currentContext = new OneDBLeafContext();
+      currentContext.setParent(parent);
+      parent.updateChild(currentContext, null);
+    }
+
+    public void createBinaryContext(OneDBContext left, OneDBContext right) {
+      OneDBContext parent = currentContext;
+      OneDBBinaryContext joinContext = new OneDBBinaryContext(parent, left, right);
+      left.setParent(joinContext);
+      right.setParent(joinContext);
+      // todo: tricy method, refactor this part
+      parent.updateChild(joinContext, right);
+      currentContext = joinContext;
+      List<OneDBExpression> exps = new ArrayList<>();
       int idx = 0;
-      for (ExpressionProto exp : currentContext.getLeft().getSelectExpList()) {
-        builder.add(
-            ExpressionProto.newBuilder()
-                .setOpType(OneDBOpType.REF.ordinal())
-                .setOutType(exp.getOutType())
-                .setRef(idx)
-                .build());
+      for (OneDBExpression exp: left.getOutExpressions()) {
+        exps.add(new OneDBReference(exp.getOutType(), idx));
         ++idx;
       }
-      for (ExpressionProto exp : currentContext.getRight().getSelectExpList()) {
-        builder.add(
-            ExpressionProto.newBuilder()
-                .setOpType(OneDBOpType.REF.ordinal())
-                .setOutType(exp.getOutType())
-                .setRef(idx)
-                .build());
+      for (OneDBExpression exp : right.getOutExpressions()) {
+        exps.add(new OneDBReference(exp.getOutType(), idx));
         ++idx;
       }
-      setSelectExpProtos(builder.build());
+      currentContext.setSelectExps(exps);
     }
 
     public void setSchema(OneDBSchema schema) {
@@ -98,35 +106,43 @@ public interface OneDBRel extends RelNode {
       currentContext.setTableName(tableName);
     }
 
-    // todo: pass proto
     public void setSelectExps(List<OneDBExpression> exps) {
-      currentContext.clearSelectExp();
-      currentContext.addAllSelectExp(
-          exps.stream().map(exp -> exp.toProto()).collect(Collectors.toList()));
+      currentContext.setSelectExps(exps);
     }
 
     public void setOrderExps(List<String> orderExps) {
-      currentContext.addAllOrder(orderExps);
-    }
-
-    void setSelectExpProtos(List<ExpressionProto> exps) {
-      currentContext.clearSelectExp();
-      currentContext.addAllSelectExp(exps);
+      currentContext.setOrders(orderExps);
     }
 
     public void addFilterExps(OneDBExpression exp) {
-      currentContext.addWhereExp(exp.toProto());
+      List<OneDBExpression> exps = currentContext.getWhereExps();
+      if (exps == null) {
+        List<OneDBExpression> filters = new ArrayList<>();
+        filters.add(exp);
+        currentContext.setWhereExps(filters);
+      } else {
+        exps.add(exp);
+      }
     }
 
     public void setAggExps(List<OneDBExpression> exps) {
-      currentContext.clearAggExp();
-      currentContext.addAllAggExp(
-          exps.stream().map(exp -> exp.toProto()).collect(Collectors.toList()));
+      List<OneDBExpression> currentAggs = currentContext.getAggExps();
+      if (currentAggs != null && !currentAggs.isEmpty()) {
+        OneDBUnaryContext unary = new OneDBUnaryContext();
+        unary.setChildren(ImmutableList.of(currentContext));
+        currentContext.getParent().updateChild(unary, currentContext);
+        currentContext.setParent(unary);
+        currentContext = unary;
+      }
+      currentContext.setAggExps(exps);
+    }
+
+    public List<OneDBExpression> getAggExps() {
+      return currentContext.getAggExps();
     }
 
     public void setGroupSet(List<Integer> groups) {
-      currentContext.clearGroup();
-      currentContext.addAllGroup(groups);
+      currentContext.setGroups(groups);
     }
 
     public void setOffset(int offset) {
@@ -137,35 +153,18 @@ public interface OneDBRel extends RelNode {
       currentContext.setFetch(fetch);
     }
 
-    public void setJoinCondition(JoinInfo joinInfo) {
-      if (!joinInfo.nonEquiConditions.isEmpty()) {
-        currentContext.clearJoinCond();
-        currentContext.addAllJoinCond(
-            OneDBOperator.fromRexNodes(joinInfo.nonEquiConditions, getCurrentOutput()).stream()
-                .map(exp -> exp.toProto())
-                .collect(Collectors.toList()));
-      }
-      currentContext.addAllLeftKey(joinInfo.leftKeys).addAllRightKey(joinInfo.rightKeys);
-    }
 
-    public boolean hasJoin() {
-      return currentContext.hasLeft() && currentContext.hasRight();
-    }
-
-    public boolean hasAgg() {
-      return currentContext.getAggExpCount() > 0;
-    }
-
-    public Header getHeader() {
-      return OneDBExpression.generateHeaderFromProto(currentContext.getSelectExpList());
+    public void setJoinInfo(JoinInfo joinInfo, JoinRelType joinRelType) {
+      List<OneDBExpression> condition = OneDBOperator.fromRexNodes(joinInfo.nonEquiConditions, currentContext.getOutExpressions());
+      currentContext.setJoinInfo(new OneDBJoinInfo(OneDBJoinType.of(joinRelType), joinInfo.leftKeys, joinInfo.rightKeys, condition));
     }
 
     public List<OneDBExpression> getCurrentOutput() {
-      return OneDBQueryContext.getOutputExpressions(currentContext.build());
+      return currentContext.getOutExpressions();
     }
 
     public List<FieldType> getOutputTypes() {
-      return OneDBQueryContext.getOutputTypes(currentContext.build());
+      return currentContext.getOutTypes();
     }
   }
 }

@@ -53,6 +53,10 @@ public interface OneDBExpression {
     return protos.stream().map(proto -> fromProto(proto)).collect(Collectors.toList());
   }
 
+  static List<ExpressionProto> toProto(List<OneDBExpression> exps) {
+    return exps.stream().map(exp -> exp.toProto()).collect(Collectors.toList());
+  }
+
   ExpressionProto toProto();
 
   FieldType getOutType();

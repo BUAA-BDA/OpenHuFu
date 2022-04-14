@@ -30,7 +30,6 @@ public class OneDBLimit extends SingleRel implements OneDBRel {
   @Override
   public @Nullable
   RelOptCost computeSelfCost(RelOptPlanner planner, RelMetadataQuery mq) {
-    // We do this so we get the limit for free
     return planner.getCostFactory().makeZeroCost();
   }
 
@@ -41,7 +40,7 @@ public class OneDBLimit extends SingleRel implements OneDBRel {
 
   @Override
   public void implement(Implementor implementor) {
-    implementor.visitChild(getInput());
+    implementor.visitChild((OneDBRel) getInput());
     if (offset != null) {
       implementor.setOffset(RexLiteral.intValue(offset));
     }
@@ -57,5 +56,4 @@ public class OneDBLimit extends SingleRel implements OneDBRel {
     pw.itemIf("fetch", fetch, fetch != null);
     return pw;
   }
-
 }

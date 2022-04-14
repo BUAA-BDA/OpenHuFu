@@ -1,7 +1,6 @@
 package com.hufudb.onedb.core.sql.rel;
 
 import com.google.common.collect.ImmutableList;
-import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.sql.expression.OneDBAggCall;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.expression.OneDBOperator;
@@ -29,14 +28,10 @@ public class OneDBCalc extends Calc implements OneDBRel {
   public static OneDBCalc create(final RelNode input, final RexProgram program) {
     final RelOptCluster cluster = input.getCluster();
     final RelMetadataQuery mq = cluster.getMetadataQuery();
-    final RelTraitSet traitSet =
-        cluster
-            .traitSet()
-            .replace(OneDBRel.CONVENTION)
-            .replaceIfs(
-                RelCollationTraitDef.INSTANCE, () -> RelMdCollation.calc(mq, input, program))
-            .replaceIf(
-                RelDistributionTraitDef.INSTANCE, () -> RelMdDistribution.calc(mq, input, program));
+    final RelTraitSet traitSet = cluster.traitSet().replace(OneDBRel.CONVENTION)
+        .replaceIfs(RelCollationTraitDef.INSTANCE, () -> RelMdCollation.calc(mq, input, program))
+        .replaceIf(RelDistributionTraitDef.INSTANCE,
+            () -> RelMdDistribution.calc(mq, input, program));
     return new OneDBCalc(cluster, traitSet, input, program);
   }
 
@@ -51,13 +46,15 @@ public class OneDBCalc extends Calc implements OneDBRel {
 
   @Override
   public void implement(Implementor implementor) {
-    implementor.visitChild(getInput());
-    Header header = implementor.getHeader();
+    implementor.visitChild((OneDBRel) getInput());
     RexProgram program = getProgram();
-    assert header.size() == program.getInputRowType().getFieldCount();
     List<OneDBExpression> calcs =
         OneDBOperator.fromRexNodes(program, implementor.getCurrentOutput());
-    implementor.setSelectExps(calcs);
+    if (implementor.getAggExps() != null && !implementor.getAggExps().isEmpty()) {
+      implementor.setAggExps(calcs);
+    } else {
+      implementor.setSelectExps(calcs);
+    }
   }
 
   @Override

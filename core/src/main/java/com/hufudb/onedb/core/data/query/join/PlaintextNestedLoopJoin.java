@@ -16,7 +16,7 @@ public class PlaintextNestedLoopJoin {
     List<Integer> rightKeys = joinInfo.getRightKeys();
     List<Row> leftData = left.getRows();
     List<Row> rigthData = right.getRows();
-    List<OneDBExpression> filters = OneDBExpression.fromProto(joinInfo.getConditions());
+    List<OneDBExpression> filters = joinInfo.getConditions();
     final boolean hasThetaJoin = filters.size() > 0;
     Header outputHeader = Header.joinHeader(left.getHeader(), right.getHeader());
     QueryableDataSet result = QueryableDataSet.fromHeader(outputHeader);

@@ -3,6 +3,8 @@ package com.hufudb.onedb.core.data;
 import com.google.gson.annotations.SerializedName;
 
 public enum FieldType {
+  @SerializedName("UNKOWN")
+  UNKOWN,
   @SerializedName("BOOLEAN")
   BOOLEAN,
   @SerializedName("BYTE")
