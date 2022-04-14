@@ -22,6 +22,11 @@ public enum OneDBOpType {
   NOT,
   PLUS_PRE,
   MINUS_PRE,
+  IS_NULL,
+  IS_NOT_NULL,
+  // for case
+  CASE,
+  // for functions
   SCALAR_FUNC,
   AGG_FUNC;
 

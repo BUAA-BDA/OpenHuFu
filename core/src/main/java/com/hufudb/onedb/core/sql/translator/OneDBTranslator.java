@@ -10,6 +10,7 @@ import com.hufudb.onedb.core.sql.expression.OneDBOperator;
 import com.hufudb.onedb.core.sql.expression.OneDBOperator.FuncType;
 import com.hufudb.onedb.core.sql.expression.OneDBReference;
 import com.hufudb.onedb.core.sql.expression.OneDBAggCall.AggregateType;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -70,7 +71,11 @@ public class OneDBTranslator {
       case NOT:
       case PLUS_PRE:
       case MINUS_PRE:
+      case IS_NULL:
+      case IS_NOT_NULL:
         return unary((OneDBOperator) exp);
+      case CASE:
+        return caseCall((OneDBOperator) exp);
       case SCALAR_FUNC:
         return scalarFunc((OneDBOperator) exp);
       default:
@@ -101,6 +106,8 @@ public class OneDBTranslator {
         return String.valueOf(literal.getValue());
       case DOUBLE:
         return String.valueOf(literal.getValue());
+      case STRING:
+        return String.format("'%s'", literal.getValue());
       default:
         throw new RuntimeException("can't translate literal " + literal);
     }
@@ -116,6 +123,10 @@ public class OneDBTranslator {
         return String.format("(+%s)", in);
       case MINUS_PRE:
         return String.format("(-%s)", in);
+      case IS_NULL:
+        return String.format("(%s IS NULL)", in);
+      case IS_NOT_NULL:
+        return String.format("(%s IS NOT NULL", in);
       case NOT:
         return String.format("(NOT %s)", in);
       default:
@@ -171,6 +182,17 @@ public class OneDBTranslator {
         throw new RuntimeException("can't translate binary " + exp);
     }
     return String.format("(%s %s %s)", left, op, right);
+  }
+
+  protected String caseCall(OneDBOperator exp) {
+    List<String> inputs =
+        exp.getInputs().stream().map(e -> translate(e)).collect(Collectors.toList());
+    List<String> caseList = new ArrayList<>();
+    for (int i = 1; i < inputs.size(); i += 2) {
+      caseList.add(String.format("WHEN %s THEN %s", inputs.get(i - 1), inputs.get(i)));
+    }
+    String elseCase = String.format("ELSE %s", inputs.get(inputs.size() - 1));
+    return String.format("CASE %s %s END", String.join(" ", caseList), elseCase);
   }
 
   protected String scalarFunc(OneDBOperator exp) {

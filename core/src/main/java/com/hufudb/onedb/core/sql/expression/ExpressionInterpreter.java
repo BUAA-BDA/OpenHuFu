@@ -6,7 +6,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
 import java.util.List;
-import java.util.stream.Collectors;
 
 // plaintext interpreter for onedb expression
 public class ExpressionInterpreter {
@@ -33,61 +32,68 @@ public class ExpressionInterpreter {
   }
 
   static Comparable implementOperator(Row row, OneDBOperator op) {
-    List<Comparable> inputs =
-        op.getInputs().stream().map(exp -> implement(row, exp)).collect(Collectors.toList());
+    List<OneDBExpression> eles = op.getInputs();
     switch (op.getOpType()) {
-        // binary
+      // binary
       case GT:
-        return inputs.get(0).compareTo(inputs.get(1)) > 0;
+        return implement(row, eles.get(0)).compareTo(implement(row, eles.get(1))) > 0;
       case GE:
-        return inputs.get(0).compareTo(inputs.get(1)) >= 0;
+        return implement(row, eles.get(0)).compareTo(implement(row, eles.get(1))) >= 0;
       case LT:
-        return inputs.get(0).compareTo(inputs.get(1)) < 0;
+        return implement(row, eles.get(0)).compareTo(implement(row, eles.get(1))) < 0;
       case LE:
-        return inputs.get(0).compareTo(inputs.get(1)) <= 0;
+        return implement(row, eles.get(0)).compareTo(implement(row, eles.get(1))) <= 0;
       case EQ:
-        return inputs.get(0).compareTo(inputs.get(1)) == 0;
+        return implement(row, eles.get(0)).compareTo(implement(row, eles.get(1))) == 0;
       case NE:
-        return inputs.get(0).compareTo(inputs.get(1)) != 0;
+        return implement(row, eles.get(0)).compareTo(implement(row, eles.get(1))) != 0;
       case PLUS:
-        return number(inputs.get(0)).add(number(inputs.get(1)));
+        return number(implement(row, eles.get(0))).add(number(implement(row, eles.get(1))));
       case MINUS:
-        return number(inputs.get(0)).subtract(number(inputs.get(1)));
+        return number(implement(row, eles.get(0))).subtract(number(implement(row, eles.get(1))));
       case TIMES:
-        return number(inputs.get(0)).multiply(number(inputs.get(1)));
+        return number(implement(row, eles.get(0))).multiply(number(implement(row, eles.get(1))));
       case DIVIDE:
-        return number(inputs.get(0)).divide(number(inputs.get(1)), MathContext.DECIMAL64);
+        return number(implement(row, eles.get(0)))
+            .divide(number(number(implement(row, eles.get(1)))), MathContext.DECIMAL64);
       case MOD:
-        return number(inputs.get(0)).remainder(number(inputs.get(1)));
+        return number(implement(row, eles.get(0))).remainder(number(implement(row, eles.get(1))));
       case AND:
-        return ((Boolean) inputs.get(0)) && ((Boolean) inputs.get(1));
+        return ((Boolean) implement(row, eles.get(0))) && ((Boolean) implement(row, eles.get(1)));
       case OR:
-        return ((Boolean) inputs.get(0)) || ((Boolean) inputs.get(1));
-        // unary
+        return ((Boolean) implement(row, eles.get(0))) || ((Boolean) implement(row, eles.get(1)));
+      // unary
       case AS:
-        return inputs.get(0);
+        return implement(row, eles.get(0));
       case PLUS_PRE:
-        return number(inputs.get(0)).plus();
+        return number(implement(row, eles.get(0))).plus();
       case MINUS_PRE:
-        return number(inputs.get(0)).negate();
+        return number(implement(row, eles.get(0))).negate();
+      case IS_NULL:
+        return implement(row, eles.get(0)) == null;
+      case IS_NOT_NULL:
+        return implement(row, eles.get(0)) != null;
       case NOT:
-        return inputs.get(0);
-        // todo: support scalar functions
+        return !(Boolean) implement(row, eles.get(0));
+      case CASE:
+        for (int i = 1; i < eles.size(); i += 2) {
+          if ((Boolean) implement(row, eles.get(i - 1))) {
+            return implement(row, eles.get(i));
+          }
+        }
+        return implement(row, eles.get(eles.size() - 1));
+      // todo: support scalar functions
       default:
         throw new UnsupportedOperationException("operator not support in intereperter");
     }
   }
 
   private static BigDecimal number(Comparable comparable) {
-    return comparable instanceof BigDecimal
-        ? (BigDecimal) comparable
-        : comparable instanceof BigInteger
-            ? new BigDecimal((BigInteger) comparable)
-            : comparable instanceof Long
-                    || comparable instanceof Integer
-                    || comparable instanceof Short
-                ? new BigDecimal(((Number) comparable).longValue())
-                : new BigDecimal(((Number) comparable).doubleValue());
+    return comparable instanceof BigDecimal ? (BigDecimal) comparable
+        : comparable instanceof BigInteger ? new BigDecimal((BigInteger) comparable)
+            : comparable instanceof Long || comparable instanceof Integer
+                || comparable instanceof Short ? new BigDecimal(((Number) comparable).longValue())
+                    : new BigDecimal(((Number) comparable).doubleValue());
   }
 
   public static Comparable cast(Comparable in, final FieldType type) {
