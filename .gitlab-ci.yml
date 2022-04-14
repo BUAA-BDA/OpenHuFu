@@ -1,0 +1,9 @@
+image: "maven:3.8-openjdk-11"
+
+stages:
+  - build
+
+build:
+  stage: build
+  script:
+    - sh package.sh
