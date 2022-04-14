@@ -27,6 +27,7 @@ public class BasicDataSet implements EnumerableDataSet {
   public static BasicDataSet fromProto(DataSetProto proto) {
     Header header = Header.fromProto(proto.getHeader());
     RowsProto rowsProto = proto.getRows();
+    // todo: optimize row serialization
     List<Row> rows =
         rowsProto.getRowList().stream()
             .map(bytes -> (Row) SerializationUtils.deserialize(bytes.toByteArray()))
