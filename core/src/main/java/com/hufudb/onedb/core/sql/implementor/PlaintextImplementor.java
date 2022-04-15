@@ -245,22 +245,35 @@ public class PlaintextImplementor implements OneDBImplementor {
       ++idx;
     }
     for (OneDBExpression exp : originAggs) {
-      OneDBExpression rewritedExp = rewriteAggregate(exp, localAggs, localGroups);
-      if (rewritedExp instanceof OneDBAggCall
-          && ((OneDBAggCall) rewritedExp).getAggType().equals(AggregateType.GROUPKEY)) {
+      OneDBExpression rewrittenExp = rewriteAggregate(exp, localAggs, localGroups);
+      if (rewrittenExp instanceof OneDBAggCall
+          && ((OneDBAggCall) rewrittenExp).getAggType().equals(AggregateType.GROUPKEY)) {
         globalGroups.add(globalAggs.size());
       }
-      globalAggs.add(rewritedExp);
+      globalAggs.add(rewrittenExp);
     }
     unary.setAggExps(globalAggs);
     unary.setGroups(globalGroups);
+    // delete sort and limit operations in leaf node and add them in unary node if exist
+    boolean hasLimit = leaf.getOffset() != 0 || leaf.getFetch() != 0;
+    boolean hasSort = leaf.getOrders() != null && !leaf.getOrders().isEmpty();
+    if (hasLimit) {
+      unary.setFetch(leaf.getFetch());
+      unary.setOffset(leaf.getOffset());
+      leaf.setOffset(0);
+      leaf.setFetch(0);
+    }
+    if (hasSort) {
+      unary.setOrders(leaf.getOrders());
+      leaf.setOrders(new ArrayList<>());
+    }
     originAggs.clear();
     originAggs.addAll(localAggs);
   }
 
   public OneDBUnaryContext rewriteLeaf(OneDBLeafContext leaf) {
     boolean hasAgg = leaf.hasAgg();
-    boolean hasLimit = leaf.getOffset() != 0 && leaf.getFetch() != 0;
+    boolean hasLimit = leaf.getOffset() != 0 || leaf.getFetch() != 0;
     boolean hasSort = leaf.getOrders() != null && !leaf.getOrders().isEmpty();
     if (!hasAgg && !hasLimit && !hasSort) {
       // return null if no aggergate, limit or sort
@@ -272,14 +285,14 @@ public class PlaintextImplementor implements OneDBImplementor {
     leaf.setParent(unary);
     if (hasAgg) {
       rewriteAggregations(unary, leaf);
-    }
-    if (hasLimit) {
-      unary.setFetch(leaf.getFetch());
-      unary.setOffset(leaf.getOffset());
-      leaf.setOffset(0);
-    }
-    if (hasSort) {
-      unary.setOrders(leaf.getOrders());
+    } else {
+      if (hasLimit) {
+        unary.setFetch(leaf.getFetch());
+        unary.setOffset(leaf.getOffset());
+      }
+      if (hasSort) {
+        unary.setOrders(leaf.getOrders());
+      }
     }
     return unary;
   }
