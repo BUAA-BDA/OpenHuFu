@@ -10,6 +10,7 @@ public class PostgresqlTypeConverter {
         return FieldType.FLOAT;
       case "float8":
       case "double precision":
+      case "numeric":
         return FieldType.DOUBLE;
       case "TINYINT":
         return FieldType.BYTE;

@@ -28,7 +28,9 @@ public enum FieldType {
   @SerializedName("POINT")
   POINT,
   @SerializedName("STRING")
-  STRING;
+  STRING,
+  @SerializedName("SARG")
+  SARG;
 
   public static FieldType of(int id) {
     return values()[id];

@@ -63,6 +63,8 @@ public class TypeConverter {
         return FieldType.TIMESTAMP;
       case GEOMETRY:
         return FieldType.POINT;
+      case SARG:
+        return FieldType.SARG;
       default:
         return FieldType.STRING;
     }

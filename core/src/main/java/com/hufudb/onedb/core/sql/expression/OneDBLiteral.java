@@ -1,9 +1,11 @@
 package com.hufudb.onedb.core.sql.expression;
 
 import com.hufudb.onedb.core.data.FieldType;
+import com.hufudb.onedb.core.data.SearchList;
 import com.hufudb.onedb.core.data.TypeConverter;
 import com.hufudb.onedb.rpc.OneDBCommon.ExpressionProto;
 import org.apache.calcite.rex.RexLiteral;
+import org.apache.calcite.sql.type.SqlTypeName;
 
 /*
  * leaf node of expression tree
@@ -20,6 +22,11 @@ public class OneDBLiteral implements OneDBExpression {
   public static OneDBExpression fromLiteral(RexLiteral literal) {
     FieldType type = TypeConverter.convert2OneDBType(literal.getTypeName());
     Object value = literal.getValue2();
+    if (type == FieldType.SARG) {
+      SearchList searchList = new SearchList(
+              TypeConverter.convert2OneDBType(literal.getType().getSqlTypeName()), value);
+      return new OneDBLiteral(type, searchList);
+    }
     return new OneDBLiteral(type, value);
   }
 
@@ -50,6 +57,9 @@ public class OneDBLiteral implements OneDBExpression {
       case STRING:
         value = proto.getStr();
         break;
+      case SARG:
+        value = SearchList.fromProto(proto);
+        break;
       default:
         throw new RuntimeException("can't translate " + proto);
     }
@@ -59,9 +69,9 @@ public class OneDBLiteral implements OneDBExpression {
   @Override
   public ExpressionProto toProto() {
     ExpressionProto.Builder builder =
-        ExpressionProto.newBuilder()
-            .setOpType(OneDBOpType.LITERAL.ordinal())
-            .setOutType(type.ordinal());
+            ExpressionProto.newBuilder()
+                    .setOpType(OneDBOpType.LITERAL.ordinal())
+                    .setOutType(type.ordinal());
     switch (type) {
       case BOOLEAN:
         return builder.setB((Boolean) value).build();
@@ -80,6 +90,8 @@ public class OneDBLiteral implements OneDBExpression {
         return builder.setF64(((Number) value).doubleValue()).build();
       case STRING:
         return builder.setStr((String) value).build();
+      case SARG:
+        return ((SearchList) value).toProto();
       default:
         throw new RuntimeException("can't translate " + type);
     }

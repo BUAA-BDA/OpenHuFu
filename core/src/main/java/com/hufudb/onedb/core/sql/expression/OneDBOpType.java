@@ -26,6 +26,7 @@ public enum OneDBOpType {
   IS_NOT_NULL,
   // for case
   CASE,
+  SEARCH,
   // for functions
   SCALAR_FUNC,
   AGG_FUNC;

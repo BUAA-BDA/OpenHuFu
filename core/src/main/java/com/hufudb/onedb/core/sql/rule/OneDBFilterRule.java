@@ -21,11 +21,7 @@ public class OneDBFilterRule extends RelRule<OneDBFilterRule.OneDBFilterRuleConf
 
   @Override
   public boolean matches(RelOptRuleCall call) {
-    LogicalFilter filter = call.rel(0);
-    RexNode condition = filter.getCondition();
-
-    List<RexNode> disjunctions = RelOptUtil.disjunctions(condition);
-    return disjunctions.size() == 1;
+    return true;
   }
 
   @Override
