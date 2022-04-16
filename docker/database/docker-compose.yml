@@ -12,7 +12,7 @@ services:
     volumes:
       - $PWD/config/db1.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
-      - owner_net_1
+      - owner_pg_1
 
   postgres2:
     image: postgres
@@ -25,7 +25,7 @@ services:
     volumes:
       - $PWD/config/db2.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
-      - owner_net_2
+      - owner_pg_2
 
   postgres3:
     image: postgres
@@ -38,12 +38,15 @@ services:
     volumes:
       - $PWD/config/db3.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
-      - owner_net_3
+      - owner_pg_3
 
 networks:
-  owner_net_1:
+  owner_pg_1:
     driver: bridge
-  owner_net_2:
+    name: owner_pg_1
+  owner_pg_2:
     driver: bridge
-  owner_net_3:
+    name: owner_pg_2
+  owner_pg_3:
     driver: bridge
+    name: owner_pg_3

@@ -4,15 +4,15 @@ services:
   owner1:
     image: maven:3.8-openjdk-11
     container_name: owner1
-    working_dir: /root/onedb
+    working_dir: /usr/src/mymvn
     restart: "no"
     command: nohup java -jar ./bin/onedb_postgresql_owner.jar -c ./config/server1.json > ./log/owner1.log &
     volumes:
-      - $PWD/../../release/bin:/root/onedb/bin
-      - $PWD/config:/root/onedb/config
-      - $PWD/log:/root/onedb/log
+      - $PWD/../../release/bin:/usr/src/mymvn/bin
+      - $PWD/config:/usr/src/mymvn/config
+      - $PWD/log:/usr/src/mymvn/log
     networks:
-      - database_owner_net_1
+      - owner_pg_1
       - public_net
     ports:
       - 12345:12345
@@ -20,15 +20,15 @@ services:
   owner2:
     image: maven:3.8-openjdk-11
     container_name: owner2
-    working_dir: /root/onedb
+    working_dir: /usr/src/mymvn
     restart: "no"
     command: nohup java -jar ./bin/onedb_postgresql_owner.jar -c ./config/server2.json > ./log/owner2.log &
     volumes:
-      - $PWD/../../release/bin:/root/onedb/bin
-      - $PWD/config:/root/onedb/config
-      - $PWD/log:/root/onedb/log
+      - $PWD/../../release/bin:/usr/src/mymvn/bin
+      - $PWD/config:/usr/src/mymvn/config
+      - $PWD/log:/usr/src/mymvn/log
     networks:
-      - database_owner_net_2
+      - owner_pg_2
       - public_net
     ports:
       - 12346:12345
@@ -36,25 +36,25 @@ services:
   owner3:
     image: maven:3.8-openjdk-11
     container_name: owner3
-    working_dir: /root/onedb
+    working_dir: /usr/src/mymvn
     restart: "no"
     command: nohup java -jar ./bin/onedb_postgresql_owner.jar -c ./config/server3.json > ./log/owner3.log &
     volumes:
-      - $PWD/../../release/bin:/root/onedb/bin
-      - $PWD/config:/root/onedb/config
-      - $PWD/log:/root/onedb/log
+      - $PWD/../../release/bin:/usr/src/mymvn/bin
+      - $PWD/config:/usr/src/mymvn/config
+      - $PWD/log:/usr/src/mymvn/log
     networks:
-      - database_owner_net_3
+      - owner_pg_3
       - public_net
     ports:
       - 12347:12345
 
 networks:
-  database_owner_net_1:
+  owner_pg_1:
     external: true
-  database_owner_net_2:
+  owner_pg_2:
     external: true
-  database_owner_net_3:
+  owner_pg_3:
     external: true
   public_net:
     driver: bridge
