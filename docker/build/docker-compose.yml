@@ -5,8 +5,8 @@ services:
     image: maven:3.8-openjdk-11
     container_name: builder
     restart: "no"
-    working_dir: /root/code
-    command: bash ./package.sh
+    working_dir: /usr/src/mymvn
+    command: bash package.sh
     volumes:
-      - ~/.m2:/root/.m2
-      - $PWD/../..:/root/code
+      - $HOME/.m2:/root/.m2
+      - $PWD/../..:/usr/src/mymvn
