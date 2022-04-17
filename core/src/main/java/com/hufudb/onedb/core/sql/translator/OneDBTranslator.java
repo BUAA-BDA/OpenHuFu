@@ -2,6 +2,7 @@ package com.hufudb.onedb.core.sql.translator;
 
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Header;
+import com.hufudb.onedb.core.data.SearchList;
 import com.hufudb.onedb.core.sql.expression.OneDBAggCall;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.expression.OneDBLiteral;
@@ -76,6 +77,8 @@ public class OneDBTranslator {
         return unary((OneDBOperator) exp);
       case CASE:
         return caseCall((OneDBOperator) exp);
+      case SEARCH:
+        return searchCall((OneDBOperator) exp);
       case SCALAR_FUNC:
         return scalarFunc((OneDBOperator) exp);
       default:
@@ -194,6 +197,18 @@ public class OneDBTranslator {
     String elseCase = String.format("ELSE %s", inputs.get(inputs.size() - 1));
     return String.format("CASE %s %s END", String.join(" ", caseList), elseCase);
   }
+
+  protected String searchCall(OneDBOperator exp) {
+    List<OneDBExpression> inputs = exp.getInputs();
+    assert inputs.size() == 2 && inputs.get(1).getOpType() == OneDBOpType.LITERAL;
+    String left = translate(inputs.get(0));
+    List<String> searchClause = ((SearchList) ((OneDBLiteral) inputs.get(1)).getValue()).toSqlString();
+    for (int i = 0; i < searchClause.size(); i++) {
+      searchClause.set(i, left + searchClause.get(i));
+    }
+    return String.join(" or ", searchClause);
+  }
+
 
   protected String scalarFunc(OneDBOperator exp) {
     FuncType func = exp.getFuncType();

@@ -14,10 +14,10 @@
 
   <modules>
     <module>core</module>
-    <module>user-client</module>
     <module>owner-core</module>
     <module>owner-postgresql</module>
     <module>owner-mysql</module>
+    <module>user-client</module>
   </modules>
 
   <properties>
@@ -35,7 +35,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.11</version>
+      <version>4.12</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

@@ -163,6 +163,8 @@ public class OneDBOperator implements OneDBExpression {
         // case
         case CASE:
           return caseCall((RexCall) node);
+        case SEARCH:
+          return searchCall((RexCall) node);
         // local_ref
         case LOCAL_REF:
           return localRef((RexLocalRef) node);
@@ -254,6 +256,7 @@ public class OneDBOperator implements OneDBExpression {
       switch (call.getKind()) {
         case AS:
           op = OneDBOpType.AS;
+          break;
         case NOT:
           op = OneDBOpType.NOT;
           break;
@@ -289,6 +292,13 @@ public class OneDBOperator implements OneDBExpression {
       return new OneDBOperator(op, type, eles, FuncType.NONE);
     }
 
+    OneDBExpression searchCall(RexCall call) {
+      OneDBOpType op = OneDBOpType.SEARCH;
+      List<OneDBExpression> eles =
+              call.operands.stream().map(c -> buildOp(c)).collect(Collectors.toList());
+      FieldType type = TypeConverter.convert2OneDBType(call.getType().getSqlTypeName());
+      return new OneDBOperator(op, type, eles, FuncType.NONE);
+    }
     /*
      * translate localref
      */
