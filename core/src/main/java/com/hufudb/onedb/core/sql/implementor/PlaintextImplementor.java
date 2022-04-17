@@ -137,13 +137,12 @@ public class PlaintextImplementor implements OneDBImplementor {
       OneDBAggCall globalAvgSum = OneDBAggCall.create(AggregateType.SUM,
           ImmutableList.of(localAvgSumRef), agg.getOutType());
       // add a sum layer above count
-      int localAvgCntRef = localAggs.size();
       OneDBAggCall localAvgCount = OneDBAggCall.create(AggregateType.COUNT,
-          ImmutableList.of(localAvgCntRef), agg.getOutType());
-      int localAvgCountRef = localAggs.size();
+      agg.getInputRef(), agg.getOutType());
+      int localAvgCntRef = localAggs.size();
       localAggs.add(localAvgCount);
       OneDBAggCall globalAvgCount = OneDBAggCall.create(AggregateType.SUM,
-          ImmutableList.of(localAvgCountRef), agg.getOutType());
+          ImmutableList.of(localAvgCntRef), agg.getOutType());
       return OneDBOperator.create(OneDBOpType.DIVIDE, agg.getOutType(),
           new ArrayList<>(Arrays.asList(globalAvgSum, globalAvgCount)), FuncType.NONE);
     } else {
@@ -233,13 +232,13 @@ public class PlaintextImplementor implements OneDBImplementor {
     List<OneDBExpression> originAggs = leaf.getAggExps();
     List<OneDBExpression> localAggs = new ArrayList<>();
     List<OneDBExpression> globalAggs = new ArrayList<>();
-    List<FieldType> columnTypes = leaf.getColumnTypes();
+    List<FieldType> selectTypes = leaf.getSelectTypes();
     List<Integer> globalGroups = new ArrayList<>();
     // add local groups into local aggs as group key function
     // todo: reduce duplicated group keys in local aggregation
     int idx = 0;
     for (int groupRef : localGroups) {
-      FieldType type = columnTypes.get(groupRef);
+      FieldType type = selectTypes.get(groupRef);
       localAggs.add(OneDBAggCall.create(AggregateType.GROUPKEY, ImmutableList.of(groupRef), type));
       globalGroups.add(idx);
       ++idx;

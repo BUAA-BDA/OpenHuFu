@@ -44,6 +44,7 @@ public abstract class OwnerServer {
   /** Stop serving requests and shutdown resources. */
   public void stop() throws InterruptedException {
     if (server != null) {
+      service.beforeStop();
       server.shutdown().awaitTermination(30, TimeUnit.SECONDS);
     }
   }
