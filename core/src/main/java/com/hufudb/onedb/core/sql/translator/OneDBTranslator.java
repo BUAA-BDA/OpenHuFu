@@ -209,6 +209,7 @@ public class OneDBTranslator {
     return String.join(" or ", searchClause);
   }
 
+
   protected String scalarFunc(OneDBOperator exp) {
     FuncType func = exp.getFuncType();
     List<String> inputs =
