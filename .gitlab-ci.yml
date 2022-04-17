@@ -1,9 +1,42 @@
-image: "maven:3.8-openjdk-11"
+image: "docker/compose:1.28.5"
+
+services:
+  - docker:dind
+
+before_script:
+  - docker info
+  - docker-compose --version
 
 stages:
   - build
+  - deploy
 
 build:
   stage: build
   script:
-    - sh package.sh
+    - cd docker/build
+    - docker-compose up
+
+deploy:
+  stage: deploy
+  before_script:
+    - cd docker/user
+    - docker-compose down
+    - cd ../owner
+    - docker-compose down
+    - cd ../database
+    - docker-compose down
+    - cd ../..
+
+  script:
+    - mkdir -p $PWD/release/bin
+    - cp $HOME/.m2/repository/com/hufudb/onedb/owner-postgresql/0.1-SNAPSHOT/owner-postgresql-0.1-SNAPSHOT-jar-with-dependencies.jar $PWD/release/bin/onedb_postgresql_owner.jar
+    - cd docker/database
+    - docker-compose down
+    - docker-compose up -d
+    - sleep 5
+    - cd ../owner
+    - docker-compose down
+    - docker-compose up -d
+    - cd ../user
+    - docker-compose up
