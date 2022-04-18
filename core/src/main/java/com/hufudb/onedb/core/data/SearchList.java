@@ -16,16 +16,15 @@ import java.util.List;
 public class SearchList {
 
   enum SearchType {
-    STRING,
-    INT,
-    DOUBLE
+    STRING, INT, DOUBLE
   }
 
   private List<Pair<Comparable, Comparable>> searchList;
   private SearchType searchType;
   private FieldType fieldType;
 
-  public SearchList(FieldType type, SearchType searchType, List<Pair<Comparable, Comparable>> searchList) {
+  public SearchList(FieldType type, SearchType searchType,
+      List<Pair<Comparable, Comparable>> searchList) {
     this.fieldType = type;
     this.searchType = searchType;
     this.searchList = searchList;
@@ -48,7 +47,8 @@ public class SearchList {
         searchType = SearchType.STRING;
         break;
       default:
-        throw new RuntimeException("not support type including bool, time, date and point in search operation");
+        throw new RuntimeException(
+            "not support type including bool, time, date and point in search operation");
     }
     searchList = new ArrayList<>();
     ImmutableRangeSet rangeSet = (ImmutableRangeSet) ((Sarg) value).rangeSet;
@@ -57,24 +57,22 @@ public class SearchList {
       switch (searchType) {
         case INT:
           searchList.add(new Pair<>(((BigDecimal) p.lowerEndpoint()).longValue(),
-                  ((BigDecimal) p.upperEndpoint()).longValue()));
+              ((BigDecimal) p.upperEndpoint()).longValue()));
           break;
         case DOUBLE:
           searchList.add(new Pair<>(((BigDecimal) p.lowerEndpoint()).doubleValue(),
-                  ((BigDecimal) p.upperEndpoint()).doubleValue()));
+              ((BigDecimal) p.upperEndpoint()).doubleValue()));
           break;
         case STRING:
           searchList.add((new Pair<>(((NlsString) p.lowerEndpoint()).getValue(),
-                  ((NlsString) p.upperEndpoint()).getValue())));
+              ((NlsString) p.upperEndpoint()).getValue())));
       }
     }
   }
 
   public ExpressionProto toProto() {
-    ExpressionProto.Builder builder =
-            ExpressionProto.newBuilder()
-                    .setOpType(OneDBOpType.LITERAL.ordinal())
-                    .setOutType(FieldType.SARG.ordinal());
+    ExpressionProto.Builder builder = ExpressionProto.newBuilder()
+        .setOpType(OneDBOpType.LITERAL.ordinal()).setOutType(FieldType.SARG.ordinal());
     for (Pair<Comparable, Comparable> p : searchList) {
       ExpressionProto.Builder lowerBuilder = ExpressionProto.newBuilder();
       ExpressionProto.Builder upperBuilder = ExpressionProto.newBuilder();
@@ -125,7 +123,8 @@ public class SearchList {
         searchType = SearchType.STRING;
         break;
       default:
-        throw new RuntimeException("not support type including bool, time, date and point in search operation");
+        throw new RuntimeException(
+            "not support type including bool, time, date and point in search operation");
     }
     List<Pair<Comparable, Comparable>> searchList = new ArrayList<>();
     for (int i = 0; i < protoList.size(); i += 2) {
@@ -150,7 +149,8 @@ public class SearchList {
       if (p.left.compareTo(p.right) == 0) {
         inClause.add(object2String(p.left));
       } else {
-        betweenAndClause.add(String.format(" between %s and %s ", object2String(p.left), object2String(p.right)));
+        betweenAndClause.add(
+            String.format(" between %s and %s ", object2String(p.left), object2String(p.right)));
       }
     }
     String inClauseJoin = String.join(", ", inClause);

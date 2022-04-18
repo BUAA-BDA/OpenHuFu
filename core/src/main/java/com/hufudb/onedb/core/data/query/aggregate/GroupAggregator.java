@@ -27,7 +27,8 @@ public class GroupAggregator implements Aggregator {
     this.iterator = null;
   }
 
-  public GroupAggregator(List<Integer> groups, List<AggregateFunction<Row, Comparable>> aggFunc, List<FieldType> aggOutputTypes) {
+  public GroupAggregator(List<Integer> groups, List<AggregateFunction<Row, Comparable>> aggFunc,
+      List<FieldType> aggOutputTypes) {
     this.groups = groups;
     this.types = aggOutputTypes;
     this.baseAggregator = new SingleAggregator(aggFunc, aggOutputTypes);

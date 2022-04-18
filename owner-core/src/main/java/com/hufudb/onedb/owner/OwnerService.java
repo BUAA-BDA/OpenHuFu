@@ -239,8 +239,7 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
   }
 
   // template function for SQL database, rewrite this for database without sql
-  protected void oneDBQueryInternal(OneDBQueryProto query, DataSet dataSet)
-  throws SQLException {
+  protected void oneDBQueryInternal(OneDBQueryProto query, DataSet dataSet) throws SQLException {
     String sql = generateSQL(query);
     if (sql.isEmpty()) {
       return;
@@ -252,14 +251,12 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
     String originTableName = getOriginTableName(query.getTableName());
     Header tableHeader = getPublishedTableHeader(query.getTableName());
     LOG.info("{}: {}", originTableName, tableHeader);
-    final List<String> filters =
-        OneDBTranslator.tranlateExps(
-            tableHeader, OneDBExpression.fromProto(query.getWhereExpList()));
-    final List<String> selects =
-        OneDBTranslator.tranlateExps(
-            tableHeader, OneDBExpression.fromProto(query.getSelectExpList()));
-    final List<String> groups = query.getGroupList().stream()
-        .map(ref -> selects.get(ref)).collect(Collectors.toList());
+    final List<String> filters = OneDBTranslator.tranlateExps(tableHeader,
+        OneDBExpression.fromProto(query.getWhereExpList()));
+    final List<String> selects = OneDBTranslator.tranlateExps(tableHeader,
+        OneDBExpression.fromProto(query.getSelectExpList()));
+    final List<String> groups =
+        query.getGroupList().stream().map(ref -> selects.get(ref)).collect(Collectors.toList());
     // order by
     List<String> order = query.getOrderList();
     StringBuilder orderClause = new StringBuilder();
@@ -275,7 +272,8 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
     StringBuilder sql = new StringBuilder();
     // select from clause
     if (query.getAggExpCount() > 0) {
-      final List<String> aggs = OneDBTranslator.translateAgg(selects, OneDBExpression.fromProto(query.getAggExpList()));
+      final List<String> aggs =
+          OneDBTranslator.translateAgg(selects, OneDBExpression.fromProto(query.getAggExpList()));
       sql.append(String.format("SELECT %s from %s", String.join(",", aggs), originTableName));
     } else {
       sql.append(String.format("SELECT %s from %s", String.join(",", selects), originTableName));
