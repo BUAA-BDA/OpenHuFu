@@ -31,6 +31,7 @@ deploy:
   script:
     - mkdir -p $PWD/release/bin
     - cp $HOME/.m2/repository/com/hufudb/onedb/owner-postgresql/0.1-SNAPSHOT/owner-postgresql-0.1-SNAPSHOT-jar-with-dependencies.jar $PWD/release/bin/onedb_postgresql_owner.jar
+    - cp $HOME/.m2/repository/com/hufudb/onedb/user-client/0.1-SNAPSHOT/user-client-0.1-SNAPSHOT-jar-with-dependencies.jar $PWD/release/bin/onedb_user_client.jar
     - cd docker/database
     - docker-compose down
     - docker-compose up -d
