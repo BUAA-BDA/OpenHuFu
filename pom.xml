@@ -13,6 +13,7 @@
   <packaging>pom</packaging>
 
   <modules>
+    <module>rpc</module>
     <module>core</module>
     <module>owner-core</module>
     <module>owner-postgresql</module>

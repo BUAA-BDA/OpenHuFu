@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option java_package = "com.hufudb.onedb.rpc.proto";
+option java_outer_classname = "NettyRpcProtobuf";
+
+message DataPacketProto {
+  HeaderProto headerProto = 1;
+  PayloadProto payloadProto = 2;
+}
+
+message HeaderProto {
+  int64 taskId = 1;
+  int32 ptoId = 2;
+  int32 stepId = 3;
+  int64 extraInfo = 4;
+  int32 senderId = 5;
+  int32 receiverId = 6;
+}
+
+message PayloadProto {
+  repeated bytes payloadBytes = 1;
+}
