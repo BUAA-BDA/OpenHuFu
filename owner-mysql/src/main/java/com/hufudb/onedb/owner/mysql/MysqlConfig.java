@@ -6,6 +6,7 @@ import java.util.List;
 public class MysqlConfig {
   public int port;
   public String hostname;
+  public String credspath;
   public String url;
   public String catalog;
   public String user;

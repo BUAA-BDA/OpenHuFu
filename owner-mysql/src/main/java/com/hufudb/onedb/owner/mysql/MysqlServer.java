@@ -2,7 +2,6 @@ package com.hufudb.onedb.owner.mysql;
 
 import com.google.gson.Gson;
 import com.hufudb.onedb.owner.OwnerServer;
-import io.grpc.ServerBuilder;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
@@ -17,11 +16,11 @@ import org.apache.commons.cli.ParseException;
 public class MysqlServer extends OwnerServer {
 
   public MysqlServer(MysqlConfig config) throws IOException {
-    super(ServerBuilder.forPort(config.port), config.port, new MysqlService(config));
+    super(config.port, new MysqlService(config), null);
   }
 
   public MysqlServer(int port, MysqlService service) throws IOException {
-    super(ServerBuilder.forPort(port), port, service);
+    super(port, service, null);
   }
 
   public static void main(String[] args) {
