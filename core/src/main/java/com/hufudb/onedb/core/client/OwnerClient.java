@@ -34,15 +34,18 @@ public class OwnerClient {
   public OwnerClient(String host, int port) {
     this(ManagedChannelBuilder.forAddress(host, port));
     this.endpoint = String.format("%s:%d", host, port);
+    LOG.info("Connect to {}", endpoint);
   }
 
   public OwnerClient(String endpoint) {
     this(ManagedChannelBuilder.forTarget(endpoint));
     this.endpoint = endpoint;
+    LOG.info("Connect to {}", endpoint);
   }
 
   public OwnerClient(String endpoint, ChannelCredentials creds) {
     this(Grpc.newChannelBuilder(endpoint, creds));
+    this.endpoint = endpoint;
     LOG.info("Connect to {} with TLS", endpoint);
   }
 
