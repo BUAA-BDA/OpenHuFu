@@ -36,8 +36,8 @@ deploy:
     - docker-compose up -d
     - sleep 5
     - cd ../owner
-    - cp -r ../../cert/ci cert
+    - cp -r ../cert/ci cert
     - docker-compose up -d
     - cd ../user
-    - cp -r ../../cert/ci cert
+    - cp -r ../cert/ci cert
     - docker-compose up
