@@ -9,7 +9,6 @@ import com.hufudb.onedb.core.sql.schema.OneDBSchema;
 import com.hufudb.onedb.core.table.OneDBTableInfo;
 import com.hufudb.onedb.core.table.TableMeta;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.calcite.adapter.java.AbstractQueryableTable;
@@ -63,7 +62,8 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
     for (TableMeta.LocalTableMeta fedMeta : tableMeta.localTables) {
       OwnerClient client = schema.getDBClient(fedMeta.endpoint);
       if (client == null) {
-        client = schema.addOwner(fedMeta.endpoint);
+        LOG.error("No connection to owner {}", fedMeta.endpoint);
+        continue;
       }
       Header header = client.getTableHeader(fedMeta.localName);
       LOG.info(
@@ -102,10 +102,10 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
 
   public static Table create(
       OneDBSchema schema, String tableName, Map operand, RelProtoDataType protoRowType) {
-    List<LinkedHashMap<String, Object>> feds =
-        (List<LinkedHashMap<String, Object>>) operand.get("feds");
+    List<Map<String, Object>> feds =
+        (List<Map<String, Object>>) operand.get("feds");
     OneDBTable table = null;
-    for (LinkedHashMap<String, Object> fed : feds) {
+    for (Map<String, Object> fed : feds) {
       String endpoint = fed.get("endpoint").toString();
       String localName = fed.get("name").toString();
       OwnerClient client = schema.getDBClient(endpoint);

@@ -98,7 +98,7 @@ public class OneDB {
   }
 
   public boolean addOwner(String endpoint) {
-    return schema.addOwner(endpoint) != null;
+    return schema.addOwner(endpoint, null) != null;
   }
 
   public void removeOwner(String endpoint) {

@@ -35,7 +35,7 @@ public class EndpointWatcher extends ZkWatcher {
 
   private void addEndpoint(List<String> endpoints) {
     for (String endpoint : endpoints) {
-      schema.addOwner(endpoint);
+      schema.addOwner(endpoint, null);
     }
   }
 

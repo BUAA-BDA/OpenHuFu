@@ -5,9 +5,12 @@ import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.sql.enumerator.OneDBEnumerator;
 import com.hufudb.onedb.core.sql.rel.OneDBTable;
+import com.hufudb.onedb.core.sql.schema.OneDBSchemaFactory.OwnerMeta;
 import com.hufudb.onedb.core.table.OneDBTableInfo;
 import com.hufudb.onedb.core.zk.OneDBZkClient;
 import com.hufudb.onedb.core.zk.ZkConfig;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +26,8 @@ import org.apache.calcite.schema.Table;
 import org.apache.calcite.schema.impl.AbstractSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import io.grpc.ChannelCredentials;
+import io.grpc.TlsChannelCredentials;
 
 public class OneDBSchema extends AbstractSchema {
   private static final Logger LOG = LoggerFactory.getLogger(OneDBSchema.class);
@@ -39,13 +44,13 @@ public class OneDBSchema extends AbstractSchema {
     this.zkClient = new OneDBZkClient(zkConfig, this);
   }
 
-  public OneDBSchema(List<String> endpoints, List<Map<String, Object>> tables, SchemaPlus schema) {
+  public OneDBSchema(List<OwnerMeta> owners, List<Map<String, Object>> tables, SchemaPlus schema) {
     this.parentSchema = schema;
     this.tableMap = new HashMap<>();
     this.client = new OneDBClient(this);
     this.zkClient = null;
-    for (String endpoint : endpoints) {
-      addOwner(endpoint);
+    for (OwnerMeta owner : owners) {
+      addOwner(owner.getEndpoint(), owner.getTrustCertPath());
     }
   }
 
@@ -69,8 +74,18 @@ public class OneDBSchema extends AbstractSchema {
     return infos;
   }
 
-  public OwnerClient addOwner(String endpoint) {
-    return client.addOwner(endpoint);
+  public OwnerClient addOwner(String endpoint, String trustCertPath) {
+    try {
+      ChannelCredentials cred = null;
+      if (trustCertPath != null) {
+        File trustCertFile = new File(trustCertPath);
+        cred = TlsChannelCredentials.newBuilder().trustManager(trustCertFile).build();
+      }
+      return client.addOwner(endpoint, cred);
+    } catch (IOException e) {
+      LOG.error("Fail to create channel credentials: {}", e.getMessage());
+      return null;
+    }
   }
 
   public boolean hasOwner(String endpoint) {

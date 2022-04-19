@@ -16,6 +16,7 @@ import org.apache.calcite.schema.Table;
 import org.apache.calcite.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import io.grpc.ChannelCredentials;
 
 /*
  * client for all DB
@@ -39,20 +40,24 @@ public class OneDBClient {
     return tableMap;
   }
 
-  public OwnerClient addOwner(String endpoint) {
+  public OwnerClient addOwner(String endpoint, ChannelCredentials cred) {
     if (hasOwner(endpoint)) {
-      LOG.info("owner at {} already exists", endpoint);
+      LOG.info("Owner at {} already exists", endpoint);
       return getOwnerClient(endpoint);
     }
     OwnerClient client = null;
     try {
-      client = new OwnerClient(endpoint);
+      if (cred != null) {
+        client = new OwnerClient(endpoint, cred);
+      } else {
+        client = new OwnerClient(endpoint);
+      }
       if (client != null) {
         ownerMap.put(endpoint, client);
       }
-      LOG.info("add DB {}", endpoint);
+      LOG.info("Add owner {}", endpoint);
     } catch (Exception e) {
-      LOG.warn("fail to add owner {}", endpoint);
+      LOG.warn("Fail to add owner {}: {}", endpoint, e.getMessage());
     }
     return client;
   }

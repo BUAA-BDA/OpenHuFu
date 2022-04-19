@@ -1,6 +1,8 @@
 {
   "port": 12345,
   "hostname": "localhost",
+  "privatekeypath": "./cert/owner2.key",
+  "certchainpath": "./cert/owner2.pem",
   "url": "jdbc:postgresql://postgres2:5432/postgres",
   "catalog": "postgres",
   "user": "postgres",
