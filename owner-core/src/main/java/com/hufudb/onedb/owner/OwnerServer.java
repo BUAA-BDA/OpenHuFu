@@ -4,6 +4,8 @@ import io.grpc.Grpc;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerCredentials;
+import io.grpc.TlsServerCredentials;
+import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
@@ -26,6 +28,17 @@ public abstract class OwnerServer {
     } else {
       this.server = Grpc.newServerBuilderForPort(port, creds).addService(service).build();
       this.creds = creds;
+    }
+  }
+
+  public static ServerCredentials generateCerd(String certChainPath, String privateKeyPath) {
+    try {
+      File certChainFile = new File(certChainPath);
+      File privateKeyFile = new File(privateKeyPath);
+      return TlsServerCredentials.create(certChainFile, privateKeyFile);
+    } catch (Exception e) {
+      LOG.error("Fail to read certChainFile or privateKeyFile: {}", e.getMessage());
+      return null;
     }
   }
 

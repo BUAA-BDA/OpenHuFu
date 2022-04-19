@@ -10,6 +10,7 @@ services:
     volumes:
       - $PWD/../../release/bin:/usr/src/mymvn/bin
       - $PWD/config:/usr/src/mymvn/config
+      - $PWD/cert:/usr/src/mymvn/cert
       - $PWD/log:/usr/src/mymvn/log
     networks:
       - owner_pg_1
@@ -26,6 +27,7 @@ services:
     volumes:
       - $PWD/../../release/bin:/usr/src/mymvn/bin
       - $PWD/config:/usr/src/mymvn/config
+      - $PWD/cert:/usr/src/mymvn/cert
       - $PWD/log:/usr/src/mymvn/log
     networks:
       - owner_pg_2
@@ -42,6 +44,7 @@ services:
     volumes:
       - $PWD/../../release/bin:/usr/src/mymvn/bin
       - $PWD/config:/usr/src/mymvn/config
+      - $PWD/cert:/usr/src/mymvn/cert
       - $PWD/log:/usr/src/mymvn/log
     networks:
       - owner_pg_3

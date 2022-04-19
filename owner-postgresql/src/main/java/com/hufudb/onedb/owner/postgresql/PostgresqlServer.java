@@ -12,15 +12,16 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import io.grpc.ServerCredentials;
 
 public class PostgresqlServer extends OwnerServer {
 
-  public PostgresqlServer(PostgresqlConfig config) throws IOException {
-    super(config.port, new PostgresqlService(config), null);
+  public PostgresqlServer(PostgresqlConfig config, ServerCredentials certs) throws IOException {
+    super(config.port, new PostgresqlService(config), certs);
   }
 
-  public PostgresqlServer(int port, PostgresqlService service) throws IOException {
-    super(port, service, null);
+  public PostgresqlServer(int port, PostgresqlService service, ServerCredentials certs) throws IOException {
+    super(port, service, certs);
   }
 
   public static void main(String[] args) {
@@ -35,7 +36,8 @@ public class PostgresqlServer extends OwnerServer {
       cmd = parser.parse(options, args);
       Reader reader = Files.newBufferedReader(Paths.get(cmd.getOptionValue("config")));
       PostgresqlConfig pConfig = gson.fromJson(reader, PostgresqlConfig.class);
-      PostgresqlServer server = new PostgresqlServer(pConfig);
+      ServerCredentials creds = OwnerServer.generateCerd(pConfig.certchainpath, pConfig.privatekeypath);
+      PostgresqlServer server = new PostgresqlServer(pConfig, creds);
       server.start();
       server.blockUntilShutdown();
     } catch (ParseException | IOException | InterruptedException e) {
