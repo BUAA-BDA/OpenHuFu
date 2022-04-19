@@ -26,6 +26,8 @@ deploy:
     - docker-compose down
     - cd ../database
     - docker-compose down
+    - cd ../utils
+    - bash ./license_generator_ci.sh
     - cd ../..
 
   script:

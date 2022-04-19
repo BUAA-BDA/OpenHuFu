@@ -13,3 +13,5 @@ generate "owner1"
 generate "owner2"
 generate "owner3"
 cp -r cert ../owner
+mkdir -p ../user/cert
+cp -r cert/ca.pem ../user/cert
