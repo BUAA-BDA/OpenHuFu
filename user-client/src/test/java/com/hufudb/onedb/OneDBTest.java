@@ -6,6 +6,7 @@ import com.hufudb.onedb.core.table.TableMeta;
 import junit.framework.TestCase;
 import org.junit.Test;
 
+import java.net.URL;
 import java.sql.ResultSet;
 import java.util.Arrays;
 import java.util.List;
@@ -19,8 +20,13 @@ public class OneDBTest extends TestCase {
   public void setUp() throws Exception {
     super.setUp();
     oneDB = new OneDB();
+    ClassLoader classLoader = OneDBTest.class.getClassLoader();
+    URL resource = classLoader.getResource("ci/ca.pem");
     List<String> endpoints = ImmutableList.of("localhost:12345", "localhost:12346", "localhost:12347");
-    endpoints.forEach(oneDB::addOwner);
+    endpoints.forEach(e -> {
+      assert resource != null;
+      oneDB.addOwner(e, resource.getPath());
+    });
     oneDB.createOneDBTable(new TableMeta("region",
             Stream.of(endpoints.get(0)).map(e -> new TableMeta.LocalTableMeta(e, "region"))
                     .collect(Collectors.toList())));

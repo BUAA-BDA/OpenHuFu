@@ -9,12 +9,19 @@ before_script:
 
 stages:
   - build
+  - test
   - deploy
 
 build:
   stage: build
   script:
     - cd docker/build
+    - docker-compose up
+
+test:
+  stage: test
+  script:
+    - cd docker/test
     - docker-compose up
 
 deploy:

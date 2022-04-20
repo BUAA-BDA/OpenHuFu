@@ -101,6 +101,10 @@ public class OneDB {
     return schema.addOwner(endpoint, null) != null;
   }
 
+  public boolean addOwner(String endpoint, String certPath) {
+    return schema.addOwner(endpoint, certPath) != null;
+  }
+
   public void removeOwner(String endpoint) {
     schema.removeOnwer(endpoint);
   }
