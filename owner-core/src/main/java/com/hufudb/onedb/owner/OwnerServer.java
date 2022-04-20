@@ -1,7 +1,11 @@
 package com.hufudb.onedb.owner;
 
+import io.grpc.Grpc;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import io.grpc.ServerCredentials;
+import io.grpc.TlsServerCredentials;
+import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
@@ -12,12 +16,30 @@ public abstract class OwnerServer {
   protected final int port;
   protected final Server server;
   protected final OwnerService service;
+  protected final ServerCredentials creds;
 
-  public OwnerServer(ServerBuilder<?> serverBuilder, int port, OwnerService service)
+  public OwnerServer(int port, OwnerService service, ServerCredentials creds)
       throws IOException {
     this.port = port;
     this.service = service;
-    this.server = serverBuilder.addService(service).build();
+    if (creds == null) {
+      this.server = ServerBuilder.forPort(port).addService(service).build();
+      this.creds = null;
+    } else {
+      this.server = Grpc.newServerBuilderForPort(port, creds).addService(service).build();
+      this.creds = creds;
+    }
+  }
+
+  public static ServerCredentials generateCerd(String certChainPath, String privateKeyPath) {
+    try {
+      File certChainFile = new File(certChainPath);
+      File privateKeyFile = new File(privateKeyPath);
+      return TlsServerCredentials.create(certChainFile, privateKeyFile);
+    } catch (Exception e) {
+      LOG.error("Fail to read certChainFile or privateKeyFile: {}", e.getMessage());
+      return null;
+    }
   }
 
   public void start() throws IOException {

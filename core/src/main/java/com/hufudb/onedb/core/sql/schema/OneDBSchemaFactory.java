@@ -19,13 +19,21 @@ public class OneDBSchemaFactory implements SchemaFactory {
 
   @Override
   public Schema create(SchemaPlus parentSchema, String name, Map<String, Object> operand) {
-    List<String> endpoints = new ArrayList<>();
-    List<Map<String, Object>> tables = new ArrayList<>();
+    List<OwnerMeta> owners = new ArrayList<>();
+    List<Map<String, Object>> tableObjs = new ArrayList<>();
     if (operand.containsKey("endpoints")) {
-      endpoints.addAll((List) operand.get("endpoints"));
+      for (Object endpoint : (List<Object>) operand.get("endpoints")) {
+        owners.add(new OwnerMeta((String) endpoint, null));
+      }
+    } else if (operand.containsKey("owners")) {
+      for (Map<String, Object> owner : (List<Map<String, Object>>) operand.get("owners")) {
+        String endpoint = (String) owner.get("endpoint");
+        String trustCertPath = (String) owner.get("trustcertpath");
+        owners.add(new OwnerMeta(endpoint, trustCertPath));
+      }
     }
     if (operand.containsKey("tables")) {
-      tables.addAll((List) operand.get("tables"));
+      tableObjs.addAll((List) operand.get("tables"));
     }
     ZkConfig zkConfig = new ZkConfig();
     zkConfig.servers = (String) operand.get("zookeeper");
@@ -35,14 +43,30 @@ public class OneDBSchemaFactory implements SchemaFactory {
     zkConfig.passwd = (String) operand.get("passwd");
     if (zkConfig.valid()) {
       LOG.info("Use Zk");
-      return new OneDBSchema(tables, parentSchema, zkConfig);
+      return new OneDBSchema(tableObjs, parentSchema, zkConfig);
     } else {
       LOG.info("Use model");
-      return new OneDBSchema(endpoints, tables, parentSchema);
+      return new OneDBSchema(owners, tableObjs, parentSchema);
     }
   }
 
-  public OneDBSchema create(SchemaPlus parentSchema, List<String> endpoints) {
-    return new OneDBSchema(endpoints, ImmutableList.of(), parentSchema);
+  static class OwnerMeta {
+    String endpoint;
+    String trustCertPath;
+
+    OwnerMeta() {}
+
+    OwnerMeta(String endpoint, String trustCertPath) {
+      this.endpoint = endpoint;
+      this.trustCertPath = trustCertPath;
+    }
+
+    public String getEndpoint() {
+      return endpoint;
+    }
+
+    public String getTrustCertPath() {
+      return trustCertPath;
+    }
   }
 }

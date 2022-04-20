@@ -11,6 +11,8 @@ import com.hufudb.onedb.rpc.OneDBService.GeneralRequest;
 import com.hufudb.onedb.rpc.OneDBService.GeneralResponse;
 import com.hufudb.onedb.rpc.ServiceGrpc;
 import io.grpc.Channel;
+import io.grpc.ChannelCredentials;
+import io.grpc.Grpc;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 import java.util.ArrayList;
@@ -30,19 +32,21 @@ public class OwnerClient {
   private String endpoint;
 
   public OwnerClient(String host, int port) {
-    this(
-        ManagedChannelBuilder.forAddress(host, port)
-            .usePlaintext()
-            .maxInboundMessageSize(1024 * 1024 * 80));
+    this(ManagedChannelBuilder.forAddress(host, port));
     this.endpoint = String.format("%s:%d", host, port);
+    LOG.info("Connect to {}", endpoint);
   }
 
   public OwnerClient(String endpoint) {
-    this(
-        ManagedChannelBuilder.forTarget(endpoint)
-            .usePlaintext()
-            .maxInboundMessageSize(1024 * 1024 * 80));
+    this(ManagedChannelBuilder.forTarget(endpoint));
     this.endpoint = endpoint;
+    LOG.info("Connect to {}", endpoint);
+  }
+
+  public OwnerClient(String endpoint, ChannelCredentials creds) {
+    this(Grpc.newChannelBuilder(endpoint, creds));
+    this.endpoint = endpoint;
+    LOG.info("Connect to {} with TLS", endpoint);
   }
 
   public OwnerClient(ManagedChannelBuilder<?> channelBuilder) {
