@@ -43,7 +43,7 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
   protected final String endpoint;
   private final Map<String, TableInfo> localTableInfoMap; // localName -> localTableInfo
   private final ReadWriteLock localLock;
-  private final Map<String, PublishedTableInfo> publishedTableInfoMap; // publishedTableName ->
+  private final Map<String, PublishedTableInfo> publishedTableInfoMap; // publishedTableName
                                                                        // publishedTableInfo
   private final ReadWriteLock publishedLock;
   // private final ExecutorService executorService;
