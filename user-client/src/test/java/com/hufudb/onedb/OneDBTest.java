@@ -3,7 +3,7 @@ package com.hufudb.onedb;
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.table.TableMeta;
-import junit.framework.TestCase;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.net.URL;
@@ -14,12 +14,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class OneDBTest extends TestCase {
+public class OneDBTest {
 
   static OneDB oneDB;
 
-  public void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void setUp() {
     oneDB = new OneDB();
     ClassLoader classLoader = OneDBTest.class.getClassLoader();
     URL resource = classLoader.getResource("ci_crt/ca.pem");
