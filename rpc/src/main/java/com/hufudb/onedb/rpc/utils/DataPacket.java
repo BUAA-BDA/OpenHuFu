@@ -30,6 +30,15 @@ public final class DataPacket {
     return payload;
   }
 
+  public int getHeaderByteLength() {
+    return 32;
+  }
+
+  public int getPayloadByteLength() {
+    return payload.stream().map(p -> p.length).reduce(0,
+        (totalLength, length) -> totalLength + length);
+  }
+
   public DataPacketProto toProto() {
     return DataPacketProto.newBuilder().setHeaderProto(header.toProto())
         .setPayloadProto(PayloadProto.newBuilder()
