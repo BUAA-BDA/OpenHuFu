@@ -6,7 +6,7 @@ services:
     container_name: unit_test
     restart: "no"
     working_dir: /usr/src/mymvn
-    command: mvn clean && mvn test
+    command: mvn clean test
     volumes:
       - $HOME/.m2:/root/.m2
       - $PWD/../..:/usr/src/mymvn
