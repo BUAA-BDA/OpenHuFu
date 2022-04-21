@@ -10,7 +10,6 @@ before_script:
 stages:
   - build
   - test
-  - deploy
 
 build:
   stage: build
@@ -19,26 +18,6 @@ build:
     - docker-compose up
 
 test:
-  stage: test
-  before_script:
-    - cd docker/owner
-    - docker-compose down
-    - cd ../database
-    - docker-compose down
-    - cd ../..
-  script:
-    - mkdir -p $PWD/release/bin
-    - cp $HOME/.m2/repository/com/hufudb/onedb/owner-postgresql/0.1-SNAPSHOT/owner-postgresql-0.1-SNAPSHOT-jar-with-dependencies.jar $PWD/release/bin/onedb_postgresql_owner.jar
-    - cd docker/database
-    - docker-compose up -d
-    - sleep 5
-    - cd ../owner
-    - cp -r ../cert/ci cert
-    - docker-compose up -d
-    - cd ../test
-    - docker-compose up
-
-deploy:
   stage: deploy
   before_script:
     - cd docker/user
@@ -59,6 +38,5 @@ deploy:
     - cd ../owner
     - cp -r ../cert/ci cert
     - docker-compose up -d
-    - cd ../user
-    - cp -r ../cert/ci cert
+    - cd ../test
     - docker-compose up
