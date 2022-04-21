@@ -21,7 +21,7 @@ build:
 test:
   stage: test
   before_script:
-    - cd ../owner
+    - cd docker/owner
     - docker-compose down
     - cd ../database
     - docker-compose down
