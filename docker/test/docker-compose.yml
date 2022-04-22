@@ -11,7 +11,7 @@ services:
       - $HOME/.m2:/root/.m2
       - $PWD/../..:/usr/src/mymvn
     networks:
-      - owner_public_net
+      - public_net
 
 networks:
   public_net:
