@@ -18,6 +18,8 @@ build:
   stage: build
   script:
     - cd docker/build
+    - pwd
+    - ls ../.. -la
     - docker-compose up
 
 test:
