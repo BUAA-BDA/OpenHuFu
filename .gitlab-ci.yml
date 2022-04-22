@@ -20,7 +20,7 @@ build:
     - cp -r ./* ${MOUNT_POINT}
     - ls ${MOUNT_POINT}
     - cd docker/build
-    - docker-compose -f docker-compose-ci.yml up
+    - docker run -v $MOUNT_POINT:/usr/src/build $HOME/.m2:/root/.m2 -w /usr/src/build --rm bash package.sh
 
 test:
   stage: test
