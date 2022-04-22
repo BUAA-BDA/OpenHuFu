@@ -14,5 +14,5 @@ services:
       - owner_public_net
 
 networks:
-  owner_public_net:
+  public_net:
     external: true
