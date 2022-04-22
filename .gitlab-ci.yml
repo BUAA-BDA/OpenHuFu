@@ -39,3 +39,9 @@ test:
     - docker-compose up -d
     - cd ../test
     - docker-compose up
+  after_script:
+    - docker-compose down
+    - cd ../owner
+    - docker-compose down
+    - cd ../database
+    - docker-compose down
