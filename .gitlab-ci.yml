@@ -23,7 +23,7 @@ build:
     - mkdir -p ${MOUNT_POINT}
     - cp -r ./* ${MOUNT_POINT}
     - ls ${MOUNT_POINT}
-    - docker-compose -f docker-compose-ci.yml up
+    - docker-compose -f docker/build/docker-compose-ci.yml up
 
 test:
   stage: test
