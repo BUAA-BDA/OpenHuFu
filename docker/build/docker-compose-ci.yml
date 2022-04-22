@@ -9,4 +9,4 @@ services:
     command: ls -lah
     volumes:
       - $HOME/.m2:/root/.m2
-      - ${SHARED_PATH}:/usr/src/build
+      - ${SHARED_PATH}/..:/usr/src/build
