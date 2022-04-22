@@ -13,6 +13,42 @@
       "publishedName": "student1",
       "publishedFields": [],
       "originColumns": []
+    },
+    {
+      "originName": "partsupp",
+      "publishedName": "partsupp",
+      "publishedFields": [],
+      "originColumns": []
+    },
+    {
+      "originName": "customer",
+      "publishedName": "customer",
+      "publishedFields": [],
+      "originColumns": []
+    },
+    {
+      "originName": "lineitem",
+      "publishedName": "lineitem",
+      "publishedFields": [],
+      "originColumns": []
+    },
+    {
+      "originName": "orders",
+      "publishedName": "orders",
+      "publishedFields": [],
+      "originColumns": []
+    },
+    {
+      "originName": "part",
+      "publishedName": "part",
+      "publishedFields": [],
+      "originColumns": []
+    },
+    {
+      "originName": "supplier",
+      "publishedName": "supplier",
+      "publishedFields": [],
+      "originColumns": []
     }
   ]
 }

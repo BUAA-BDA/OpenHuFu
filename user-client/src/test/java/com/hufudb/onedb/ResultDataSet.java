@@ -23,8 +23,16 @@ public class ResultDataSet {
 
   private int compare(Row row1, Row row2) {
     int compareResult = 0;
+    assert row1.size() == row2.size();
     for (int i = 0; i < row1.size(); i++) {
       compareResult = ((Comparable) row1.getObject(i)).compareTo((Comparable) row2.getObject(i));
+      if ((row1.getObject(i) instanceof Float) || (row1.getObject(i) instanceof Double)) {
+        double x = (Double) row1.getObject(i);
+        double y = (Double) row2.getObject(i);
+        if (Math.abs(x - y) < 1e-5) {
+          compareResult = 0;
+        }
+      }
       if (compareResult != 0) {
         return compareResult;
       }
