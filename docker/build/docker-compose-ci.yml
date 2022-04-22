@@ -9,4 +9,4 @@ services:
     command: bash package.sh
     volumes:
       - $HOME/.m2:/root/.m2
-      - ${SHARED_PATH}:/usr/src/build
+      - ${MOUNT_POINT}:/usr/src/build
