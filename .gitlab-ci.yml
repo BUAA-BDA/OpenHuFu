@@ -3,9 +3,6 @@ image: "docker/compose:1.28.5"
 services:
   - docker:dind
 
-variables:
-  SHARED_PATH: /root/$CI_PROJECT_PATH
-
 before_script:
   - docker info
   - docker-compose --version
@@ -17,7 +14,7 @@ stages:
 build:
   stage: build
   script:
-    - 'export SHARED_PATH="$(dirname ${CI_PROJECT_DIR})/shared"'
+    - 'export SHARED_PATH="$(dirname ${CI_PROJECT_DIR})"'
     - echo ${SHARED_PATH}
     - mkdir -p ${SHARED_PATH}
     - cp -r ./* ${SHARED_PATH}
