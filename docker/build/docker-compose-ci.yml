@@ -9,4 +9,4 @@ services:
     command: ls -la
     volumes:
       - $HOME/.m2:/root/.m2
-      - /builds/pxc/onedb:/usr/src/build
+      - ..:/usr/src/build

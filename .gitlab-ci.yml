@@ -18,12 +18,8 @@ stages:
 build:
   stage: build
   script:
-    - 'export MOUNT_POINT="/builds/$CI_PROJECT_PATH"'
-    - echo ${MOUNT_POINT}
-    - ls ${MOUNT_POINT}
-    - docker-compose -f docker/build/docker-compose-ci.yml up
-
-test:
+    - cd docker/build
+    - docker-compose up
   stage: test
   before_script:
     - cd docker/user
