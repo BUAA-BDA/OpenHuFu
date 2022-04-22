@@ -3,6 +3,11 @@ image: "docker/compose:1.28.5"
 services:
   - docker:dind
 
+variables:
+  DOCKER_HOST: tcp://docker:2375/
+  DOCKER_DRIVER: overlay2
+  MOUNT_POINT: /builds/$CI_PROJECT_PATH/mnt
+
 before_script:
   - docker info
   - docker-compose --version
@@ -20,7 +25,7 @@ build:
     - cp -r ./* ${MOUNT_POINT}
     - ls ${MOUNT_POINT}
     - cd docker/build
-    - docker run -v $MOUNT_POINT:/usr/src/build $HOME/.m2:/root/.m2 -w /usr/src/build --rm bash package.sh
+    - docker-compose up
 
 test:
   stage: test
