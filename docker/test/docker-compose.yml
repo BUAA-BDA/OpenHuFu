@@ -3,10 +3,10 @@ version: '3.3'
 services:
   builder:
     image: maven:3.8-openjdk-11
-    container_name: onedb_test
+    container_name: onedbtest
     restart: "no"
     working_dir: /usr/src/mymvn
-    command: mvn clean test
+    command: mvn clean test -X
     volumes:
       - $HOME/.m2:/root/.m2
       - $PWD/../..:/usr/src/mymvn
