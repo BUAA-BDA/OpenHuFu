@@ -40,6 +40,7 @@ test:
     - cd ../test
     - docker-compose up
   after_script:
+    - cd docker/test
     - docker-compose down
     - cd ../owner
     - docker-compose down
