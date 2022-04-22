@@ -42,6 +42,7 @@
   </dependencies>
 
   <build>
+    <testSourceDirectory>${project.basedir}/src/test/java</testSourceDirectory>
     <extensions>
       <extension>
         <groupId>kr.motd.maven</groupId>
