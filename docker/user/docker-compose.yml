@@ -13,8 +13,8 @@ services:
       - $PWD/log:/root/onedb/log
       - $PWD/cert:/root/onedb/cert
     networks:
-      - owner_public_net
+      - public_net
 
 networks:
-  owner_public_net:
+  public_net:
     external: true

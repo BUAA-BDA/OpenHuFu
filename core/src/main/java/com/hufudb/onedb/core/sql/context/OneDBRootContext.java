@@ -57,7 +57,6 @@ public class OneDBRootContext extends OneDBBaseContext {
 
   @Override
   public void updateChild(OneDBContext newChild, OneDBContext oldChild) {
-    assert oldChild == child;
     child = newChild;
   }
 };

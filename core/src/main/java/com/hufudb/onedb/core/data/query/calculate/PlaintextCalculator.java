@@ -22,7 +22,7 @@ public class PlaintextCalculator {
       builder.set(
           i,
           ExpressionInterpreter.cast(
-              ExpressionInterpreter.implement(row, calcs.get(i)), types.get(i)));
+              ExpressionInterpreter.implement(row, calcs.get(i)), calcs.get(i).getOutType()));
     }
     return builder.build();
   }
