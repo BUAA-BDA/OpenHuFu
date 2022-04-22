@@ -6,7 +6,13 @@ services:
     container_name: onedbtest
     restart: "no"
     working_dir: /usr/src/mymvn
-    command: mvn clean test -X
+    command: mvn clean test
     volumes:
       - $HOME/.m2:/root/.m2
       - $PWD/../..:/usr/src/mymvn
+    networks:
+      - owner_public_net
+
+networks:
+  owner_public_net:
+    external: true
