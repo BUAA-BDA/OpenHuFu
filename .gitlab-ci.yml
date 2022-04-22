@@ -5,7 +5,7 @@ services:
 
 variables:
   DOCKER_DRIVER: overlay2
-  MOUNT_POINT: /builds/$CI_PROJECT_PATH/mnt
+  MOUNT_POINT: /builds/$CI_PROJECT_PATH
 
 before_script:
   - docker info
@@ -18,10 +18,8 @@ stages:
 build:
   stage: build
   script:
-    - 'export MOUNT_POINT="/builds/$CI_PROJECT_PATH/mnt"'
+    - 'export MOUNT_POINT="/builds/$CI_PROJECT_PATH"'
     - echo ${MOUNT_POINT}
-    - mkdir -p ${MOUNT_POINT}
-    - cp -r ./* ${MOUNT_POINT}
     - ls ${MOUNT_POINT}
     - docker-compose -f docker/build/docker-compose-ci.yml up
 

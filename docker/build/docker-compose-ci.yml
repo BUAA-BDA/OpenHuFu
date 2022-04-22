@@ -6,7 +6,7 @@ services:
     container_name: builder
     restart: "no"
     working_dir: /usr/src/build
-    command: ls -la && ls .. -la
+    command: ls -la
     volumes:
       - $HOME/.m2:/root/.m2
       - /builds/pxc/onedb:/usr/src/build
