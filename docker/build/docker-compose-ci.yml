@@ -5,8 +5,8 @@ services:
     image: maven:3.8-openjdk-11
     container_name: builder
     restart: "no"
-    working_dir: ${MOUNT_POINT}
-    command: bash package.sh
+    working_dir: /usr/src/build
+    command: ls -la && ls .. -la
     volumes:
       - $HOME/.m2:/root/.m2
       - ${MOUNT_POINT}:/usr/src/build
