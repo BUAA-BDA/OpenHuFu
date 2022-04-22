@@ -20,6 +20,8 @@ build:
   script:
     - cd docker/build
     - docker-compose up
+
+test:
   stage: test
   before_script:
     - cd docker/user
