@@ -9,7 +9,12 @@ variables:
 before_script:
   - docker info
   - docker-compose --version
-
+script:
+  - 'export SHARED_PATH="$(dirname ${CI_PROJECT_DIR})/shared"'
+  - mkdir -p ${SHARED_PATH}
+  - cp -r ./* ${SHARED_PATH}
+  - ls ${SHARED_PATH}
+  
 stages:
   - build
   - test
@@ -18,9 +23,7 @@ build:
   stage: build
   script:
     - cd docker/build
-    - pwd
-    - ls ../.. -la
-    - docker-compose up
+    - docker-compose -f docker-compose-ci.yml up
 
 test:
   stage: test
