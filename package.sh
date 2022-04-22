@@ -1,5 +1,5 @@
 mvn clean
-mvn install -T 0.5C
+mvn install -T 0.5C -Dmaven.test.skip=false
 mkdir -p ./release/bin
 cp user-client/target/*-with-dependencies.jar ./release/bin/onedb_user_client.jar
 cp owner-postgresql/target/*-with-dependencies.jar ./release/bin/onedb_postgresql_owner.jar
