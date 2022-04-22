@@ -6,7 +6,7 @@ services:
     container_name: builder
     restart: "no"
     working_dir: /usr/src/build
-    command: ls onedb -la
+    command: bash package.sh
     volumes:
       - $HOME/.m2:/root/.m2
-      - ${SHARED_PATH}/..:/usr/src/build
+      - ${SHARED_PATH}:/usr/src/build
