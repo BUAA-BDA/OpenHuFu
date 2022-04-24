@@ -1,14 +1,18 @@
 package com.hufudb.onedb.mpc;
 
-import com.hufudb.onedb.rpc.RpcManager;
+import com.hufudb.onedb.rpc.Rpc;
 import com.hufudb.onedb.rpc.utils.DataPacket;
-
+import com.hufudb.onedb.rpc.utils.DataPacketHeader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 public abstract class ProtocolExecutor {
-  final RpcManager manager;
-  final ProtocolType type;
+  protected static final Logger LOG = LoggerFactory.getLogger(ProtocolExecutor.class);
 
-  protected ProtocolExecutor(RpcManager manager, ProtocolType type) {
-    this.manager = manager;
+  final protected Rpc rpc;
+  final protected ProtocolType type;
+
+  protected ProtocolExecutor(Rpc rpc, ProtocolType type) {
+    this.rpc = rpc;
     this.type = type;
   }
 
@@ -16,5 +20,6 @@ public abstract class ProtocolExecutor {
     return type;
   }
 
-  public abstract void execute(DataPacket packet);
+  public abstract DataPacketHeader run(DataPacket initPacket);
+
 }

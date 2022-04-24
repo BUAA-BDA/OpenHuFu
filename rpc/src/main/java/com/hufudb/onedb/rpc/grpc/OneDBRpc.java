@@ -1,59 +1,75 @@
 package com.hufudb.onedb.rpc.grpc;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableMap;
 import com.hufudb.onedb.rpc.Party;
 import com.hufudb.onedb.rpc.Rpc;
 import com.hufudb.onedb.rpc.grpc.pipe.PipeClient;
+import com.hufudb.onedb.rpc.grpc.pipe.PipeService;
 import com.hufudb.onedb.rpc.grpc.queue.ConcurrentBuffer;
 import com.hufudb.onedb.rpc.utils.DataPacket;
 import com.hufudb.onedb.rpc.utils.DataPacketHeader;
+import io.grpc.BindableService;
 import io.grpc.Channel;
 
 public class OneDBRpc implements Rpc {
-
-  final Party target;
+  final Party own;
   final Set<Party> parties;
   final Map<Integer, Party> participantMap;
-  final ConcurrentBuffer receiveBuffer;
-  final PipeClient client;
+  final Map<Integer, PipeClient> clientMap;
+  final Map<Integer, ConcurrentBuffer> bufferMap;
+  final PipeService service;
   long payloadByteLength;
   long dataPacketNum;
 
-  public OneDBRpc(Party target, Set<Party> parties, ConcurrentBuffer receiveBuffer) {
-    this.target = target;
+  public OneDBRpc(Party own, Set<Party> parties) {
+    this.own = own;
     this.parties = parties;
-    ImmutableMap.Builder<Integer, Party> builder = ImmutableMap.builder();
+    this.participantMap = new HashMap<>();
+    this.clientMap = new HashMap<>();
+    this.bufferMap = new HashMap<>();
     for (Party p : parties) {
-      builder.put(p.getPartyId(), p);
+      this.participantMap.put(p.getPartyId(), p);
+      if (!p.equals(own)) {
+        this.clientMap.put(p.getPartyId(), new PipeClient(own.getPartyName()));
+        this.bufferMap.put(p.getPartyId(), new ConcurrentBuffer());
+      }
     }
-    this.participantMap = builder.build();
-    this.receiveBuffer = receiveBuffer;
-    this.client = new PipeClient(target.getPartyName());
+    this.service = new PipeService(bufferMap);
     this.payloadByteLength = 0;
     this.dataPacketNum = 0;
   }
 
   @VisibleForTesting
-  public OneDBRpc(Party target, Set<Party> parties, ConcurrentBuffer receiveBuffer, Channel channel) {
-    this.target = target;
-    this.parties = parties;
-    ImmutableMap.Builder<Integer, Party> builder = ImmutableMap.builder();
-    for (Party p : parties) {
-      builder.put(p.getPartyId(), p);
+  public OneDBRpc(Party own, List<Party> parties, List<Channel> channels) {
+    assert parties.size() == channels.size();
+    this.own = own;
+    this.parties = new HashSet<>();
+    this.participantMap = new HashMap<>();
+    this.clientMap = new HashMap<>();
+    this.bufferMap = new HashMap<>();
+    for (int i = 0; i < parties.size(); ++i) {
+      Party p = parties.get(i);
+      Channel ch = channels.get(i);
+      this.parties.add(p);
+      this.participantMap.put(p.getPartyId(), p);
+      if (!p.equals(own)) {
+        this.clientMap.put(p.getPartyId(), new PipeClient(ch));
+        this.bufferMap.put(p.getPartyId(), new ConcurrentBuffer());
+      }
     }
-    this.participantMap = builder.build();
-    this.receiveBuffer = receiveBuffer;
-    this.client = new PipeClient(channel);
+    this.service = new PipeService(bufferMap);
     this.payloadByteLength = 0;
     this.dataPacketNum = 0;
   }
 
   @Override
   public Party ownParty() {
-    return target;
+    return own;
   }
 
   @Override
@@ -68,18 +84,20 @@ public class OneDBRpc implements Rpc {
 
   @Override
   public void connect() {
-    client.connect();
+    clientMap.values().stream().forEach(c -> c.connect());
   }
 
   @Override
   public void send(DataPacket dataPacket) {
     payloadByteLength += dataPacket.getPayloadByteLength();
-    this.client.send(dataPacket.toProto());
+    PipeClient client = clientMap.get(dataPacket.getHeader().getReceiverId());
+    client.send(dataPacket.toProto());
   }
 
   @Override
   public DataPacket receive(DataPacketHeader header) {
-    return receiveBuffer.get(header);
+    ConcurrentBuffer buffer = bufferMap.get(header.getSenderId());
+    return buffer.get(header);
   }
 
   @Override
@@ -102,6 +120,10 @@ public class OneDBRpc implements Rpc {
 
   @Override
   public void disconnect() {
-    client.close();
+    clientMap.values().forEach(c -> c.close());
+  }
+
+  public BindableService getgRpcService() {
+    return service;
   }
 }
