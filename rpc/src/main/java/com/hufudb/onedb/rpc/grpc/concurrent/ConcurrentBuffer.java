@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 public class ConcurrentBuffer {
   private static final Logger LOG = LoggerFactory.getLogger(ConcurrentBuffer.class);
-  private static final long WAIT_TIMEOUT = 2000;
+  private static final long WAIT_TIMEOUT = 10000;
 
   private final static int DEFAULT_OFFSET = 8;
   private final DataPacket buff[];
@@ -60,7 +60,7 @@ public class ConcurrentBuffer {
       while (!searchIndex.containsKey(header)) {
         if (!condition.await(WAIT_TIMEOUT, TimeUnit.MILLISECONDS)) {
           if (searchIndex.containsKey(header)) break;
-          LOG.warn("Wait timeout for packet {}", header);
+          LOG.warn("Wait timeout for {}", header);
           return null;
         }
       }

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum ProtocolType {
+  ERROR("ERROR", 0),
   PK_OT("PUBLIC_KEY_BASED_OT", 10),
   BEAVER_TRIPLE("BEAVER_TRIPLE", 20),
   GMW("GMW", 30);

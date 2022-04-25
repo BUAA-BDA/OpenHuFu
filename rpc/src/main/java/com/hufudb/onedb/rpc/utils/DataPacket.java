@@ -74,4 +74,9 @@ public final class DataPacket {
             that.payload.stream().map(ByteBuffer::wrap).collect(Collectors.toList()))
         .isEquals();
   }
+
+  @Override
+  public String toString() {
+    return header.toString();
+  }
 }

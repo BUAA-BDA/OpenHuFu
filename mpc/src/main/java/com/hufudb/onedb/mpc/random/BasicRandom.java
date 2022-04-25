@@ -15,6 +15,11 @@ public class BasicRandom implements OneDBRandom {
   }
 
   @Override
+  public int nextInt(int n) {
+    return random.nextInt(n);
+  }
+
+  @Override
   public long nextLong() {
     return random.nextLong();
   }

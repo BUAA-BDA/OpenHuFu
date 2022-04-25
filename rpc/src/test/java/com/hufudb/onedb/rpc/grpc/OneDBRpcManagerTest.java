@@ -48,7 +48,6 @@ public class OneDBRpcManagerTest {
   public void OneDBRpcTest() throws Exception {
     String ownerName0 = InProcessServerBuilder.generateName();
     String ownerName1 = InProcessServerBuilder.generateName();
-    System.out.print("");
     Party owner0 = new OneDBOwnerInfo(0, ownerName0);
     Party owner1 = new OneDBOwnerInfo(1, ownerName1);
     List<Party> parties = ImmutableList.of(

@@ -2,7 +2,6 @@ package com.hufudb.onedb.mpc;
 
 import com.hufudb.onedb.rpc.Rpc;
 import com.hufudb.onedb.rpc.utils.DataPacket;
-import com.hufudb.onedb.rpc.utils.DataPacketHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 public abstract class ProtocolExecutor {
@@ -20,6 +19,6 @@ public abstract class ProtocolExecutor {
     return type;
   }
 
-  public abstract DataPacketHeader run(DataPacket initPacket);
+  public abstract DataPacket run(DataPacket initPacket);
 
 }

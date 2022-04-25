@@ -54,6 +54,7 @@ public class PipeClient {
       LOG.warn("No connection to {}", endpoint);
       return;
     }
+    LOG.debug("Send packet to {}", endpoint);
     reqObserver.onNext(packet);
   }
 

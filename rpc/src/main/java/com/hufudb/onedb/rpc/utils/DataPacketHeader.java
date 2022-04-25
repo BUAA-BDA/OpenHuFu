@@ -86,4 +86,11 @@ public class DataPacketHeader {
         .append(this.stepId, that.stepId).append(this.extraInfo, that.extraInfo)
         .append(this.senderId, that.senderId).append(this.receiverId, that.receiverId).isEquals();
   }
+
+  @Override
+  public String toString() {
+    return String.format(
+        "DataPacket[taskId:%d,ptoId:%d,stepId:%d,extraInfo:%d,senderId:%d,receiverId:%d]",
+        taskId, ptoId, stepId, extraInfo, senderId, receiverId);
+  }
 }
