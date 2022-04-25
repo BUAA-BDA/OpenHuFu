@@ -5,24 +5,29 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import com.google.common.annotations.VisibleForTesting;
 import com.hufudb.onedb.rpc.Party;
 import com.hufudb.onedb.rpc.Rpc;
+import com.hufudb.onedb.rpc.grpc.concurrent.ConcurrentBuffer;
 import com.hufudb.onedb.rpc.grpc.pipe.PipeClient;
 import com.hufudb.onedb.rpc.grpc.pipe.PipeService;
-import com.hufudb.onedb.rpc.grpc.queue.ConcurrentBuffer;
 import com.hufudb.onedb.rpc.utils.DataPacket;
 import com.hufudb.onedb.rpc.utils.DataPacketHeader;
 import io.grpc.BindableService;
 import io.grpc.Channel;
 
 public class OneDBRpc implements Rpc {
+  private static int THREAD_NUM = 8;
   final Party own;
   final Set<Party> parties;
   final Map<Integer, Party> participantMap;
   final Map<Integer, PipeClient> clientMap;
   final Map<Integer, ConcurrentBuffer> bufferMap;
-  final PipeService service;
+  final PipeService gRpcService;
+  final ExecutorService execService;
   long payloadByteLength;
   long dataPacketNum;
 
@@ -32,6 +37,7 @@ public class OneDBRpc implements Rpc {
     this.participantMap = new HashMap<>();
     this.clientMap = new HashMap<>();
     this.bufferMap = new HashMap<>();
+    this.execService = Executors.newFixedThreadPool(THREAD_NUM);
     for (Party p : parties) {
       this.participantMap.put(p.getPartyId(), p);
       if (!p.equals(own)) {
@@ -39,7 +45,7 @@ public class OneDBRpc implements Rpc {
         this.bufferMap.put(p.getPartyId(), new ConcurrentBuffer());
       }
     }
-    this.service = new PipeService(bufferMap);
+    this.gRpcService = new PipeService(bufferMap);
     this.payloadByteLength = 0;
     this.dataPacketNum = 0;
   }
@@ -62,7 +68,8 @@ public class OneDBRpc implements Rpc {
         this.bufferMap.put(p.getPartyId(), new ConcurrentBuffer());
       }
     }
-    this.service = new PipeService(bufferMap);
+    this.gRpcService = new PipeService(bufferMap);
+    this.execService = Executors.newFixedThreadPool(THREAD_NUM);
     this.payloadByteLength = 0;
     this.dataPacketNum = 0;
   }
@@ -97,7 +104,7 @@ public class OneDBRpc implements Rpc {
   @Override
   public DataPacket receive(DataPacketHeader header) {
     ConcurrentBuffer buffer = bufferMap.get(header.getSenderId());
-    return buffer.get(header);
+    return buffer.blockingPop(header);
   }
 
   @Override
@@ -124,6 +131,6 @@ public class OneDBRpc implements Rpc {
   }
 
   public BindableService getgRpcService() {
-    return service;
+    return gRpcService;
   }
 }

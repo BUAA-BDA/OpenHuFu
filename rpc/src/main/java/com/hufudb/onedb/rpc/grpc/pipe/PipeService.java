@@ -4,7 +4,7 @@ import java.util.Map;
 import com.hufudb.onedb.rpc.PipeGrpc;
 import com.hufudb.onedb.rpc.OneDBPipe.DataPacketProto;
 import com.hufudb.onedb.rpc.OneDBPipe.ResponseProto;
-import com.hufudb.onedb.rpc.grpc.queue.ConcurrentBuffer;
+import com.hufudb.onedb.rpc.grpc.concurrent.ConcurrentBuffer;
 import com.hufudb.onedb.rpc.utils.DataPacket;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;

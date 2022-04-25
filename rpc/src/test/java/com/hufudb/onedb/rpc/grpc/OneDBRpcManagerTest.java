@@ -73,24 +73,10 @@ public class OneDBRpcManagerTest {
     rpc1.send(packet1);
     DataPacketHeader headerfrom0 = packet0.getHeader();
     DataPacketHeader headerfrom1 = packet1.getHeader();
-    boolean rec0 = false;
-    boolean rec1 = false;
-    for (int i = 0; i < 10; ++i) {
-      if (!rec0) {
-        DataPacket r0 = rpc0.receive(headerfrom1);
-        rec0 = true;
-        assertTrue("rpc0 receive wrong message", r0.equals(packet1));
-      }
-      if (!rec1) {
-        DataPacket r1 = rpc1.receive(headerfrom0);
-        rec1 = true;
-        assertTrue("rpc1 receive wrong message", r1.equals(packet0));
-      }
-      if (rec0 && rec1) {
-        break;
-      }
-      Thread.sleep(200);
-    }
+    DataPacket r0 = rpc0.receive(headerfrom1);
+    DataPacket r1 = rpc1.receive(headerfrom0);
+    assertTrue("rpc0 receive wrong message", r0.equals(packet1));
+    assertTrue("rpc0 receive wrong message", r1.equals(packet0));
     rpc0.disconnect();
     rpc1.disconnect();
     Thread.sleep(1000);

@@ -52,7 +52,7 @@ public class PublicKeyOT extends ProtocolExecutor {
   }
 
   void initSender(DataPacket packet) {
-
+    
   }
 
   void initReceiver(DataPacket receiver) {
