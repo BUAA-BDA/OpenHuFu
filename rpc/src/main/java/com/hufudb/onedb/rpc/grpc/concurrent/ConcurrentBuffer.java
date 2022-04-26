@@ -73,8 +73,11 @@ public class ConcurrentBuffer {
     }
     if (target != null) {
       lock.writeLock().lock();
+      searchIndex.remove(header);
       buff[idx] = null;
       lock.writeLock().unlock();
+    } else {
+      LOG.warn("Get NULL for {}", header);
     }
     return target;
   }
@@ -91,6 +94,7 @@ public class ConcurrentBuffer {
     lock.readLock().unlock();
     if (target != null) {
       lock.writeLock().lock();
+      searchIndex.remove(header);
       buff[idx] = null;
       lock.writeLock().unlock();
     }

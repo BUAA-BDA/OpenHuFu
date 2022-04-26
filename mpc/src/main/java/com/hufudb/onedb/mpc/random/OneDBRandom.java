@@ -7,4 +7,5 @@ public interface OneDBRandom {
   double nextDouble();
   float nextFloat();
   boolean nextBoolean();
+  byte[] randomBytes(int size);
 }

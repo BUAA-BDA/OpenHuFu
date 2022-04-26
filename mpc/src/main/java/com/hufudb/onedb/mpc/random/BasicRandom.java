@@ -38,4 +38,11 @@ public class BasicRandom implements OneDBRandom {
   public boolean nextBoolean() {
     return random.nextBoolean();
   }
+
+  @Override
+  public byte[] randomBytes(int size) {
+    byte[] bytes = new byte[size];
+    random.nextBytes(bytes);
+    return bytes;
+  }
 }

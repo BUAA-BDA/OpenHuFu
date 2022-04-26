@@ -30,8 +30,9 @@ public class PipeService extends PipeGrpc.PipeImplBase {
       @Override
       public void onNext(DataPacketProto value) {
         int senderId = value.getHeaderProto().getSenderId();
-        LOG.debug("Get packet from sender [{}]", senderId);
-        boolean hasErr = buffers.get(senderId).put(DataPacket.fromProto(value));
+        DataPacket packet = DataPacket.fromProto(value);
+        LOG.debug("Pipe get {}", packet);
+        boolean hasErr = buffers.get(senderId).put(packet);
         if (hasErr) {
           responseObserver.onNext(ResponseProto.newBuilder().setStatus(1).setMsg(String.format("Buffer of party[%d] is full", senderId)).build());
         } else {

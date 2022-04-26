@@ -1,4 +1,4 @@
-package com.hufudb.onedb.mpc.ot;
+package com.hufudb.onedb.mpc.gmw;
 
 import static org.junit.Assert.assertEquals;
 import java.util.Arrays;
@@ -7,16 +7,17 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.mpc.ProtocolType;
+import com.hufudb.onedb.mpc.bristol.CircuitType;
 import com.hufudb.onedb.mpc.codec.OneDBCodec;
+import com.hufudb.onedb.mpc.ot.PublicKeyOT;
 import com.hufudb.onedb.mpc.random.BasicRandom;
 import com.hufudb.onedb.mpc.random.OneDBRandom;
 import com.hufudb.onedb.rpc.Party;
 import com.hufudb.onedb.rpc.grpc.OneDBOwnerInfo;
-import com.hufudb.onedb.rpc.grpc.OneDBRpcManager;
 import com.hufudb.onedb.rpc.grpc.OneDBRpc;
+import com.hufudb.onedb.rpc.grpc.OneDBRpcManager;
 import com.hufudb.onedb.rpc.utils.DataPacket;
 import com.hufudb.onedb.rpc.utils.DataPacketHeader;
 import org.junit.Rule;
@@ -30,25 +31,20 @@ import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.testing.GrpcCleanupRule;
 
 @RunWith(JUnit4.class)
-public class PublicKeyOTTest {
+public class GMWTest {
   @Rule
   public final GrpcCleanupRule grpcCleanup = new GrpcCleanupRule();
 
   public static OneDBRandom rand = new BasicRandom();
 
-  public DataPacket generateInitPacket4Sender(int sender, int receiver, List<String> secrets) {
-    DataPacketHeader header = new DataPacketHeader(0, ProtocolType.PK_OT.getId(), 0, secrets.size(), sender, receiver);
-    List<byte[]> payloads = secrets.stream().map(s -> s.getBytes()).collect(Collectors.toList());
-    return DataPacket.fromByteArrayList(header, payloads);
-  }
-
-  public DataPacket generateInitPacket4Receiver(int sender, int receiver, int select) {
-    DataPacketHeader header = new DataPacketHeader(0, ProtocolType.PK_OT.getId(), 0, 2, sender, receiver);
-    return DataPacket.fromByteArrayList(header, ImmutableList.of(OneDBCodec.encodeInt(select)));
+  DataPacket generateInitPacket(int senderId, int receiverId, int value) {
+    DataPacketHeader header = new DataPacketHeader(0L, ProtocolType.GMW.getId(), 0, (long) CircuitType.ADD_32.getId(), senderId, receiverId);
+    byte[] payload = OneDBCodec.encodeInt(value);
+    return DataPacket.fromByteArrayList(header, ImmutableList.of(payload));
   }
 
   @Test
-  public void testPublicKeyOT() throws Exception {
+  public void testGMW() throws Exception {
     try {
       String ownerName0 = InProcessServerBuilder.generateName();
       String ownerName1 = InProcessServerBuilder.generateName();
@@ -72,27 +68,31 @@ public class PublicKeyOTTest {
       rpc1.connect();
       PublicKeyOT otSender = new PublicKeyOT(rpc0);
       PublicKeyOT otReceiver = new PublicKeyOT(rpc1);
-      List<String> secrets = Arrays.asList("Alice", "Bob", "Jerry", "Tom");
-      int tid = rand.nextInt(secrets.size());
-      String expect = secrets.get(tid);
+      GMW gmwSender = new GMW(rpc0, otSender);
+      GMW gmwReceiver = new GMW(rpc1, otReceiver);
       ExecutorService service = Executors.newFixedThreadPool(2);
-      Future<List<byte[]>> senderRes = service.submit(
+      final int a = 4;
+      final int b = 2;
+      Future<List<byte[]>> senFuture = service.submit(
         new Callable<List<byte[]>>() {
           @Override
           public List<byte[]> call() throws Exception {
-            return otSender.run(generateInitPacket4Sender(0, 1, secrets));
+            return gmwSender.run(generateInitPacket(0, 1, a));
           }
         }
       );
-      Future<List<byte[]>> receiverRes = service.submit(
+      Future<List<byte[]>> recFuture = service.submit(
         new Callable<List<byte[]>>() {
         @Override
         public List<byte[]> call() throws Exception {
-          return otReceiver.run(generateInitPacket4Receiver(0, 1, tid));
+          return gmwReceiver.run(generateInitPacket(1, 0, b));
         }
       });
-      List<byte[]> result = receiverRes.get();
-      String actual = new String(result.get(0));
+      byte[] senRes = senFuture.get().get(0);
+      byte[] recRes = recFuture.get().get(0);
+      OneDBCodec.xor(senRes, recRes);
+      int actual = OneDBCodec.decodeInt(senRes);
+      int expect = a + b;
       assertEquals(expect, actual);
       rpc0.disconnect();
       rpc1.disconnect();

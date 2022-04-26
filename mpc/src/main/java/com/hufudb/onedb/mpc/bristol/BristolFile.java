@@ -11,17 +11,17 @@ public class BristolFile {
 
   final int gateNum;
   final int wireNum;
-  final int n1;
-  final int n2;
-  final int n3;
+  final int in1;
+  final int in2;
+  final int out;
   final ImmutableList<Gate> gates;
 
-  private BristolFile(int gateNum, int wireNum, int n1, int n2, int n3, ImmutableList<Gate> gates) {
+  private BristolFile(int gateNum, int wireNum, int in1, int in2, int out, ImmutableList<Gate> gates) {
     this.gateNum = gateNum;
     this.wireNum = wireNum;
-    this.n1 = n1;
-    this.n2 = n2;
-    this.n3 = n3;
+    this.in1 = in1;
+    this.in2 = in2;
+    this.out = out;
     this.gates = gates;
   }
 
@@ -65,11 +65,35 @@ public class BristolFile {
     return new BristolFile(gateNum, wireNum, n1, n2, n3, builder.build());
   }
 
+  public int getWireNum() {
+    return wireNum;
+  }
+
+  public int getGateNum() {
+    return gateNum;
+  }
+
+  public int getIn1() {
+    return in1;
+  }
+
+  public int getIn2() {
+    return in2;
+  }
+
+  public int getOut() {
+    return out;
+  }
+
+  public ImmutableList<Gate> getGates() {
+    return gates;
+  }
+
   public static class Gate {
-    int in1;
-    int in2;
-    int out;
-    GateType type;
+    public final int in1;
+    public final int in2;
+    public final int out;
+    public final GateType type;
 
     public Gate(int in1, int in2, int out, GateType type) {
       this.in1 = in1;
@@ -80,6 +104,7 @@ public class BristolFile {
   
     public Gate(int in1, int out, GateType type) {
       this.in1 = in1;
+      this.in2 = 0;
       this.out = out;
       this.type = type;
     }

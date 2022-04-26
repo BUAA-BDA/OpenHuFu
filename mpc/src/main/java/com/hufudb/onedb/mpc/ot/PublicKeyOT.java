@@ -1,5 +1,6 @@
 package com.hufudb.onedb.mpc.ot;
 
+import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.mpc.ProtocolExecutor;
 import com.hufudb.onedb.mpc.ProtocolType;
 import com.hufudb.onedb.mpc.codec.OneDBCodec;
@@ -15,8 +16,6 @@ import java.security.spec.EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import javax.crypto.Cipher;
 
 /*-
@@ -42,26 +41,23 @@ import javax.crypto.Cipher;
 
 public class PublicKeyOT extends ProtocolExecutor {
 
-  private final Map<Long, OTCache> cache = new ConcurrentHashMap<>();
-
-  PublicKeyOT(Rpc rpc) {
+  public PublicKeyOT(Rpc rpc) {
     super(rpc, ProtocolType.PK_OT);
   }
 
   // step 0, run on S
-  DataPacketHeader storeSecrets(DataPacket packet) {
+  DataPacketHeader storeSecrets(DataPacket packet, OTMeta meta) {
     DataPacketHeader header = packet.getHeader();
-    List<byte[]> payloads = packet.getPayload();
-    cache.put(header.getTaskId(), new OTCache(payloads));
-    LOG.debug("Party [{}] store secrets in cache", rpc.ownParty().getPartyId());
+    meta.secrets = packet.getPayload();
+    LOG.debug("Party [{}] store secrets", rpc.ownParty());
     DataPacketHeader expect = new DataPacketHeader(header.getTaskId(), header.getPtoId(), 1,
-        payloads.size(), header.getReceiverId(), header.getSenderId());
+        meta.secrets.size(), header.getReceiverId(), header.getSenderId());
     LOG.debug("Party [{}] wait for packet {}", rpc.ownParty(), expect);
     return expect;
   }
 
   // step 1, run on R
-  DataPacketHeader generateKeys(DataPacket packet) {
+  DataPacketHeader generateKeys(DataPacket packet, OTMeta meta) {
     DataPacketHeader header = packet.getHeader();
     int m = (int) header.getExtraInfo();
     int n = 1 << m;
@@ -84,7 +80,8 @@ public class PublicKeyOT extends ProtocolExecutor {
       LOG.error("Error when generating key pair: {}", e.getMessage());
       return null;
     }
-    cache.put(header.getTaskId(), new OTCache(b, privateKey));
+    meta.b = b;
+    meta.key = privateKey;
     DataPacketHeader outHeader = new DataPacketHeader(header.getTaskId(), header.getPtoId(), 1, n,
         header.getReceiverId(), header.getSenderId());
     rpc.send(DataPacket.fromByteArrayList(outHeader, payloads));
@@ -97,9 +94,9 @@ public class PublicKeyOT extends ProtocolExecutor {
   }
 
   // step 2, run on S
-  DataPacketHeader encryptSecrets(DataPacket packet) {
+  DataPacketHeader encryptSecrets(DataPacket packet, OTMeta meta) {
     DataPacketHeader header = packet.getHeader();
-    List<byte[]> secrets = cache.get(header.getTaskId()).secrets;
+    List<byte[]> secrets = meta.secrets;
     int n = (int) header.getExtraInfo();
     List<byte[]> publicKeyBytes = packet.getPayload();
     List<byte[]> encryptedSecrets = new ArrayList<>();
@@ -128,43 +125,35 @@ public class PublicKeyOT extends ProtocolExecutor {
   }
 
   // step3, run on R
-  DataPacket decryptSecrets(DataPacket packet) {
-    DataPacketHeader header = packet.getHeader();
-    OTCache c = cache.get(header.getTaskId());
-    PrivateKey key = c.key;
-    int b = c.b;
+  List<byte[]> decryptSecrets(DataPacket packet, OTMeta meta) {
+    PrivateKey key = meta.key;
+    int b = meta.b;
     byte[] target = packet.getPayload().get(b);
-    DataPacket res = null;
+    byte[] decryptedBytes = null;
     LOG.debug("Party [{}] decrypt secret [{}]", rpc.ownParty(), b);
     try {
       Cipher decryptCipher = Cipher.getInstance("RSA");
       decryptCipher.init(Cipher.DECRYPT_MODE, key);
-      byte[] decryptedBytes = decryptCipher.doFinal(target);
-      res = generateResultPacket(packet, decryptedBytes);
+      decryptedBytes = decryptCipher.doFinal(target);
     } catch (Exception e) {
       LOG.error("Error when decrypting: {}", e.getMessage());
     }
-    return res;
+    return ImmutableList.of(decryptedBytes);
   }
 
-  DataPacket generateResultPacket(DataPacket finalPacket, byte[] decryptedBytes) {
-    DataPacketHeader fHeader = finalPacket.getHeader();
-    DataPacketHeader header = new DataPacketHeader(fHeader.getTaskId(), fHeader.getPtoId(), 4,
-        fHeader.getSenderId(), fHeader.getReceiverId());
-    return DataPacket.fromByteArrayList(header, List.of(decryptedBytes));
-  }
-
-  DataPacket senderProcedure(DataPacket initPacket) {
+  List<byte[]> senderProcedure(DataPacket initPacket) {
     LOG.debug("Party [{}] is sender of OT", rpc.ownParty());
-    DataPacketHeader expectHeader = storeSecrets(initPacket);
-    encryptSecrets(rpc.receive(expectHeader));
-    return null;
+    OTMeta meta = new OTMeta();
+    DataPacketHeader expectHeader = storeSecrets(initPacket, meta);
+    encryptSecrets(rpc.receive(expectHeader), meta);
+    return ImmutableList.of();
   }
 
-  DataPacket receiverProcedure(DataPacket initPacket) {
+  List<byte[]> receiverProcedure(DataPacket initPacket) {
     LOG.debug("Party [{}] is receiver of OT", rpc.ownParty());
-    DataPacketHeader expectHeader = generateKeys(initPacket);
-    return decryptSecrets(rpc.receive(expectHeader));
+    OTMeta meta = new OTMeta();
+    DataPacketHeader expectHeader = generateKeys(initPacket, meta);
+    return decryptSecrets(rpc.receive(expectHeader), meta);
   }
 
   // Sender: the party who has n secrets
@@ -173,7 +162,7 @@ public class PublicKeyOT extends ProtocolExecutor {
   }
 
   @Override
-  public DataPacket run(DataPacket initPacket) {
+  public List<byte[]> run(DataPacket initPacket) {
     DataPacketHeader header = initPacket.getHeader();
     assert header.getPtoId() == type.getId();
     if (isSender(header)) {
@@ -183,17 +172,19 @@ public class PublicKeyOT extends ProtocolExecutor {
     }
   }
 
-  static class OTCache {
+  static class OTMeta {
     int b;
     PrivateKey key;
     List<byte[]> secrets;
 
-    OTCache(int b, PrivateKey key) {
+    OTMeta() {}
+
+    OTMeta(int b, PrivateKey key) {
       this.b = b;
       this.key = key;
     }
 
-    OTCache(List<byte[]> secrets) {
+    OTMeta(List<byte[]> secrets) {
       this.secrets = secrets;
     }
   }
