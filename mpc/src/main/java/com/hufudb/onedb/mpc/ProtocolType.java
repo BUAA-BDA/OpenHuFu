@@ -1,7 +1,6 @@
 package com.hufudb.onedb.mpc;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 
 public enum ProtocolType {
   ERROR("ERROR", 0),
@@ -9,12 +8,14 @@ public enum ProtocolType {
   BEAVER_TRIPLE("BEAVER_TRIPLE", 20),
   GMW("GMW", 30);
 
-  private static final Map<String, ProtocolType> MAP = new HashMap<>();
+  private static final ImmutableMap<Integer, ProtocolType> MAP;
 
   static {
+    final ImmutableMap.Builder<Integer, ProtocolType> builder = ImmutableMap.builder();
     for (ProtocolType type : values()) {
-      MAP.put(type.name, type);
+      builder.put(type.id, type);
     }
+    MAP = builder.build();
   }
 
   private final String name;
@@ -35,5 +36,9 @@ public enum ProtocolType {
 
   public String toString() {
     return name;
+  }
+
+  public static ProtocolType type(int id) {
+    return MAP.get(id);
   }
 }

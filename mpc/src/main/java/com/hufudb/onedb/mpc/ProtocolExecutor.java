@@ -4,6 +4,7 @@ import com.hufudb.onedb.rpc.Rpc;
 import com.hufudb.onedb.rpc.utils.DataPacket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 public abstract class ProtocolExecutor {
   protected static final Logger LOG = LoggerFactory.getLogger(ProtocolExecutor.class);
 
