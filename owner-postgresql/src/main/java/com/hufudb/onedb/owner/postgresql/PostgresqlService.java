@@ -5,6 +5,7 @@ import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.data.TableInfo;
 import com.hufudb.onedb.core.data.utils.POJOPublishedTableInfo;
 import com.hufudb.onedb.owner.OwnerService;
+import com.hufudb.onedb.rpc.grpc.OneDBRpc;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -33,8 +34,9 @@ public class PostgresqlService extends OwnerService {
       String user,
       String passwd,
       List<POJOPublishedTableInfo> infos,
-      ExecutorService threadPool) {
-    super(null, null, String.format("%s:%d", hostname, port), null, threadPool);
+      ExecutorService threadPool,
+      OneDBRpc rpc) {
+    super(null, null, String.format("%s:%d", hostname, port), null, threadPool, rpc);
     this.catalog = catalog;
     try {
       Class.forName("org.postgresql.Driver");
@@ -48,28 +50,8 @@ public class PostgresqlService extends OwnerService {
   }
 
   public PostgresqlService(
-      String hostname, int port, String catalog, String url, String user, String passwd, ExecutorService threadPool) {
-    this(hostname, port, catalog, url, user, passwd, ImmutableList.of(), threadPool);
-  }
-
-  PostgresqlService(PostgresqlConfig config, ExecutorService threadPool) {
-    super(
-        config.zkservers,
-        config.zkroot,
-        String.format(
-            "%s:%d", config.hostname == null ? "localhost" : config.hostname, config.port),
-        config.digest,
-        threadPool);
-    this.catalog = config.catalog;
-    try {
-      Class.forName("org.postgresql.Driver");
-      connection = DriverManager.getConnection(config.url, config.user, config.passwd);
-      statement = connection.createStatement();
-      loadAllTableInfo();
-      initPublishedTable(config.tables);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+      String hostname, int port, String catalog, String url, String user, String passwd, ExecutorService threadPool, OneDBRpc rpc) {
+    this(hostname, port, catalog, url, user, passwd, ImmutableList.of(), threadPool, rpc);
   }
 
   @Override

@@ -3,6 +3,7 @@ package com.hufudb.onedb.rpc.grpc;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executors;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 public class OneDBRpcManager implements RpcManager {
   protected static final Logger LOG = LoggerFactory.getLogger(OneDBRpcManager.class);
+  private static final int THREAD_NUM = 2;
 
   final Set<Party> parties;
   final Map<Integer, Rpc> rpcMap;
@@ -23,7 +25,7 @@ public class OneDBRpcManager implements RpcManager {
     this.parties = parties;
     ImmutableMap.Builder<Integer, Rpc> rpcMapBuilder = ImmutableMap.builder();
     for (Party pt : parties) {
-      rpcMapBuilder.put(pt.getPartyId(), new OneDBRpc(pt, parties));
+      rpcMapBuilder.put(pt.getPartyId(), new OneDBRpc(pt, parties, Executors.newFixedThreadPool(THREAD_NUM)));
     }
     this.rpcMap = rpcMapBuilder.build();
   }

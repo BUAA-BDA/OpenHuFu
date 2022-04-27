@@ -3,6 +3,7 @@ package com.hufudb.onedb.owner.mysql;
 import com.google.gson.Gson;
 import com.hufudb.onedb.core.config.OneDBConfig;
 import com.hufudb.onedb.owner.OwnerServer;
+import com.hufudb.onedb.owner.config.OwnerConfig;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
@@ -19,8 +20,8 @@ import io.grpc.ServerCredentials;
 
 public class MysqlServer extends OwnerServer {
 
-  public MysqlServer(MysqlConfig config, ExecutorService threadPool, ServerCredentials certs) throws IOException {
-    super(config.port, new MysqlService(config, threadPool), threadPool, certs);
+  public MysqlServer(OwnerConfig config) throws IOException {
+    super(config);
   }
 
   public static void main(String[] args) {
@@ -35,10 +36,7 @@ public class MysqlServer extends OwnerServer {
       cmd = parser.parse(options, args);
       Reader reader = Files.newBufferedReader(Paths.get(cmd.getOptionValue("config")));
       MysqlConfig mConfig = gson.fromJson(reader, MysqlConfig.class);
-      ServerCredentials creds = OwnerServer.generateCerd(mConfig.certchainpath, mConfig.privatekeypath);
-      int threadNum = mConfig.threadnum == 0 ? OneDBConfig.SERVER_THREAD_NUM : mConfig.threadnum;
-      ExecutorService threadPool = Executors.newFixedThreadPool(threadNum);
-      MysqlServer server = new MysqlServer(mConfig, threadPool, creds);
+      MysqlServer server = new MysqlServer(mConfig.generateConfig());
       server.start();
       server.blockUntilShutdown();
     } catch (ParseException | IOException | InterruptedException e) {

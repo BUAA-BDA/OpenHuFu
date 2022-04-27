@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import com.hufudb.onedb.owner.config.OwnerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,17 +21,17 @@ public abstract class OwnerServer {
   protected final ServerCredentials creds;
   protected final ExecutorService threadPool;
 
-  public OwnerServer(int port, OwnerService service, ExecutorService threadPool, ServerCredentials creds)
+  public OwnerServer(OwnerConfig config)
       throws IOException {
-    this.port = port;
-    this.service = service;
-    this.threadPool = threadPool;
-    if (creds == null) {
-      this.server = ServerBuilder.forPort(port).addService(service).build();
-      this.creds = null;
-    } else {
+    this.port = config.port;
+    this.service = config.userOwnerService;
+    this.threadPool = config.threadPool;
+    if (config.useTLS) {
+      this.creds = TlsServerCredentials.create(config.certChain, config.privateKey);
       this.server = Grpc.newServerBuilderForPort(port, creds).addService(service).build();
-      this.creds = creds;
+    } else {
+      this.creds = null;
+      this.server = ServerBuilder.forPort(port).addService(service).build();
     }
   }
 

@@ -20,6 +20,8 @@ import com.hufudb.onedb.rpc.OneDBCommon.LocalTableListProto;
 import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
 import com.hufudb.onedb.rpc.OneDBService.GeneralRequest;
 import com.hufudb.onedb.rpc.OneDBService.GeneralResponse;
+import com.hufudb.onedb.rpc.grpc.OneDBRpc;
+import com.hufudb.onedb.rpc.Rpc;
 import com.hufudb.onedb.rpc.ServiceGrpc;
 import io.grpc.stub.StreamObserver;
 import java.sql.ResultSet;
@@ -45,12 +47,14 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
   private final Map<String, TableInfo> localTableInfoMap; // localName -> localTableInfo
   private final ReadWriteLock localLock;
   private final Map<String, PublishedTableInfo> publishedTableInfoMap; // publishedTableName
-                                                                       // publishedTableInfo
+                                                                       // -> publishedTableInfo
   private final ReadWriteLock publishedLock;
   private final DBZkClient zkClient;
   protected final ExecutorService threadPool;
+  protected final OneDBRpc ownerSideRpc;
 
-  public OwnerService(String zkServers, String zkRootPath, String endpoint, String digest, ExecutorService threadPool) {
+  public OwnerService(String zkServers, String zkRootPath, String endpoint, String digest,
+      ExecutorService threadPool, OneDBRpc ownerSideRpc) {
     this.dbClientMap = new HashMap<>();
     this.localTableInfoMap = new HashMap<>();
     this.publishedTableInfoMap = new HashMap<>();
@@ -58,6 +62,7 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
     this.localLock = new ReentrantReadWriteLock();
     this.publishedLock = new ReentrantReadWriteLock();
     this.endpoint = endpoint;
+    this.ownerSideRpc = ownerSideRpc;
     if (zkServers == null || zkRootPath == null || digest == null) {
       zkClient = null;
     } else {
@@ -195,6 +200,7 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
   }
 
   public void initPublishedTable(List<POJOPublishedTableInfo> infos) {
+    if (infos == null) return;
     for (POJOPublishedTableInfo info : infos) {
       addPublishedTable(info);
     }

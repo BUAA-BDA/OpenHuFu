@@ -1,4 +1,5 @@
 {
+  "id": 0,
   "port": 12345,
   "hostname": "localhost",
   "privatekeypath": "./cert/owner1.key",
