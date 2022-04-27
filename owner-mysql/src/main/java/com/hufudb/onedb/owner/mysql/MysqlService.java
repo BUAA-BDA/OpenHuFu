@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -24,15 +25,9 @@ public class MysqlService extends OwnerService {
   private Connection connection;
   private Statement statement;
 
-  public MysqlService(
-      String hostname,
-      int port,
-      String catalog,
-      String url,
-      String user,
-      String passwd,
-      List<POJOPublishedTableInfo> infos) {
-    super(null, null, String.format("%s:%d", hostname, port), null);
+  public MysqlService(String hostname, int port, String catalog, String url, String user,
+      String passwd, List<POJOPublishedTableInfo> infos, ExecutorService threadPool) {
+    super(null, null, String.format("%s:%d", hostname, port), null, threadPool);
     this.catalog = catalog;
     try {
       Class.forName("com.mysql.cj.jdbc.Driver");
@@ -45,18 +40,16 @@ public class MysqlService extends OwnerService {
     }
   }
 
-  public MysqlService(
-      String hostname, int port, String catalog, String url, String user, String passwd) {
-    this(hostname, port, catalog, url, user, passwd, ImmutableList.of());
+  public MysqlService(String hostname, int port, String catalog, String url, String user,
+      String passwd, ExecutorService threadPool) {
+    this(hostname, port, catalog, url, user, passwd, ImmutableList.of(), threadPool);
   }
 
-  MysqlService(MysqlConfig config) {
+  MysqlService(MysqlConfig config, ExecutorService threadPool) {
     super(
-        config.zkservers,
-        config.zkroot,
-        String.format(
-            "%s:%d", config.hostname == null ? "localhost" : config.hostname, config.port),
-        config.digest);
+        config.zkservers, config.zkroot, String.format("%s:%d",
+            config.hostname == null ? "localhost" : config.hostname, config.port),
+        config.digest, threadPool);
     this.catalog = config.catalog;
     try {
       Class.forName("com.mysql.cj.jdbc.Driver");
@@ -81,7 +74,7 @@ public class MysqlService extends OwnerService {
     } catch (SQLException e) {
       LOG.error("Failed to load all tables: {}", e.getCause());
       e.printStackTrace();
-      
+
     }
   }
 
@@ -93,8 +86,8 @@ public class MysqlService extends OwnerService {
       tableInfoBuilder.setTableName(tableName);
       while (rc.next()) {
         String columnName = rc.getString("COLUMN_NAME");
-        tableInfoBuilder.add(
-            columnName, MysqlTypeConverter.convert(rc.getString("TYPE_NAME")), Level.PUBLIC);
+        tableInfoBuilder.add(columnName, MysqlTypeConverter.convert(rc.getString("TYPE_NAME")),
+            Level.PUBLIC);
       }
       rc.close();
       return tableInfoBuilder.build();

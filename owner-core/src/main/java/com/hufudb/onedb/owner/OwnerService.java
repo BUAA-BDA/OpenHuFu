@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
@@ -46,15 +47,14 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
   private final Map<String, PublishedTableInfo> publishedTableInfoMap; // publishedTableName
                                                                        // publishedTableInfo
   private final ReadWriteLock publishedLock;
-  // private final ExecutorService executorService;
   private final DBZkClient zkClient;
+  protected final ExecutorService threadPool;
 
-  public OwnerService(String zkServers, String zkRootPath, String endpoint, String digest) {
+  public OwnerService(String zkServers, String zkRootPath, String endpoint, String digest, ExecutorService threadPool) {
     this.dbClientMap = new HashMap<>();
     this.localTableInfoMap = new HashMap<>();
     this.publishedTableInfoMap = new HashMap<>();
-    // this.executorService =
-    // Executors.newFixedThreadPool(OneDBConfig.SERVER_THREAD_NUM);
+    this.threadPool = threadPool;
     this.localLock = new ReentrantReadWriteLock();
     this.publishedLock = new ReentrantReadWriteLock();
     this.endpoint = endpoint;

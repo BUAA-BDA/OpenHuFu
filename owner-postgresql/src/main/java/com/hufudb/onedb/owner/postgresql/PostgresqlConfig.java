@@ -5,6 +5,7 @@ import java.util.List;
 
 public class PostgresqlConfig {
   public int port;
+  public int threadnum;
   public String hostname;
   public String privatekeypath;
   public String certchainpath;

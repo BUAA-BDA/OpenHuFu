@@ -5,8 +5,10 @@ import java.util.List;
 
 public class MysqlConfig {
   public int port;
+  public int threadnum;
   public String hostname;
-  public String credspath;
+  public String privatekeypath;
+  public String certchainpath;
   public String url;
   public String catalog;
   public String user;

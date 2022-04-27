@@ -7,6 +7,7 @@ import io.grpc.ServerCredentials;
 import io.grpc.TlsServerCredentials;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,11 +18,13 @@ public abstract class OwnerServer {
   protected final Server server;
   protected final OwnerService service;
   protected final ServerCredentials creds;
+  protected final ExecutorService threadPool;
 
-  public OwnerServer(int port, OwnerService service, ServerCredentials creds)
+  public OwnerServer(int port, OwnerService service, ExecutorService threadPool, ServerCredentials creds)
       throws IOException {
     this.port = port;
     this.service = service;
+    this.threadPool = threadPool;
     if (creds == null) {
       this.server = ServerBuilder.forPort(port).addService(service).build();
       this.creds = null;

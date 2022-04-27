@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -31,8 +32,9 @@ public class PostgresqlService extends OwnerService {
       String url,
       String user,
       String passwd,
-      List<POJOPublishedTableInfo> infos) {
-    super(null, null, String.format("%s:%d", hostname, port), null);
+      List<POJOPublishedTableInfo> infos,
+      ExecutorService threadPool) {
+    super(null, null, String.format("%s:%d", hostname, port), null, threadPool);
     this.catalog = catalog;
     try {
       Class.forName("org.postgresql.Driver");
@@ -46,17 +48,18 @@ public class PostgresqlService extends OwnerService {
   }
 
   public PostgresqlService(
-      String hostname, int port, String catalog, String url, String user, String passwd) {
-    this(hostname, port, catalog, url, user, passwd, ImmutableList.of());
+      String hostname, int port, String catalog, String url, String user, String passwd, ExecutorService threadPool) {
+    this(hostname, port, catalog, url, user, passwd, ImmutableList.of(), threadPool);
   }
 
-  PostgresqlService(PostgresqlConfig config) {
+  PostgresqlService(PostgresqlConfig config, ExecutorService threadPool) {
     super(
         config.zkservers,
         config.zkroot,
         String.format(
             "%s:%d", config.hostname == null ? "localhost" : config.hostname, config.port),
-        config.digest);
+        config.digest,
+        threadPool);
     this.catalog = config.catalog;
     try {
       Class.forName("org.postgresql.Driver");
