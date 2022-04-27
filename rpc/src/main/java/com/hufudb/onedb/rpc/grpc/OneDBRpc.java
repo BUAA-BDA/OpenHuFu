@@ -1,5 +1,7 @@
 package com.hufudb.onedb.rpc.grpc;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,6 +20,8 @@ import com.hufudb.onedb.rpc.utils.DataPacket;
 import com.hufudb.onedb.rpc.utils.DataPacketHeader;
 import io.grpc.BindableService;
 import io.grpc.Channel;
+import io.grpc.ChannelCredentials;
+import io.grpc.TlsChannelCredentials;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +37,7 @@ public class OneDBRpc implements Rpc {
   final ExecutorService threadPool;
   long payloadByteLength;
   long dataPacketNum;
+  ChannelCredentials rootCert;
 
   public OneDBRpc(Party own, Set<Party> parties, ExecutorService threadPool) {
     this.own = own;
@@ -55,6 +60,12 @@ public class OneDBRpc implements Rpc {
 
   public OneDBRpc(Party own, ExecutorService threadPool) {
     this(own, new HashSet<>(Arrays.asList(own)), threadPool);
+    this.rootCert = null;
+  }
+
+  public OneDBRpc(Party own, ExecutorService threadPool, ChannelCredentials rootCert) {
+    this(own, new HashSet<>(Arrays.asList(own)), threadPool);
+    this.rootCert = rootCert;
   }
 
   @VisibleForTesting
@@ -148,7 +159,7 @@ public class OneDBRpc implements Rpc {
     }
     parties.add(party);
     participantMap.put(party.getPartyId(), party);
-    clientMap.put(party.getPartyId(), new PipeClient(own.getPartyName()));
+    clientMap.put(party.getPartyId(), new PipeClient(own.getPartyName(), rootCert));
     bufferMap.put(party.getPartyId(), new ConcurrentBuffer());
     return true;
   }

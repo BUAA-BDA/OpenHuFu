@@ -53,11 +53,18 @@ public class OneDBClient {
         client = new OwnerClient(endpoint);
       }
       if (client != null) {
+        // establish connection among owners
+        for (Map.Entry<String, OwnerClient> entry : ownerMap.entrySet()) {
+          OwnerClient oldClient = entry.getValue();
+          oldClient.addOwner(client.getParty());
+          client.addOwner(oldClient.getParty());
+        }
         ownerMap.put(endpoint, client);
       }
       LOG.info("Add owner {}", endpoint);
     } catch (Exception e) {
       LOG.warn("Fail to add owner {}: {}", endpoint, e.getMessage());
+      e.printStackTrace();
     }
     return client;
   }

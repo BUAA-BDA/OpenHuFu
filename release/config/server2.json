@@ -1,6 +1,10 @@
 {
+  "id": 1,
   "port": 12346,
   "hostname": "localhost",
+  "privatekeypath": "./cert/owner1.key",
+  "certchainpath": "./cert/owner1.pem",
+  "trustcertpath": "./cert/ca.pem",
   "url": "jdbc:postgresql://localhost:13102/postgres",
   "catalog": "postgres",
   "user": "postgres",

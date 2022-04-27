@@ -1,5 +1,6 @@
 package com.hufudb.onedb.owner;
 
+import io.grpc.BindableService;
 import io.grpc.Grpc;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -26,12 +27,13 @@ public abstract class OwnerServer {
     this.port = config.port;
     this.service = config.userOwnerService;
     this.threadPool = config.threadPool;
+    BindableService pipeService = config.acrossOwnerService.getgRpcService();
     if (config.useTLS) {
-      this.creds = TlsServerCredentials.create(config.certChain, config.privateKey);
-      this.server = Grpc.newServerBuilderForPort(port, creds).addService(service).build();
+      this.creds = config.serverCerts;
+      this.server = Grpc.newServerBuilderForPort(port, creds).addService(service).addService(pipeService).build();
     } else {
       this.creds = null;
-      this.server = ServerBuilder.forPort(port).addService(service).build();
+      this.server = ServerBuilder.forPort(port).addService(service).addService(pipeService).build();
     }
   }
 

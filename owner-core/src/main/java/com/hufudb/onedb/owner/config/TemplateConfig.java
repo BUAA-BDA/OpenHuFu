@@ -4,6 +4,9 @@ import com.hufudb.onedb.core.config.OneDBConfig;
 import com.hufudb.onedb.core.data.utils.POJOPublishedTableInfo;
 import com.hufudb.onedb.rpc.grpc.OneDBOwnerInfo;
 import com.hufudb.onedb.rpc.grpc.OneDBRpc;
+import io.grpc.ServerCredentials;
+import io.grpc.TlsChannelCredentials;
+import io.grpc.TlsServerCredentials;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -43,8 +46,9 @@ public abstract class TemplateConfig implements DBConfig {
     }
     if (privatekeypath != null && certchainpath != null) {
       try {
-        config.certChain = new File(certchainpath);
-        config.privateKey = new File(privatekeypath);
+        File certChain = new File(certchainpath);
+        File privateKey = new File(privatekeypath);
+        config.serverCerts = TlsServerCredentials.create(certChain, privateKey);
         config.useTLS = true;
       } catch (Exception e) {
         LOG.error("Fail to read certChainFile or privateKeyFile: {}", e.getMessage());
@@ -53,12 +57,16 @@ public abstract class TemplateConfig implements DBConfig {
     }
     if (trustcertpath != null) {
       try {
-        config.rootCert = new File(trustcertpath);
+        File rootCert = new File(trustcertpath);
+        config.clientCerts = TlsChannelCredentials.newBuilder().trustManager(rootCert).build();
+        config.acrossOwnerService = new OneDBRpc(config.party, config.threadPool, config.clientCerts);
       } catch (Exception e) {
         LOG.error("Fail to read trustcertFile: {}", e.getMessage());
+        config.acrossOwnerService = new OneDBRpc(config.party, config.threadPool);
       }
+    } else {
+      config.acrossOwnerService = new OneDBRpc(config.party, config.threadPool);
     }
-    config.acrossOwnerService = new OneDBRpc(config.party, config.threadPool);
     return config;
   }
 }

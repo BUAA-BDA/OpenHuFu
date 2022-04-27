@@ -1,6 +1,5 @@
 package com.hufudb.onedb.owner;
 
-import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.data.DataSet;
 import com.hufudb.onedb.core.data.Field;
 import com.hufudb.onedb.core.data.Header;
@@ -18,10 +17,12 @@ import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
 import com.hufudb.onedb.rpc.OneDBCommon.HeaderProto;
 import com.hufudb.onedb.rpc.OneDBCommon.LocalTableListProto;
 import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
+import com.hufudb.onedb.rpc.OneDBCommon.OwnerInfoProto;
 import com.hufudb.onedb.rpc.OneDBService.GeneralRequest;
 import com.hufudb.onedb.rpc.OneDBService.GeneralResponse;
+import com.hufudb.onedb.rpc.grpc.OneDBOwnerInfo;
 import com.hufudb.onedb.rpc.grpc.OneDBRpc;
-import com.hufudb.onedb.rpc.Rpc;
+import com.hufudb.onedb.rpc.Party;
 import com.hufudb.onedb.rpc.ServiceGrpc;
 import io.grpc.stub.StreamObserver;
 import java.sql.ResultSet;
@@ -42,7 +43,6 @@ import org.springframework.stereotype.Service;
 @Service
 public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
   private static final Logger LOG = LoggerFactory.getLogger(OwnerService.class);
-  protected final Map<String, OwnerClient> dbClientMap; // endpoint -> rpc_client
   protected final String endpoint;
   private final Map<String, TableInfo> localTableInfoMap; // localName -> localTableInfo
   private final ReadWriteLock localLock;
@@ -55,7 +55,6 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
 
   public OwnerService(String zkServers, String zkRootPath, String endpoint, String digest,
       ExecutorService threadPool, OneDBRpc ownerSideRpc) {
-    this.dbClientMap = new HashMap<>();
     this.localTableInfoMap = new HashMap<>();
     this.publishedTableInfoMap = new HashMap<>();
     this.threadPool = threadPool;
@@ -91,8 +90,21 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
   }
 
   @Override
-  public void addClient(GeneralRequest request, StreamObserver<GeneralResponse> responseObserver) {
-    super.addClient(request, responseObserver);
+  public void getOwnerInfo(GeneralRequest request,
+          StreamObserver<OwnerInfoProto> responseObserver) {
+    Party party = ownerSideRpc.ownParty();
+    LOG.info("Get owner info {}", party);
+    responseObserver.onNext(OwnerInfoProto.newBuilder().setId(party.getPartyId()).setEndpoint(endpoint).build());
+    responseObserver.onCompleted();
+  }
+
+  @Override
+  public void addOwner(OwnerInfoProto request, StreamObserver<GeneralResponse> responseObserver) {
+    LOG.info("Connect to owner {}", OneDBOwnerInfo.fromProto(request));
+    boolean ok = ownerSideRpc.addParty(OneDBOwnerInfo.fromProto(request));
+    ownerSideRpc.connect();
+    responseObserver.onNext(GeneralResponse.newBuilder().setStatus(ok ? 0 : 1).setMsg(ok ? "" : "Fail to add owner").build());
+    responseObserver.onCompleted();
   }
 
   @Override

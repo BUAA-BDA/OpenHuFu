@@ -43,6 +43,7 @@ public class PipeService extends PipeGrpc.PipeImplBase {
       @Override
       public void onError(Throwable t) {
         LOG.warn("Error: {}", t.getMessage());
+        t.printStackTrace();
         responseObserver.onCompleted();
       }
 

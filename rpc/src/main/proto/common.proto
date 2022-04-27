@@ -53,6 +53,11 @@ message ExpressionProto {
   }
 }
 
+message OwnerInfoProto {
+  int32 id = 1;
+  string endpoint = 2;
+}
+
 message JoinConditionProto {
   int32 type = 1;
   repeated int32 leftKey = 2;

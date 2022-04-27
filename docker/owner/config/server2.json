@@ -1,7 +1,7 @@
 {
   "id": 1,
   "port": 12345,
-  "hostname": "localhost",
+  "hostname": "owner2",
   "privatekeypath": "./cert/owner2.key",
   "certchainpath": "./cert/owner2.pem",
   "url": "jdbc:postgresql://postgres2:5432/postgres",

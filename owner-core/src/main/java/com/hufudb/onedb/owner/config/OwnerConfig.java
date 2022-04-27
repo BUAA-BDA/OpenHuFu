@@ -1,10 +1,11 @@
 package com.hufudb.onedb.owner.config;
 
-import java.io.File;
 import java.util.concurrent.ExecutorService;
 import com.hufudb.onedb.owner.OwnerService;
 import com.hufudb.onedb.rpc.Party;
 import com.hufudb.onedb.rpc.grpc.OneDBRpc;
+import io.grpc.ChannelCredentials;
+import io.grpc.ServerCredentials;
 
 public class OwnerConfig {
   public Party party;
@@ -14,7 +15,6 @@ public class OwnerConfig {
   public OwnerService userOwnerService;
   public OneDBRpc acrossOwnerService;
   public boolean useTLS;
-  public File certChain;
-  public File privateKey;
-  public File rootCert;
+  public ServerCredentials serverCerts;
+  public ChannelCredentials clientCerts;
 }

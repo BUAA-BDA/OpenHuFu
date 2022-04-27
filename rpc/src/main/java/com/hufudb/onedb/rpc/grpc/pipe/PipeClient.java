@@ -1,11 +1,14 @@
 package com.hufudb.onedb.rpc.grpc.pipe;
 
+import java.io.File;
 import com.hufudb.onedb.rpc.PipeGrpc;
 import com.hufudb.onedb.rpc.OneDBPipe.DataPacketProto;
 import com.hufudb.onedb.rpc.OneDBPipe.ResponseProto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.grpc.Channel;
+import io.grpc.ChannelCredentials;
+import io.grpc.Grpc;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 
@@ -22,11 +25,27 @@ public class PipeClient {
   }
 
   public PipeClient(String endpoint) {
-    this.stub = PipeGrpc.newStub(ManagedChannelBuilder.forTarget(endpoint).build());
+    this.stub = PipeGrpc.newStub(ManagedChannelBuilder.forTarget(endpoint).usePlaintext().build());
+    this.endpoint = endpoint;
+    LOG.info("Pipe connect to {} in plaintext", endpoint);
+  }
+
+  public PipeClient(String endpoint, ChannelCredentials certRoot) {
+    if (certRoot == null) {
+      this.stub = PipeGrpc.newStub(ManagedChannelBuilder.forTarget(endpoint).usePlaintext().build());
+      LOG.info("Pipe connect to {} in plaintext", endpoint);
+    } else {
+      this.stub = PipeGrpc.newStub(Grpc.newChannelBuilder(endpoint, certRoot).build());
+      LOG.info("Pipe connect to {} with TLS", endpoint);
+    }
     this.endpoint = endpoint;
   }
 
   public void connect() {
+    if (reqObserver != null) {
+      LOG.info("Connection has established");
+      return;
+    }
     this.reqObserver = stub.send(
       new StreamObserver<ResponseProto>() {
         @Override
@@ -39,11 +58,14 @@ public class PipeClient {
         @Override
         public void onError(Throwable t) {
           LOG.warn("Error in pipe: {}", t.getMessage());
+          t.printStackTrace();
+          PipeClient.this.reqObserver = null;
         }
 
         @Override
         public void onCompleted() {
           LOG.info("Close connection to {}", endpoint);
+          PipeClient.this.reqObserver = null;
         }
       }
     );
