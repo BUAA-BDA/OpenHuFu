@@ -1,6 +1,8 @@
 package com.hufudb.onedb.mpc.bristol;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import com.google.common.collect.ImmutableList;
 import org.slf4j.Logger;
@@ -14,15 +16,46 @@ public class BristolFile {
   final int in1;
   final int in2;
   final int out;
-  final ImmutableList<Gate> gates;
+  // final ImmutableList<Gate> gates;
+  final ImmutableList<ImmutableList<Gate>> gates;
 
-  private BristolFile(int gateNum, int wireNum, int in1, int in2, int out, ImmutableList<Gate> gates) {
+  private BristolFile(int gateNum, int wireNum, int in1, int in2, int out,
+      ImmutableList<ImmutableList<Gate>> gates) {
     this.gateNum = gateNum;
     this.wireNum = wireNum;
     this.in1 = in1;
     this.in2 = in2;
     this.out = out;
+    // this.gates = gates;
     this.gates = gates;
+  }
+
+  static ImmutableList<ImmutableList<Gate>> getConcurrentList(Gate[] gates, int[] inDegrees,
+      List<Integer>[] record, ImmutableList<Gate> initBatch) {
+    ImmutableList.Builder<ImmutableList<Gate>> builder = ImmutableList.builder();
+    ImmutableList<Gate> currentBatch = initBatch;
+    while (true) {
+      ImmutableList.Builder<Gate> nextBatch = ImmutableList.builder();
+      for (Gate gate : currentBatch) {
+        List<Integer> outs = record[gate.out];
+        if (outs == null) {
+          continue;
+        }
+        for (Integer o : outs) {
+          inDegrees[o]--;
+          if (inDegrees[o] == 0) {
+            nextBatch.add(gates[o]);
+          }
+        }
+      }
+      ImmutableList<Gate> batch = nextBatch.build();
+      if (batch.size() == 0) {
+        break;
+      }
+      currentBatch = batch;
+      builder.add(batch);
+    }
+    return builder.build();
   }
 
   public static BristolFile fromStream(InputStream inStream) {
@@ -32,7 +65,9 @@ public class BristolFile {
     int n1 = sc.nextInt();
     int n2 = sc.nextInt();
     int n3 = sc.nextInt();
-    ImmutableList.Builder<Gate> builder = ImmutableList.builderWithExpectedSize(gateNum);
+    Gate[] gates = new Gate[wireNum];
+    int[] inDegrees = new int[wireNum];
+    List<Integer>[] record = new ArrayList[wireNum];
     for (int i = 0; i < gateNum; ++i) {
       int inNum = sc.nextInt();
       int outNum = sc.nextInt();
@@ -42,27 +77,46 @@ public class BristolFile {
         int out = sc.nextInt();
         String type = sc.next();
         if (type.charAt(0) == 'X') {
-          builder.add(new Gate(in1, in2, out, GateType.XOR));
+          gates[out] = new Gate(in1, in2, out, GateType.XOR);
         } else if (type.charAt(0) == 'A') {
-          builder.add(new Gate(in1, in2, out, GateType.AND));
+          gates[out] = new Gate(in1, in2, out, GateType.AND);
         } else {
           LOG.error("Unsupported Gate {} in BristolFormat File", type);
         }
+        if (record[in1] == null) {
+          record[in1] = new ArrayList<>();
+        }
+        record[in1].add(out);
+        if (record[in2] == null) {
+          record[in2] = new ArrayList<>();
+        }
+        record[in2].add(out);
+        inDegrees[out] += 2;
       } else if (inNum == 1) {
         int in1 = sc.nextInt();
         int out = sc.nextInt();
         String type = sc.next();
         if (type.charAt(0) == 'I') {
-          builder.add(new Gate(in1, out, GateType.NOT));
+          gates[out] = new Gate(in1, out, GateType.NOT);
         } else {
-          LOG.error("Unsupported Gate {} in BristolFormat File", type);
+          LOG.error("Unsupported gate {} in BristolFormat File", type);
         }
+        if (record[in1] == null) {
+          record[in1] = new ArrayList<>();
+        }
+        record[in1].add(out);
+        inDegrees[out] += 1;
       } else {
         LOG.error("Unsupported gate input number {} in BristolFormat File", inNum);
       }
     }
     sc.close();
-    return new BristolFile(gateNum, wireNum, n1, n2, n3, builder.build());
+    ImmutableList.Builder<Gate> inputBuilder = ImmutableList.builder();
+    for (int i = 0; i < n1 + n2; ++i) {
+      inputBuilder.add(new Gate(0, i, GateType.UNSUPPORT));
+    }
+    return new BristolFile(gateNum, wireNum, n1, n2, n3,
+        getConcurrentList(gates, inDegrees, record, inputBuilder.build()));
   }
 
   public int getWireNum() {
@@ -85,7 +139,7 @@ public class BristolFile {
     return out;
   }
 
-  public ImmutableList<Gate> getGates() {
+  public ImmutableList<ImmutableList<Gate>> getGates() {
     return gates;
   }
 
@@ -101,7 +155,7 @@ public class BristolFile {
       this.out = out;
       this.type = type;
     }
-  
+
     public Gate(int in1, int out, GateType type) {
       this.in1 = in1;
       this.in2 = 0;

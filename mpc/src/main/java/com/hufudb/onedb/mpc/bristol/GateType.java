@@ -5,7 +5,8 @@ import com.google.common.collect.ImmutableMap;
 public enum GateType {
   AND("AND", 0),
   XOR("XOR", 1),
-  NOT("INV", 2);
+  NOT("INV", 2),
+  UNSUPPORT("UNSUPPORT", 3);
 
   private static final ImmutableMap<Integer, GateType> MAP;
 

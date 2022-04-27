@@ -23,17 +23,17 @@ import javax.crypto.Cipher;
  *   Participants: S and R
  *   Init DataPacket:
  *     S:
- *       Header: [ptoId: pkot, stepId: 0, senderId: S, recieveId: R, extraInfo: n]
- *       Payload: n secret values [x_0, x_1, ..., x_n-1] 
+ *       Header: [ptoId: pkot, stepId: 0, senderId: S, recieveId: R, extraInfo: flag]
+ *       Payload: n secret values [x_0, x_1, ..., x_n-1]
  *     R: 
- *       Header: [ptoId: pkot, stepId: 0, senderId: S, recieveId: R, extraInfo: select bits length m]
- *       Payload: select bits b
+ *       Header: [ptoId: pkot, stepId: 0, senderId: S, recieveId: R, extraInfo: flag]
+ *       Payload: [select bits length, select bits b]
  *   Step1: R generates (sk, pk) and n - 1 random pk', sends [pk_0, pk_1, .. pk_n-1]to S (pk_b = pk and others are filled with pk')
  *     Send DataPacket Format:
- *       Header: [ptoId: pkot, stepId: 1, senderId: R, recieveId: S, extraInfo: n] Payload: [pk_0, ..., pk_n-1]
+ *       Header: [ptoId: pkot, stepId: 1, senderId: R, recieveId: S, extraInfo: flag] Payload: [pk_0, ..., pk_n-1]
  *   Step2: S receives pk list, for each x_i, encrypts it with pk_i as e_i, and sends [e_0, ..., e_n-1] to R
  *     Send DataPacket Format: 
- *       Header: [ptoId, pkot, stepId: 2, senderId, S, receivedId: R, extraInfo: n] Payload: [e_0, ..., e_n-1]
+ *       Header: [ptoId, pkot, stepId: 2, senderId, S, receivedId: R, extraInfo: flag] Payload: [e_0, ..., e_n-1]
  *   Step3: R receives e list, and uses sk to decrypt e_b and get the value
  *     Result DataPacket Format: Header: [ptoId, pkot, stepId: 3]
  *    Payload: [x_b]
@@ -48,10 +48,11 @@ public class PublicKeyOT extends ProtocolExecutor {
   // step 0, run on S
   DataPacketHeader storeSecrets(DataPacket packet, OTMeta meta) {
     DataPacketHeader header = packet.getHeader();
+    meta.extraInfo = header.getExtraInfo();
     meta.secrets = packet.getPayload();
     LOG.debug("Party [{}] store secrets", rpc.ownParty());
     DataPacketHeader expect = new DataPacketHeader(header.getTaskId(), header.getPtoId(), 1,
-        meta.secrets.size(), header.getReceiverId(), header.getSenderId());
+        meta.extraInfo, header.getReceiverId(), header.getSenderId());
     LOG.debug("Party [{}] wait for packet {}", rpc.ownParty(), expect);
     return expect;
   }
@@ -59,17 +60,18 @@ public class PublicKeyOT extends ProtocolExecutor {
   // step 1, run on R
   DataPacketHeader generateKeys(DataPacket packet, OTMeta meta) {
     DataPacketHeader header = packet.getHeader();
-    int m = (int) header.getExtraInfo();
+    meta.extraInfo = header.getExtraInfo();
+    int m = OneDBCodec.decodeInt(packet.getPayload().get(0));
     int n = 1 << m;
     int mask = n - 1;
-    int b = OneDBCodec.decodeInt(packet.getPayload().get(0)) & mask;
+    int b = OneDBCodec.decodeInt(packet.getPayload().get(1)) & mask;
     LOG.debug("Party [{}] generate [{}] public keys, a private key for [{}]", rpc.ownParty(), n, b);
     List<byte[]> payloads = new ArrayList<>();
     PrivateKey privateKey = null;
     try {
       for (int i = 0; i < n; ++i) {
         KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
-        generator.initialize(2048);
+        generator.initialize(1024);
         KeyPair pair = generator.generateKeyPair();
         payloads.add(pair.getPublic().getEncoded());
         if (i == b) {
@@ -82,13 +84,13 @@ public class PublicKeyOT extends ProtocolExecutor {
     }
     meta.b = b;
     meta.key = privateKey;
-    DataPacketHeader outHeader = new DataPacketHeader(header.getTaskId(), header.getPtoId(), 1, n,
-        header.getReceiverId(), header.getSenderId());
+    DataPacketHeader outHeader = new DataPacketHeader(header.getTaskId(), header.getPtoId(), 1,
+        meta.extraInfo, header.getReceiverId(), header.getSenderId());
     rpc.send(DataPacket.fromByteArrayList(outHeader, payloads));
     LOG.debug("Party [{}] send {}", rpc.ownParty(), outHeader);
     // waiting for receving a packet with below header
-    DataPacketHeader expect = new DataPacketHeader(header.getTaskId(), header.getPtoId(), 2, n,
-        outHeader.getReceiverId(), outHeader.getSenderId());
+    DataPacketHeader expect = new DataPacketHeader(header.getTaskId(), header.getPtoId(), 2,
+        meta.extraInfo, outHeader.getReceiverId(), outHeader.getSenderId());
     LOG.debug("Party [{}] wait for packet {}", rpc.ownParty(), expect);
     return expect;
   }
@@ -97,12 +99,12 @@ public class PublicKeyOT extends ProtocolExecutor {
   DataPacketHeader encryptSecrets(DataPacket packet, OTMeta meta) {
     DataPacketHeader header = packet.getHeader();
     List<byte[]> secrets = meta.secrets;
-    int n = (int) header.getExtraInfo();
     List<byte[]> publicKeyBytes = packet.getPayload();
+    int n = publicKeyBytes.size();
     List<byte[]> encryptedSecrets = new ArrayList<>();
     KeyFactory keyFactory = null;
-    LOG.debug("Party [{}] encrypts secrets with public keys from Party [{}]",
-        rpc.ownParty(), header.getSenderId());
+    LOG.debug("Party [{}] encrypts secrets with public keys from Party [{}]", rpc.ownParty(),
+        header.getSenderId());
     try {
       keyFactory = KeyFactory.getInstance("RSA");
       for (int i = 0; i < n; ++i) {
@@ -117,8 +119,8 @@ public class PublicKeyOT extends ProtocolExecutor {
       e.printStackTrace();
       return null;
     }
-    DataPacketHeader outHeader = new DataPacketHeader(header.getTaskId(), header.getPtoId(), 2, n,
-        header.getReceiverId(), header.getSenderId());
+    DataPacketHeader outHeader = new DataPacketHeader(header.getTaskId(), header.getPtoId(), 2,
+        meta.extraInfo, header.getReceiverId(), header.getSenderId());
     rpc.send(DataPacket.fromByteArrayList(outHeader, encryptedSecrets));
     LOG.debug("Party [{}] send {}", rpc.ownParty(), outHeader);
     return null;
@@ -174,6 +176,7 @@ public class PublicKeyOT extends ProtocolExecutor {
 
   static class OTMeta {
     int b;
+    long extraInfo;
     PrivateKey key;
     List<byte[]> secrets;
 

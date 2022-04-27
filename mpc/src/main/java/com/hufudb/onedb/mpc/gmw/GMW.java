@@ -1,9 +1,11 @@
 package com.hufudb.onedb.mpc.gmw;
 
+import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.mpc.ProtocolExecutor;
 import com.hufudb.onedb.mpc.ProtocolType;
@@ -39,10 +41,12 @@ import com.hufudb.onedb.rpc.utils.DataPacketHeader;
  */
 public class GMW extends ProtocolExecutor {
   final PublicKeyOT otExecutor;
+  final ExecutorService threadPool;
 
-  protected GMW(Rpc rpc, PublicKeyOT otExecutor) {
+  protected GMW(Rpc rpc, PublicKeyOT otExecutor, ExecutorService service) {
     super(rpc, ProtocolType.GMW);
     this.otExecutor = otExecutor;
+    this.threadPool = service;
   }
 
   boolean isA(DataPacketHeader initHeader) {
@@ -90,67 +94,96 @@ public class GMW extends ProtocolExecutor {
     LOG.debug("Party [{}] get shares from Party [{}]", rpc.ownParty(), packet.getHeader().getSenderId());
   }
 
-  void evaluateAnd(GMWMeta meta, int in1, int in2, int out, boolean isA) {
-    BitSet wireSet = meta.wireSet;
-    DataPacketHeader initHeader = meta.initHeader;
-    if (meta.isA) {
-      boolean rb = random.nextBoolean();
-      ImmutableList.Builder<byte[]> builder = ImmutableList.builder();
-      builder.add(
-          OneDBCodec.encodeBoolean(rb ^ ((wireSet.get(in1) ^ false) & (wireSet.get(in2) ^ false))));
-      builder.add(
-          OneDBCodec.encodeBoolean(rb ^ ((wireSet.get(in1) ^ false) & (wireSet.get(in2) ^ true))));
-      builder.add(
-          OneDBCodec.encodeBoolean(rb ^ ((wireSet.get(in1) ^ true) & (wireSet.get(in2) ^ false))));
-      builder.add(
-          OneDBCodec.encodeBoolean(rb ^ ((wireSet.get(in1) ^ true) & (wireSet.get(in2) ^ true))));
-      DataPacketHeader otHeader = new DataPacketHeader(initHeader.getTaskId(),
-          ProtocolType.PK_OT.getId(), 0, 4L, initHeader.getSenderId(), initHeader.getReceiverId());
-      otExecutor.run(DataPacket.fromByteArrayList(otHeader, builder.build()));
-      wireSet.set(out, rb);
-    } else {
-      int sel = (wireSet.get(in1) ? 2 : 0) + (wireSet.get(in2) ? 1 : 0);
-      DataPacketHeader otHeader = new DataPacketHeader(initHeader.getTaskId(),
-          ProtocolType.PK_OT.getId(), 0, 2, initHeader.getReceiverId(), initHeader.getSenderId());
-      byte[] selBits = OneDBCodec.encodeInt(sel);
-      List<byte[]> result =
-          otExecutor.run(DataPacket.fromByteArrayList(otHeader, ImmutableList.of(selBits)));
-      byte[] res = result.get(0);
-      wireSet.set(out, OneDBCodec.decodeBoolean(res));
-    }
+  Callable<Boolean> evaluateAnd(GMWMeta meta, int in1, int in2, int out) {
+    return new Callable<Boolean>() {
+      @Override
+      public Boolean call() throws Exception {
+        BitSet wireSet = meta.wireSet;
+        DataPacketHeader initHeader = meta.initHeader;
+        if (meta.isA) {
+          boolean rb = random.nextBoolean();
+          ImmutableList.Builder<byte[]> builder = ImmutableList.builder();
+          builder.add(
+              OneDBCodec.encodeBoolean(rb ^ ((wireSet.get(in1) ^ false) & (wireSet.get(in2) ^ false))));
+          builder.add(
+              OneDBCodec.encodeBoolean(rb ^ ((wireSet.get(in1) ^ false) & (wireSet.get(in2) ^ true))));
+          builder.add(
+              OneDBCodec.encodeBoolean(rb ^ ((wireSet.get(in1) ^ true) & (wireSet.get(in2) ^ false))));
+          builder.add(
+              OneDBCodec.encodeBoolean(rb ^ ((wireSet.get(in1) ^ true) & (wireSet.get(in2) ^ true))));
+          DataPacketHeader otHeader = new DataPacketHeader(initHeader.getTaskId(),
+              ProtocolType.PK_OT.getId(), 0, out, initHeader.getSenderId(), initHeader.getReceiverId());
+          otExecutor.run(DataPacket.fromByteArrayList(otHeader, builder.build()));
+          wireSet.set(out, rb);
+        } else {
+          int sel = (wireSet.get(in1) ? 2 : 0) + (wireSet.get(in2) ? 1 : 0);
+          DataPacketHeader otHeader = new DataPacketHeader(initHeader.getTaskId(),
+              ProtocolType.PK_OT.getId(), 0, out, initHeader.getReceiverId(), initHeader.getSenderId());
+          byte[] selBits = OneDBCodec.encodeInt(sel);
+          List<byte[]> result =
+              otExecutor.run(DataPacket.fromByteArrayList(otHeader, ImmutableList.of(OneDBCodec.encodeInt(2), selBits)));
+          byte[] res = result.get(0);
+          wireSet.set(out, OneDBCodec.decodeBoolean(res));
+        }
+        return true;
+      }
+    };
   }
 
-  void evaluateXor(BitSet wireSet, int in1, int in2, int out) {
-    wireSet.set(out, wireSet.get(in1) ^ wireSet.get(in2));
+  Callable<Boolean> evaluateXor(GMWMeta meta, int in1, int in2, int out) {
+    return new Callable<Boolean>() {
+      @Override
+      public Boolean call() throws Exception {
+        meta.setBitSet(out, meta.getBitSet(in1) ^ meta.getBitSet(in2));
+        return true;
+      }
+    };
   }
 
-  void evaluateNot(BitSet wireSet, int in, int out, boolean isA) {
-    if (isA) {
-      wireSet.set(out, !wireSet.get(in));
-    } else {
-      wireSet.set(out, wireSet.get(in));
-    }
+  Callable<Boolean> evaluateNot(GMWMeta meta, int in, int out) {
+    return new Callable<Boolean>() {
+      @Override
+      public Boolean call() throws Exception {
+        if (meta.isA) {
+          meta.setBitSet(out, !meta.getBitSet(in));
+        } else {
+          meta.setBitSet(out, meta.getBitSet(in));
+        }
+        return true;
+      }
+    };
   }
 
   void evaluateCircuit(GMWMeta meta) {
-    ImmutableList<Gate> gates = meta.bristol.getGates();
-    final BitSet wireSet = meta.wireSet;
+    ImmutableList<ImmutableList<Gate>> concurrentGates = meta.bristol.getGates();
     LOG.debug("Party [{}] starts to evaluate circuit", rpc.ownParty());
-    // todo: optimze with concurrent
-    for (Gate gate : gates) {
-      switch (gate.type) {
-        case AND:
-          evaluateAnd(meta, gate.in1, gate.in2, gate.out, meta.isA);
-          break;
-        case XOR:
-          evaluateXor(wireSet, gate.in1, gate.in2, gate.out);
-          break;
-        case NOT:
-          evaluateNot(wireSet, gate.in1, gate.out, meta.isA);
-          break;
-        default:
-          LOG.error("Unsupported gate type {}", gate.toString());
-          throw new UnsupportedOperationException("Unsupported gate type");
+    for (ImmutableList<Gate> gates : concurrentGates) {
+      List<Callable<Boolean>> concurrentTasks = new ArrayList<>();
+      LOG.debug("Party [{}] evaluate batch circuit", rpc.ownParty());
+      for (Gate gate : gates) {
+        switch (gate.type) {
+          case AND:
+            concurrentTasks.add(evaluateAnd(meta, gate.in1, gate.in2, gate.out));
+            break;
+          case XOR:
+            concurrentTasks.add(evaluateXor(meta, gate.in1, gate.in2, gate.out));
+            break;
+          case NOT:
+            concurrentTasks.add(evaluateNot(meta, gate.in1, gate.out));
+            break;
+          default:
+            LOG.error("Unsupported gate type {}", gate.toString());
+            throw new UnsupportedOperationException("Unsupported gate type");
+        }
+      }
+      try {
+        List<Future<Boolean>> futures = threadPool.invokeAll(concurrentTasks);
+        for (Future<Boolean> f : futures) {
+          f.get();
+        }
+      } catch (Exception e) {
+        LOG.error("Error when evaluate circuit in GMW: {}", e.getMessage());
+        e.printStackTrace();
       }
     }
   }
@@ -199,6 +232,14 @@ public class GMW extends ProtocolExecutor {
       for (int i = 0; i < in2Size; ++i) {
         wireSet.set(i + in1Size, in2.get(i));
       }
+    }
+
+    synchronized void setBitSet(int i, boolean value) {
+      wireSet.set(i, value);
+    }
+
+    synchronized boolean getBitSet(int i) {
+      return wireSet.get(i);
     }
   }
 }

@@ -37,14 +37,14 @@ public class PublicKeyOTTest {
   public static OneDBRandom rand = new BasicRandom();
 
   public DataPacket generateInitPacket4Sender(int sender, int receiver, List<String> secrets) {
-    DataPacketHeader header = new DataPacketHeader(0, ProtocolType.PK_OT.getId(), 0, secrets.size(), sender, receiver);
+    DataPacketHeader header = new DataPacketHeader(0, ProtocolType.PK_OT.getId(), 0, 0, sender, receiver);
     List<byte[]> payloads = secrets.stream().map(s -> s.getBytes()).collect(Collectors.toList());
     return DataPacket.fromByteArrayList(header, payloads);
   }
 
   public DataPacket generateInitPacket4Receiver(int sender, int receiver, int select) {
-    DataPacketHeader header = new DataPacketHeader(0, ProtocolType.PK_OT.getId(), 0, 2, sender, receiver);
-    return DataPacket.fromByteArrayList(header, ImmutableList.of(OneDBCodec.encodeInt(select)));
+    DataPacketHeader header = new DataPacketHeader(0, ProtocolType.PK_OT.getId(), 0, 0, sender, receiver);
+    return DataPacket.fromByteArrayList(header, ImmutableList.of(OneDBCodec.encodeInt(2), OneDBCodec.encodeInt(select)));
   }
 
   @Test

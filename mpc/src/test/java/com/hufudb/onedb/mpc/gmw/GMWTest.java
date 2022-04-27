@@ -66,10 +66,12 @@ public class GMWTest {
       grpcCleanup.register(server1);
       rpc0.connect();
       rpc1.connect();
+      ExecutorService threadPool0 = Executors.newFixedThreadPool(4);
+      ExecutorService threadPool1 = Executors.newFixedThreadPool(4);
       PublicKeyOT otSender = new PublicKeyOT(rpc0);
       PublicKeyOT otReceiver = new PublicKeyOT(rpc1);
-      GMW gmwSender = new GMW(rpc0, otSender);
-      GMW gmwReceiver = new GMW(rpc1, otReceiver);
+      GMW gmwSender = new GMW(rpc0, otSender, threadPool0);
+      GMW gmwReceiver = new GMW(rpc1, otReceiver, threadPool1);
       ExecutorService service = Executors.newFixedThreadPool(2);
       final int a = 4;
       final int b = 2;
