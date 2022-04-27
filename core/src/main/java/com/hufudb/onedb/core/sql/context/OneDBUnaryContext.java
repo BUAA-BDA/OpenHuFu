@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.data.FieldType;
-import com.hufudb.onedb.core.data.query.QueryableDataSet;
+import com.hufudb.onedb.core.implementor.OneDBImplementor;
+import com.hufudb.onedb.core.implementor.QueryableDataSet;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
-import com.hufudb.onedb.core.sql.implementor.OneDBImplementor;
 
 /*
  * context for intermediate process with single input relation (e.g., outer layer of nested

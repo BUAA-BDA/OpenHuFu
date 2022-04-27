@@ -1,10 +1,10 @@
-package com.hufudb.onedb.core.data.query.aggregate;
+package com.hufudb.onedb.core.implementor.aggregate;
 
 import java.util.List;
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Row;
 import com.hufudb.onedb.core.data.Row.RowBuilder;
-import com.hufudb.onedb.core.sql.expression.ExpressionInterpreter;
+import com.hufudb.onedb.core.implementor.plaintext.PlaintextInterpreter;
 
 public class SingleAggregator implements Aggregator {
 
@@ -29,7 +29,7 @@ public class SingleAggregator implements Aggregator {
   public Row aggregate() {
     RowBuilder builder = Row.newBuilder(aggFunc.size());
     for (int i = 0; i < aggFunc.size(); ++i) {
-      builder.set(i, ExpressionInterpreter.cast(aggFunc.get(i).aggregate(), types.get(i)));
+      builder.set(i, PlaintextInterpreter.cast(aggFunc.get(i).aggregate(), types.get(i)));
     }
     return builder.build();
   }

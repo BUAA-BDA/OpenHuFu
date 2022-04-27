@@ -1,4 +1,4 @@
-package com.hufudb.onedb.core.data.query.sort;
+package com.hufudb.onedb.core.sql.rel;
 
 import org.apache.calcite.rel.RelFieldCollation;
 

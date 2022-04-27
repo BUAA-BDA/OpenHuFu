@@ -1,9 +1,11 @@
-package com.hufudb.onedb.core.data.query.aggregate;
+package com.hufudb.onedb.core.implementor.plaintext;
 
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.data.Row;
-import com.hufudb.onedb.core.data.query.QueryableDataSet;
+import com.hufudb.onedb.core.implementor.QueryableDataSet;
+import com.hufudb.onedb.core.implementor.aggregate.AggregateFunction;
+import com.hufudb.onedb.core.implementor.aggregate.Aggregator;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +28,7 @@ public class PlaintextAggregation {
     // aggregate input rows
     Header.Builder builder = Header.newBuilder();
     aggregator.getOutputTypes().stream().forEach(type -> builder.add("", type));
-    QueryableDataSet result = QueryableDataSet.fromHeader(builder.build());
+    QueryableDataSet result = PlaintextQueryableDataSet.fromHeader(builder.build());
     List<Row> rows = input.getRows();
     for (Row row : rows) {
       aggregator.add(row);

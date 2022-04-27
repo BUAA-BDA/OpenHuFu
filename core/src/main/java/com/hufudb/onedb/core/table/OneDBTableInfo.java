@@ -97,6 +97,15 @@ public class OneDBTableInfo {
     }
   }
 
+  public int ownerSize() {
+    try {
+      lock.readLock().lock();
+      return tableList.size();
+    } finally {
+      lock.readLock().unlock();
+    }
+  }
+
   public void removeOwner(OwnerClient client) {
     List<Pair<OwnerClient, String>> newList = new ArrayList<>();
     lock.readLock().lock();

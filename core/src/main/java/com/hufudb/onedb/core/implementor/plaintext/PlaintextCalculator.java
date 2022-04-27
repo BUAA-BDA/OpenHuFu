@@ -1,10 +1,9 @@
-package com.hufudb.onedb.core.data.query.calculate;
+package com.hufudb.onedb.core.implementor.plaintext;
 
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Row;
 import com.hufudb.onedb.core.data.Row.RowBuilder;
-import com.hufudb.onedb.core.data.query.QueryableDataSet;
-import com.hufudb.onedb.core.sql.expression.ExpressionInterpreter;
+import com.hufudb.onedb.core.implementor.QueryableDataSet;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import java.util.List;
 
@@ -21,8 +20,8 @@ public class PlaintextCalculator {
     for (int i = 0; i < length; ++i) {
       builder.set(
           i,
-          ExpressionInterpreter.cast(
-              ExpressionInterpreter.implement(row, calcs.get(i)), calcs.get(i).getOutType()));
+          PlaintextInterpreter.cast(
+              PlaintextInterpreter.implement(row, calcs.get(i)), calcs.get(i).getOutType()));
     }
     return builder.build();
   }

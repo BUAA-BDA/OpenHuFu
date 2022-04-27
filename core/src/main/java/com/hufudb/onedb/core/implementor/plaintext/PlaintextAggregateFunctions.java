@@ -1,4 +1,4 @@
-package com.hufudb.onedb.core.data.query.aggregate;
+package com.hufudb.onedb.core.implementor.plaintext;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import com.hufudb.onedb.core.data.Row;
 import com.hufudb.onedb.core.data.Row.RowBuilder;
-import com.hufudb.onedb.core.sql.expression.ExpressionInterpreter;
+import com.hufudb.onedb.core.implementor.aggregate.AggregateFunction;
 import com.hufudb.onedb.core.sql.expression.OneDBAggCall;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.expression.OneDBOperator;
@@ -330,7 +330,7 @@ public class PlaintextAggregateFunctions {
       for (int i = 0; i < in.size(); ++i) {
         inputRow.set(i, in.get(i).aggregate());
       }
-      return ExpressionInterpreter.implement(inputRow.build(), exp);
+      return PlaintextInterpreter.implement(inputRow.build(), exp);
     }
 
     @Override

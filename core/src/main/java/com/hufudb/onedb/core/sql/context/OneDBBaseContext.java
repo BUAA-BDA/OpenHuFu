@@ -1,10 +1,11 @@
 package com.hufudb.onedb.core.sql.context;
 
 import java.util.List;
-import com.hufudb.onedb.core.data.query.QueryableDataSet;
+import com.hufudb.onedb.core.implementor.OneDBImplementor;
+import com.hufudb.onedb.core.implementor.QueryableDataSet;
+import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
-import com.hufudb.onedb.core.sql.implementor.OneDBImplementor;
-import com.hufudb.onedb.core.sql.implementor.utils.OneDBJoinInfo;
+import com.hufudb.onedb.core.table.OneDBTableInfo;
 
 
 /*
@@ -48,8 +49,8 @@ public abstract class OneDBBaseContext implements OneDBContext {
   }
 
   @Override
-  public void setTableName(String tableName) {
-    LOG.error("not support setTableName");
+  public void setTableInfo(OneDBTableInfo info) {
+    LOG.error("not support setTableInfo");
     throw new UnsupportedOperationException();
   }
 

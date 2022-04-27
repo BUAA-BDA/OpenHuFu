@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.data.FieldType;
-import com.hufudb.onedb.core.data.query.QueryableDataSet;
+import com.hufudb.onedb.core.implementor.OneDBImplementor;
+import com.hufudb.onedb.core.implementor.QueryableDataSet;
+import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
-import com.hufudb.onedb.core.sql.implementor.OneDBImplementor;
-import com.hufudb.onedb.core.sql.implementor.utils.OneDBJoinInfo;
 
 /*
  * context for join
@@ -173,7 +173,7 @@ public class OneDBBinaryContext extends OneDBBaseContext {
   public QueryableDataSet implement(OneDBImplementor implementor) {
     QueryableDataSet leftResult = left.implement(implementor);
     QueryableDataSet rightResult = right.implement(implementor);
-    QueryableDataSet result = QueryableDataSet.join(implementor, leftResult, rightResult, joinInfo);
+    QueryableDataSet result = leftResult.join(implementor, rightResult, joinInfo);
     if (whereExps != null && !whereExps.isEmpty()) {
       result = result.filter(implementor, whereExps);
     }

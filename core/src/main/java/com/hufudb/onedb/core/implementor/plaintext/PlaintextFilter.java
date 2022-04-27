@@ -1,8 +1,7 @@
-package com.hufudb.onedb.core.data.query.filter;
+package com.hufudb.onedb.core.implementor.plaintext;
 
 import com.hufudb.onedb.core.data.Row;
-import com.hufudb.onedb.core.data.query.QueryableDataSet;
-import com.hufudb.onedb.core.sql.expression.ExpressionInterpreter;
+import com.hufudb.onedb.core.implementor.QueryableDataSet;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import java.util.List;
 
@@ -16,7 +15,7 @@ public class PlaintextFilter {
   public static boolean filterRow(Row row, List<OneDBExpression> filters) {
     boolean result = true;
     for (OneDBExpression filter : filters) {
-      result = result && (Boolean) ExpressionInterpreter.implement(row, filter);
+      result = result && (Boolean) PlaintextInterpreter.implement(row, filter);
       if (!result) {
         return false;
       }

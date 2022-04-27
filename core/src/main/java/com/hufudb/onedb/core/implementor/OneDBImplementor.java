@@ -1,12 +1,11 @@
-package com.hufudb.onedb.core.sql.implementor;
+package com.hufudb.onedb.core.implementor;
 
 import java.util.List;
 import com.hufudb.onedb.core.data.FieldType;
-import com.hufudb.onedb.core.data.query.QueryableDataSet;
+import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.sql.context.OneDBLeafContext;
 import com.hufudb.onedb.core.sql.context.OneDBUnaryContext;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
-import com.hufudb.onedb.core.sql.implementor.utils.OneDBJoinInfo;
 
 public interface OneDBImplementor {
   QueryableDataSet join(QueryableDataSet left, QueryableDataSet right, OneDBJoinInfo joinInfo);

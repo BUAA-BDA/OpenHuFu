@@ -1,4 +1,4 @@
-package com.hufudb.onedb.core.data.query.aggregate;
+package com.hufudb.onedb.core.implementor.aggregate;
 
 import java.util.List;
 import com.hufudb.onedb.core.data.FieldType;

@@ -1,8 +1,6 @@
 package com.hufudb.onedb.core.sql.rel;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.hufudb.onedb.core.data.query.sort.OneDBOrder;
 import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelOptCost;
 import org.apache.calcite.plan.RelOptPlanner;
