@@ -7,6 +7,12 @@ import com.hufudb.onedb.rpc.OneDBCommon.ExpressionProto;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/*
+ * interface for all expression node
+ * add a new expression need to:
+ * 1. add an entry in OneDBTranslator.java,
+ * 2. add an entry in Interpreter
+ */
 public interface OneDBExpression {
   static Header generateHeader(List<OneDBExpression> exps) {
     Header.Builder builder = Header.newBuilder();

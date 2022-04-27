@@ -1,6 +1,5 @@
 package com.hufudb.onedb.core.sql.schema;
 
-import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.zk.ZkConfig;
 import java.util.ArrayList;
 import java.util.List;
