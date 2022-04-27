@@ -2,7 +2,7 @@ package com.hufudb.onedb.core.sql.rel;
 
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.data.FieldType;
-import com.hufudb.onedb.core.query.implementor.utils.OneDBJoinInfo;
+import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.sql.context.OneDBLeafContext;
 import com.hufudb.onedb.core.sql.context.OneDBBinaryContext;
 import com.hufudb.onedb.core.sql.context.OneDBContext;
@@ -13,6 +13,7 @@ import com.hufudb.onedb.core.sql.expression.OneDBJoinType;
 import com.hufudb.onedb.core.sql.expression.OneDBOperator;
 import com.hufudb.onedb.core.sql.expression.OneDBReference;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
+import com.hufudb.onedb.core.table.OneDBTableInfo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -102,8 +103,8 @@ public interface OneDBRel extends RelNode {
       }
     }
 
-    public void setTableName(String tableName) {
-      currentContext.setTableName(tableName);
+    public void setTableInfo(OneDBTableInfo info) {
+      currentContext.setTableInfo(info);
     }
 
     public void setSelectExps(List<OneDBExpression> exps) {

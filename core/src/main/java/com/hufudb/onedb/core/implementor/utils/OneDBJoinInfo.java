@@ -1,4 +1,4 @@
-package com.hufudb.onedb.core.query.implementor.utils;
+package com.hufudb.onedb.core.implementor.utils;
 
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.expression.OneDBJoinType;

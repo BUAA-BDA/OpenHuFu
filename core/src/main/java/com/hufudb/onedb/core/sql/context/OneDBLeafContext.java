@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import com.hufudb.onedb.core.data.FieldType;
-import com.hufudb.onedb.core.query.QueryableDataSet;
-import com.hufudb.onedb.core.query.implementor.OneDBImplementor;
+import com.hufudb.onedb.core.implementor.OneDBImplementor;
+import com.hufudb.onedb.core.implementor.QueryableDataSet;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
+import com.hufudb.onedb.core.table.OneDBTableInfo;
 import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
 
 /*
@@ -15,7 +16,7 @@ import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
 public class OneDBLeafContext extends OneDBBaseContext {
   OneDBContext parent;
   OneDBContextType contextType;
-  String tableName;
+  OneDBTableInfo info;
   List<OneDBExpression> selectExps = new ArrayList<>();
   List<OneDBExpression> whereExps = new ArrayList<>();
   List<OneDBExpression> aggExps = new ArrayList<>();
@@ -28,26 +29,9 @@ public class OneDBLeafContext extends OneDBBaseContext {
     super();
   }
 
-  OneDBLeafContext(OneDBQueryProto proto) {
-    super();
-    this.tableName = proto.getTableName();
-    this.selectExps = OneDBExpression.fromProto(proto.getSelectExpList());
-    this.whereExps = OneDBExpression.fromProto(proto.getWhereExpList());
-    this.aggExps = OneDBExpression.fromProto(proto.getAggExpList());
-    this.groups = proto.getGroupList();
-    this.orders = proto.getOrderList();
-    this.fetch = proto.getFetch();
-    this.offset = proto.getOffset();
-    LOG.warn("should not be here");
-  }
-
-  public static OneDBContext fromProto(OneDBQueryProto proto) {
-    return new OneDBLeafContext(proto);
-  }
-
   public OneDBQueryProto toProto() {
     OneDBQueryProto.Builder builder = OneDBQueryProto.newBuilder();
-    builder.setTableName(tableName).addAllSelectExp(OneDBExpression.toProto(selectExps))
+    builder.setTableName(info.getName()).addAllSelectExp(OneDBExpression.toProto(selectExps))
         .setFetch(fetch).setOffset(offset);
     if (whereExps != null) {
       builder.addAllWhereExp(OneDBExpression.toProto(whereExps));
@@ -81,12 +65,12 @@ public class OneDBLeafContext extends OneDBBaseContext {
 
   @Override
   public String getTableName() {
-    return tableName;
+    return info.getName();
   }
 
   @Override
-  public void setTableName(String tableName) {
-    this.tableName = tableName;
+  public void setTableInfo(OneDBTableInfo info) {
+    this.info = info;
   }
 
   @Override
@@ -191,12 +175,17 @@ public class OneDBLeafContext extends OneDBBaseContext {
 
   @Override
   public QueryableDataSet implement(OneDBImplementor implementor) {
-    OneDBUnaryContext unary = implementor.rewriteLeaf(this);
-    QueryableDataSet result = implementor.leafQuery(this);
-    if (unary != null) {
-      return unary.implementInternal(implementor, result);
+    // only horizontal partitioned tables need rewrite
+    if (info.ownerSize() > 1) {
+      OneDBUnaryContext unary = implementor.rewriteLeaf(this);
+      QueryableDataSet result = implementor.leafQuery(this);
+      if (unary != null) {
+        return unary.implementInternal(implementor, result);
+      } else {
+        return result;
+      }
     } else {
-      return result;
+      return implementor.leafQuery(this);
     }
   }
 }

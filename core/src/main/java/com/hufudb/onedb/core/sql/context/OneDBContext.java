@@ -2,10 +2,11 @@ package com.hufudb.onedb.core.sql.context;
 
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Header;
-import com.hufudb.onedb.core.query.QueryableDataSet;
-import com.hufudb.onedb.core.query.implementor.OneDBImplementor;
-import com.hufudb.onedb.core.query.implementor.utils.OneDBJoinInfo;
+import com.hufudb.onedb.core.implementor.OneDBImplementor;
+import com.hufudb.onedb.core.implementor.QueryableDataSet;
+import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
+import com.hufudb.onedb.core.table.OneDBTableInfo;
 import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,7 +34,7 @@ public interface OneDBContext {
 
   String getTableName();
 
-  void setTableName(String tableName);
+  void setTableInfo(OneDBTableInfo info);
 
   List<OneDBExpression> getSelectExps();
 

@@ -1,4 +1,4 @@
-package com.hufudb.onedb.core.query.implementor.plaintext;
+package com.hufudb.onedb.core.implementor.plaintext;
 
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.client.OneDBClient;
@@ -8,14 +8,9 @@ import com.hufudb.onedb.core.data.BasicDataSet;
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.data.StreamBuffer;
-import com.hufudb.onedb.core.query.QueryableDataSet;
-import com.hufudb.onedb.core.query.aggregate.PlaintextAggregation;
-import com.hufudb.onedb.core.query.calculate.PlaintextCalculator;
-import com.hufudb.onedb.core.query.filter.PlaintextFilter;
-import com.hufudb.onedb.core.query.implementor.OneDBImplementor;
-import com.hufudb.onedb.core.query.implementor.utils.OneDBJoinInfo;
-import com.hufudb.onedb.core.query.join.PlaintextNestedLoopJoin;
-import com.hufudb.onedb.core.query.sort.PlaintextSort;
+import com.hufudb.onedb.core.implementor.OneDBImplementor;
+import com.hufudb.onedb.core.implementor.QueryableDataSet;
+import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.sql.expression.OneDBAggCall;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.expression.OneDBOpType;
