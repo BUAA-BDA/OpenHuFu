@@ -2,6 +2,7 @@ package com.hufudb.onedb.core.sql.rel;
 
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.data.FieldType;
+import com.hufudb.onedb.core.query.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.sql.context.OneDBLeafContext;
 import com.hufudb.onedb.core.sql.context.OneDBBinaryContext;
 import com.hufudb.onedb.core.sql.context.OneDBContext;
@@ -11,7 +12,6 @@ import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.expression.OneDBJoinType;
 import com.hufudb.onedb.core.sql.expression.OneDBOperator;
 import com.hufudb.onedb.core.sql.expression.OneDBReference;
-import com.hufudb.onedb.core.sql.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
 import java.util.ArrayList;
 import java.util.List;

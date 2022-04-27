@@ -1,7 +1,7 @@
-package com.hufudb.onedb.core.data.query.filter;
+package com.hufudb.onedb.core.query.filter;
 
 import com.hufudb.onedb.core.data.Row;
-import com.hufudb.onedb.core.data.query.QueryableDataSet;
+import com.hufudb.onedb.core.query.QueryableDataSet;
 import com.hufudb.onedb.core.sql.expression.ExpressionInterpreter;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import java.util.List;

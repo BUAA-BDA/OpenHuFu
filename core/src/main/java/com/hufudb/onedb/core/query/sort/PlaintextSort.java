@@ -1,9 +1,8 @@
-package com.hufudb.onedb.core.data.query.sort;
+package com.hufudb.onedb.core.query.sort;
 
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.data.Row;
-import com.hufudb.onedb.core.data.query.QueryableDataSet;
-
+import com.hufudb.onedb.core.query.QueryableDataSet;
 import java.util.List;
 
 public class PlaintextSort {

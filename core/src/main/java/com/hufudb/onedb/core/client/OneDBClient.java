@@ -2,7 +2,7 @@ package com.hufudb.onedb.core.client;
 
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.data.Row;
-import com.hufudb.onedb.core.sql.implementor.PlaintextImplementor;
+import com.hufudb.onedb.core.query.implementor.plaintext.PlaintextImplementor;
 import com.hufudb.onedb.core.sql.context.OneDBContext;
 import com.hufudb.onedb.core.sql.context.OneDBQueryContextPool;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;

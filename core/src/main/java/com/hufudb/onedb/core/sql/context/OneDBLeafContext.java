@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import com.hufudb.onedb.core.data.FieldType;
-import com.hufudb.onedb.core.data.query.QueryableDataSet;
+import com.hufudb.onedb.core.query.QueryableDataSet;
+import com.hufudb.onedb.core.query.implementor.OneDBImplementor;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
-import com.hufudb.onedb.core.sql.implementor.OneDBImplementor;
 import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
 
 /*

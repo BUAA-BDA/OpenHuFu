@@ -2,10 +2,10 @@ package com.hufudb.onedb.core.sql.context;
 
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Header;
-import com.hufudb.onedb.core.data.query.QueryableDataSet;
+import com.hufudb.onedb.core.query.QueryableDataSet;
+import com.hufudb.onedb.core.query.implementor.OneDBImplementor;
+import com.hufudb.onedb.core.query.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
-import com.hufudb.onedb.core.sql.implementor.OneDBImplementor;
-import com.hufudb.onedb.core.sql.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
 import java.util.List;
 import java.util.stream.Collectors;

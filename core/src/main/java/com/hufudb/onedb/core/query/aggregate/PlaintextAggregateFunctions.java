@@ -1,4 +1,4 @@
-package com.hufudb.onedb.core.data.query.aggregate;
+package com.hufudb.onedb.core.query.aggregate;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

@@ -1,4 +1,4 @@
-package com.hufudb.onedb.core.data.query.aggregate;
+package com.hufudb.onedb.core.query.aggregate;
 
 import java.util.List;
 import java.util.stream.Collectors;

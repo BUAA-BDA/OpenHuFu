@@ -1,11 +1,12 @@
-package com.hufudb.onedb.core.data.query.join;
+package com.hufudb.onedb.core.query.join;
 
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.data.Row;
-import com.hufudb.onedb.core.data.query.QueryableDataSet;
-import com.hufudb.onedb.core.data.query.filter.PlaintextFilter;
+import com.hufudb.onedb.core.query.QueryableDataSet;
+import com.hufudb.onedb.core.query.filter.PlaintextFilter;
+import com.hufudb.onedb.core.query.implementor.plaintext.PlaintextQueryableDataSet;
+import com.hufudb.onedb.core.query.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
-import com.hufudb.onedb.core.sql.implementor.utils.OneDBJoinInfo;
 import java.util.List;
 
 public class PlaintextNestedLoopJoin {
@@ -19,7 +20,7 @@ public class PlaintextNestedLoopJoin {
     List<OneDBExpression> filters = joinInfo.getConditions();
     final boolean hasThetaJoin = filters.size() > 0;
     Header outputHeader = Header.joinHeader(left.getHeader(), right.getHeader());
-    QueryableDataSet result = QueryableDataSet.fromHeader(outputHeader);
+    QueryableDataSet result = PlaintextQueryableDataSet.fromHeader(outputHeader);
     for (Row lr : leftData) {
       for (Row rr : rigthData) {
         // todo: put the join condition predication into another function

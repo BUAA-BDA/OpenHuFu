@@ -1,4 +1,4 @@
-package com.hufudb.onedb.core.sql.implementor;
+package com.hufudb.onedb.core.query.implementor.plaintext;
 
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.client.OneDBClient;
@@ -8,19 +8,20 @@ import com.hufudb.onedb.core.data.BasicDataSet;
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.data.StreamBuffer;
-import com.hufudb.onedb.core.data.query.QueryableDataSet;
-import com.hufudb.onedb.core.data.query.aggregate.PlaintextAggregation;
-import com.hufudb.onedb.core.data.query.calculate.PlaintextCalculator;
-import com.hufudb.onedb.core.data.query.filter.PlaintextFilter;
-import com.hufudb.onedb.core.data.query.join.PlaintextNestedLoopJoin;
-import com.hufudb.onedb.core.data.query.sort.PlaintextSort;
+import com.hufudb.onedb.core.query.QueryableDataSet;
+import com.hufudb.onedb.core.query.aggregate.PlaintextAggregation;
+import com.hufudb.onedb.core.query.calculate.PlaintextCalculator;
+import com.hufudb.onedb.core.query.filter.PlaintextFilter;
+import com.hufudb.onedb.core.query.implementor.OneDBImplementor;
+import com.hufudb.onedb.core.query.implementor.utils.OneDBJoinInfo;
+import com.hufudb.onedb.core.query.join.PlaintextNestedLoopJoin;
+import com.hufudb.onedb.core.query.sort.PlaintextSort;
 import com.hufudb.onedb.core.sql.expression.OneDBAggCall;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.expression.OneDBOpType;
 import com.hufudb.onedb.core.sql.expression.OneDBOperator;
 import com.hufudb.onedb.core.sql.expression.OneDBAggCall.AggregateType;
 import com.hufudb.onedb.core.sql.expression.OneDBOperator.FuncType;
-import com.hufudb.onedb.core.sql.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.sql.context.OneDBContextType;
 import com.hufudb.onedb.core.sql.context.OneDBLeafContext;
 import com.hufudb.onedb.core.sql.context.OneDBContext;
@@ -327,6 +328,6 @@ public class PlaintextImplementor implements OneDBImplementor {
     while (streamProto.hasNext()) {
       localDataSet.mergeDataSet(BasicDataSet.fromProto(streamProto.next()));
     }
-    return QueryableDataSet.fromBasic(localDataSet);
+    return PlaintextQueryableDataSet.fromBasic(localDataSet);
   }
 }
