@@ -4,6 +4,7 @@
   "hostname": "owner2",
   "privatekeypath": "./cert/owner2.key",
   "certchainpath": "./cert/owner2.pem",
+  "trustcertpath": "./cert/ca.pem",
   "url": "jdbc:postgresql://postgres2:5432/postgres",
   "catalog": "postgres",
   "user": "postgres",

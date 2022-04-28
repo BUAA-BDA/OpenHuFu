@@ -25,7 +25,7 @@ public class OneDBRpcManager implements RpcManager {
     this.parties = parties;
     ImmutableMap.Builder<Integer, Rpc> rpcMapBuilder = ImmutableMap.builder();
     for (Party pt : parties) {
-      rpcMapBuilder.put(pt.getPartyId(), new OneDBRpc(pt, parties, Executors.newFixedThreadPool(THREAD_NUM)));
+      rpcMapBuilder.put(pt.getPartyId(), new OneDBRpc(pt, parties, Executors.newFixedThreadPool(THREAD_NUM), null));
     }
     this.rpcMap = rpcMapBuilder.build();
   }

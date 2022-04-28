@@ -72,10 +72,6 @@ public interface OneDBContext {
 
   QueryableDataSet implement(OneDBImplementor implementor);
 
-  public static boolean hasJoin(OneDBQueryProto proto) {
-    return proto.hasLeft() && proto.hasRight();
-  }
-
   public static Header getOutputHeader(OneDBQueryProto proto) {
     Header.Builder builder = Header.newBuilder();
     List<FieldType> types = getOutputTypes(proto);

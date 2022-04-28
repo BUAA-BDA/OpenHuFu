@@ -4,6 +4,7 @@
   "hostname": "owner3",
   "privatekeypath": "./cert/owner3.key",
   "certchainpath": "./cert/owner3.pem",
+  "trustcertpath": "./cert/ca.pem",
   "url": "jdbc:postgresql://postgres3:5432/postgres",
   "catalog": "postgres",
   "user": "postgres",

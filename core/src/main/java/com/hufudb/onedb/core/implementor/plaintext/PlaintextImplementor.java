@@ -95,10 +95,6 @@ public class PlaintextImplementor implements OneDBImplementor {
     return iterator;
   }
 
-  boolean isLeaf(OneDBQueryProto proto) {
-    return !(proto.hasLeft() && proto.hasRight());
-  }
-
   @Override
   public QueryableDataSet join(QueryableDataSet left, QueryableDataSet right,
       OneDBJoinInfo joinInfo) {
@@ -127,9 +123,11 @@ public class PlaintextImplementor implements OneDBImplementor {
   }
 
   /*
-   * for aggregate call with distinct flag, add the inputRefs into local group set and update the global group set
+   * for aggregate call with distinct flag, add the inputRefs into local group set and update the
+   * global group set
    */
-  private void updateGroupIdx(OneDBAggCall agg, List<OneDBExpression> localAggs, Map<Integer, Integer> groupMap) {
+  private void updateGroupIdx(OneDBAggCall agg, List<OneDBExpression> localAggs,
+      Map<Integer, Integer> groupMap) {
     List<Integer> inputRefs = agg.getInputRef();
     for (int i = 0; i < inputRefs.size(); ++i) {
       int inputRef = inputRefs.get(i);

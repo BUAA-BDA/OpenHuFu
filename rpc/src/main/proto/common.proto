@@ -65,6 +65,14 @@ message JoinConditionProto {
   repeated ExpressionProto condition = 4;
 }
 
+message MpcTaskProto {
+  int32 userId = 1;
+  int32 queryId = 2;
+  int64 taskId = 3;
+  int32 ptoId = 4;
+  repeated int32 parties = 5;
+}
+
 message OneDBQueryProto {
   string tableName = 1;
   repeated ExpressionProto selectExp = 2;
@@ -74,7 +82,4 @@ message OneDBQueryProto {
   repeated string order = 6;
   int32 fetch = 7;
   int32 offset = 8;
-  OneDBQueryProto left = 9;
-  OneDBQueryProto right = 10;
-  JoinConditionProto joinCond = 11;
 }

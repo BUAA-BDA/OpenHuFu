@@ -17,41 +17,31 @@ public class PipeService extends PipeGrpc.PipeImplBase {
   private final Map<Integer, ConcurrentBuffer> buffers;
 
   /*
-   * partyId -> concurrentBuffer
-   * each buffer only collects packets from the correspongding party
+   * partyId -> concurrentBuffer each buffer only collects packets from the correspongding party
    */
   public PipeService(Map<Integer, ConcurrentBuffer> buffers) {
     this.buffers = buffers;
   }
 
   @Override
-  public StreamObserver<DataPacketProto> send(StreamObserver<ResponseProto> responseObserver) {
-    return new StreamObserver<DataPacketProto>() {
-      @Override
-      public void onNext(DataPacketProto value) {
-        int senderId = value.getHeaderProto().getSenderId();
-        DataPacket packet = DataPacket.fromProto(value);
-        LOG.debug("Pipe get {}", packet);
-        boolean hasErr = buffers.get(senderId).put(packet);
-        if (hasErr) {
-          responseObserver.onNext(ResponseProto.newBuilder().setStatus(1).setMsg(String.format("Buffer of party[%d] is full", senderId)).build());
-        } else {
-          responseObserver.onNext(OK);
-        }
+  public void send(DataPacketProto request, StreamObserver<ResponseProto> responseObserver) {
+    int senderId = request.getHeaderProto().getSenderId();
+    DataPacket packet = DataPacket.fromProto(request);
+    LOG.debug("Pipe get {}", packet);
+    ConcurrentBuffer buffer = buffers.get(senderId);
+    ResponseProto resp = OK;
+    if (buffer == null) {
+      LOG.error("No buffer for Party[{}]", senderId);
+      resp = ResponseProto.newBuilder().setStatus(1)
+      .setMsg(String.format("No buffer for Party[%d]", senderId)).build();
+    } else {
+      boolean err = buffer.put(packet);
+      if (err) {
+        resp = ResponseProto.newBuilder().setStatus(1)
+        .setMsg(String.format("Buffer of Party[%d] is full", senderId)).build();
       }
-
-      @Override
-      public void onError(Throwable t) {
-        LOG.warn("Error: {}", t.getMessage());
-        t.printStackTrace();
-        responseObserver.onCompleted();
-      }
-
-      @Override
-      public void onCompleted() {
-        responseObserver.onCompleted();
-        LOG.info("Stop pipe service");
-      }
-    };
+    }
+    responseObserver.onNext(resp);
+    responseObserver.onCompleted();
   }
 }

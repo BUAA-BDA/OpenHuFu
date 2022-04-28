@@ -77,7 +77,7 @@ public class OwnerClient {
     try {
       response = blockingStub.addOwner(request);
     } catch (StatusRuntimeException e) {
-      LOG.error("RPC failed: {}", e);
+      LOG.error("RPC failed in addOwner: {}", e.getMessage());
       return false;
     }
     if (response.getStatus() == 0) {
