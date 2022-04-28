@@ -7,8 +7,8 @@ public class MysqlConfig extends TemplateConfig {
   @Override
   public OwnerConfig generateConfig() {
     OwnerConfig config = generateConfigInternal();
-    config.userOwnerService = new MysqlService(hostname, port, catalog, url, user, passwd,
-        tables, config.threadPool, config.acrossOwnerService);
+    config.userOwnerService = new MysqlService(hostname, port, catalog, url, user, passwd, tables,
+        config.threadPool, config.acrossOwnerService);
     return config;
   }
 }

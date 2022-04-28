@@ -32,8 +32,8 @@ public class OwnerClient {
 
   private final ServiceGrpc.ServiceBlockingStub blockingStub;
 
-  final private String endpoint;
-  final private Party party;
+  private final String endpoint;
+  private final Party party;
 
   public OwnerClient(String host, int port) {
     this(ManagedChannelBuilder.forAddress(host, port).usePlaintext().build(), String.format("%s:%d", host, port));

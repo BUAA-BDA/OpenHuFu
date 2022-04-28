@@ -22,15 +22,15 @@ public abstract class OwnerServer {
   protected final ServerCredentials creds;
   protected final ExecutorService threadPool;
 
-  public OwnerServer(OwnerConfig config)
-      throws IOException {
+  public OwnerServer(OwnerConfig config) throws IOException {
     this.port = config.port;
     this.service = config.userOwnerService;
     this.threadPool = config.threadPool;
     BindableService pipeService = config.acrossOwnerService.getgRpcService();
     if (config.useTLS) {
       this.creds = config.serverCerts;
-      this.server = Grpc.newServerBuilderForPort(port, creds).addService(service).addService(pipeService).build();
+      this.server = Grpc.newServerBuilderForPort(port, creds).addService(service)
+          .addService(pipeService).build();
     } else {
       this.creds = null;
       this.server = ServerBuilder.forPort(port).addService(service).addService(pipeService).build();

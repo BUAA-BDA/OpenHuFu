@@ -26,16 +26,8 @@ public class PostgresqlService extends OwnerService {
   private Connection connection;
   private Statement statement;
 
-  public PostgresqlService(
-      String hostname,
-      int port,
-      String catalog,
-      String url,
-      String user,
-      String passwd,
-      List<POJOPublishedTableInfo> infos,
-      ExecutorService threadPool,
-      OneDBRpc rpc) {
+  public PostgresqlService(String hostname, int port, String catalog, String url, String user,
+      String passwd, List<POJOPublishedTableInfo> infos, ExecutorService threadPool, OneDBRpc rpc) {
     super(null, null, String.format("%s:%d", hostname, port), null, threadPool, rpc);
     this.catalog = catalog;
     try {
@@ -49,8 +41,8 @@ public class PostgresqlService extends OwnerService {
     }
   }
 
-  public PostgresqlService(
-      String hostname, int port, String catalog, String url, String user, String passwd, ExecutorService threadPool, OneDBRpc rpc) {
+  public PostgresqlService(String hostname, int port, String catalog, String url, String user,
+      String passwd, ExecutorService threadPool, OneDBRpc rpc) {
     this(hostname, port, catalog, url, user, passwd, ImmutableList.of(), threadPool, rpc);
   }
 
@@ -77,8 +69,8 @@ public class PostgresqlService extends OwnerService {
       tableInfoBuilder.setTableName(tableName);
       while (rc.next()) {
         String columnName = rc.getString("COLUMN_NAME");
-        tableInfoBuilder.add(
-            columnName, PostgresqlTypeConverter.convert(rc.getString("TYPE_NAME")), Level.PUBLIC);
+        tableInfoBuilder.add(columnName, PostgresqlTypeConverter.convert(rc.getString("TYPE_NAME")),
+            Level.PUBLIC);
       }
       rc.close();
       return tableInfoBuilder.build();
@@ -90,7 +82,7 @@ public class PostgresqlService extends OwnerService {
 
   @Override
   protected Statement getStatement() {
-      return statement;
+    return statement;
   }
 
   @Override

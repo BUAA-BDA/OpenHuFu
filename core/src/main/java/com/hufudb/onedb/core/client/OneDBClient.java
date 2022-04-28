@@ -64,7 +64,6 @@ public class OneDBClient {
       LOG.info("Add owner {}", endpoint);
     } catch (Exception e) {
       LOG.warn("Fail to add owner {}: {}", endpoint, e.getMessage());
-      e.printStackTrace();
     }
     return client;
   }

@@ -4,7 +4,6 @@ import com.hufudb.onedb.core.config.OneDBConfig;
 import com.hufudb.onedb.core.data.utils.POJOPublishedTableInfo;
 import com.hufudb.onedb.rpc.grpc.OneDBOwnerInfo;
 import com.hufudb.onedb.rpc.grpc.OneDBRpc;
-import io.grpc.ServerCredentials;
 import io.grpc.TlsChannelCredentials;
 import io.grpc.TlsServerCredentials;
 import java.io.File;
@@ -59,7 +58,8 @@ public abstract class TemplateConfig implements DBConfig {
       try {
         File rootCert = new File(trustcertpath);
         config.clientCerts = TlsChannelCredentials.newBuilder().trustManager(rootCert).build();
-        config.acrossOwnerService = new OneDBRpc(config.party, config.threadPool, config.clientCerts);
+        config.acrossOwnerService =
+            new OneDBRpc(config.party, config.threadPool, config.clientCerts);
       } catch (Exception e) {
         LOG.error("Fail to read trustcertFile: {}", e.getMessage());
         config.acrossOwnerService = new OneDBRpc(config.party, config.threadPool);

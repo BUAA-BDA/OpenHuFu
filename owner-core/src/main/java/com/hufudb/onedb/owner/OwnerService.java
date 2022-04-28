@@ -91,10 +91,11 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
 
   @Override
   public void getOwnerInfo(GeneralRequest request,
-          StreamObserver<OwnerInfoProto> responseObserver) {
+      StreamObserver<OwnerInfoProto> responseObserver) {
     Party party = ownerSideRpc.ownParty();
     LOG.info("Get owner info {}", party);
-    responseObserver.onNext(OwnerInfoProto.newBuilder().setId(party.getPartyId()).setEndpoint(endpoint).build());
+    responseObserver.onNext(
+        OwnerInfoProto.newBuilder().setId(party.getPartyId()).setEndpoint(endpoint).build());
     responseObserver.onCompleted();
   }
 
@@ -103,7 +104,8 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
     LOG.info("Connect to owner {}", OneDBOwnerInfo.fromProto(request));
     boolean ok = ownerSideRpc.addParty(OneDBOwnerInfo.fromProto(request));
     ownerSideRpc.connect();
-    responseObserver.onNext(GeneralResponse.newBuilder().setStatus(ok ? 0 : 1).setMsg(ok ? "" : "Fail to add owner").build());
+    responseObserver.onNext(GeneralResponse.newBuilder().setStatus(ok ? 0 : 1)
+        .setMsg(ok ? "" : "Fail to add owner").build());
     responseObserver.onCompleted();
   }
 
@@ -212,7 +214,8 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
   }
 
   public void initPublishedTable(List<POJOPublishedTableInfo> infos) {
-    if (infos == null) return;
+    if (infos == null)
+      return;
     for (POJOPublishedTableInfo info : infos) {
       addPublishedTable(info);
     }
