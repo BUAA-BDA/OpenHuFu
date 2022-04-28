@@ -1,1 +1,1 @@
-java -jar ./bin/onedb_user_client.jar -m ./config/client_model.json
+java -Dlog4j.configurationFile=./config/log4j.properties -jar ./bin/onedb_user_client.jar -m ./config/client_model.json

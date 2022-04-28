@@ -2,6 +2,7 @@ package com.hufudb.onedb.owner.mysql;
 
 import com.google.gson.Gson;
 import com.hufudb.onedb.owner.OwnerServer;
+import com.hufudb.onedb.owner.config.OwnerConfig;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
@@ -15,12 +16,8 @@ import org.apache.commons.cli.ParseException;
 
 public class MysqlServer extends OwnerServer {
 
-  public MysqlServer(MysqlConfig config) throws IOException {
-    super(config.port, new MysqlService(config), null);
-  }
-
-  public MysqlServer(int port, MysqlService service) throws IOException {
-    super(port, service, null);
+  public MysqlServer(OwnerConfig config) throws IOException {
+    super(config);
   }
 
   public static void main(String[] args) {
@@ -34,8 +31,8 @@ public class MysqlServer extends OwnerServer {
     try {
       cmd = parser.parse(options, args);
       Reader reader = Files.newBufferedReader(Paths.get(cmd.getOptionValue("config")));
-      MysqlConfig pConfig = gson.fromJson(reader, MysqlConfig.class);
-      MysqlServer server = new MysqlServer(pConfig);
+      MysqlConfig mConfig = gson.fromJson(reader, MysqlConfig.class);
+      MysqlServer server = new MysqlServer(mConfig.generateConfig());
       server.start();
       server.blockUntilShutdown();
     } catch (ParseException | IOException | InterruptedException e) {

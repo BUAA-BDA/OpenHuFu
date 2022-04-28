@@ -7,8 +7,11 @@ import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
 import com.hufudb.onedb.rpc.OneDBCommon.HeaderProto;
 import com.hufudb.onedb.rpc.OneDBCommon.LocalTableListProto;
 import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
+import com.hufudb.onedb.rpc.OneDBCommon.OwnerInfoProto;
 import com.hufudb.onedb.rpc.OneDBService.GeneralRequest;
 import com.hufudb.onedb.rpc.OneDBService.GeneralResponse;
+import com.hufudb.onedb.rpc.grpc.OneDBOwnerInfo;
+import com.hufudb.onedb.rpc.Party;
 import com.hufudb.onedb.rpc.ServiceGrpc;
 import io.grpc.Channel;
 import io.grpc.ChannelCredentials;
@@ -29,47 +32,58 @@ public class OwnerClient {
 
   private final ServiceGrpc.ServiceBlockingStub blockingStub;
 
-  private String endpoint;
+  private final String endpoint;
+  private final Party party;
 
   public OwnerClient(String host, int port) {
-    this(ManagedChannelBuilder.forAddress(host, port));
-    this.endpoint = String.format("%s:%d", host, port);
+    this(ManagedChannelBuilder.forAddress(host, port).usePlaintext().build(), String.format("%s:%d", host, port));
     LOG.info("Connect to {}", endpoint);
   }
 
   public OwnerClient(String endpoint) {
-    this(ManagedChannelBuilder.forTarget(endpoint));
-    this.endpoint = endpoint;
+    this(ManagedChannelBuilder.forTarget(endpoint).usePlaintext().build(), endpoint);
     LOG.info("Connect to {}", endpoint);
   }
 
   public OwnerClient(String endpoint, ChannelCredentials creds) {
-    this(Grpc.newChannelBuilder(endpoint, creds));
-    this.endpoint = endpoint;
+    this(Grpc.newChannelBuilder(endpoint, creds).build(), endpoint);
     LOG.info("Connect to {} with TLS", endpoint);
   }
 
-  public OwnerClient(ManagedChannelBuilder<?> channelBuilder) {
-    this(channelBuilder.build());
+  public OwnerClient(Channel channel, String endpoint) {
+    this.blockingStub = ServiceGrpc.newBlockingStub(channel);
+    this.endpoint = endpoint;
+    this.party = getOwnerInfo();
   }
 
-  public OwnerClient(Channel channel) {
-    blockingStub = ServiceGrpc.newBlockingStub(channel);
+  public Party getParty() {
+    return party;
   }
 
-  public boolean addClient(String endpoint) {
-    GeneralRequest request = GeneralRequest.newBuilder().setValue(endpoint).build();
+  public Party getOwnerInfo() {
+    try {
+      OwnerInfoProto proto =
+          blockingStub.getOwnerInfo(GeneralRequest.newBuilder().build());
+      return OneDBOwnerInfo.fromProto(proto);
+    } catch (StatusRuntimeException e) {
+      LOG.error("RPC failed in getOwnerInfo: {}", e.getStatus());
+      return null;
+    }
+  }
+
+  public boolean addOwner(Party party) {
+    OwnerInfoProto request = OwnerInfoProto.newBuilder().setId(party.getPartyId()).setEndpoint(party.getPartyName()).build();
     GeneralResponse response;
     try {
-      response = blockingStub.addClient(request);
+      response = blockingStub.addOwner(request);
     } catch (StatusRuntimeException e) {
-      LOG.error("RPC failed: {}", e);
+      LOG.error("RPC failed in addOwner: {}", e.getMessage());
       return false;
     }
     if (response.getStatus() == 0) {
       return true;
     } else {
-      LOG.warn("error in addClient: {}", response.getMsg());
+      LOG.warn("error in addOwner: {}", response.getMsg());
     }
     return true;
   }

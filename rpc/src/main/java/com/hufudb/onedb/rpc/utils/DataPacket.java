@@ -3,6 +3,7 @@ package com.hufudb.onedb.rpc.utils;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.stream.Collectors;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.ByteString;
 import com.hufudb.onedb.rpc.OneDBPipe.DataPacketProto;
 import com.hufudb.onedb.rpc.OneDBPipe.PayloadProto;
@@ -52,6 +53,11 @@ public final class DataPacket {
     return DataPacket.fromByteArrayList(DataPacketHeader.fromProto(proto.getHeaderProto()),
         proto.getPayloadProto().getPayloadBytesList().stream().map(p -> p.toByteArray())
             .collect(Collectors.toList()));
+  }
+
+  public static DataPacket emptyPacket(int senderId, int receiverId) {
+    return DataPacket.fromByteArrayList(new DataPacketHeader(0, 0, 0, senderId, receiverId),
+        ImmutableList.of());
   }
 
   @Override

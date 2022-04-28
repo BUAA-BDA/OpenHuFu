@@ -27,5 +27,5 @@ message ResponseProto {
 }
 
 service Pipe {
-  rpc send(stream DataPacketProto) returns (stream ResponseProto);
+  rpc send(DataPacketProto) returns (ResponseProto);
 }

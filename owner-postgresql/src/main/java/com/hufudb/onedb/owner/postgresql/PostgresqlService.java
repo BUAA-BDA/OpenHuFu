@@ -5,6 +5,7 @@ import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.data.TableInfo;
 import com.hufudb.onedb.core.data.utils.POJOPublishedTableInfo;
 import com.hufudb.onedb.owner.OwnerService;
+import com.hufudb.onedb.rpc.grpc.OneDBRpc;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -12,6 +13,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -24,15 +26,9 @@ public class PostgresqlService extends OwnerService {
   private Connection connection;
   private Statement statement;
 
-  public PostgresqlService(
-      String hostname,
-      int port,
-      String catalog,
-      String url,
-      String user,
-      String passwd,
-      List<POJOPublishedTableInfo> infos) {
-    super(null, null, String.format("%s:%d", hostname, port), null);
+  public PostgresqlService(String hostname, int port, String catalog, String url, String user,
+      String passwd, List<POJOPublishedTableInfo> infos, ExecutorService threadPool, OneDBRpc rpc) {
+    super(null, null, String.format("%s:%d", hostname, port), null, threadPool, rpc);
     this.catalog = catalog;
     try {
       Class.forName("org.postgresql.Driver");
@@ -45,28 +41,9 @@ public class PostgresqlService extends OwnerService {
     }
   }
 
-  public PostgresqlService(
-      String hostname, int port, String catalog, String url, String user, String passwd) {
-    this(hostname, port, catalog, url, user, passwd, ImmutableList.of());
-  }
-
-  PostgresqlService(PostgresqlConfig config) {
-    super(
-        config.zkservers,
-        config.zkroot,
-        String.format(
-            "%s:%d", config.hostname == null ? "localhost" : config.hostname, config.port),
-        config.digest);
-    this.catalog = config.catalog;
-    try {
-      Class.forName("org.postgresql.Driver");
-      connection = DriverManager.getConnection(config.url, config.user, config.passwd);
-      statement = connection.createStatement();
-      loadAllTableInfo();
-      initPublishedTable(config.tables);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+  public PostgresqlService(String hostname, int port, String catalog, String url, String user,
+      String passwd, ExecutorService threadPool, OneDBRpc rpc) {
+    this(hostname, port, catalog, url, user, passwd, ImmutableList.of(), threadPool, rpc);
   }
 
   @Override
@@ -92,8 +69,8 @@ public class PostgresqlService extends OwnerService {
       tableInfoBuilder.setTableName(tableName);
       while (rc.next()) {
         String columnName = rc.getString("COLUMN_NAME");
-        tableInfoBuilder.add(
-            columnName, PostgresqlTypeConverter.convert(rc.getString("TYPE_NAME")), Level.PUBLIC);
+        tableInfoBuilder.add(columnName, PostgresqlTypeConverter.convert(rc.getString("TYPE_NAME")),
+            Level.PUBLIC);
       }
       rc.close();
       return tableInfoBuilder.build();
@@ -105,7 +82,7 @@ public class PostgresqlService extends OwnerService {
 
   @Override
   protected Statement getStatement() {
-      return statement;
+    return statement;
   }
 
   @Override

@@ -53,11 +53,24 @@ message ExpressionProto {
   }
 }
 
+message OwnerInfoProto {
+  int32 id = 1;
+  string endpoint = 2;
+}
+
 message JoinConditionProto {
   int32 type = 1;
   repeated int32 leftKey = 2;
   repeated int32 rightKey = 3;
   repeated ExpressionProto condition = 4;
+}
+
+message MpcTaskProto {
+  int32 userId = 1;
+  int32 queryId = 2;
+  int64 taskId = 3;
+  int32 ptoId = 4;
+  repeated int32 parties = 5;
 }
 
 message OneDBQueryProto {
@@ -69,7 +82,4 @@ message OneDBQueryProto {
   repeated string order = 6;
   int32 fetch = 7;
   int32 offset = 8;
-  OneDBQueryProto left = 9;
-  OneDBQueryProto right = 10;
-  JoinConditionProto joinCond = 11;
 }

@@ -1,5 +1,6 @@
 package com.hufudb.onedb.owner;
 
+import io.grpc.BindableService;
 import io.grpc.Grpc;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -7,7 +8,9 @@ import io.grpc.ServerCredentials;
 import io.grpc.TlsServerCredentials;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import com.hufudb.onedb.owner.config.OwnerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,17 +20,20 @@ public abstract class OwnerServer {
   protected final Server server;
   protected final OwnerService service;
   protected final ServerCredentials creds;
+  protected final ExecutorService threadPool;
 
-  public OwnerServer(int port, OwnerService service, ServerCredentials creds)
-      throws IOException {
-    this.port = port;
-    this.service = service;
-    if (creds == null) {
-      this.server = ServerBuilder.forPort(port).addService(service).build();
-      this.creds = null;
+  public OwnerServer(OwnerConfig config) throws IOException {
+    this.port = config.port;
+    this.service = config.userOwnerService;
+    this.threadPool = config.threadPool;
+    BindableService pipeService = config.acrossOwnerService.getgRpcService();
+    if (config.useTLS) {
+      this.creds = config.serverCerts;
+      this.server = Grpc.newServerBuilderForPort(port, creds).addService(service)
+          .addService(pipeService).build();
     } else {
-      this.server = Grpc.newServerBuilderForPort(port, creds).addService(service).build();
-      this.creds = creds;
+      this.creds = null;
+      this.server = ServerBuilder.forPort(port).addService(service).addService(pipeService).build();
     }
   }
 
