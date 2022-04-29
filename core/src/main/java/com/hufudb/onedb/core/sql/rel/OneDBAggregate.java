@@ -31,8 +31,8 @@ public class OneDBAggregate extends Aggregate implements OneDBRel {
     implementor.visitChild((OneDBRel) getInput());
     List<Integer> groups = new ArrayList<>(getGroupSet().asList());
     List<OneDBExpression> aggExps = new ArrayList<>();
-    aggExps.addAll(OneDBAggCall.fromGroups(groups, implementor.getOutputTypes()));
-    aggExps.addAll(OneDBAggCall.fromAggregates(aggCalls));
+    aggExps.addAll(OneDBAggCall.fromGroups(groups, implementor.getOutputTypes(), implementor.getOutputLevels()));
+    aggExps.addAll(OneDBAggCall.fromAggregates(aggCalls, implementor.getOutputLevels()));
     implementor.setAggExps(aggExps);
     implementor.setGroupSet(groups);
   }

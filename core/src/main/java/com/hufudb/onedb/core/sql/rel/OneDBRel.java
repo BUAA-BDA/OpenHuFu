@@ -2,6 +2,7 @@ package com.hufudb.onedb.core.sql.rel;
 
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.data.FieldType;
+import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.sql.context.OneDBLeafContext;
 import com.hufudb.onedb.core.sql.context.OneDBBinaryContext;
@@ -87,11 +88,11 @@ public interface OneDBRel extends RelNode {
       List<OneDBExpression> exps = new ArrayList<>();
       int idx = 0;
       for (OneDBExpression exp: left.getOutExpressions()) {
-        exps.add(new OneDBReference(exp.getOutType(), idx));
+        exps.add(new OneDBReference(exp.getOutType(), exp.getLevel(), idx));
         ++idx;
       }
       for (OneDBExpression exp : right.getOutExpressions()) {
-        exps.add(new OneDBReference(exp.getOutType(), idx));
+        exps.add(new OneDBReference(exp.getOutType(), exp.getLevel(), idx));
         ++idx;
       }
       currentContext.setSelectExps(exps);
@@ -156,8 +157,16 @@ public interface OneDBRel extends RelNode {
 
 
     public void setJoinInfo(JoinInfo joinInfo, JoinRelType joinRelType) {
+      List<OneDBExpression> outExpression = currentContext.getOutExpressions();
       List<OneDBExpression> condition = OneDBOperator.fromRexNodes(joinInfo.nonEquiConditions, currentContext.getOutExpressions());
-      currentContext.setJoinInfo(new OneDBJoinInfo(OneDBJoinType.of(joinRelType), joinInfo.leftKeys, joinInfo.rightKeys, condition));
+      Level dominator = Level.findDominator(condition);
+      for (int key : joinInfo.leftKeys) {
+        dominator = Level.dominate(dominator, outExpression.get(key).getLevel());
+      }
+      for (int key : joinInfo.rightKeys) {
+        dominator = Level.dominate(dominator, outExpression.get(key).getLevel());
+      }
+      currentContext.setJoinInfo(new OneDBJoinInfo(OneDBJoinType.of(joinRelType), joinInfo.leftKeys, joinInfo.rightKeys, condition, dominator));
     }
 
     public List<OneDBExpression> getCurrentOutput() {
@@ -166,6 +175,10 @@ public interface OneDBRel extends RelNode {
 
     public List<FieldType> getOutputTypes() {
       return currentContext.getOutTypes();
+    }
+
+    public List<Level> getOutputLevels() {
+      return currentContext.getOutLevels();
     }
   }
 }

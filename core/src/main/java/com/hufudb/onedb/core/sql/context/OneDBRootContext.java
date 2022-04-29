@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.data.FieldType;
+import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 
 public class OneDBRootContext extends OneDBBaseContext {
@@ -42,6 +43,16 @@ public class OneDBRootContext extends OneDBBaseContext {
   @Override
   public List<FieldType> getOutTypes() {
     return ImmutableList.of();
+  }
+
+  @Override
+  public Level getContextLevel() {
+    return child.getContextLevel();
+  }
+
+  @Override
+  public List<Level> getOutLevels() {
+    return child.getOutLevels();
   }
 
   @Override

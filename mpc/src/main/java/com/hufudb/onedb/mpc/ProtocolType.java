@@ -38,7 +38,7 @@ public enum ProtocolType {
     return name;
   }
 
-  public static ProtocolType type(int id) {
+  public static ProtocolType of(int id) {
     return MAP.get(id);
   }
 }
