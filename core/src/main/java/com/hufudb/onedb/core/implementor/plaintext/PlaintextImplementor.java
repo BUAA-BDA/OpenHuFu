@@ -47,14 +47,6 @@ public class PlaintextImplementor implements OneDBImplementor {
     this.client = client;
   }
 
-
-  public QueryableDataSet implement(OneDBContext context) {
-    if (context.getContextType().equals(OneDBContextType.ROOT)) {
-      context = ((OneDBRootContext) context).getChild();
-    }
-    return context.implement(this);
-  }
-
   private StreamBuffer<DataSetProto> tableQuery(OneDBQueryProto query,
       List<Pair<OwnerClient, String>> tableClients) {
     StreamBuffer<DataSetProto> iterator = new StreamBuffer<>(tableClients.size());

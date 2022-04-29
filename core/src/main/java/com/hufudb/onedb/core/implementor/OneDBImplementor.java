@@ -46,7 +46,7 @@ public interface OneDBImplementor {
         return new PlaintextImplementor(client);
       default:
         LOG.error("No implementor found for Level {}", context.getContextLevel().name());
-        return null;
+        throw new UnsupportedOperationException(String.format("No implementor found for Level %s", context.getContextLevel().name()));
     }
   }
 }

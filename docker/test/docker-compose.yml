@@ -6,12 +6,19 @@ services:
     container_name: onedbtest
     restart: "no"
     working_dir: /usr/src/mymvn
-    command: mvn clean test
+    command: mvn clean verify
     volumes:
       - $HOME/.m2:/root/.m2
       - $PWD/../..:/usr/src/mymvn
     networks:
       - public_net
+    artifacts:
+      when: always
+      reports:
+        junit:
+          - rpc/target/surefire-reports/TEST-*.xml
+          - mpc/target/surefire-reports/TEST-*.xml
+          - user-client/target/surefire-reports/TEST-*.xml
 
 networks:
   public_net:
