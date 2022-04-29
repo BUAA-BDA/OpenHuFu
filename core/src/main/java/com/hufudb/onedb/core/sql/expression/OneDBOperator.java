@@ -2,6 +2,7 @@ package com.hufudb.onedb.core.sql.expression;
 
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.data.FieldType;
+import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.data.TypeConverter;
 import com.hufudb.onedb.rpc.OneDBCommon.ExpressionProto;
 import java.util.Arrays;
@@ -23,17 +24,20 @@ public class OneDBOperator implements OneDBExpression {
   FieldType outType;
   List<OneDBExpression> inputs;
   FuncType funcType;
+  Level level;
 
   OneDBOperator(OneDBOpType opType, FieldType outType, List<OneDBExpression> inputs,
-      FuncType funcType) {
+      FuncType funcType, Level level) {
     this.opType = opType;
     this.outType = outType;
     this.inputs = inputs;
     this.funcType = funcType;
+    this.level = level;
   }
 
-  public static OneDBExpression fromRexNode(RexNode node) {
-    return new OperatorBuilder(ImmutableList.of(node)).build().get(0);
+  OneDBOperator(OneDBOpType opType, FieldType outType, List<OneDBExpression> inputs,
+      FuncType funcType) {
+    this(opType, outType, inputs, funcType, Level.findDominator(inputs));
   }
 
   public static OneDBExpression fromRexNode(RexNode node, List<OneDBExpression> ins) {
@@ -44,10 +48,11 @@ public class OneDBOperator implements OneDBExpression {
     return nodes.stream().map(node -> {
       if (node instanceof RexInputRef) {
         int i = ((RexInputRef) node).getIndex();
-        if (ins.get(i) instanceof RexInputRef) {
-          return new OneDBReference(ins.get(i).getOutType(), i);
+        OneDBExpression exp = ins.get(i);
+        if (exp instanceof RexInputRef) {
+          return new OneDBReference(exp.getOutType(), exp.getLevel(), i);
         } else {
-          return ins.get(i);
+          return exp;
         }
       } else {
         return OneDBOperator.fromRexNode(node, ins);
@@ -70,11 +75,11 @@ public class OneDBOperator implements OneDBExpression {
 
   public ExpressionProto toProto() {
     ExpressionProto.Builder builder = ExpressionProto.newBuilder();
-    builder.setOpType(opType.ordinal());
-    builder.setOutType(outType.ordinal());
-    builder.addAllIn(inputs.stream().map(e -> e.toProto()).collect(Collectors.toList()));
-    builder.setFunc(funcType.ordinal());
-    return builder.build();
+    return builder.setOpType(opType.ordinal())
+        .setOutType(outType.ordinal())
+        .setLevel(level.getId())
+        .addAllIn(inputs.stream().map(e -> e.toProto()).collect(Collectors.toList()))
+        .setFunc(funcType.ordinal()).build();
   }
 
   public List<OneDBExpression> getInputs() {
@@ -95,6 +100,11 @@ public class OneDBOperator implements OneDBExpression {
     return opType;
   }
 
+  @Override
+  public Level getLevel() {
+    return level;
+  }
+
   public enum FuncType {
     NONE, ABS;
 
@@ -107,12 +117,6 @@ public class OneDBOperator implements OneDBExpression {
     List<? extends RexNode> outputNodes;
     List<RexNode> localNodes;
     List<OneDBExpression> inputExps;
-
-    OperatorBuilder(List<RexNode> nodes) {
-      this.outputNodes = nodes;
-      this.localNodes = nodes;
-      this.inputExps = ImmutableList.of();
-    }
 
     OperatorBuilder(List<RexNode> nodes, List<OneDBExpression> inputs) {
       this.outputNodes = nodes;
@@ -184,11 +188,7 @@ public class OneDBOperator implements OneDBExpression {
         case LITERAL:
           return OneDBLiteral.fromLiteral((RexLiteral) node);
         case INPUT_REF:
-          if (inputExps.isEmpty()) {
-            return OneDBReference.fromInputRef((RexInputRef) node);
-          } else {
-            return inputExps.get(((RexInputRef) node).getIndex());
-          }
+          return inputExps.get(((RexInputRef) node).getIndex());
         default:
           throw new RuntimeException("can't translate " + node);
       }
@@ -295,10 +295,11 @@ public class OneDBOperator implements OneDBExpression {
     OneDBExpression searchCall(RexCall call) {
       OneDBOpType op = OneDBOpType.SEARCH;
       List<OneDBExpression> eles =
-              call.operands.stream().map(c -> buildOp(c)).collect(Collectors.toList());
+          call.operands.stream().map(c -> buildOp(c)).collect(Collectors.toList());
       FieldType type = TypeConverter.convert2OneDBType(call.getType().getSqlTypeName());
       return new OneDBOperator(op, type, eles, FuncType.NONE);
     }
+
     /*
      * translate localref
      */

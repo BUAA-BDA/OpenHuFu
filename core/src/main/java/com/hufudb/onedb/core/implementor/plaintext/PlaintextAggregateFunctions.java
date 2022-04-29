@@ -367,7 +367,7 @@ public class PlaintextAggregateFunctions {
             if (child instanceof OneDBAggCall) {
               int id = in.size();
               in.add(getAggregateFunc((OneDBAggCall) child));
-              children.set(i, OneDBReference.fromIndex(child.getOutType(), id));
+              children.set(i, OneDBReference.fromIndex(child.getOutType(), child.getLevel(), id));
             } else {
               visit(child);
             }

@@ -1,6 +1,7 @@
 package com.hufudb.onedb.core.sql.expression;
 
 import com.hufudb.onedb.core.data.FieldType;
+import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.data.TypeConverter;
 import com.hufudb.onedb.rpc.OneDBCommon.ExpressionProto;
 import java.util.ArrayList;
@@ -15,17 +16,27 @@ public class OneDBAggCall implements OneDBExpression {
   AggregateType aggType;
   List<Integer> in;
   FieldType outType;
+  Level level;
   boolean distinct;
 
-  OneDBAggCall(AggregateType aggType, List<Integer> args, FieldType type, boolean distinct) {
+  OneDBAggCall(AggregateType aggType, List<Integer> args, FieldType type, Level level, boolean distinct) {
     this.aggType = aggType;
     this.in = args;
     this.outType = type;
+    this.level = level;
     this.distinct = distinct;
   }
 
+  OneDBAggCall(AggregateType aggType, List<Integer> args, FieldType type, boolean distinct) {
+    this(aggType, args, type, Level.PUBLIC, distinct);
+  }
+
+  OneDBAggCall(AggregateType aggType, List<Integer> args, FieldType type, Level level) {
+    this(aggType, args, type, level, false);
+  }
+
   OneDBAggCall(AggregateType aggType, List<Integer> args, FieldType type) {
-    this(aggType, args, type, false);
+    this(aggType, args, type, Level.PUBLIC, false);
   }
 
   public static List<OneDBExpression> fromAggregates(List<AggregateCall> calls) {
@@ -47,7 +58,7 @@ public class OneDBAggCall implements OneDBExpression {
       throw new RuntimeException("not aggregate");
     }
     List<Integer> inputs =
-        proto.getInList().stream().map(in -> in.getRef()).collect(Collectors.toList());
+        proto.getInList().stream().map(in -> in.getI32()).collect(Collectors.toList());
     return new OneDBAggCall(AggregateType.of(proto.getFunc()), inputs,
         FieldType.of(proto.getOutType()), proto.getB());
   }
@@ -56,7 +67,7 @@ public class OneDBAggCall implements OneDBExpression {
   public ExpressionProto toProto() {
     return ExpressionProto.newBuilder().setOpType(OneDBOpType.AGG_FUNC.ordinal())
         .setFunc(aggType.ordinal()).setOutType(outType.ordinal()).addAllIn(in.stream()
-            .map(i -> OneDBReference.fromIndex(outType, i).toProto()).collect(Collectors.toList()))
+            .map(i -> OneDBReference.fromIndex(outType, level, i).toProto()).collect(Collectors.toList()))
         .setB(distinct).build();
   }
 
@@ -68,6 +79,11 @@ public class OneDBAggCall implements OneDBExpression {
   @Override
   public OneDBOpType getOpType() {
     return OneDBOpType.AGG_FUNC;
+  }
+
+  @Override
+  public Level getLevel() {
+    return null;
   }
 
   public AggregateType getAggType() {

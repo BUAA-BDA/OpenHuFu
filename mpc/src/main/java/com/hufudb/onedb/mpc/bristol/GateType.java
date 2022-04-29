@@ -38,7 +38,7 @@ public enum GateType {
     return name;
   }
 
-  public static GateType type(int id) {
+  public static GateType of(int id) {
     return MAP.get(id);
   }
 }

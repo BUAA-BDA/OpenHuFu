@@ -191,7 +191,7 @@ public class GMW extends ProtocolExecutor {
   @Override
   public List<byte[]> run(DataPacket initPacket) {
     DataPacketHeader header = initPacket.getHeader();
-    CircuitType type = CircuitType.type((int) header.getExtraInfo());
+    CircuitType type = CircuitType.of((int) header.getExtraInfo());
     LOG.debug("Load bristol of circuit {}", type);
     GMWMeta meta = new GMWMeta(type, isA(header), header);
     DataPacketHeader expect = prepare(initPacket, meta);

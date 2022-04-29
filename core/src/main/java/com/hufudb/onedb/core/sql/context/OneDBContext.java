@@ -2,6 +2,7 @@ package com.hufudb.onedb.core.sql.context;
 
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Header;
+import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.implementor.OneDBImplementor;
 import com.hufudb.onedb.core.implementor.QueryableDataSet;
 import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
@@ -21,6 +22,8 @@ public interface OneDBContext {
   List<OneDBExpression> getOutExpressions();
 
   List<FieldType> getOutTypes();
+
+  Level getOutLevel();
 
   OneDBContext getParent();
 

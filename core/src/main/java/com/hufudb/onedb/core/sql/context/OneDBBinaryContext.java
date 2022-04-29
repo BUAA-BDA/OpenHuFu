@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.data.FieldType;
+import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.implementor.OneDBImplementor;
 import com.hufudb.onedb.core.implementor.QueryableDataSet;
 import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
@@ -120,6 +121,11 @@ public class OneDBBinaryContext extends OneDBBaseContext {
   public List<FieldType> getOutTypes() {
     return getOutExpressions().stream()
         .map(exp -> exp.getOutType()).collect(Collectors.toList());
+  }
+
+  @Override
+  public Level getOutLevel() {
+    return Level.dominate(Level.findDominator(getOutExpressions()), joinInfo.getLevel());
   }
 
   @Override

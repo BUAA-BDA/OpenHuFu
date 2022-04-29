@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import com.hufudb.onedb.core.data.FieldType;
+import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.implementor.OneDBImplementor;
 import com.hufudb.onedb.core.implementor.QueryableDataSet;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
@@ -76,6 +77,11 @@ public class OneDBLeafContext extends OneDBBaseContext {
   @Override
   public List<FieldType> getOutTypes() {
     return getOutExpressions().stream().map(exp -> exp.getOutType()).collect(Collectors.toList());
+  }
+
+  @Override
+  public Level getOutLevel() {
+    return Level.findDominator(getOutExpressions());
   }
 
   @Override

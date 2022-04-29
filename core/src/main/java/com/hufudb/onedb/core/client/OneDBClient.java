@@ -1,7 +1,9 @@
 package com.hufudb.onedb.core.client;
 
+import com.hufudb.onedb.core.config.OneDBConfig;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.data.Row;
+import com.hufudb.onedb.core.implementor.OneDBImplementor;
 import com.hufudb.onedb.core.implementor.plaintext.PlaintextImplementor;
 import com.hufudb.onedb.core.sql.context.OneDBContext;
 import com.hufudb.onedb.core.sql.context.OneDBQueryContextPool;
@@ -11,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.apache.calcite.linq4j.Enumerator;
 import org.apache.calcite.schema.Table;
 import org.apache.calcite.util.Pair;
@@ -27,17 +31,21 @@ public class OneDBClient {
   private final OneDBSchema schema;
   private final Map<String, OwnerClient> ownerMap;
   private final Map<String, OneDBTableInfo> tableMap;
-  private final PlaintextImplementor implementor;
+  final ExecutorService threadPool;
 
   public OneDBClient(OneDBSchema schema) {
     this.schema = schema;
-    ownerMap = new ConcurrentHashMap<>();
-    tableMap = new ConcurrentHashMap<>();
-    implementor = new PlaintextImplementor(this);
+    this.ownerMap = new ConcurrentHashMap<>();
+    this.tableMap = new ConcurrentHashMap<>();
+    this.threadPool = Executors.newFixedThreadPool(OneDBConfig.CLIENT_THREAD_NUM);
   }
 
   Map<String, OneDBTableInfo> getTableMap() {
     return tableMap;
+  }
+
+  public ExecutorService getThreadPool() {
+    return threadPool;
   }
 
   public OwnerClient addOwner(String endpoint, ChannelCredentials cred) {
@@ -145,6 +153,6 @@ public class OneDBClient {
    */
   public Enumerator<Row> oneDBQuery(long contextId) {
     OneDBContext context = OneDBQueryContextPool.getContext(contextId);
-    return implementor.implement(context);
+    return OneDBImplementor.getImplementor(context, this).implement(context);
   }
 }

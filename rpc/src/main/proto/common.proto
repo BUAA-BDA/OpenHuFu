@@ -41,15 +41,15 @@ message ExpressionProto {
   int32 outType = 2;
   repeated ExpressionProto in = 3;
   int32 func = 4;
+  int32 level = 5;
   oneof value {
-    string str = 5;
-    bool b = 6;
-    int32 i32 = 7;
-    int64 i64 = 8;
-    float f32 = 9;
-    double f64 = 10;
-    Point p = 11;
-    int32 ref = 12;
+    string str = 6;
+    bool b = 7;
+    int32 i32 = 8;
+    int64 i64 = 9;
+    float f32 = 10;
+    double f64 = 11;
+    Point p = 12;
   }
 }
 

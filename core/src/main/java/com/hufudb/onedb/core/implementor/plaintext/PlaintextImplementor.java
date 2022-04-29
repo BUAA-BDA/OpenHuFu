@@ -3,7 +3,6 @@ package com.hufudb.onedb.core.implementor.plaintext;
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.client.OneDBClient;
 import com.hufudb.onedb.core.client.OwnerClient;
-import com.hufudb.onedb.core.config.OneDBConfig;
 import com.hufudb.onedb.core.data.BasicDataSet;
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Header;
@@ -32,27 +31,21 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import org.apache.calcite.util.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /*
  * plaintext implementor of onedb query proto
  */
 public class PlaintextImplementor implements OneDBImplementor {
-  private static final Logger LOG = LoggerFactory.getLogger(PlaintextImplementor.class);
 
   private final OneDBClient client;
-  private final ExecutorService executorService;
 
   public PlaintextImplementor(OneDBClient client) {
     this.client = client;
-    this.executorService = Executors.newFixedThreadPool(OneDBConfig.CLIENT_THREAD_NUM);
   }
+
 
   public QueryableDataSet implement(OneDBContext context) {
     if (context.getContextType().equals(OneDBContextType.ROOT)) {
@@ -83,7 +76,7 @@ public class PlaintextImplementor implements OneDBImplementor {
       });
     }
     try {
-      List<Future<Boolean>> statusList = executorService.invokeAll(tasks);
+      List<Future<Boolean>> statusList = client.getThreadPool().invokeAll(tasks);
       for (Future<Boolean> status : statusList) {
         if (!status.get()) {
           LOG.error("error in oneDBQuery");

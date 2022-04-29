@@ -1,11 +1,11 @@
 package com.hufudb.onedb.core.sql.expression;
 
 import com.hufudb.onedb.core.data.FieldType;
+import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.data.SearchList;
 import com.hufudb.onedb.core.data.TypeConverter;
 import com.hufudb.onedb.rpc.OneDBCommon.ExpressionProto;
 import org.apache.calcite.rex.RexLiteral;
-import org.apache.calcite.sql.type.SqlTypeName;
 
 /*
  * leaf node of expression tree
@@ -71,7 +71,8 @@ public class OneDBLiteral implements OneDBExpression {
     ExpressionProto.Builder builder =
             ExpressionProto.newBuilder()
                     .setOpType(OneDBOpType.LITERAL.ordinal())
-                    .setOutType(type.ordinal());
+                    .setOutType(type.ordinal())
+                    .setLevel(Level.PUBLIC.getId());
     switch (type) {
       case BOOLEAN:
         return builder.setB((Boolean) value).build();
@@ -109,5 +110,10 @@ public class OneDBLiteral implements OneDBExpression {
 
   public Object getValue() {
     return value;
+  }
+
+  @Override
+  public Level getLevel() {
+    return Level.PUBLIC;
   }
 }
