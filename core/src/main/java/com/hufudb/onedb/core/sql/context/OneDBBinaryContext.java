@@ -119,13 +119,17 @@ public class OneDBBinaryContext extends OneDBBaseContext {
 
   @Override
   public List<FieldType> getOutTypes() {
-    return getOutExpressions().stream()
-        .map(exp -> exp.getOutType()).collect(Collectors.toList());
+    return getOutExpressions().stream().map(exp -> exp.getOutType()).collect(Collectors.toList());
   }
 
   @Override
-  public Level getOutLevel() {
+  public Level getContextLevel() {
     return Level.dominate(Level.findDominator(getOutExpressions()), joinInfo.getLevel());
+  }
+
+  @Override
+  public List<Level> getOutLevels() {
+    return getOutExpressions().stream().map(exp -> exp.getLevel()).collect(Collectors.toList());
   }
 
   @Override

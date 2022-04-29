@@ -6,6 +6,7 @@ import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.data.BasicDataSet;
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Header;
+import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.data.StreamBuffer;
 import com.hufudb.onedb.core.implementor.OneDBImplementor;
 import com.hufudb.onedb.core.implementor.QueryableDataSet;
@@ -129,7 +130,7 @@ public class PlaintextImplementor implements OneDBImplementor {
         // for distinct agg, the distinct key is not group key in global agg
         groupMap.put(inputRef, groupKeyIdx);
         localAggs.add(OneDBAggCall.create(AggregateType.GROUPKEY, ImmutableList.of(inputRef),
-            FieldType.UNKOWN));
+            FieldType.UNKOWN, Level.PUBLIC));
         inputRefs.set(i, groupKeyIdx);
       } else {
         inputRefs.set(i, groupMap.get(inputRef));
@@ -141,18 +142,18 @@ public class PlaintextImplementor implements OneDBImplementor {
       Map<Integer, Integer> groupMap) {
     if (!agg.isDistinct()) {
       OneDBAggCall localAvgSum =
-          OneDBAggCall.create(AggregateType.SUM, agg.getInputRef(), agg.getOutType());
+          OneDBAggCall.create(AggregateType.SUM, agg.getInputRef(), agg.getOutType(), Level.PUBLIC);
       int localAvgSumRef = localAggs.size();
       localAggs.add(localAvgSum);
       OneDBAggCall globalAvgSum = OneDBAggCall.create(AggregateType.SUM,
-          ImmutableList.of(localAvgSumRef), agg.getOutType());
+          ImmutableList.of(localAvgSumRef), agg.getOutType(), Level.PUBLIC);
       // add a sum layer above count
       OneDBAggCall localAvgCount =
-          OneDBAggCall.create(AggregateType.COUNT, agg.getInputRef(), agg.getOutType());
+          OneDBAggCall.create(AggregateType.COUNT, agg.getInputRef(), agg.getOutType(), Level.PUBLIC);
       int localAvgCntRef = localAggs.size();
       localAggs.add(localAvgCount);
       OneDBAggCall globalAvgCount = OneDBAggCall.create(AggregateType.SUM,
-          ImmutableList.of(localAvgCntRef), agg.getOutType());
+          ImmutableList.of(localAvgCntRef), agg.getOutType(), Level.PUBLIC);
       return OneDBOperator.create(OneDBOpType.DIVIDE, agg.getOutType(),
           new ArrayList<>(Arrays.asList(globalAvgSum, globalAvgCount)), FuncType.NONE);
     } else {
@@ -167,7 +168,7 @@ public class PlaintextImplementor implements OneDBImplementor {
       localAggs.add(agg);
       // add a sum layer above count
       return OneDBAggCall.create(AggregateType.SUM, ImmutableList.of(localAggs.size() - 1),
-          agg.getOutType());
+          agg.getOutType(), Level.PUBLIC);
     } else {
       updateGroupIdx(agg, localAggs, groupMap);
       return agg;
@@ -179,7 +180,7 @@ public class PlaintextImplementor implements OneDBImplementor {
     if (!agg.isDistinct()) {
       localAggs.add(agg);
       return OneDBAggCall.create(AggregateType.SUM, ImmutableList.of(localAggs.size() - 1),
-          agg.getOutType());
+          agg.getOutType(), Level.PUBLIC);
     } else {
       updateGroupIdx(agg, localAggs, groupMap);
       return agg;
@@ -190,7 +191,7 @@ public class PlaintextImplementor implements OneDBImplementor {
       Map<Integer, Integer> groupMap) {
     if (groupMap.containsKey(agg.getInputRef().get(0))) {
       return OneDBAggCall.create(AggregateType.GROUPKEY,
-          ImmutableList.of(groupMap.get(agg.getInputRef().get(0))), agg.getOutType());
+          ImmutableList.of(groupMap.get(agg.getInputRef().get(0))), agg.getOutType(), Level.PUBLIC);
     } else {
       LOG.error("Group key should be presented in group by clause");
       throw new RuntimeException("Group key should be presented in group by clause");
@@ -213,7 +214,7 @@ public class PlaintextImplementor implements OneDBImplementor {
       default: // others convert directly
         localAggs.add(agg);
         return OneDBAggCall.create(agg.getAggType(), ImmutableList.of(localAggs.size() - 1),
-            agg.getOutType());
+            agg.getOutType(), Level.PUBLIC);
     }
   }
 
@@ -241,13 +242,13 @@ public class PlaintextImplementor implements OneDBImplementor {
     List<OneDBExpression> originAggs = leaf.getAggExps();
     List<OneDBExpression> localAggs = new ArrayList<>();
     List<OneDBExpression> globalAggs = new ArrayList<>();
-    List<Integer> globalGroups = new ArrayList();
+    List<Integer> globalGroups = new ArrayList<>();
     List<FieldType> selectTypes = leaf.getSelectTypes();
     // add local groups into local aggs as group key function
     int idx = 0;
     for (int groupRef : leaf.getGroups()) {
       FieldType type = selectTypes.get(groupRef);
-      localAggs.add(OneDBAggCall.create(AggregateType.GROUPKEY, ImmutableList.of(groupRef), type));
+      localAggs.add(OneDBAggCall.create(AggregateType.GROUPKEY, ImmutableList.of(groupRef), type, Level.PUBLIC));
       groupMap.put(groupRef, idx);
       globalGroups.add(idx);
       ++idx;

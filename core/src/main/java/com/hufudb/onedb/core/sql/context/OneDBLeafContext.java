@@ -80,8 +80,13 @@ public class OneDBLeafContext extends OneDBBaseContext {
   }
 
   @Override
-  public Level getOutLevel() {
+  public Level getContextLevel() {
     return Level.findDominator(getOutExpressions());
+  }
+
+  @Override
+  public List<Level> getOutLevels() {
+    return getOutExpressions().stream().map(exp -> exp.getLevel()).collect(Collectors.toList());
   }
 
   @Override

@@ -41,10 +41,11 @@ public interface OneDBImplementor {
   QueryableDataSet leafQuery(OneDBLeafContext leaf);
 
   public static OneDBImplementor getImplementor(OneDBContext context, OneDBClient client) {
-    switch (context.getOutLevel()) {
+    switch (context.getContextLevel()) {
       case PUBLIC:
         return new PlaintextImplementor(client);
       default:
+        LOG.error("No implementor found for Level {}", context.getContextLevel().name());
         return null;
     }
   }

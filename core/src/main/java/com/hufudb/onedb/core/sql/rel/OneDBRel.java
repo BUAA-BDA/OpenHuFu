@@ -176,5 +176,9 @@ public interface OneDBRel extends RelNode {
     public List<FieldType> getOutputTypes() {
       return currentContext.getOutTypes();
     }
+
+    public List<Level> getOutputLevels() {
+      return currentContext.getOutLevels();
+    }
   }
 }

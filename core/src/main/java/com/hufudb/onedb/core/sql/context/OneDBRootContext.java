@@ -46,8 +46,13 @@ public class OneDBRootContext extends OneDBBaseContext {
   }
 
   @Override
-  public Level getOutLevel() {
-    return child.getOutLevel();
+  public Level getContextLevel() {
+    return child.getContextLevel();
+  }
+
+  @Override
+  public List<Level> getOutLevels() {
+    return child.getOutLevels();
   }
 
   @Override

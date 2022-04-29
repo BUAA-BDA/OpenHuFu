@@ -23,7 +23,9 @@ public interface OneDBContext {
 
   List<FieldType> getOutTypes();
 
-  Level getOutLevel();
+  Level getContextLevel();
+
+  List<Level> getOutLevels();
 
   OneDBContext getParent();
 
