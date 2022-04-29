@@ -50,3 +50,10 @@ test:
     - docker-compose down
     - cd ../database
     - docker-compose down
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - rpc/target/surefire-reports/TEST-*.xml
+        - mpc/target/surefire-reports/TEST-*.xml
+        - user-client/target/surefire-reports/TEST-*.xml
