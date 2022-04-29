@@ -16,7 +16,7 @@ import com.hufudb.onedb.core.zk.DBZkClient;
 import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
 import com.hufudb.onedb.rpc.OneDBCommon.HeaderProto;
 import com.hufudb.onedb.rpc.OneDBCommon.LocalTableListProto;
-import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
+import com.hufudb.onedb.rpc.OneDBCommon.LeafQueryProto;
 import com.hufudb.onedb.rpc.OneDBCommon.OwnerInfoProto;
 import com.hufudb.onedb.rpc.OneDBService.GeneralRequest;
 import com.hufudb.onedb.rpc.OneDBService.GeneralResponse;
@@ -77,7 +77,7 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
   }
 
   @Override
-  public void oneDBQuery(OneDBQueryProto request, StreamObserver<DataSetProto> responseObserver) {
+  public void leafQuery(LeafQueryProto request, StreamObserver<DataSetProto> responseObserver) {
     Header header = OneDBContext.getOutputHeader(request);
     StreamObserverDataSet obDataSet = new StreamObserverDataSet(responseObserver, header);
     try {
@@ -260,7 +260,7 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
   }
 
   // template function for SQL database, rewrite this for database without sql
-  protected void oneDBQueryInternal(OneDBQueryProto query, DataSet dataSet) throws SQLException {
+  protected void oneDBQueryInternal(LeafQueryProto query, DataSet dataSet) throws SQLException {
     String sql = generateSQL(query);
     if (sql.isEmpty()) {
       return;
@@ -268,7 +268,7 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
     executeSQL(sql, dataSet);
   }
 
-  protected String generateSQL(OneDBQueryProto query) {
+  protected String generateSQL(LeafQueryProto query) {
     String originTableName = getOriginTableName(query.getTableName());
     Header tableHeader = getPublishedTableHeader(query.getTableName());
     LOG.info("{}: {}", originTableName, tableHeader);

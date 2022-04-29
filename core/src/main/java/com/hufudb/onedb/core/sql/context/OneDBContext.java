@@ -8,7 +8,7 @@ import com.hufudb.onedb.core.implementor.QueryableDataSet;
 import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.table.OneDBTableInfo;
-import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
+import com.hufudb.onedb.rpc.OneDBCommon.LeafQueryProto;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -77,14 +77,14 @@ public interface OneDBContext {
 
   QueryableDataSet implement(OneDBImplementor implementor);
 
-  public static Header getOutputHeader(OneDBQueryProto proto) {
+  public static Header getOutputHeader(LeafQueryProto proto) {
     Header.Builder builder = Header.newBuilder();
     List<FieldType> types = getOutputTypes(proto);
     types.stream().forEach(type -> builder.add("", type));
     return builder.build();
   }
 
-  public static List<FieldType> getOutputTypes(OneDBQueryProto proto) {
+  public static List<FieldType> getOutputTypes(LeafQueryProto proto) {
     if (proto.getAggExpCount() > 0) {
       return proto.getAggExpList().stream().map(agg -> FieldType.of(agg.getOutType()))
           .collect(Collectors.toList());
@@ -94,7 +94,7 @@ public interface OneDBContext {
     }
   }
 
-  public static List<FieldType> getOutputTypes(OneDBQueryProto proto, List<Integer> indexs) {
+  public static List<FieldType> getOutputTypes(LeafQueryProto proto, List<Integer> indexs) {
     if (proto.getAggExpCount() > 0) {
       return indexs.stream().map(id -> FieldType.of(proto.getAggExp(id).getOutType()))
           .collect(Collectors.toList());
@@ -104,7 +104,7 @@ public interface OneDBContext {
     }
   }
 
-  public static List<OneDBExpression> getOutputExpressions(OneDBQueryProto proto) {
+  public static List<OneDBExpression> getOutputExpressions(LeafQueryProto proto) {
     if (proto.getAggExpCount() > 0) {
       return OneDBExpression.fromProto(proto.getAggExpList());
     } else {

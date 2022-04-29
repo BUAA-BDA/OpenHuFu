@@ -17,13 +17,11 @@ import com.hufudb.onedb.core.sql.expression.OneDBOpType;
 import com.hufudb.onedb.core.sql.expression.OneDBOperator;
 import com.hufudb.onedb.core.sql.expression.OneDBAggCall.AggregateType;
 import com.hufudb.onedb.core.sql.expression.OneDBOperator.FuncType;
-import com.hufudb.onedb.core.sql.context.OneDBContextType;
 import com.hufudb.onedb.core.sql.context.OneDBLeafContext;
 import com.hufudb.onedb.core.sql.context.OneDBContext;
 import com.hufudb.onedb.core.sql.context.OneDBUnaryContext;
-import com.hufudb.onedb.core.sql.context.OneDBRootContext;
 import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
-import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
+import com.hufudb.onedb.rpc.OneDBCommon.LeafQueryProto;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -47,15 +45,15 @@ public class PlaintextImplementor implements OneDBImplementor {
     this.client = client;
   }
 
-  private StreamBuffer<DataSetProto> tableQuery(OneDBQueryProto query,
+  private StreamBuffer<DataSetProto> tableQuery(LeafQueryProto query,
       List<Pair<OwnerClient, String>> tableClients) {
     StreamBuffer<DataSetProto> iterator = new StreamBuffer<>(tableClients.size());
     List<Callable<Boolean>> tasks = new ArrayList<Callable<Boolean>>();
     for (Pair<OwnerClient, String> entry : tableClients) {
       tasks.add(() -> {
         try {
-          OneDBQueryProto localQuery = query.toBuilder().setTableName(entry.getValue()).build();
-          Iterator<DataSetProto> it = entry.getKey().oneDBQuery(localQuery);
+          LeafQueryProto localQuery = query.toBuilder().setTableName(entry.getValue()).build();
+          Iterator<DataSetProto> it = entry.getKey().leafQuery(localQuery);
           while (it.hasNext()) {
             iterator.add(it.next());
           }
@@ -72,11 +70,11 @@ public class PlaintextImplementor implements OneDBImplementor {
       List<Future<Boolean>> statusList = client.getThreadPool().invokeAll(tasks);
       for (Future<Boolean> status : statusList) {
         if (!status.get()) {
-          LOG.error("error in oneDBQuery");
+          LOG.error("error in leafQuery");
         }
       }
     } catch (InterruptedException | ExecutionException e) {
-      LOG.error("Error in OneDBQuery for {}", e.getMessage());
+      LOG.error("Error in leafQuery for {}", e.getMessage());
     }
     return iterator;
   }
@@ -297,7 +295,7 @@ public class PlaintextImplementor implements OneDBImplementor {
   }
 
   public QueryableDataSet leafQuery(OneDBLeafContext leaf) {
-    OneDBQueryProto proto = leaf.toProto();
+    LeafQueryProto proto = leaf.toProto();
     List<Pair<OwnerClient, String>> tableClients = client.getTableClients(leaf.getTableName());
     StreamBuffer<DataSetProto> streamProto = tableQuery(proto, tableClients);
 

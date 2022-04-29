@@ -73,7 +73,7 @@ message MpcTaskProto {
   repeated int32 parties = 5;
 }
 
-message OneDBQueryProto {
+message LeafQueryProto {
   string tableName = 1;
   repeated ExpressionProto selectExp = 2;
   repeated ExpressionProto whereExp = 3;

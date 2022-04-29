@@ -4,7 +4,6 @@ import com.hufudb.onedb.core.config.OneDBConfig;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.data.Row;
 import com.hufudb.onedb.core.implementor.OneDBImplementor;
-import com.hufudb.onedb.core.implementor.plaintext.PlaintextImplementor;
 import com.hufudb.onedb.core.sql.context.OneDBContext;
 import com.hufudb.onedb.core.sql.context.OneDBQueryContextPool;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;

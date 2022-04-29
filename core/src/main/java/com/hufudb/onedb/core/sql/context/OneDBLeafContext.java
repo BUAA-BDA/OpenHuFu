@@ -9,7 +9,7 @@ import com.hufudb.onedb.core.implementor.OneDBImplementor;
 import com.hufudb.onedb.core.implementor.QueryableDataSet;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.table.OneDBTableInfo;
-import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
+import com.hufudb.onedb.rpc.OneDBCommon.LeafQueryProto;
 
 /*
  * context for single global table query (horizontal partitioned table)
@@ -30,8 +30,8 @@ public class OneDBLeafContext extends OneDBBaseContext {
     super();
   }
 
-  public OneDBQueryProto toProto() {
-    OneDBQueryProto.Builder builder = OneDBQueryProto.newBuilder();
+  public LeafQueryProto toProto() {
+    LeafQueryProto.Builder builder = LeafQueryProto.newBuilder();
     builder.setTableName(info.getName()).addAllSelectExp(OneDBExpression.toProto(selectExps))
         .setFetch(fetch).setOffset(offset);
     if (whereExps != null) {
