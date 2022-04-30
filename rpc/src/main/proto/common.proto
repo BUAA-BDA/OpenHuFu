@@ -60,17 +60,46 @@ message OwnerInfoProto {
 
 message JoinConditionProto {
   int32 type = 1;
-  repeated int32 leftKey = 2;
-  repeated int32 rightKey = 3;
-  repeated ExpressionProto condition = 4;
+  int32 level = 2;
+  repeated int32 leftKey = 3;
+  repeated int32 rightKey = 4;
+  repeated ExpressionProto condition = 5;
 }
 
-message MpcTaskProto {
-  int32 userId = 1;
-  int32 queryId = 2;
-  int64 taskId = 3;
-  int32 ptoId = 4;
-  repeated int32 parties = 5;
+message TaskInfoProto {
+  int64 taskId = 1;
+  int32 ptoId = 2;
+  repeated int32 parties = 3;
+}
+
+// beta message
+message SecureQueryProto {
+  TaskInfoProto taskInfo = 1;
+  oneof query {
+    BinaryQueryProto binary = 2;
+    UnaryQueryProto unary = 3;
+    LeafQueryProto leaf = 4;
+  }
+  repeated SecureQueryProto children = 5;
+}
+
+message BinaryQueryProto {
+  repeated ExpressionProto selectExp = 1;
+  repeated ExpressionProto whereExp = 2;
+  repeated ExpressionProto aggExp = 3;
+  repeated int32 group = 4;
+  repeated string order = 5;
+  int32 fetch = 6;
+  int32 offset = 7;
+  JoinConditionProto joinInfo = 8;
+}
+
+message UnaryQueryProto {
+  repeated ExpressionProto aggExp = 1;
+  repeated int32 group = 2;
+  repeated string order = 3;
+  int32 fetch = 4;
+  int32 offset = 5;
 }
 
 message LeafQueryProto {

@@ -31,7 +31,7 @@ public class OneDBRpc implements Rpc {
   final Set<Party> parties;
   final Map<Integer, Party> participantMap;
   final Map<Integer, PipeClient> clientMap;
-  final Map<Integer, ConcurrentBuffer> bufferMap;
+  final Map<Integer, ConcurrentBuffer<DataPacketHeader, DataPacket>> bufferMap;
   final PipeService gRpcService;
   final ExecutorService threadPool;
   long payloadByteLength;
@@ -39,7 +39,8 @@ public class OneDBRpc implements Rpc {
   final ChannelCredentials rootCert;
   final ReadWriteLock lock;
 
-  public OneDBRpc(Party own, Set<Party> parties, ExecutorService threadPool, ChannelCredentials rootCert) {
+  public OneDBRpc(Party own, Set<Party> parties, ExecutorService threadPool,
+      ChannelCredentials rootCert) {
     this.own = own;
     this.parties = parties;
     this.participantMap = new HashMap<>();
@@ -50,7 +51,7 @@ public class OneDBRpc implements Rpc {
       this.participantMap.put(p.getPartyId(), p);
       if (!p.equals(own)) {
         this.clientMap.put(p.getPartyId(), new PipeClient(own.getPartyName()));
-        this.bufferMap.put(p.getPartyId(), new ConcurrentBuffer());
+        this.bufferMap.put(p.getPartyId(), new ConcurrentBuffer<DataPacketHeader, DataPacket>());
       }
     }
     this.gRpcService = new PipeService(bufferMap);
@@ -83,7 +84,7 @@ public class OneDBRpc implements Rpc {
       this.participantMap.put(p.getPartyId(), p);
       if (!p.equals(own)) {
         this.clientMap.put(p.getPartyId(), new PipeClient(ch));
-        this.bufferMap.put(p.getPartyId(), new ConcurrentBuffer());
+        this.bufferMap.put(p.getPartyId(), new ConcurrentBuffer<DataPacketHeader, DataPacket>());
       }
     }
     this.gRpcService = new PipeService(bufferMap);
@@ -134,7 +135,7 @@ public class OneDBRpc implements Rpc {
 
   @Override
   public DataPacket receive(DataPacketHeader header) {
-    ConcurrentBuffer buffer = bufferMap.get(header.getSenderId());
+    ConcurrentBuffer<DataPacketHeader, DataPacket> buffer = bufferMap.get(header.getSenderId());
     return buffer.blockingPop(header);
   }
 
@@ -177,7 +178,7 @@ public class OneDBRpc implements Rpc {
     parties.add(party);
     participantMap.put(party.getPartyId(), party);
     clientMap.put(party.getPartyId(), new PipeClient(party.getPartyName(), rootCert));
-    bufferMap.put(party.getPartyId(), new ConcurrentBuffer());
+    bufferMap.put(party.getPartyId(), new ConcurrentBuffer<DataPacketHeader, DataPacket>());
     lock.writeLock().unlock();
     return true;
   }

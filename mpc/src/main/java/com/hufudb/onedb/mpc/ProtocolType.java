@@ -11,7 +11,8 @@ public enum ProtocolType {
   PLAINTEXT("PLAINTEXT", 0),
   PK_OT("PUBLIC_KEY_BASED_OT", 10),
   BEAVER_TRIPLE("BEAVER_TRIPLE", 20),
-  GMW("GMW", 30);
+  GMW("GMW", 100),
+  HASH_PSI("PSI", 200);
 
   private static final ImmutableMap<Integer, ProtocolType> MAP;
 

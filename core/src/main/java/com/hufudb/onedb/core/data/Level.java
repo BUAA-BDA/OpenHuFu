@@ -28,7 +28,7 @@ public enum Level {
   PROTECTED("PROTECTED", 2, 0, 0),
   // can't scan private columns directly, only statistics including COUNT, SUM, AVG can use on these columns
   @SerializedName("private")
-  PRIVATE("PRIVATE", 3, 30, 30),
+  PRIVATE("PRIVATE", 3, 100, 200),
 
   /*
    * Advanced levels

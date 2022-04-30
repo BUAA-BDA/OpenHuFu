@@ -36,19 +36,22 @@ public class OneDBSchema extends AbstractSchema {
   private final Map<String, Table> tableMap;
   private final OneDBClient client;
   private final OneDBZkClient zkClient;
+  private final int userId;
 
   public OneDBSchema(List<Map<String, Object>> tables, SchemaPlus schema, ZkConfig zkConfig) {
     this.parentSchema = schema;
     this.tableMap = new HashMap<>();
     this.client = new OneDBClient(this);
     this.zkClient = new OneDBZkClient(zkConfig, this);
+    this.userId = 0;
   }
 
-  public OneDBSchema(List<OwnerMeta> owners, List<Map<String, Object>> tables, SchemaPlus schema) {
+  public OneDBSchema(List<OwnerMeta> owners, List<Map<String, Object>> tables, SchemaPlus schema, int userId) {
     this.parentSchema = schema;
     this.tableMap = new HashMap<>();
     this.client = new OneDBClient(this);
     this.zkClient = null;
+    this.userId = userId;
     for (OwnerMeta owner : owners) {
       addOwner(owner.getEndpoint(), owner.getTrustCertPath());
     }
@@ -72,6 +75,10 @@ public class OneDBSchema extends AbstractSchema {
       infos.add(((OneDBTable) table).getTableInfo());
     }
     return infos;
+  }
+
+  public int getUserId() {
+    return userId;
   }
 
   public OwnerClient addOwner(String endpoint, String trustCertPath) {

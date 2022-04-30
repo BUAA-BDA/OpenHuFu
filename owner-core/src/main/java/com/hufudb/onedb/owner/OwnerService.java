@@ -22,6 +22,7 @@ import com.hufudb.onedb.rpc.OneDBService.GeneralRequest;
 import com.hufudb.onedb.rpc.OneDBService.GeneralResponse;
 import com.hufudb.onedb.rpc.grpc.OneDBOwnerInfo;
 import com.hufudb.onedb.rpc.grpc.OneDBRpc;
+import com.hufudb.onedb.rpc.grpc.concurrent.ConcurrentBuffer;
 import com.hufudb.onedb.rpc.Party;
 import com.hufudb.onedb.rpc.ServiceGrpc;
 import io.grpc.stub.StreamObserver;
@@ -52,6 +53,7 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
   private final DBZkClient zkClient;
   protected final ExecutorService threadPool;
   protected final OneDBRpc ownerSideRpc;
+  protected final ConcurrentBuffer<Long, DataSet> resultBuffer; // taskId -> bufferDataSet
 
   public OwnerService(String zkServers, String zkRootPath, String endpoint, String digest,
       ExecutorService threadPool, OneDBRpc ownerSideRpc) {
@@ -62,6 +64,7 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
     this.publishedLock = new ReentrantReadWriteLock();
     this.endpoint = endpoint;
     this.ownerSideRpc = ownerSideRpc;
+    this.resultBuffer = new ConcurrentBuffer<Long, DataSet>();
     if (zkServers == null || zkRootPath == null || digest == null) {
       zkClient = null;
     } else {
