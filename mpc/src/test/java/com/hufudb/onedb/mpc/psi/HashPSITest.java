@@ -79,7 +79,7 @@ public class HashPSITest {
       rpc1.connect();
       HashPSI psi0 = new HashPSI(rpc0);
       HashPSI psi1 = new HashPSI(rpc1);
-      List<byte[]> data0 = generateData(8, 1000);
+      List<byte[]> data0 = generateData(8, 100);
       List<byte[]> data1 = generateData(8, 10000);
       ExecutorService service = Executors.newFixedThreadPool(2);
       DataPacketHeader header = new DataPacketHeader(0, psi0.getProtocolType().getId(), 0, HashFunction.MD5.getId(), 0, 1);
