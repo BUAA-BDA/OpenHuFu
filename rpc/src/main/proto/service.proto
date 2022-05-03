@@ -20,5 +20,6 @@ service Service {
   rpc AddOwner(OwnerInfoProto) returns (GeneralResponse);
   rpc GetTableHeader(GeneralRequest) returns (HeaderProto);
   rpc GetAllLocalTable(GeneralRequest) returns (LocalTableListProto);
-  rpc OneDBQuery(OneDBQueryProto) returns (stream DataSetProto);
+  rpc LeafQuery(LeafQueryProto) returns (stream DataSetProto);
+  rpc secureQuery(SecureQueryProto) returns (stream DataSetProto);
 }

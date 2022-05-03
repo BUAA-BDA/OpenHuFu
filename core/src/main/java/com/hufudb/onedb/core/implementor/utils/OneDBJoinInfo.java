@@ -3,6 +3,7 @@ package com.hufudb.onedb.core.implementor.utils;
 import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.expression.OneDBJoinType;
+import com.hufudb.onedb.rpc.OneDBCommon.JoinConditionProto;
 import java.util.List;
 
 public class OneDBJoinInfo {
@@ -19,6 +20,11 @@ public class OneDBJoinInfo {
     this.rightKeys = rightKeys;
     this.conditions = conditions;
     this.level = level;
+  }
+
+  public JoinConditionProto toProto() {
+    return JoinConditionProto.newBuilder().addAllLeftKey(leftKeys).addAllRightKey(rightKeys)
+        .addAllCondition(OneDBExpression.toProto(conditions)).setLevel(level.getId()).build();
   }
 
   public OneDBJoinType getType() {

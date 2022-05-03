@@ -10,6 +10,7 @@ import com.hufudb.onedb.core.implementor.OneDBImplementor;
 import com.hufudb.onedb.core.implementor.QueryableDataSet;
 import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
+import com.hufudb.onedb.rpc.OneDBCommon.BinaryQueryProto;
 
 /*
  * context for join
@@ -31,6 +32,27 @@ public class OneDBBinaryContext extends OneDBBaseContext {
     this.parent = parent;
     this.left = left;
     this.right = right;
+  }
+
+  public BinaryQueryProto toProto() {
+    BinaryQueryProto.Builder builder = BinaryQueryProto.newBuilder();
+    if(selectExps != null) {
+      builder.addAllSelectExp(OneDBExpression.toProto(selectExps));
+    }
+    if (whereExps != null) {
+      builder.addAllWhereExp(OneDBExpression.toProto(whereExps));
+    }
+    if (aggExps != null) {
+      builder.addAllAggExp(OneDBExpression.toProto(aggExps));
+    }
+    if (groups != null) {
+      builder.addAllGroup(groups);
+    }
+    if (orders != null) {
+      builder.addAllOrder(orders);
+    }
+    builder.setFetch(fetch).setOffset(fetch).setJoinInfo(joinInfo.toProto());
+    return builder.build();
   }
 
   @Override

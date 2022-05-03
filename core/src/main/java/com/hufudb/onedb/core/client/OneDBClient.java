@@ -4,7 +4,6 @@ import com.hufudb.onedb.core.config.OneDBConfig;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.data.Row;
 import com.hufudb.onedb.core.implementor.OneDBImplementor;
-import com.hufudb.onedb.core.implementor.plaintext.PlaintextImplementor;
 import com.hufudb.onedb.core.sql.context.OneDBContext;
 import com.hufudb.onedb.core.sql.context.OneDBQueryContextPool;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
@@ -15,6 +14,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.calcite.linq4j.Enumerator;
 import org.apache.calcite.schema.Table;
 import org.apache.calcite.util.Pair;
@@ -27,6 +27,11 @@ import io.grpc.ChannelCredentials;
  */
 public class OneDBClient {
   private static final Logger LOG = LoggerFactory.getLogger(OneDBClient.class);
+  private static final AtomicInteger queryId = new AtomicInteger(0);
+
+  public static int getQueryid() {
+    return queryId.getAndIncrement();
+  }
 
   private final OneDBSchema schema;
   private final Map<String, OwnerClient> ownerMap;

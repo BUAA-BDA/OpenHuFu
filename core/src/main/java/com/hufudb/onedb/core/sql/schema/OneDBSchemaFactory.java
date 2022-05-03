@@ -20,6 +20,7 @@ public class OneDBSchemaFactory implements SchemaFactory {
   public Schema create(SchemaPlus parentSchema, String name, Map<String, Object> operand) {
     List<OwnerMeta> owners = new ArrayList<>();
     List<Map<String, Object>> tableObjs = new ArrayList<>();
+    int userId = 0;
     if (operand.containsKey("endpoints")) {
       for (Object endpoint : (List<Object>) operand.get("endpoints")) {
         owners.add(new OwnerMeta((String) endpoint, null));
@@ -30,6 +31,9 @@ public class OneDBSchemaFactory implements SchemaFactory {
         String trustCertPath = (String) owner.get("trustcertpath");
         owners.add(new OwnerMeta(endpoint, trustCertPath));
       }
+    }
+    if (operand.containsKey("userid")) {
+      userId = (Integer) operand.get("userid");
     }
     if (operand.containsKey("tables")) {
       tableObjs.addAll((List) operand.get("tables"));
@@ -45,7 +49,7 @@ public class OneDBSchemaFactory implements SchemaFactory {
       return new OneDBSchema(tableObjs, parentSchema, zkConfig);
     } else {
       LOG.info("Use model");
-      return new OneDBSchema(owners, tableObjs, parentSchema);
+      return new OneDBSchema(owners, tableObjs, parentSchema, userId);
     }
   }
 

@@ -1,7 +1,6 @@
 package com.hufudb.onedb.mpc;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 import com.hufudb.onedb.mpc.random.BasicRandom;
 import com.hufudb.onedb.mpc.random.OneDBRandom;
 import com.hufudb.onedb.rpc.Rpc;
@@ -12,7 +11,6 @@ import org.slf4j.LoggerFactory;
 public abstract class ProtocolExecutor {
   protected static final Logger LOG = LoggerFactory.getLogger(ProtocolExecutor.class);
   protected static final OneDBRandom random = new BasicRandom();
-  private static AtomicLong taskId = new AtomicLong(0);
 
   final protected Rpc rpc;
   final protected ProtocolType type;
@@ -26,9 +24,6 @@ public abstract class ProtocolExecutor {
     return type;
   }
 
-  protected static long taskId() {
-    return taskId.getAndIncrement();
-  }
-
+  // Beta API, parameters may change to [Set<Integer> partySet, List<byte[]> inputData, int extraInfo]
   public abstract List<byte[]> run(DataPacket initPacket);
 }

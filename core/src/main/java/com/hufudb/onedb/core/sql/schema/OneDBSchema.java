@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.calcite.linq4j.AbstractEnumerable;
 import org.apache.calcite.linq4j.Enumerable;
 import org.apache.calcite.linq4j.Enumerator;
@@ -36,19 +37,25 @@ public class OneDBSchema extends AbstractSchema {
   private final Map<String, Table> tableMap;
   private final OneDBClient client;
   private final OneDBZkClient zkClient;
+  private final int userId;
+  private final AtomicInteger queryCounter;
 
   public OneDBSchema(List<Map<String, Object>> tables, SchemaPlus schema, ZkConfig zkConfig) {
     this.parentSchema = schema;
     this.tableMap = new HashMap<>();
     this.client = new OneDBClient(this);
     this.zkClient = new OneDBZkClient(zkConfig, this);
+    this.userId = 0;
+    this.queryCounter = new AtomicInteger(0);
   }
 
-  public OneDBSchema(List<OwnerMeta> owners, List<Map<String, Object>> tables, SchemaPlus schema) {
+  public OneDBSchema(List<OwnerMeta> owners, List<Map<String, Object>> tables, SchemaPlus schema, int userId) {
     this.parentSchema = schema;
     this.tableMap = new HashMap<>();
     this.client = new OneDBClient(this);
     this.zkClient = null;
+    this.userId = userId;
+    this.queryCounter = new AtomicInteger(0);
     for (OwnerMeta owner : owners) {
       addOwner(owner.getEndpoint(), owner.getTrustCertPath());
     }
@@ -72,6 +79,18 @@ public class OneDBSchema extends AbstractSchema {
       infos.add(((OneDBTable) table).getTableInfo());
     }
     return infos;
+  }
+
+  public int getUserId() {
+    return userId;
+  }
+
+  public int getAndIncrementQueryCounter() {
+    return queryCounter.getAndIncrement();
+  }
+
+  public long stampQueryId() {
+    return ((long) getUserId() << 32) | (long) getAndIncrementQueryCounter();
   }
 
   public OwnerClient addOwner(String endpoint, String trustCertPath) {

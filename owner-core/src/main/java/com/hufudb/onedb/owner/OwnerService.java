@@ -16,12 +16,13 @@ import com.hufudb.onedb.core.zk.DBZkClient;
 import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
 import com.hufudb.onedb.rpc.OneDBCommon.HeaderProto;
 import com.hufudb.onedb.rpc.OneDBCommon.LocalTableListProto;
-import com.hufudb.onedb.rpc.OneDBCommon.OneDBQueryProto;
+import com.hufudb.onedb.rpc.OneDBCommon.LeafQueryProto;
 import com.hufudb.onedb.rpc.OneDBCommon.OwnerInfoProto;
 import com.hufudb.onedb.rpc.OneDBService.GeneralRequest;
 import com.hufudb.onedb.rpc.OneDBService.GeneralResponse;
 import com.hufudb.onedb.rpc.grpc.OneDBOwnerInfo;
 import com.hufudb.onedb.rpc.grpc.OneDBRpc;
+import com.hufudb.onedb.rpc.grpc.concurrent.ConcurrentBuffer;
 import com.hufudb.onedb.rpc.Party;
 import com.hufudb.onedb.rpc.ServiceGrpc;
 import io.grpc.stub.StreamObserver;
@@ -52,6 +53,7 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
   private final DBZkClient zkClient;
   protected final ExecutorService threadPool;
   protected final OneDBRpc ownerSideRpc;
+  protected final ConcurrentBuffer<Long, DataSet> resultBuffer; // taskId -> bufferDataSet
 
   public OwnerService(String zkServers, String zkRootPath, String endpoint, String digest,
       ExecutorService threadPool, OneDBRpc ownerSideRpc) {
@@ -62,6 +64,7 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
     this.publishedLock = new ReentrantReadWriteLock();
     this.endpoint = endpoint;
     this.ownerSideRpc = ownerSideRpc;
+    this.resultBuffer = new ConcurrentBuffer<Long, DataSet>();
     if (zkServers == null || zkRootPath == null || digest == null) {
       zkClient = null;
     } else {
@@ -77,7 +80,7 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
   }
 
   @Override
-  public void oneDBQuery(OneDBQueryProto request, StreamObserver<DataSetProto> responseObserver) {
+  public void leafQuery(LeafQueryProto request, StreamObserver<DataSetProto> responseObserver) {
     Header header = OneDBContext.getOutputHeader(request);
     StreamObserverDataSet obDataSet = new StreamObserverDataSet(responseObserver, header);
     try {
@@ -260,7 +263,7 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
   }
 
   // template function for SQL database, rewrite this for database without sql
-  protected void oneDBQueryInternal(OneDBQueryProto query, DataSet dataSet) throws SQLException {
+  protected void oneDBQueryInternal(LeafQueryProto query, DataSet dataSet) throws SQLException {
     String sql = generateSQL(query);
     if (sql.isEmpty()) {
       return;
@@ -268,7 +271,7 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
     executeSQL(sql, dataSet);
   }
 
-  protected String generateSQL(OneDBQueryProto query) {
+  protected String generateSQL(LeafQueryProto query) {
     String originTableName = getOriginTableName(query.getTableName());
     Header tableHeader = getPublishedTableHeader(query.getTableName());
     LOG.info("{}: {}", originTableName, tableHeader);

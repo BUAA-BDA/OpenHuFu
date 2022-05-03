@@ -5,6 +5,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Level;
+import com.hufudb.onedb.core.implementor.OneDBImplementor;
+import com.hufudb.onedb.core.implementor.QueryableDataSet;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 
 public class OneDBRootContext extends OneDBBaseContext {
@@ -69,5 +71,10 @@ public class OneDBRootContext extends OneDBBaseContext {
   @Override
   public void updateChild(OneDBContext newChild, OneDBContext oldChild) {
     child = newChild;
+  }
+
+  @Override
+  public QueryableDataSet implement(OneDBImplementor implementor) {
+    return child.implement(implementor);
   }
 };
