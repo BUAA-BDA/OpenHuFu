@@ -27,7 +27,7 @@ public class SecureImplementor implements OneDBImplementor {
 
   @Override
   public QueryableDataSet filter(QueryableDataSet in, List<OneDBExpression> filters) {
-    throw new UnsupportedOperationException("Secure Implementor not support join");
+    throw new UnsupportedOperationException("Secure Implementor not support filters");
   }
 
   @Override
@@ -53,8 +53,6 @@ public class SecureImplementor implements OneDBImplementor {
 
   @Override
   public QueryableDataSet leafQuery(OneDBLeafContext leaf) {
-    LeafQueryProto proto = leaf.toProto();
-    new SecureQueryableDataSet(client);
     return null;
   }
 }

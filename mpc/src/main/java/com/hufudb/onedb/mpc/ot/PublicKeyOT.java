@@ -23,7 +23,7 @@ import javax.crypto.Cipher;
  *   Participants: S and R
  *   Init DataPacket:
  *     S:
- *       Header: [ptoId: pkot, stepId: 0, senderId: S, recieveId: R, extraInfo: flag]
+ *       Header: [ptoId: pkot, stepId: 0, senderId: S, recieveId: R, extraInfo: flag(e.g. the gate id in circuit)]
  *       Payload: n secret values [x_0, x_1, ..., x_n-1]
  *     R: 
  *       Header: [ptoId: pkot, stepId: 0, senderId: S, recieveId: R, extraInfo: flag]

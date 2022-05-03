@@ -25,7 +25,7 @@ public enum Level {
   PUBLIC("PUBLIC", 1, 0, 0),
   // protected columns can be scanned but data source information will be hidden from client and other dataServers
   @SerializedName("protected")
-  PROTECTED("PROTECTED", 2, 0, 0),
+  PROTECTED("PROTECTED", 2, 0, 200),
   // can't scan private columns directly, only statistics including COUNT, SUM, AVG can use on these columns
   @SerializedName("private")
   PRIVATE("PRIVATE", 3, 100, 200),

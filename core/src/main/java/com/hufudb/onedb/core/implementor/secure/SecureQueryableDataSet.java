@@ -1,7 +1,12 @@
 package com.hufudb.onedb.core.implementor.secure;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import com.hufudb.onedb.core.client.OneDBClient;
+import com.hufudb.onedb.core.data.BasicDataSet;
 import com.hufudb.onedb.core.data.DataSet;
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Header;
@@ -12,114 +17,139 @@ import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 
 public class SecureQueryableDataSet implements QueryableDataSet {
-
+  long queryId = 0;
   final OneDBClient client;
+  AtomicBoolean startReveal;
+  AtomicBoolean isRevealed;
+  BasicDataSet result;
+  Lock lock;
+  Condition revealCondition;
 
-  public SecureQueryableDataSet(OneDBClient client) {
+  public SecureQueryableDataSet(Header header, OneDBClient client) {
     this.client = client;
+    this.startReveal = new AtomicBoolean(false);
+    this.isRevealed = new AtomicBoolean(false);
+    this.result = BasicDataSet.of(header);
+    this.lock = new ReentrantLock();
+    this.revealCondition = lock.newCondition();
   }
 
   @Override
   public Header getHeader() {
-    // TODO Auto-generated method stub
-    return null;
+    return result.getHeader();
   }
 
   @Override
   public int getRowCount() {
-    // TODO Auto-generated method stub
-    return 0;
+    if (!isRevealed.get()) {
+      reveal();
+    }
+    return result.getRowCount();
   }
 
   @Override
   public void addRow(Row row) {
-    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Secure queryable database not support add row");
   }
 
   @Override
   public void addRows(List<Row> rows) {
-    // TODO Auto-generated method stub
-    
+    throw new UnsupportedOperationException("Secure queryable database not support add rows");
   }
 
   @Override
   public void mergeDataSet(DataSet dataSet) {
-    // TODO Auto-generated method stub
-    
+    throw new UnsupportedOperationException("Secure queryable database not support merge dataset");
   }
 
   @Override
   public List<Row> getRows() {
-    // TODO Auto-generated method stub
-    return null;
+    if (!isRevealed.get()) {
+      reveal();
+    }
+    return result.getRows();
   }
 
   @Override
   public Row current() {
-    // TODO Auto-generated method stub
-    return null;
+    if (!isRevealed.get()) {
+      reveal();
+    }
+    return result.current();
   }
 
   @Override
   public boolean moveNext() {
-    // TODO Auto-generated method stub
-    return false;
+    if (!isRevealed.get()) {
+      reveal();
+    }
+    return result.moveNext();
   }
 
   @Override
   public void reset() {
-    // TODO Auto-generated method stub
-    
+    if (!isRevealed.get()) {
+      reveal();
+    }
+    result.reset();
   }
 
   @Override
   public void close() {
-    // TODO Auto-generated method stub
-    
+    result.close();
   }
 
   @Override
   public List<FieldType> getTypeList() {
-    // TODO Auto-generated method stub
-    return null;
+    return result.getHeader().getTypeList();
   }
 
   @Override
   public QueryableDataSet join(OneDBImplementor implementor, QueryableDataSet right,
       OneDBJoinInfo joinInfo) {
-    // TODO Auto-generated method stub
     return null;
   }
 
   @Override
   public QueryableDataSet filter(OneDBImplementor implementor, List<OneDBExpression> filters) {
-    // TODO Auto-generated method stub
-    return null;
+    throw new UnsupportedOperationException("Secure queryable database not support filter");
   }
 
   @Override
   public QueryableDataSet project(OneDBImplementor implementor, List<OneDBExpression> projects) {
-    // TODO Auto-generated method stub
-    return null;
+    throw new UnsupportedOperationException("Secure queryable database not support project");
   }
 
   @Override
   public QueryableDataSet aggregate(OneDBImplementor implementor, List<Integer> groups,
       List<OneDBExpression> aggs, List<FieldType> inputTypes) {
-    // TODO Auto-generated method stub
     return null;
   }
 
   @Override
   public QueryableDataSet sort(OneDBImplementor implementor, List<String> orders) {
-    // TODO Auto-generated method stub
-    return null;
+    throw new UnsupportedOperationException("Secure queryable database not support sort");
   }
 
   @Override
   public QueryableDataSet limit(int offset, int fetch) {
-    // TODO Auto-generated method stub
     return null;
   }
-  
+
+  // reveal
+  void reveal() {
+    try {
+      if (startReveal.getAndSet(true)) {
+        revealCondition.wait();
+      }
+      if (!isRevealed.get()) {
+        // do something slow: send secure request to owners and get result
+        isRevealed.set(true);
+        revealCondition.notifyAll();
+      }
+    } catch (Exception e) {
+      LOG.error("error when reveal secure dataset: {}", e.getMessage());
+      e.printStackTrace();
+    }
+  }
 }

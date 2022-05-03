@@ -37,6 +37,8 @@ import org.apache.commons.lang3.tuple.Pair;
  *       Payload: [hash(ele_ns_i)]
  *   Step3:
  *     NR receives [hash(ele_ns_i)] from NS, and find the same elements in [hash(ele_nr_i)]
+ *     Result for R and S:
+ *     [index of elements in the intersection result as byte arry]
  */
 
 public class HashPSI extends ProtocolExecutor {
@@ -60,12 +62,16 @@ public class HashPSI extends ProtocolExecutor {
       otherId = initHeader.getSenderId();
     } else {
       LOG.error("Illegal DataPacketHeader: party id not found in sender/recevier id");
-      throw new RuntimeException("Illegal DataPacketHeader: party id not found in sender/recevier id");
+      throw new RuntimeException(
+          "Illegal DataPacketHeader: party id not found in sender/recevier id");
     }
     int localSize = initPacket.getPayload().size();
-    DataPacketHeader sendHeader = new DataPacketHeader(initHeader.getTaskId(), initHeader.getPtoId(), 1, initHeader.getExtraInfo(), ownId, otherId);
-    rpc.send(DataPacket.fromByteArrayList(sendHeader, ImmutableList.of(OneDBCodec.encodeInt(localSize))));
-    DataPacketHeader expect = new DataPacketHeader(initHeader.getTaskId(), initHeader.getPtoId(), 1, initHeader.getExtraInfo(), otherId, ownId);
+    DataPacketHeader sendHeader = new DataPacketHeader(initHeader.getTaskId(),
+        initHeader.getPtoId(), 1, initHeader.getExtraInfo(), ownId, otherId);
+    rpc.send(DataPacket.fromByteArrayList(sendHeader,
+        ImmutableList.of(OneDBCodec.encodeInt(localSize))));
+    DataPacketHeader expect = new DataPacketHeader(initHeader.getTaskId(), initHeader.getPtoId(), 1,
+        initHeader.getExtraInfo(), otherId, ownId);
     DataPacket setSizeResult = rpc.receive(expect);
     if (setSizeResult == null) {
       LOG.error("{} fail to get set size from party {} in HashPSI", rpc.ownParty(), otherId);
@@ -86,6 +92,7 @@ public class HashPSI extends ProtocolExecutor {
     }
   }
 
+  // sender just generate a byte arry list
   List<byte[]> hash4Sender(List<byte[]> ori, HashFunction func) {
     ImmutableList.Builder<byte[]> builder = ImmutableList.builder();
     for (byte[] row : ori) {
@@ -94,6 +101,7 @@ public class HashPSI extends ProtocolExecutor {
     return builder.build();
   }
 
+  // receiver generate a multimap to speed up finding identical elements
   Multimap<ByteBuffer, Integer> hash4Receiver(List<byte[]> ori, HashFunction func) {
     ImmutableMultimap.Builder<ByteBuffer, Integer> builder = ImmutableMultimap.builder();
     for (int i = 0; i < ori.size(); ++i) {
@@ -104,14 +112,18 @@ public class HashPSI extends ProtocolExecutor {
   }
 
   // sender hash local data, send them to receiver and wait for intersect result
-  List<byte[]> senderProcedure(List<byte[]> localData, long taskId, int receiverId, HashFunction func) {
+  List<byte[]> senderProcedure(List<byte[]> localData, long taskId, int receiverId,
+      HashFunction func) {
     List<byte[]> hashResult = hash4Sender(localData, func);
-    DataPacketHeader senderHeader = new DataPacketHeader(taskId, type.getId(), 2, func.getId(), rpc.ownParty().getPartyId(), receiverId);
+    DataPacketHeader senderHeader = new DataPacketHeader(taskId, type.getId(), 2, func.getId(),
+        rpc.ownParty().getPartyId(), receiverId);
     rpc.send(DataPacket.fromByteArrayList(senderHeader, hashResult));
-    DataPacketHeader expectHeader = new DataPacketHeader(taskId, type.getId(), 3, func.getId(), receiverId, rpc.ownParty().getPartyId());
+    DataPacketHeader expectHeader = new DataPacketHeader(taskId, type.getId(), 3, func.getId(),
+        receiverId, rpc.ownParty().getPartyId());
     DataPacket psiResult = rpc.receive(expectHeader);
     if (psiResult == null) {
-      LOG.error("Sender [{}] fail to get result from Receiver[{}] in HashPSI", rpc.ownParty(), receiverId);
+      LOG.error("Sender [{}] fail to get result from Receiver[{}] in HashPSI", rpc.ownParty(),
+          receiverId);
       throw new RuntimeException("Fail to get result in HashPSI");
     } else {
       LOG.debug("{} get {} elements in HashPSI", rpc.ownParty(), psiResult.getPayload().size());
@@ -120,12 +132,15 @@ public class HashPSI extends ProtocolExecutor {
   }
 
   // receiver hash local data wait for sender's result, execute intersect and send result to sender
-  List<byte[]> receiverProcedure(List<byte[]> localData, long taskId, int senderId, HashFunction func) {
+  List<byte[]> receiverProcedure(List<byte[]> localData, long taskId, int senderId,
+      HashFunction func) {
     Multimap<ByteBuffer, Integer> receiverIndex = hash4Receiver(localData, func);
-    DataPacketHeader expectHeader = new DataPacketHeader(taskId, type.getId(), 2, func.getId(), senderId, rpc.ownParty().getPartyId());
+    DataPacketHeader expectHeader = new DataPacketHeader(taskId, type.getId(), 2, func.getId(),
+        senderId, rpc.ownParty().getPartyId());
     DataPacket senderHashResult = rpc.receive(expectHeader);
     if (senderHashResult == null) {
-      LOG.error("Receiver [{}] fail to get hash result from Sender[{}] in HashPSI", rpc.ownParty(), senderId);
+      LOG.error("Receiver [{}] fail to get hash result from Sender[{}] in HashPSI", rpc.ownParty(),
+          senderId);
       throw new RuntimeException("Fail to get hash result from sender in HashPSI");
     } else {
       List<byte[]> senderData = senderHashResult.getPayload();
@@ -134,13 +149,14 @@ public class HashPSI extends ProtocolExecutor {
       for (int i = 0; i < senderData.size(); ++i) {
         ByteBuffer senderHash = ByteBuffer.wrap(senderData.get(i));
         if (receiverIndex.containsKey(senderHash)) {
-          for (Integer receiverId :receiverIndex.get(senderHash)) {
+          for (Integer receiverId : receiverIndex.get(senderHash)) {
             senderIntersect.add(OneDBCodec.encodeInt(receiverId));
             receiverIntersect.add(OneDBCodec.encodeInt(i));
           }
         }
       }
-      DataPacketHeader resultHeader = new DataPacketHeader(taskId, type.getId(), 3, func.getId(), rpc.ownParty().getPartyId(), senderId);
+      DataPacketHeader resultHeader = new DataPacketHeader(taskId, type.getId(), 3, func.getId(),
+          rpc.ownParty().getPartyId(), senderId);
       rpc.send(DataPacket.fromByteArrayList(resultHeader, senderIntersect.build()));
       List<byte[]> receiverResult = receiverIntersect.build();
       LOG.debug("{} get {} elements in HashPSI", rpc.ownParty(), receiverResult.size());

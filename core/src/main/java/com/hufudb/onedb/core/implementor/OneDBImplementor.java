@@ -6,10 +6,8 @@ import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.implementor.plaintext.PlaintextImplementor;
 import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.sql.context.OneDBContext;
-import com.hufudb.onedb.core.sql.context.OneDBContextType;
 import com.hufudb.onedb.core.sql.context.OneDBLeafContext;
 import com.hufudb.onedb.core.sql.context.OneDBUnaryContext;
-import com.hufudb.onedb.core.sql.context.OneDBRootContext;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,9 +16,6 @@ public interface OneDBImplementor {
   static final Logger LOG = LoggerFactory.getLogger(OneDBImplementor.class);
 
   default QueryableDataSet implement(OneDBContext context) {
-    if (context.getContextType().equals(OneDBContextType.ROOT)) {
-      context = ((OneDBRootContext) context).getChild();
-    }
     return context.implement(this);
   }
 
