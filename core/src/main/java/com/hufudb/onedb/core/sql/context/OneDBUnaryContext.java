@@ -9,6 +9,7 @@ import com.hufudb.onedb.core.implementor.OneDBImplementor;
 import com.hufudb.onedb.core.implementor.QueryableDataSet;
 import com.hufudb.onedb.core.rewriter.OneDBRewriter;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
+import com.hufudb.onedb.core.sql.rel.OneDBOrder;
 
 /*
  * context for intermediate process with single input relation (e.g., outer layer of nested
@@ -18,8 +19,9 @@ public class OneDBUnaryContext extends OneDBBaseContext {
   OneDBContext parent;
   OneDBContext child;
   List<OneDBExpression> aggExps;
+  List<OneDBExpression> selectExps;
   List<Integer> groups;
-  List<String> orders;
+  List<OneDBOrder> orders;
   int fetch;
   int offset;
 
@@ -58,6 +60,8 @@ public class OneDBUnaryContext extends OneDBBaseContext {
   public List<OneDBExpression> getOutExpressions() {
     if (aggExps != null && !aggExps.isEmpty()) {
       return aggExps;
+    } else if (selectExps != null && !selectExps.isEmpty()) {
+      return selectExps;
     } else {
       LOG.error("Unary context without output expression");
       throw new RuntimeException("Unary context without output expression");
@@ -75,6 +79,11 @@ public class OneDBUnaryContext extends OneDBBaseContext {
   }
 
   @Override
+  public void setSelectExps(List<OneDBExpression> selectExps) {
+    this.selectExps = selectExps;
+  }
+
+  @Override
   public List<Integer> getGroups() {
     return groups;
   }
@@ -85,12 +94,12 @@ public class OneDBUnaryContext extends OneDBBaseContext {
   }
 
   @Override
-  public List<String> getOrders() {
+  public List<OneDBOrder> getOrders() {
     return orders;
   }
 
   @Override
-  public void setOrders(List<String> orders) {
+  public void setOrders(List<OneDBOrder> orders) {
     this.orders = orders;
   }
 
@@ -136,6 +145,9 @@ public class OneDBUnaryContext extends OneDBBaseContext {
   }
 
   public QueryableDataSet implementInternal(OneDBImplementor implementor, QueryableDataSet input) {
+    if (selectExps != null && !selectExps.isEmpty()) {
+      input = input.project(implementor, selectExps);
+    }
     if (aggExps != null && !aggExps.isEmpty()) {
       input = input.aggregate(implementor, groups, aggExps, child.getOutTypes());
     }

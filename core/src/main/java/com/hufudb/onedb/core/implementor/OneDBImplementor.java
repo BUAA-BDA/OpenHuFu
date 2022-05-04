@@ -8,6 +8,7 @@ import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.sql.context.OneDBContext;
 import com.hufudb.onedb.core.sql.context.OneDBLeafContext;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
+import com.hufudb.onedb.core.sql.rel.OneDBOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +28,7 @@ public interface OneDBImplementor {
   QueryableDataSet aggregate(QueryableDataSet in, List<Integer> groups, List<OneDBExpression> aggs,
       List<FieldType> inputTypes);
 
-  QueryableDataSet sort(QueryableDataSet in, List<String> orders);
+  QueryableDataSet sort(QueryableDataSet in, List<OneDBOrder> orders);
 
   QueryableDataSet leafQuery(OneDBLeafContext leaf);
 

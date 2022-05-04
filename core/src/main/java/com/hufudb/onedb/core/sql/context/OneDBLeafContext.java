@@ -9,6 +9,7 @@ import com.hufudb.onedb.core.implementor.OneDBImplementor;
 import com.hufudb.onedb.core.implementor.QueryableDataSet;
 import com.hufudb.onedb.core.rewriter.OneDBRewriter;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
+import com.hufudb.onedb.core.sql.rel.OneDBOrder;
 import com.hufudb.onedb.core.table.OneDBTableInfo;
 import com.hufudb.onedb.rpc.OneDBCommon.LeafQueryProto;
 
@@ -23,7 +24,7 @@ public class OneDBLeafContext extends OneDBBaseContext {
   List<OneDBExpression> whereExps = new ArrayList<>();
   List<OneDBExpression> aggExps = new ArrayList<>();
   List<Integer> groups = new ArrayList<>();
-  List<String> orders = new ArrayList<>();
+  List<OneDBOrder> orders = new ArrayList<>();
   int fetch;
   int offset;
 
@@ -45,7 +46,7 @@ public class OneDBLeafContext extends OneDBBaseContext {
       builder.addAllGroup(groups);
     }
     if (orders != null) {
-      builder.addAllOrder(orders);
+      builder.addAllOrder(OneDBOrder.toProto(orders));
     }
     return builder.build();
   }
@@ -152,12 +153,12 @@ public class OneDBLeafContext extends OneDBBaseContext {
   }
 
   @Override
-  public List<String> getOrders() {
+  public List<OneDBOrder> getOrders() {
     return orders;
   }
 
   @Override
-  public void setOrders(List<String> orders) {
+  public void setOrders(List<OneDBOrder> orders) {
     this.orders = orders;
   }
 

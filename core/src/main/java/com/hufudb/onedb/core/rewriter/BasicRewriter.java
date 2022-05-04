@@ -18,6 +18,7 @@ import com.hufudb.onedb.core.sql.expression.OneDBAggCall;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.expression.OneDBOpType;
 import com.hufudb.onedb.core.sql.expression.OneDBOperator;
+import com.hufudb.onedb.core.sql.expression.OneDBReference;
 import com.hufudb.onedb.core.sql.expression.OneDBAggCall.AggregateType;
 import com.hufudb.onedb.core.sql.expression.OneDBOperator.FuncType;
 
@@ -68,6 +69,7 @@ public class BasicRewriter implements OneDBRewriter {
         if (hasSort) {
           unary.setOrders(leaf.getOrders());
         }
+        unary.setSelectExps(OneDBReference.fromExps(leaf.getSelectExps()));
       }
       return unary;
     } else {
@@ -217,6 +219,7 @@ public class BasicRewriter implements OneDBRewriter {
       OneDBExpression rewrittenExp = rewriteAggregate(exp, localAggs, groupMap);
       globalAggs.add(rewrittenExp);
     }
+    unary.setSelectExps(OneDBReference.fromExps(localAggs));
     unary.setAggExps(globalAggs);
     unary.setGroups(globalGroups);
     leaf.setGroups(groupMap.keySet().stream().collect(Collectors.toList()));
@@ -226,8 +229,8 @@ public class BasicRewriter implements OneDBRewriter {
     if (hasLimit) {
       unary.setFetch(leaf.getFetch());
       unary.setOffset(leaf.getOffset());
-      leaf.setOffset(0);
       leaf.setFetch(0);
+      leaf.setOffset(0);
     }
     if (hasSort) {
       unary.setOrders(leaf.getOrders());

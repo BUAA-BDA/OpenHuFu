@@ -15,6 +15,7 @@ import com.hufudb.onedb.core.implementor.OneDBImplementor;
 import com.hufudb.onedb.core.implementor.QueryableDataSet;
 import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
+import com.hufudb.onedb.core.sql.rel.OneDBOrder;
 
 public class SecureQueryableDataSet implements QueryableDataSet {
   long queryId = 0;
@@ -127,7 +128,7 @@ public class SecureQueryableDataSet implements QueryableDataSet {
   }
 
   @Override
-  public QueryableDataSet sort(OneDBImplementor implementor, List<String> orders) {
+  public QueryableDataSet sort(OneDBImplementor implementor, List<OneDBOrder> orders) {
     throw new UnsupportedOperationException("Secure queryable database not support sort");
   }
 

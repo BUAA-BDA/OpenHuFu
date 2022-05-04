@@ -53,6 +53,11 @@ message ExpressionProto {
   }
 }
 
+message CollationProto {
+  int32 ref = 1;
+  int32 direction = 2;
+}
+
 message OwnerInfoProto {
   int32 id = 1;
   string endpoint = 2;
@@ -88,18 +93,19 @@ message BinaryQueryProto {
   repeated ExpressionProto whereExp = 2;
   repeated ExpressionProto aggExp = 3;
   repeated int32 group = 4;
-  repeated string order = 5;
+  repeated CollationProto order = 5;
   int32 fetch = 6;
   int32 offset = 7;
   JoinConditionProto joinInfo = 8;
 }
 
 message UnaryQueryProto {
-  repeated ExpressionProto aggExp = 1;
-  repeated int32 group = 2;
-  repeated string order = 3;
-  int32 fetch = 4;
-  int32 offset = 5;
+  repeated ExpressionProto selectExp = 1;
+  repeated ExpressionProto aggExp = 2;
+  repeated int32 group = 3;
+  repeated CollationProto order = 4;
+  int32 fetch = 5;
+  int32 offset = 6;
 }
 
 message LeafQueryProto {
@@ -108,7 +114,7 @@ message LeafQueryProto {
   repeated ExpressionProto whereExp = 3;
   repeated ExpressionProto aggExp = 4;
   repeated int32 group = 5;
-  repeated string order = 6;
+  repeated CollationProto order = 6;
   int32 fetch = 7;
   int32 offset = 8;
 }

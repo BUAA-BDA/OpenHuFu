@@ -10,6 +10,7 @@ import com.hufudb.onedb.core.implementor.OneDBImplementor;
 import com.hufudb.onedb.core.implementor.QueryableDataSet;
 import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
+import com.hufudb.onedb.core.sql.rel.OneDBOrder;
 import com.hufudb.onedb.core.sql.context.OneDBLeafContext;
 import com.hufudb.onedb.core.sql.context.OneDBContext;
 import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
@@ -90,7 +91,7 @@ public class PlaintextImplementor implements OneDBImplementor {
   }
 
   @Override
-  public QueryableDataSet sort(QueryableDataSet in, List<String> orders) {
+  public QueryableDataSet sort(QueryableDataSet in, List<OneDBOrder> orders) {
     return PlaintextSort.apply(in, orders);
   }
 

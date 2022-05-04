@@ -8,6 +8,7 @@ import com.hufudb.onedb.core.implementor.QueryableDataSet;
 import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.rewriter.OneDBRewriter;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
+import com.hufudb.onedb.core.sql.rel.OneDBOrder;
 import com.hufudb.onedb.core.table.OneDBTableInfo;
 import com.hufudb.onedb.rpc.OneDBCommon.LeafQueryProto;
 import java.util.List;
@@ -60,9 +61,9 @@ public interface OneDBContext {
 
   void setGroups(List<Integer> groups);
 
-  List<String> getOrders();
+  List<OneDBOrder> getOrders();
 
-  void setOrders(List<String> orders);
+  void setOrders(List<OneDBOrder> orders);
 
   int getFetch();
 

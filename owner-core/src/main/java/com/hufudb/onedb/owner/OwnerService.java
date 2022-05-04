@@ -11,6 +11,7 @@ import com.hufudb.onedb.core.data.TableInfo;
 import com.hufudb.onedb.core.data.utils.POJOPublishedTableInfo;
 import com.hufudb.onedb.core.sql.context.OneDBContext;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
+import com.hufudb.onedb.core.sql.rel.OneDBOrder;
 import com.hufudb.onedb.core.sql.translator.OneDBTranslator;
 import com.hufudb.onedb.core.zk.DBZkClient;
 import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
@@ -275,24 +276,14 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
     String originTableName = getOriginTableName(query.getTableName());
     Header tableHeader = getPublishedTableHeader(query.getTableName());
     LOG.info("{}: {}", originTableName, tableHeader);
-    final List<String> filters = OneDBTranslator.tranlateExps(tableHeader,
+    final List<String> filters = OneDBTranslator.translateExps(tableHeader,
         OneDBExpression.fromProto(query.getWhereExpList()));
-    final List<String> selects = OneDBTranslator.tranlateExps(tableHeader,
+    final List<String> selects = OneDBTranslator.translateExps(tableHeader,
         OneDBExpression.fromProto(query.getSelectExpList()));
     final List<String> groups =
         query.getGroupList().stream().map(ref -> selects.get(ref)).collect(Collectors.toList());
     // order by
-    List<String> order = query.getOrderList();
-    StringBuilder orderClause = new StringBuilder();
-    if (!order.isEmpty()) {
-      for (int i = 0; i < order.size(); i++) {
-        String[] tmp = order.get(i).split(" ");
-        orderClause.append(selects.get(Integer.parseInt(tmp[0]))).append(" ").append(tmp[1]);
-        if (i != order.size() - 1) {
-          orderClause.append(" , ");
-        }
-      }
-    }
+    List<String> order = OneDBTranslator.translateOrders(selects, OneDBOrder.fromProto(query.getOrderList()));
     StringBuilder sql = new StringBuilder();
     // select from clause
     if (query.getAggExpCount() > 0) {
@@ -309,10 +300,9 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
     if (!groups.isEmpty()) {
       sql.append(String.format(" group by %s", String.join(",", groups)));
     }
-    if (orderClause.length() > 0) {
-      sql.append(" ORDER BY ");
+    if (!order.isEmpty()) {
+      sql.append(String.format(" order by %s", String.join(",", order)));
     }
-    sql.append(orderClause);
     if (query.getFetch() != 0) {
       sql.append(" LIMIT ").append(query.getFetch() + query.getOffset());
     }

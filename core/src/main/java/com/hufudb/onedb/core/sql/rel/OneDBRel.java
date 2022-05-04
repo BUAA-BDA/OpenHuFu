@@ -112,7 +112,7 @@ public interface OneDBRel extends RelNode {
       currentContext.setSelectExps(exps);
     }
 
-    public void setOrderExps(List<String> orderExps) {
+    public void setOrderExps(List<OneDBOrder> orderExps) {
       currentContext.setOrders(orderExps);
     }
 

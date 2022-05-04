@@ -4,6 +4,7 @@ import com.hufudb.onedb.core.data.EnumerableDataSet;
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
+import com.hufudb.onedb.core.sql.rel.OneDBOrder;
 import java.util.List;
 
 public interface QueryableDataSet extends EnumerableDataSet {
@@ -20,7 +21,7 @@ public interface QueryableDataSet extends EnumerableDataSet {
   QueryableDataSet aggregate(OneDBImplementor implementor, List<Integer> groups,
       List<OneDBExpression> aggs, List<FieldType> inputTypes);
 
-  QueryableDataSet sort(OneDBImplementor implementor, List<String> orders);
+  QueryableDataSet sort(OneDBImplementor implementor, List<OneDBOrder> orders);
 
   QueryableDataSet limit(int offset, int fetch);
 }

@@ -39,11 +39,11 @@ public class OneDBSort extends Sort implements OneDBRel {
   public void implement(Implementor implementor) {
     implementor.visitChild((OneDBRel) getInput());
     List<RelFieldCollation> sortCollations = collation.getFieldCollations();
-    List<String> fieldOrder = new ArrayList<>();
+    List<OneDBOrder> fieldOrder = new ArrayList<>();
     if (!sortCollations.isEmpty()) {
       // Construct a series of order clauses from the desired collation
       for (RelFieldCollation fieldCollation : sortCollations) {
-        fieldOrder.add(OneDBOrder.fromCollation(fieldCollation).toString());
+        fieldOrder.add(OneDBOrder.fromCollation(fieldCollation));
       }
       implementor.setOrderExps(fieldOrder);
     }
