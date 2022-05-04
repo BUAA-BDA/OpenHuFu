@@ -7,6 +7,7 @@ import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.implementor.OneDBImplementor;
 import com.hufudb.onedb.core.implementor.QueryableDataSet;
+import com.hufudb.onedb.core.rewriter.OneDBRewriter;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 
 /*
@@ -151,5 +152,11 @@ public class OneDBUnaryContext extends OneDBBaseContext {
   public QueryableDataSet implement(OneDBImplementor implementor) {
     QueryableDataSet input = child.implement(implementor);
     return implementInternal(implementor, input);
+  }
+
+  @Override
+  public OneDBContext rewrite(OneDBRewriter rewriter) {
+    this.child = child.rewrite(rewriter);
+    return rewriter.rewriteUnary(this);
   }
 }

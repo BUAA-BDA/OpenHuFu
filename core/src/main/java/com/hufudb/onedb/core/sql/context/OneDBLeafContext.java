@@ -7,6 +7,7 @@ import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.implementor.OneDBImplementor;
 import com.hufudb.onedb.core.implementor.QueryableDataSet;
+import com.hufudb.onedb.core.rewriter.OneDBRewriter;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.table.OneDBTableInfo;
 import com.hufudb.onedb.rpc.OneDBCommon.LeafQueryProto;
@@ -184,19 +185,17 @@ public class OneDBLeafContext extends OneDBBaseContext {
     return selectExps.stream().map(exp -> exp.getOutType()).collect(Collectors.toList());
   }
 
+  public int ownerSize() {
+    return info.ownerSize();
+  }
+
   @Override
   public QueryableDataSet implement(OneDBImplementor implementor) {
-    // only horizontal partitioned tables need rewrite
-    if (info.ownerSize() > 1) {
-      OneDBUnaryContext unary = implementor.rewriteLeaf(this);
-      QueryableDataSet result = implementor.leafQuery(this);
-      if (unary != null) {
-        return unary.implementInternal(implementor, result);
-      } else {
-        return result;
-      }
-    } else {
-      return implementor.leafQuery(this);
-    }
+    return implementor.leafQuery(this);
+  }
+
+  @Override
+  public OneDBContext rewrite(OneDBRewriter rewriter) {
+    return rewriter.rewriteLeaf(this);
   }
 }

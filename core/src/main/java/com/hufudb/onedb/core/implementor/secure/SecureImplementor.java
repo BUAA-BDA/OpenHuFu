@@ -7,9 +7,7 @@ import com.hufudb.onedb.core.implementor.OneDBImplementor;
 import com.hufudb.onedb.core.implementor.QueryableDataSet;
 import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.sql.context.OneDBLeafContext;
-import com.hufudb.onedb.core.sql.context.OneDBUnaryContext;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
-import com.hufudb.onedb.rpc.OneDBCommon.LeafQueryProto;
 
 public class SecureImplementor implements OneDBImplementor {
 
@@ -44,11 +42,6 @@ public class SecureImplementor implements OneDBImplementor {
   @Override
   public QueryableDataSet sort(QueryableDataSet in, List<String> orders) {
     throw new UnsupportedOperationException("Secure Implementor not support sort");
-  }
-
-  @Override
-  public OneDBUnaryContext rewriteLeaf(OneDBLeafContext leaf) {
-    return null;
   }
 
   @Override

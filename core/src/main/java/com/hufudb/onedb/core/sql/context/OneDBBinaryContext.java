@@ -9,6 +9,7 @@ import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.implementor.OneDBImplementor;
 import com.hufudb.onedb.core.implementor.QueryableDataSet;
 import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
+import com.hufudb.onedb.core.rewriter.OneDBRewriter;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.rpc.OneDBCommon.BinaryQueryProto;
 
@@ -225,5 +226,12 @@ public class OneDBBinaryContext extends OneDBBaseContext {
       result = result.limit(offset, fetch);
     }
     return result;
+  }
+
+  @Override
+  public OneDBContext rewrite(OneDBRewriter rewriter) {
+    this.left = left.rewrite(rewriter);
+    this.right = right.rewrite(rewriter);
+    return rewriter.rewriteBianry(this);
   }
 }
