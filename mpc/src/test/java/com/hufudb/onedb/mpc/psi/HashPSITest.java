@@ -57,7 +57,6 @@ public class HashPSITest {
   private HashPSI psi0;
   private HashPSI psi1;
 
-
   @Before
   public void setUp() throws IOException {
     String ownerName0 = InProcessServerBuilder.generateName();

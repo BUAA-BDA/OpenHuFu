@@ -4,6 +4,7 @@ import com.hufudb.onedb.core.config.OneDBConfig;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.data.Row;
 import com.hufudb.onedb.core.implementor.OneDBImplementor;
+import com.hufudb.onedb.core.rewriter.BasicRewriter;
 import com.hufudb.onedb.core.sql.context.OneDBContext;
 import com.hufudb.onedb.core.sql.context.OneDBQueryContextPool;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
@@ -158,6 +159,8 @@ public class OneDBClient {
    */
   public Enumerator<Row> oneDBQuery(long contextId) {
     OneDBContext context = OneDBQueryContextPool.getContext(contextId);
+    // todo: support for choosing the appropritate rewriter
+    context = context.rewrite(new BasicRewriter());
     return OneDBImplementor.getImplementor(context, this).implement(context);
   }
 }

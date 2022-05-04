@@ -5,6 +5,7 @@ import com.hufudb.onedb.core.implementor.OneDBImplementor;
 import com.hufudb.onedb.core.implementor.QueryableDataSet;
 import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
+import com.hufudb.onedb.core.sql.rel.OneDBOrder;
 import com.hufudb.onedb.core.table.OneDBTableInfo;
 
 
@@ -108,13 +109,13 @@ public abstract class OneDBBaseContext implements OneDBContext {
   }
 
   @Override
-  public List<String> getOrders() {
+  public List<OneDBOrder> getOrders() {
     LOG.error("not support getOrders");
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public void setOrders(List<String> orders) {
+  public void setOrders(List<OneDBOrder> orders) {
     LOG.error("not support setOrders");
     throw new UnsupportedOperationException();
   }

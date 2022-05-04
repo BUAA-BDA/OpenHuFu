@@ -1,40 +1,29 @@
 package com.hufudb.onedb.core.sql.rel;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import com.hufudb.onedb.rpc.OneDBCommon.CollationProto;
 import org.apache.calcite.rel.RelFieldCollation;
 
 public class OneDBOrder {
   public Direction direction;
-  public int idx;
+  public int inputRef;
 
   public static OneDBOrder fromCollation(RelFieldCollation fieldCollation) {
     return new OneDBOrder(fieldCollation);
   }
 
-  public static OneDBOrder parse(String oneDBOrder) {
-    return new OneDBOrder(oneDBOrder);
-  }
-
-
   public enum Direction {
-    ASC,
-    DESC
+    ASC, DESC
   }
 
-  private OneDBOrder(String federateOrder) {
-    String[] tmp = federateOrder.split(" ");
-    this.idx = Integer.parseInt(tmp[0]);
-    switch (tmp[1]) {
-      case "ASC":
-        this.direction = Direction.ASC;
-        break;
-      case "DESC":
-        this.direction = Direction.DESC;
-        break;
-    }
+  public OneDBOrder(Direction direction, int inputRef) {
+    this.direction = direction;
+    this.inputRef = inputRef;
   }
 
   private OneDBOrder(RelFieldCollation fieldCollation) {
-    this.idx = fieldCollation.getFieldIndex();
+    this.inputRef = fieldCollation.getFieldIndex();
     if (fieldCollation.direction == RelFieldCollation.Direction.DESCENDING) {
       this.direction = Direction.DESC;
     } else {
@@ -46,12 +35,27 @@ public class OneDBOrder {
   public String toString() {
     switch (this.direction) {
       case ASC:
-        return idx + " ASC";
+        return inputRef + " ASC";
       case DESC:
-        return idx + " DESC";
+        return inputRef + " DESC";
       default:
         return "";
     }
   }
 
+  public CollationProto toProto() {
+    return CollationProto.newBuilder().setDirection(direction.ordinal()).setRef(inputRef).build();
+  }
+
+  public static List<CollationProto> toProto(List<OneDBOrder> orders) {
+    return orders.stream().map(order -> order.toProto()).collect(Collectors.toList());
+  }
+
+  public static OneDBOrder fromProto(CollationProto proto) {
+    return new OneDBOrder(Direction.values()[proto.getDirection()], proto.getRef());
+  }
+
+  public static List<OneDBOrder> fromProto(List<CollationProto> proto) {
+    return proto.stream().map(c -> OneDBOrder.fromProto(c)).collect(Collectors.toList());
+  }
 }

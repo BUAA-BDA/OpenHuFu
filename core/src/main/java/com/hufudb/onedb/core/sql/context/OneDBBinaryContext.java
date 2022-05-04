@@ -9,7 +9,9 @@ import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.implementor.OneDBImplementor;
 import com.hufudb.onedb.core.implementor.QueryableDataSet;
 import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
+import com.hufudb.onedb.core.rewriter.OneDBRewriter;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
+import com.hufudb.onedb.core.sql.rel.OneDBOrder;
 import com.hufudb.onedb.rpc.OneDBCommon.BinaryQueryProto;
 
 /*
@@ -23,7 +25,7 @@ public class OneDBBinaryContext extends OneDBBaseContext {
   List<OneDBExpression> whereExps;
   List<OneDBExpression> aggExps;
   List<Integer> groups;
-  List<String> orders;
+  List<OneDBOrder> orders;
   int fetch;
   int offset;
   OneDBJoinInfo joinInfo;
@@ -49,7 +51,7 @@ public class OneDBBinaryContext extends OneDBBaseContext {
       builder.addAllGroup(groups);
     }
     if (orders != null) {
-      builder.addAllOrder(orders);
+      builder.addAllOrder(OneDBOrder.toProto(orders));
     }
     builder.setFetch(fetch).setOffset(fetch).setJoinInfo(joinInfo.toProto());
     return builder.build();
@@ -130,12 +132,12 @@ public class OneDBBinaryContext extends OneDBBaseContext {
   }
 
   @Override
-  public List<String> getOrders() {
+  public List<OneDBOrder> getOrders() {
     return orders;
   }
 
   @Override
-  public void setOrders(List<String> orders) {
+  public void setOrders(List<OneDBOrder> orders) {
     this.orders = orders;
   }
 
@@ -225,5 +227,12 @@ public class OneDBBinaryContext extends OneDBBaseContext {
       result = result.limit(offset, fetch);
     }
     return result;
+  }
+
+  @Override
+  public OneDBContext rewrite(OneDBRewriter rewriter) {
+    this.left = left.rewrite(rewriter);
+    this.right = right.rewrite(rewriter);
+    return rewriter.rewriteBianry(this);
   }
 }

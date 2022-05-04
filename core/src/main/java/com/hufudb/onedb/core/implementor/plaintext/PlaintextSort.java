@@ -7,14 +7,13 @@ import com.hufudb.onedb.core.sql.rel.OneDBOrder;
 import java.util.List;
 
 public class PlaintextSort {
-  public static QueryableDataSet apply(QueryableDataSet input, List<String> orders) {
+  public static QueryableDataSet apply(QueryableDataSet input, List<OneDBOrder> orders) {
     List<Row> rows = input.getRows();
     Header header = input.getHeader();
     rows.sort((o1, o2) -> {
-      for (String str : orders) {
-        OneDBOrder order = OneDBOrder.parse(str);
+      for (OneDBOrder order : orders) {
         int compareResult;
-        switch (header.getType(order.idx)) {
+        switch (header.getType(order.inputRef)) {
           case INT:
           case LONG:
           case SHORT:
@@ -25,7 +24,7 @@ public class PlaintextSort {
           case TIME:
           case TIMESTAMP:
             //TODO:
-            compareResult = ((Comparable) o1.getObject(order.idx)).compareTo(o2.getObject(order.idx));
+            compareResult = ((Comparable) o1.getObject(order.inputRef)).compareTo(o2.getObject(order.inputRef));
             if (order.direction.equals(OneDBOrder.Direction.DESC)) {
               compareResult = compareResult * -1;
             }

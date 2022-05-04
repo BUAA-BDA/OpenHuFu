@@ -8,6 +8,7 @@ import com.hufudb.onedb.core.implementor.OneDBImplementor;
 import com.hufudb.onedb.core.implementor.QueryableDataSet;
 import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
+import com.hufudb.onedb.core.sql.rel.OneDBOrder;
 import java.util.List;
 
 public class PlaintextQueryableDataSet extends BasicDataSet implements QueryableDataSet {
@@ -62,7 +63,7 @@ public class PlaintextQueryableDataSet extends BasicDataSet implements Queryable
   }
 
   @Override
-  public QueryableDataSet sort(OneDBImplementor implementor, List<String> orders) {
+  public QueryableDataSet sort(OneDBImplementor implementor, List<OneDBOrder> orders) {
     return implementor.sort(this, orders);
   }
 

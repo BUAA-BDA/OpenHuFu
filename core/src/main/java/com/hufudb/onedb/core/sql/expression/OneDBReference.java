@@ -34,6 +34,14 @@ public class OneDBReference implements OneDBExpression {
     return new OneDBReference(type, level, i);
   }
 
+  public static List<OneDBExpression> fromExps(List<OneDBExpression> exps) {
+    List<OneDBExpression> nexps = new ArrayList<>();
+    for (int i = 0; i < exps.size(); ++i) {
+      nexps.add(new OneDBReference(exps.get(i).getOutType(), exps.get(i).getLevel(), i));
+    }
+    return nexps;
+  }
+
   public static OneDBExpression fromProto(ExpressionProto proto) {
     FieldType type = FieldType.of(proto.getOutType());
     Level level = Level.of(proto.getLevel());

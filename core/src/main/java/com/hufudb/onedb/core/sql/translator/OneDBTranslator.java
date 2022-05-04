@@ -9,6 +9,7 @@ import com.hufudb.onedb.core.sql.expression.OneDBLiteral;
 import com.hufudb.onedb.core.sql.expression.OneDBOpType;
 import com.hufudb.onedb.core.sql.expression.OneDBOperator;
 import com.hufudb.onedb.core.sql.expression.OneDBOperator.FuncType;
+import com.hufudb.onedb.core.sql.rel.OneDBOrder;
 import com.hufudb.onedb.core.sql.expression.OneDBReference;
 import com.hufudb.onedb.core.sql.expression.OneDBAggCall.AggregateType;
 import java.util.ArrayList;
@@ -30,7 +31,13 @@ public class OneDBTranslator {
     this.exps = aggs;
   }
 
-  public static List<String> tranlateExps(Header inputHeader, List<OneDBExpression> exps) {
+  public static List<String> translateOrders(List<String> exps, List<OneDBOrder> orders) {
+    return orders.stream()
+        .map(order -> String.format("%s %s", exps.get(order.inputRef), order.direction.toString()))
+        .collect(Collectors.toList());
+  }
+
+  public static List<String> translateExps(Header inputHeader, List<OneDBExpression> exps) {
     return new OneDBTranslator(inputHeader, exps).translateAllExps();
   }
 
@@ -202,7 +209,8 @@ public class OneDBTranslator {
     List<OneDBExpression> inputs = exp.getInputs();
     assert inputs.size() == 2 && inputs.get(1).getOpType() == OneDBOpType.LITERAL;
     String left = translate(inputs.get(0));
-    List<String> searchClause = ((SearchList) ((OneDBLiteral) inputs.get(1)).getValue()).toSqlString();
+    List<String> searchClause =
+        ((SearchList) ((OneDBLiteral) inputs.get(1)).getValue()).toSqlString();
     for (int i = 0; i < searchClause.size(); i++) {
       searchClause.set(i, left + searchClause.get(i));
     }

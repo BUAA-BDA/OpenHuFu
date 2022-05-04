@@ -7,6 +7,7 @@ import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.implementor.OneDBImplementor;
 import com.hufudb.onedb.core.implementor.QueryableDataSet;
+import com.hufudb.onedb.core.rewriter.OneDBRewriter;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 
 public class OneDBRootContext extends OneDBBaseContext {
@@ -76,5 +77,11 @@ public class OneDBRootContext extends OneDBBaseContext {
   @Override
   public QueryableDataSet implement(OneDBImplementor implementor) {
     return child.implement(implementor);
+  }
+
+  @Override
+  public OneDBContext rewrite(OneDBRewriter rewriter) {
+    this.child = child.rewrite(rewriter);
+    return rewriter.rewriteRoot(this);
   }
 };
