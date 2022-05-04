@@ -2,7 +2,9 @@ package com.hufudb.onedb.core.sql.context;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
+import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.implementor.OneDBImplementor;
@@ -11,14 +13,13 @@ import com.hufudb.onedb.core.rewriter.OneDBRewriter;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.rel.OneDBOrder;
 import com.hufudb.onedb.core.table.OneDBTableInfo;
-import com.hufudb.onedb.rpc.OneDBCommon.LeafQueryProto;
+import com.hufudb.onedb.rpc.OneDBCommon.QueryContextProto;
 
 /*
  * context for single global table query (horizontal partitioned table)
  */
 public class OneDBLeafContext extends OneDBBaseContext {
   OneDBContext parent;
-  OneDBContextType contextType;
   OneDBTableInfo info;
   List<OneDBExpression> selectExps = new ArrayList<>();
   List<OneDBExpression> whereExps = new ArrayList<>();
@@ -32,10 +33,11 @@ public class OneDBLeafContext extends OneDBBaseContext {
     super();
   }
 
-  public LeafQueryProto toProto() {
-    LeafQueryProto.Builder builder = LeafQueryProto.newBuilder();
-    builder.setTableName(info.getName()).addAllSelectExp(OneDBExpression.toProto(selectExps))
-        .setFetch(fetch).setOffset(offset);
+  public QueryContextProto toProto() {
+    QueryContextProto.Builder builder = QueryContextProto.newBuilder();
+    builder.setContextType(OneDBContextType.LEAF.ordinal()).setTableName(info.getName())
+        .addAllSelectExp(OneDBExpression.toProto(selectExps)).setFetch(fetch).setOffset(offset);
+    // there is no task info for leaf query
     if (whereExps != null) {
       builder.addAllWhereExp(OneDBExpression.toProto(whereExps));
     }
@@ -180,6 +182,11 @@ public class OneDBLeafContext extends OneDBBaseContext {
   @Override
   public void setOffset(int offset) {
     this.offset = offset;
+  }
+
+  @Override
+  public Set<OwnerClient> getOwners() {
+    return info.getOwners();
   }
 
   public List<FieldType> getSelectTypes() {

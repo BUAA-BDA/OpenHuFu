@@ -30,8 +30,12 @@ public class OneDBClient {
   private static final Logger LOG = LoggerFactory.getLogger(OneDBClient.class);
   private static final AtomicInteger queryId = new AtomicInteger(0);
 
-  public static int getQueryid() {
+  public static int getQueryId() {
     return queryId.getAndIncrement();
+  }
+
+  public static int getQueryId(int offset) {
+    return queryId.getAndAdd(offset);
   }
 
   private final OneDBSchema schema;

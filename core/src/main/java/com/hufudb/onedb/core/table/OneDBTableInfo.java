@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
@@ -104,6 +105,13 @@ public class OneDBTableInfo {
     } finally {
       lock.readLock().unlock();
     }
+  }
+
+  public Set<OwnerClient> getOwners() {
+    lock.readLock().lock();
+    Set<OwnerClient> owners = tableList.stream().map(p -> p.getKey()).collect(Collectors.toSet());
+    lock.readLock().unlock();
+    return owners;
   }
 
   public void removeOwner(OwnerClient client) {

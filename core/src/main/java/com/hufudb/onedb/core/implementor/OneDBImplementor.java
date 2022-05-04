@@ -15,9 +15,7 @@ import org.slf4j.LoggerFactory;
 public interface OneDBImplementor {
   static final Logger LOG = LoggerFactory.getLogger(OneDBImplementor.class);
 
-  default QueryableDataSet implement(OneDBContext context) {
-    return context.implement(this);
-  }
+  QueryableDataSet implement(OneDBContext context);
 
   QueryableDataSet join(QueryableDataSet left, QueryableDataSet right, OneDBJoinInfo joinInfo);
 

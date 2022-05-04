@@ -1,9 +1,12 @@
 package com.hufudb.onedb.core.sql.context;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableList;
+import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.implementor.OneDBImplementor;
@@ -12,7 +15,6 @@ import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.rewriter.OneDBRewriter;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.rel.OneDBOrder;
-import com.hufudb.onedb.rpc.OneDBCommon.BinaryQueryProto;
 
 /*
  * context for join
@@ -34,27 +36,6 @@ public class OneDBBinaryContext extends OneDBBaseContext {
     this.parent = parent;
     this.left = left;
     this.right = right;
-  }
-
-  public BinaryQueryProto toProto() {
-    BinaryQueryProto.Builder builder = BinaryQueryProto.newBuilder();
-    if(selectExps != null) {
-      builder.addAllSelectExp(OneDBExpression.toProto(selectExps));
-    }
-    if (whereExps != null) {
-      builder.addAllWhereExp(OneDBExpression.toProto(whereExps));
-    }
-    if (aggExps != null) {
-      builder.addAllAggExp(OneDBExpression.toProto(aggExps));
-    }
-    if (groups != null) {
-      builder.addAllGroup(groups);
-    }
-    if (orders != null) {
-      builder.addAllOrder(OneDBOrder.toProto(orders));
-    }
-    builder.setFetch(fetch).setOffset(fetch).setJoinInfo(joinInfo.toProto());
-    return builder.build();
   }
 
   @Override
@@ -186,6 +167,13 @@ public class OneDBBinaryContext extends OneDBBaseContext {
   @Override
   public void setOffset(int offset) {
     this.offset = offset;
+  }
+
+  @Override
+  public Set<OwnerClient> getOwners() {
+    Set<OwnerClient> owners = new HashSet<>(left.getOwners());
+    owners.addAll(right.getOwners());
+    return owners;
   }
 
   @Override

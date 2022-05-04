@@ -1,8 +1,10 @@
 package com.hufudb.onedb.core.sql.context;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableList;
+import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.implementor.OneDBImplementor;
@@ -137,6 +139,11 @@ public class OneDBUnaryContext extends OneDBBaseContext {
   @Override
   public void setOffset(int offset) {
     this.offset = offset;
+  }
+
+  @Override
+  public Set<OwnerClient> getOwners() {
+    return child.getOwners();
   }
 
   @Override
