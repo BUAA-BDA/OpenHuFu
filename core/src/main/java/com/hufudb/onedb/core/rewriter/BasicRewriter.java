@@ -51,8 +51,8 @@ public class BasicRewriter implements OneDBRewriter {
       boolean hasLimit = leaf.getOffset() != 0 || leaf.getFetch() != 0;
       boolean hasSort = leaf.getOrders() != null && !leaf.getOrders().isEmpty();
       if (!hasAgg && !hasLimit && !hasSort) {
-        // return null if no aggergate, limit or sort
-        return null;
+        // return leaf directly if no aggergate, limit or sort
+        return leaf;
       }
       OneDBUnaryContext unary = new OneDBUnaryContext();
       unary.setChildren(ImmutableList.of(leaf));
