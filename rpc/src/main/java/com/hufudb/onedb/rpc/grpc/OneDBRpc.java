@@ -49,10 +49,10 @@ public class OneDBRpc implements Rpc {
     this.threadPool = threadPool;
     for (Party p : parties) {
       this.participantMap.put(p.getPartyId(), p);
-      if (!p.equals(own)) {
+      // if (!p.equals(own)) {
         this.clientMap.put(p.getPartyId(), new PipeClient(own.getPartyName()));
         this.bufferMap.put(p.getPartyId(), new ConcurrentBuffer<DataPacketHeader, DataPacket>());
-      }
+      // }
     }
     this.gRpcService = new PipeService(bufferMap);
     this.payloadByteLength = 0;
@@ -82,10 +82,10 @@ public class OneDBRpc implements Rpc {
       Channel ch = channels.get(i);
       this.parties.add(p);
       this.participantMap.put(p.getPartyId(), p);
-      if (!p.equals(own)) {
+      // if (!p.equals(own)) {
         this.clientMap.put(p.getPartyId(), new PipeClient(ch));
         this.bufferMap.put(p.getPartyId(), new ConcurrentBuffer<DataPacketHeader, DataPacket>());
-      }
+      // }
     }
     this.gRpcService = new PipeService(bufferMap);
     this.threadPool = Executors.newFixedThreadPool(THREAD_NUM);

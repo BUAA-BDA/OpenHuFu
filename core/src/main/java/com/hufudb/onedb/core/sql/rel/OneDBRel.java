@@ -156,7 +156,7 @@ public interface OneDBRel extends RelNode {
     }
 
 
-    public void setJoinInfo(JoinInfo joinInfo, JoinRelType joinRelType) {
+    public void setJoinInfo(JoinInfo joinInfo, JoinRelType joinRelType, int leftSize) {
       List<OneDBExpression> outExpression = currentContext.getOutExpressions();
       List<OneDBExpression> condition = OneDBOperator.fromRexNodes(joinInfo.nonEquiConditions, currentContext.getOutExpressions());
       Level dominator = Level.findDominator(condition);
@@ -166,7 +166,7 @@ public interface OneDBRel extends RelNode {
       for (int key : joinInfo.rightKeys) {
         dominator = Level.dominate(dominator, outExpression.get(key).getLevel());
       }
-      currentContext.setJoinInfo(new OneDBJoinInfo(OneDBJoinType.of(joinRelType), joinInfo.leftKeys, joinInfo.rightKeys, condition, dominator));
+      currentContext.setJoinInfo(new OneDBJoinInfo(OneDBJoinType.of(joinRelType), joinInfo.leftKeys, joinInfo.rightKeys, condition, dominator, leftSize));
     }
 
     public List<OneDBExpression> getCurrentOutput() {

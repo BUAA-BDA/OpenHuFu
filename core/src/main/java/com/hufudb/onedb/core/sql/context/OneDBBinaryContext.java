@@ -1,11 +1,10 @@
 package com.hufudb.onedb.core.sql.context;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableList;
+import com.hufudb.onedb.core.client.OneDBClient;
 import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Level;
@@ -15,6 +14,9 @@ import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.rewriter.OneDBRewriter;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.rel.OneDBOrder;
+import com.hufudb.onedb.rpc.OneDBCommon.QueryContextProto;
+import com.hufudb.onedb.rpc.OneDBCommon.TaskInfoProto;
+import org.apache.commons.lang3.tuple.Pair;
 
 /*
  * context for join
@@ -170,13 +172,6 @@ public class OneDBBinaryContext extends OneDBBaseContext {
   }
 
   @Override
-  public Set<OwnerClient> getOwners() {
-    Set<OwnerClient> owners = new HashSet<>(left.getOwners());
-    owners.addAll(right.getOwners());
-    return owners;
-  }
-
-  @Override
   public OneDBJoinInfo getJoinInfo() {
     return joinInfo;
   }
@@ -222,5 +217,53 @@ public class OneDBBinaryContext extends OneDBBaseContext {
     this.left = left.rewrite(rewriter);
     this.right = right.rewrite(rewriter);
     return rewriter.rewriteBianry(this);
+  }
+
+  @Override
+  public List<Pair<OwnerClient, QueryContextProto>> generateOwnerContextProto(OneDBClient client) {
+    QueryContextProto.Builder contextBuilder = QueryContextProto.newBuilder()
+        .setContextType(OneDBContextType.UNARY.ordinal()).setFetch(fetch).setOffset(offset);
+    if (selectExps != null) {
+      contextBuilder.addAllSelectExp(OneDBExpression.toProto(selectExps));
+    }
+    if (aggExps != null) {
+      contextBuilder.addAllAggExp(OneDBExpression.toProto(aggExps));
+    }
+    if (groups != null) {
+      contextBuilder.addAllGroup(groups);
+    }
+    if (orders != null) {
+      contextBuilder.addAllOrder(OneDBOrder.toProto(orders));
+    }
+    List<Pair<OwnerClient, QueryContextProto>> leftContext = left.generateOwnerContextProto(client);
+    List<Pair<OwnerClient, QueryContextProto>> rightContext =
+        right.generateOwnerContextProto(client);
+    List<Pair<OwnerClient, QueryContextProto>> ownerContext = new ArrayList<>();
+    // contextBuilder.setJoinInfo(joinInfo.toProto());
+    TaskInfoProto.Builder taskInfo = TaskInfoProto.newBuilder().setTaskId(client.getTaskId());
+    for (Pair<OwnerClient, QueryContextProto> p : leftContext) {
+      taskInfo.addParties(p.getLeft().getParty().getPartyId());
+    }
+    for (Pair<OwnerClient, QueryContextProto> p : rightContext) {
+      taskInfo.addParties(p.getLeft().getParty().getPartyId());
+    }
+    contextBuilder.setTaskInfo(taskInfo);
+
+    // for owners from left
+    contextBuilder.setJoinInfo(joinInfo.toProto(true));
+    for (Pair<OwnerClient, QueryContextProto> p : leftContext) {
+      QueryContextProto context = contextBuilder.setChildren(0, p.getValue())
+          .setChildren(1, OneDBPlaceholderContext.PLACEHOLDER_PROTO).build();
+      p.setValue(context);
+      ownerContext.add(p);
+    }
+    // for owners from right
+    contextBuilder.setJoinInfo(joinInfo.toProto(false));
+    for (Pair<OwnerClient, QueryContextProto> p : rightContext) {
+      QueryContextProto context = contextBuilder.setChildren(0, OneDBPlaceholderContext.PLACEHOLDER_PROTO).setChildren(1, p.getValue()).build();
+      p.setValue(context);
+      ownerContext.add(p);
+    }
+    return ownerContext;
   }
 }

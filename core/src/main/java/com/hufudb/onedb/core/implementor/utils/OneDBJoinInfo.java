@@ -12,19 +12,22 @@ public class OneDBJoinInfo {
   List<Integer> rightKeys;
   List<OneDBExpression> conditions;
   Level level;
+  int leftSize;
 
   public OneDBJoinInfo(OneDBJoinType type, List<Integer> leftKeys, List<Integer> rightKeys,
-      List<OneDBExpression> conditions, Level level) {
+      List<OneDBExpression> conditions, Level level, int leftSize) {
     this.type = type;
     this.leftKeys = leftKeys;
     this.rightKeys = rightKeys;
     this.conditions = conditions;
     this.level = level;
+    this.leftSize = leftSize;
   }
 
-  public JoinConditionProto toProto() {
+  public JoinConditionProto toProto(boolean isLeft) {
     return JoinConditionProto.newBuilder().addAllLeftKey(leftKeys).addAllRightKey(rightKeys)
-        .addAllCondition(OneDBExpression.toProto(conditions)).setLevel(level.getId()).build();
+        .addAllCondition(OneDBExpression.toProto(conditions)).setLevel(level.getId())
+        .setLeftSize(leftSize).setIsLeft(isLeft).build();
   }
 
   public OneDBJoinType getType() {

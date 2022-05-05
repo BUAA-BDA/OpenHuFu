@@ -13,10 +13,10 @@ import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
-import org.apache.calcite.util.Pair;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.commons.lang3.tuple.Pair;
 
 public class OneDBTableInfo {
   private static final Logger LOG = LoggerFactory.getLogger(OneDBSchema.class);
@@ -64,7 +64,7 @@ public class OneDBTableInfo {
       lock.writeLock().lock();
       for (int i = 0; i < tableList.size(); ++i) {
         Pair<OwnerClient, String> pair = tableList.get(i);
-        if (pair.left.equals(client)) {
+        if (pair.getLeft().equals(client)) {
           tableList.remove(i);
           break;
         }
@@ -118,7 +118,7 @@ public class OneDBTableInfo {
     List<Pair<OwnerClient, String>> newList = new ArrayList<>();
     lock.readLock().lock();
     for (Pair<OwnerClient, String> pair : tableList) {
-      if (!pair.left.equals(client)) {
+      if (!pair.getLeft().equals(client)) {
         newList.add(pair);
       }
     }
@@ -132,7 +132,7 @@ public class OneDBTableInfo {
     lock.writeLock().lock();
     for (int i = 0; i < tableList.size(); ++i) {
       Pair<OwnerClient, String> pair = tableList.get(i);
-      if (pair.left.equals(client) && pair.right.equals(localName)) {
+      if (pair.getLeft().equals(client) && pair.getRight().equals(localName)) {
         tableList.remove(i);
         break;
       }
@@ -144,7 +144,7 @@ public class OneDBTableInfo {
     lock.writeLock().lock();
     for (int i = 0; i < tableList.size(); ++i) {
       Pair<OwnerClient, String> pair = tableList.get(i);
-      if (pair.left.equals(client)) {
+      if (pair.getLeft().equals(client)) {
         tableList.remove(i);
         break;
       }
@@ -163,7 +163,7 @@ public class OneDBTableInfo {
 
   public List<LocalTableMeta> getMappings() {
     return getTableList().stream()
-        .map(p -> new LocalTableMeta(p.left.getEndpoint(), p.right))
+        .map(p -> new LocalTableMeta(p.getLeft().getEndpoint(), p.getRight()))
         .collect(Collectors.toList());
   }
 

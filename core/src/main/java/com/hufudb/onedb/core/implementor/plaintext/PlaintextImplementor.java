@@ -21,17 +21,15 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import org.apache.calcite.util.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 
 /*
  * plaintext implementor of onedb query proto
  */
 public class PlaintextImplementor extends UserSideImplementor {
 
-  private final OneDBClient client;
-
   public PlaintextImplementor(OneDBClient client) {
-    this.client = client;
+    super(client);
   }
 
   private StreamBuffer<DataSetProto> tableQuery(QueryContextProto query,

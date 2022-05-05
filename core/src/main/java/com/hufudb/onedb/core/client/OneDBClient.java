@@ -18,36 +18,44 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.calcite.linq4j.Enumerator;
 import org.apache.calcite.schema.Table;
-import org.apache.calcite.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.grpc.ChannelCredentials;
+import org.apache.commons.lang3.tuple.Pair;
 
 /*
  * client for all DB
  */
 public class OneDBClient {
   private static final Logger LOG = LoggerFactory.getLogger(OneDBClient.class);
-  private static final AtomicInteger queryId = new AtomicInteger(0);
-
-  public static int getQueryId() {
-    return queryId.getAndIncrement();
-  }
-
-  public static int getQueryId(int offset) {
-    return queryId.getAndAdd(offset);
-  }
-
   private final OneDBSchema schema;
   private final Map<String, OwnerClient> ownerMap;
   private final Map<String, OneDBTableInfo> tableMap;
   final ExecutorService threadPool;
+  private final AtomicInteger queryId;
 
   public OneDBClient(OneDBSchema schema) {
     this.schema = schema;
     this.ownerMap = new ConcurrentHashMap<>();
     this.tableMap = new ConcurrentHashMap<>();
     this.threadPool = Executors.newFixedThreadPool(OneDBConfig.CLIENT_THREAD_NUM);
+    this.queryId = new AtomicInteger(0);
+  }
+
+  int getQueryId() {
+    return queryId.getAndIncrement();
+  }
+
+  int getQueryId(int offset) {
+    return queryId.getAndAdd(offset);
+  }
+
+  public long getTaskId() {
+    return (((long) schema.getUserId()) << 32) | (long) getQueryId();
+  }
+
+  public long getTaskId(int offset) {
+    return (((long) schema.getUserId()) << 32) | (long) getQueryId(offset);
   }
 
   Map<String, OneDBTableInfo> getTableMap() {

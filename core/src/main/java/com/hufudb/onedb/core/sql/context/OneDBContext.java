@@ -1,5 +1,6 @@
 package com.hufudb.onedb.core.sql.context;
 
+import com.hufudb.onedb.core.client.OneDBClient;
 import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Header;
@@ -13,13 +14,15 @@ import com.hufudb.onedb.core.sql.rel.OneDBOrder;
 import com.hufudb.onedb.core.table.OneDBTableInfo;
 import com.hufudb.onedb.rpc.OneDBCommon.QueryContextProto;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.commons.lang3.tuple.Pair;
 
 public interface OneDBContext {
   static final Logger LOG = LoggerFactory.getLogger(OneDBContext.class);
+
+  List<Pair<OwnerClient, QueryContextProto>> generateOwnerContextProto(OneDBClient client);
 
   OneDBContextType getContextType();
 
@@ -83,12 +86,17 @@ public interface OneDBContext {
 
   OneDBContext rewrite(OneDBRewriter rewriter);
 
-  Set<OwnerClient> getOwners();
-
   public static Header getOutputHeader(QueryContextProto proto) {
     Header.Builder builder = Header.newBuilder();
     List<FieldType> types = getOutputTypes(proto);
     types.stream().forEach(type -> builder.add("", type));
+    return builder.build();
+  }
+
+  public static Header getOutputHeader(OneDBContext context) {
+    Header.Builder builder = Header.newBuilder();
+    List<OneDBExpression> exps = context.getOutExpressions();
+    exps.stream().forEach(exp -> builder.add("", exp.getOutType(), exp.getLevel()));
     return builder.build();
   }
 

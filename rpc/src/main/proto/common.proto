@@ -12,6 +12,7 @@ message Point {
 message FieldProto {
   string name = 1;
   int32 type = 2;
+  int32 level = 3;
 }
 
 message HeaderProto {
@@ -69,12 +70,13 @@ message JoinConditionProto {
   repeated int32 leftKey = 3;
   repeated int32 rightKey = 4;
   repeated ExpressionProto condition = 5;
+  int32 leftSize = 6;
+  bool isLeft = 7;
 }
 
 message TaskInfoProto {
   int64 taskId = 1;
-  int32 ptoId = 2;
-  repeated int32 parties = 3;
+  repeated int32 parties = 2;
 }
 
 message QueryContextProto {
@@ -89,5 +91,5 @@ message QueryContextProto {
   int32 fetch = 9;
   int32 offset = 10;
   JoinConditionProto joinInfo = 11;
-  QueryContextProto children = 12;
+  repeated QueryContextProto children = 12;
 }

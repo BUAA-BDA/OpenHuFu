@@ -4,5 +4,6 @@ public enum OneDBContextType {
   ROOT,
   LEAF,
   UNARY,
-  BINARY
+  BINARY,
+  PLACEHOLDER
 }

@@ -15,6 +15,32 @@
       "publishedName": "student1",
       "publishedFields": [],
       "originColumns": []
+    },
+    {
+      "originName": "student",
+      "publishedName": "st_pro",
+      "publishedFields": [
+        {
+          "name": "name",
+          "type": "STRING",
+          "level": "public"
+        },
+        {
+          "name": "score",
+          "type": "INT",
+          "level": "protected"
+        },
+        {
+          "name": "age",
+          "type": "INT",
+          "level": "protected"
+        },
+        {
+          "name": "dept_name",
+          "type": "STRING",
+          "level": "protected"
+        }
+      ]
     }
   ]
 }

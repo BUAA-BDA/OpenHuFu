@@ -2,8 +2,8 @@ package com.hufudb.onedb.core.sql.context;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
+import com.hufudb.onedb.core.client.OneDBClient;
 import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Level;
@@ -14,6 +14,7 @@ import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.rel.OneDBOrder;
 import com.hufudb.onedb.core.table.OneDBTableInfo;
 import com.hufudb.onedb.rpc.OneDBCommon.QueryContextProto;
+import org.apache.commons.lang3.tuple.Pair;
 
 /*
  * context for single global table query (horizontal partitioned table)
@@ -33,11 +34,37 @@ public class OneDBLeafContext extends OneDBBaseContext {
     super();
   }
 
+  @Override
+  public List<Pair<OwnerClient, QueryContextProto>> generateOwnerContextProto(OneDBClient client) {
+    // there is no task info for leaf query
+    QueryContextProto.Builder contextBuilder =
+        QueryContextProto.newBuilder().setContextType(OneDBContextType.LEAF.ordinal())
+            .addAllSelectExp(OneDBExpression.toProto(selectExps)).setFetch(fetch).setOffset(offset);
+    if (whereExps != null) {
+      contextBuilder.addAllWhereExp(OneDBExpression.toProto(whereExps));
+    }
+    if (aggExps != null) {
+      contextBuilder.addAllAggExp(OneDBExpression.toProto(aggExps));
+    }
+    if (groups != null) {
+      contextBuilder.addAllGroup(groups);
+    }
+    if (orders != null) {
+      contextBuilder.addAllOrder(OneDBOrder.toProto(orders));
+    }
+    List<Pair<OwnerClient, String>> tableClients = info.getTableList();
+    List<Pair<OwnerClient, QueryContextProto>> ownerContext = new ArrayList<>();
+    for (Pair<OwnerClient, String> entry : tableClients) {
+      contextBuilder.setTableName(entry.getRight());
+      ownerContext.add(Pair.of(entry.getLeft(), contextBuilder.build()));
+    }
+    return ownerContext;
+  }
+
   public QueryContextProto toProto() {
     QueryContextProto.Builder builder = QueryContextProto.newBuilder();
     builder.setContextType(OneDBContextType.LEAF.ordinal()).setTableName(info.getName())
         .addAllSelectExp(OneDBExpression.toProto(selectExps)).setFetch(fetch).setOffset(offset);
-    // there is no task info for leaf query
     if (whereExps != null) {
       builder.addAllWhereExp(OneDBExpression.toProto(whereExps));
     }
@@ -182,11 +209,6 @@ public class OneDBLeafContext extends OneDBBaseContext {
   @Override
   public void setOffset(int offset) {
     this.offset = offset;
-  }
-
-  @Override
-  public Set<OwnerClient> getOwners() {
-    return info.getOwners();
   }
 
   public List<FieldType> getSelectTypes() {

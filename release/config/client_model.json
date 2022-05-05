@@ -44,6 +44,26 @@
           }
         },
         {
+          "name": "st_pro",
+          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
+          "operand": {
+            "feds": [
+              {
+                "endpoint": "localhost:12345",
+                "name": "st_pro"
+              },
+              {
+                "endpoint": "localhost:12346",
+                "name": "st_pro"
+              },
+              {
+                "endpoint": "localhost:12347",
+                "name": "st_pro"
+              }
+            ]
+          }
+        },
+        {
           "name": "student2",
           "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
           "operand": {
