@@ -88,18 +88,18 @@ public class HashPSITest {
 
   public void runHashPSI(List<byte[]> data0, List<byte[]> data1, HashFunction func, int senderId, int receiverId) throws Exception {
     ExecutorService service = Executors.newFixedThreadPool(2);
-    DataPacketHeader header = new DataPacketHeader(0, psi0.getProtocolType().getId(), 0,
-        HashFunction.MD5.getId(), 0, 1);
+    int taskId = 0;
+    int hashType = func.getId();
     Future<List<byte[]>> psiRes0 = service.submit(new Callable<List<byte[]>>() {
       @Override
       public List<byte[]> call() throws Exception {
-        return psi0.run(DataPacket.fromByteArrayList(header, data0));
+        return psi0.run(taskId, ImmutableList.of(senderId, receiverId), data0, hashType);
       }
     });
     Future<List<byte[]>> psiRes1 = service.submit(new Callable<List<byte[]>>() {
       @Override
       public List<byte[]> call() throws Exception {
-        return psi1.run(DataPacket.fromByteArrayList(header, data1));
+        return psi1.run(taskId, ImmutableList.of(senderId, receiverId), data1, hashType);
       }
     });
     List<byte[]> expect0 = new ArrayList<>();

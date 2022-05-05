@@ -49,8 +49,16 @@ public class GMW extends ProtocolExecutor {
     this.threadPool = service;
   }
 
-  boolean isA(DataPacketHeader initHeader) {
-    return initHeader.getSenderId() < initHeader.getReceiverId();
+  int getOther(List<Integer> parties) {
+    int ownId = rpc.ownParty().getPartyId();
+    if (parties.get(0) == ownId) {
+      return parties.get(1);
+    } else if (parties.get(1) == ownId) {
+      return parties.get(0);
+    } else {
+      LOG.error("{} is not participant of GMW", rpc.ownParty());
+      throw new RuntimeException("Not participant of GMW");
+    }
   }
 
   byte[] generateShares(byte[] ori, GMWMeta meta) {
@@ -67,17 +75,16 @@ public class GMW extends ProtocolExecutor {
   }
 
   // step 1: generate shares and send to another
-  DataPacketHeader prepare(DataPacket initPacket, GMWMeta meta) {
-    DataPacketHeader header = initPacket.getHeader();
-    byte[] shares = generateShares(initPacket.getPayload().get(0), meta);
-    LOG.debug("Party [{}] generates shares", rpc.ownParty());
-    DataPacketHeader outHeader = new DataPacketHeader(header.getTaskId(), header.getPtoId(), 1,
-        header.getExtraInfo(), header.getSenderId(), header.getReceiverId());
+  DataPacketHeader prepare(List<byte[]> inputs, GMWMeta meta) {
+    byte[] shares = generateShares(inputs.get(0), meta);
+    LOG.debug("{} generates shares", rpc.ownParty());
+    DataPacketHeader outHeader = new DataPacketHeader(meta.taskId, getProtocolType().getId(), 1,
+        (long) meta.circuitType, meta.ownId, meta.otherId);
     rpc.send(DataPacket.fromByteArrayList(outHeader, ImmutableList.of(shares)));
-    LOG.debug("Party [{}] sends shares to Party [{}]", rpc.ownParty(), outHeader.getReceiverId());
-    DataPacketHeader expect = new DataPacketHeader(header.getTaskId(), header.getPtoId(), 1,
-        header.getExtraInfo(), header.getReceiverId(), header.getSenderId());
-    LOG.debug("Party [{}] waits for shares of packet {}", rpc.ownParty(), expect);
+    LOG.debug("{} sends shares to Party [{}]", rpc.ownParty(), outHeader.getReceiverId());
+    DataPacketHeader expect = new DataPacketHeader(meta.taskId, getProtocolType().getId(), 1,
+        (long) meta.circuitType, meta.otherId, meta.ownId);
+    LOG.debug("{} waits for shares of packet {}", rpc.ownParty(), expect);
     return expect;
   }
 
@@ -91,7 +98,8 @@ public class GMW extends ProtocolExecutor {
     } else {
       meta.initIn1(shares, in1);
     }
-    LOG.debug("Party [{}] get shares from Party [{}]", rpc.ownParty(), packet.getHeader().getSenderId());
+    LOG.debug("{} get shares from Party [{}]", rpc.ownParty(),
+        packet.getHeader().getSenderId());
   }
 
   Callable<Boolean> evaluateAnd(GMWMeta meta, int in1, int in2, int out) {
@@ -99,29 +107,22 @@ public class GMW extends ProtocolExecutor {
       @Override
       public Boolean call() throws Exception {
         BitSet wireSet = meta.wireSet;
-        DataPacketHeader initHeader = meta.initHeader;
         if (meta.isA) {
           boolean rb = random.nextBoolean();
           ImmutableList.Builder<byte[]> builder = ImmutableList.builder();
-          builder.add(
-              OneDBCodec.encodeBoolean(rb ^ ((wireSet.get(in1) ^ false) & (wireSet.get(in2) ^ false))));
-          builder.add(
-              OneDBCodec.encodeBoolean(rb ^ ((wireSet.get(in1) ^ false) & (wireSet.get(in2) ^ true))));
-          builder.add(
-              OneDBCodec.encodeBoolean(rb ^ ((wireSet.get(in1) ^ true) & (wireSet.get(in2) ^ false))));
-          builder.add(
-              OneDBCodec.encodeBoolean(rb ^ ((wireSet.get(in1) ^ true) & (wireSet.get(in2) ^ true))));
-          DataPacketHeader otHeader = new DataPacketHeader(initHeader.getTaskId(),
-              ProtocolType.PK_OT.getId(), 0, out, initHeader.getSenderId(), initHeader.getReceiverId());
-          otExecutor.run(DataPacket.fromByteArrayList(otHeader, builder.build()));
+          builder.add(OneDBCodec
+              .encodeBoolean(rb ^ ((wireSet.get(in1) ^ false) & (wireSet.get(in2) ^ false))));
+          builder.add(OneDBCodec
+              .encodeBoolean(rb ^ ((wireSet.get(in1) ^ false) & (wireSet.get(in2) ^ true))));
+          builder.add(OneDBCodec
+              .encodeBoolean(rb ^ ((wireSet.get(in1) ^ true) & (wireSet.get(in2) ^ false))));
+          builder.add(OneDBCodec
+              .encodeBoolean(rb ^ ((wireSet.get(in1) ^ true) & (wireSet.get(in2) ^ true))));
+          otExecutor.run(meta.taskId, ImmutableList.of(), builder.build(), meta.ownId, meta.otherId, (long) out);
           wireSet.set(out, rb);
         } else {
           int sel = (wireSet.get(in1) ? 2 : 0) + (wireSet.get(in2) ? 1 : 0);
-          DataPacketHeader otHeader = new DataPacketHeader(initHeader.getTaskId(),
-              ProtocolType.PK_OT.getId(), 0, out, initHeader.getReceiverId(), initHeader.getSenderId());
-          byte[] selBits = OneDBCodec.encodeInt(sel);
-          List<byte[]> result =
-              otExecutor.run(DataPacket.fromByteArrayList(otHeader, ImmutableList.of(OneDBCodec.encodeInt(2), selBits)));
+          List<byte[]> result = otExecutor.run(meta.taskId, ImmutableList.of(), ImmutableList.of(OneDBCodec.encodeInt(2), OneDBCodec.encodeInt(sel)), meta.otherId, meta.ownId, (long) out);
           byte[] res = result.get(0);
           wireSet.set(out, OneDBCodec.decodeBoolean(res));
         }
@@ -156,10 +157,10 @@ public class GMW extends ProtocolExecutor {
 
   void evaluateCircuit(GMWMeta meta) {
     ImmutableList<ImmutableList<Gate>> concurrentGates = meta.bristol.getGates();
-    LOG.debug("Party [{}] starts to evaluate circuit", rpc.ownParty());
+    LOG.debug("{}]starts to evaluate circuit", rpc.ownParty());
     for (ImmutableList<Gate> gates : concurrentGates) {
       List<Callable<Boolean>> concurrentTasks = new ArrayList<>();
-      LOG.debug("Party [{}] evaluate batch circuit", rpc.ownParty());
+      LOG.debug("{} evaluate batch circuit", rpc.ownParty());
       for (Gate gate : gates) {
         switch (gate.type) {
           case AND:
@@ -189,17 +190,20 @@ public class GMW extends ProtocolExecutor {
   }
 
   @Override
-  public List<byte[]> run(DataPacket initPacket) {
-    DataPacketHeader header = initPacket.getHeader();
-    CircuitType type = CircuitType.of((int) header.getExtraInfo());
+  public List<byte[]> run(long taskId, List<Integer> parties, List<byte[]> inputData,
+      Object... args) {
+    assert parties.size() == 2;
+    int circuitId = (Integer) args[0];
+    CircuitType type = CircuitType.of(circuitId);
     LOG.debug("Load bristol of circuit {}", type);
-    GMWMeta meta = new GMWMeta(type, isA(header), header);
-    DataPacketHeader expect = prepare(initPacket, meta);
+    int otherId = getOther(parties);
+    GMWMeta meta = new GMWMeta(type, taskId, rpc.ownParty().getPartyId(), otherId, circuitId);
+    DataPacketHeader expect = prepare(inputData, meta);
     DataPacket sharesPacket = rpc.receive(expect);
     initWire(sharesPacket, meta);
     evaluateCircuit(meta);
-    BitSet resultSet = meta.wireSet
-        .get(meta.bristol.getWireNum() - meta.bristol.getOut(), meta.bristol.getWireNum());
+    BitSet resultSet = meta.wireSet.get(meta.bristol.getWireNum() - meta.bristol.getOut(),
+        meta.bristol.getWireNum());
     LOG.debug("Result bitset [{}]", resultSet.toString());
     return ImmutableList.of(resultSet.toByteArray());
   }
@@ -207,14 +211,20 @@ public class GMW extends ProtocolExecutor {
   static class GMWMeta {
     final BristolFile bristol;
     final BitSet wireSet;
+    final long taskId;
+    final int ownId;
+    final int otherId;
+    final int circuitType;
     final boolean isA;
-    final DataPacketHeader initHeader;
 
-    GMWMeta(CircuitType type, boolean isA, DataPacketHeader initHeader) {
+    GMWMeta(CircuitType type, long taskId, int ownId, int otherId, int circuitType) {
       this.bristol = type.getBristol();
       this.wireSet = new BitSet(this.bristol.getWireNum());
-      this.isA = isA;
-      this.initHeader = initHeader;
+      this.taskId = taskId;
+      this.ownId = ownId;
+      this.otherId = otherId;
+      this.circuitType = circuitType;
+      this.isA = ownId < otherId;
     }
 
     void initIn1(byte[] inBytes, int size) {

@@ -48,30 +48,28 @@ public class HashPSI extends ProtocolExecutor {
   }
 
   /*
-   * determine who is sender in the following steps
-   * party with smaller set is sender
-   * when set size is equal, party with lower id is sender
+   * determine who is sender in the following steps party with smaller set is sender when set size
+   * is equal, party with lower id is sender
    */
-  Pair<Integer, Integer> getSenderReceiver(DataPacket initPacket) {
-    DataPacketHeader initHeader = initPacket.getHeader();
+  Pair<Integer, Integer> getSenderReceiver(long taskId, int hashType, List<Integer> parties,
+      List<byte[]> inputs) {
     int ownId = rpc.ownParty().getPartyId();
     int otherId;
-    if (initHeader.getSenderId() == ownId) {
-      otherId = initHeader.getReceiverId();
-    } else if (initHeader.getReceiverId() == ownId) {
-      otherId = initHeader.getSenderId();
+    if (parties.get(0) == ownId) {
+      otherId = parties.get(1);
+    } else if (parties.get(1) == ownId) {
+      otherId = parties.get(0);
     } else {
-      LOG.error("Illegal DataPacketHeader: party id not found in sender/recevier id");
-      throw new RuntimeException(
-          "Illegal DataPacketHeader: party id not found in sender/recevier id");
+      LOG.error("{} is not participant of HashPSI", rpc.ownParty());
+      throw new RuntimeException("Not participant of HashPSI");
     }
-    int localSize = initPacket.getPayload().size();
-    DataPacketHeader sendHeader = new DataPacketHeader(initHeader.getTaskId(),
-        initHeader.getPtoId(), 1, initHeader.getExtraInfo(), ownId, otherId);
+    int localSize = inputs.size();
+    DataPacketHeader sendHeader = new DataPacketHeader(taskId, ProtocolType.HASH_PSI.getId(), 1,
+        (long) hashType, ownId, otherId);
     rpc.send(DataPacket.fromByteArrayList(sendHeader,
         ImmutableList.of(OneDBCodec.encodeInt(localSize))));
-    DataPacketHeader expect = new DataPacketHeader(initHeader.getTaskId(), initHeader.getPtoId(), 1,
-        initHeader.getExtraInfo(), otherId, ownId);
+    DataPacketHeader expect = new DataPacketHeader(taskId, ProtocolType.HASH_PSI.getId(), 1,
+        (long) hashType, otherId, ownId);
     DataPacket setSizeResult = rpc.receive(expect);
     if (setSizeResult == null) {
       LOG.error("{} fail to get set size from party {} in HashPSI", rpc.ownParty(), otherId);
@@ -165,20 +163,20 @@ public class HashPSI extends ProtocolExecutor {
   }
 
   @Override
-  public List<byte[]> run(DataPacket initPacket) {
-    Pair<Integer, Integer> senderReceiver = getSenderReceiver(initPacket);
+  public List<byte[]> run(long taskId, List<Integer> parties, List<byte[]> inputData,
+      Object... args) {
+    int hashType = (Integer) args[0];
+    Pair<Integer, Integer> senderReceiver = getSenderReceiver(taskId, hashType, parties, inputData);
     int sender = senderReceiver.getLeft();
     int receiver = senderReceiver.getRight();
-    List<byte[]> localData = initPacket.getPayload();
-    long taskId = initPacket.getHeader().getTaskId();
-    HashFunction hashFunc = HashFunction.of((int) initPacket.getHeader().getExtraInfo());
+    HashFunction hashFunc = HashFunction.of(hashType);
     LOG.debug("Use {} in HashPSI", hashFunc);
     if (sender == rpc.ownParty().getPartyId()) {
       LOG.debug("{} is the sender of HashPSI", rpc.ownParty());
-      return senderProcedure(localData, taskId, receiver, hashFunc);
+      return senderProcedure(inputData, taskId, receiver, hashFunc);
     } else if (receiver == rpc.ownParty().getPartyId()) {
       LOG.debug("{} is the receiver of HashPSI", rpc.ownParty());
-      return receiverProcedure(localData, taskId, sender, hashFunc);
+      return receiverProcedure(inputData, taskId, sender, hashFunc);
     } else {
       LOG.error("Fail to determine who is sender/receiver in HashPSI");
       throw new RuntimeException("Fail to determine who is sender/receiver in HashPSI");

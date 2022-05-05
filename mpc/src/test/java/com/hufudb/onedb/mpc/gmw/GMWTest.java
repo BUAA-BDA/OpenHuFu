@@ -37,10 +37,8 @@ public class GMWTest {
 
   public static OneDBRandom rand = new BasicRandom();
 
-  DataPacket generateInitPacket(int senderId, int receiverId, int value) {
-    DataPacketHeader header = new DataPacketHeader(0L, ProtocolType.GMW.getId(), 0, (long) CircuitType.ADD_32.getId(), senderId, receiverId);
-    byte[] payload = OneDBCodec.encodeInt(value);
-    return DataPacket.fromByteArrayList(header, ImmutableList.of(payload));
+  List<byte[]> encodeValue(int value) {
+    return ImmutableList.of(OneDBCodec.encodeInt(value));
   }
 
   @Test
@@ -79,7 +77,7 @@ public class GMWTest {
         new Callable<List<byte[]>>() {
           @Override
           public List<byte[]> call() throws Exception {
-            return gmwSender.run(generateInitPacket(0, 1, a));
+            return gmwSender.run(0, ImmutableList.of(0, 1), encodeValue(a), CircuitType.ADD_32.getId());
           }
         }
       );
@@ -87,7 +85,7 @@ public class GMWTest {
         new Callable<List<byte[]>>() {
         @Override
         public List<byte[]> call() throws Exception {
-          return gmwReceiver.run(generateInitPacket(1, 0, b));
+          return gmwReceiver.run(0, ImmutableList.of(0, 1), encodeValue(b), CircuitType.ADD_32.getId());
         }
       });
       byte[] senRes = senFuture.get().get(0);

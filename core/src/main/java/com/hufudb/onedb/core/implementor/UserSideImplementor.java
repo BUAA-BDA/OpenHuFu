@@ -43,8 +43,8 @@ public abstract class UserSideImplementor implements OneDBImplementor {
     Level level = context.getContextLevel();
     switch(type) {
       case ROOT: // no operation in root context
-      case LEAF: // leaf context can be executed on single owner
         return false;
+      case LEAF:
       case UNARY:
       case BINARY:
         // todo: refinement needed

@@ -45,27 +45,13 @@ public class PublicKeyOT extends ProtocolExecutor {
     super(rpc, ProtocolType.PK_OT);
   }
 
-  // step 0, run on S
-  DataPacketHeader storeSecrets(DataPacket packet, OTMeta meta) {
-    DataPacketHeader header = packet.getHeader();
-    meta.extraInfo = header.getExtraInfo();
-    meta.secrets = packet.getPayload();
-    LOG.debug("Party [{}] store secrets", rpc.ownParty());
-    DataPacketHeader expect = new DataPacketHeader(header.getTaskId(), header.getPtoId(), 1,
-        meta.extraInfo, header.getReceiverId(), header.getSenderId());
-    LOG.debug("Party [{}] wait for packet {}", rpc.ownParty(), expect);
-    return expect;
-  }
-
   // step 1, run on R
-  DataPacketHeader generateKeys(DataPacket packet, OTMeta meta) {
-    DataPacketHeader header = packet.getHeader();
-    meta.extraInfo = header.getExtraInfo();
-    int m = OneDBCodec.decodeInt(packet.getPayload().get(0));
+  DataPacketHeader generateKeys(OTMeta meta) {
+    int m = OneDBCodec.decodeInt(meta.secrets.get(0));
     int n = 1 << m;
     int mask = n - 1;
-    int b = OneDBCodec.decodeInt(packet.getPayload().get(1)) & mask;
-    LOG.debug("Party [{}] generate [{}] public keys, a private key for [{}]", rpc.ownParty(), n, b);
+    int b = OneDBCodec.decodeInt(meta.secrets.get(1)) & mask;
+    LOG.debug("{} generate [{}] public keys, a private key for [{}]", rpc.ownParty(), n, b);
     List<byte[]> payloads = new ArrayList<>();
     PrivateKey privateKey = null;
     try {
@@ -84,14 +70,14 @@ public class PublicKeyOT extends ProtocolExecutor {
     }
     meta.b = b;
     meta.key = privateKey;
-    DataPacketHeader outHeader = new DataPacketHeader(header.getTaskId(), header.getPtoId(), 1,
-        meta.extraInfo, header.getReceiverId(), header.getSenderId());
+    DataPacketHeader outHeader = new DataPacketHeader(meta.taskId, ProtocolType.PK_OT.getId(), 1,
+        meta.extraInfo, meta.ownId, meta.otherId);
     rpc.send(DataPacket.fromByteArrayList(outHeader, payloads));
-    LOG.debug("Party [{}] send {}", rpc.ownParty(), outHeader);
+    LOG.debug("{} send {}", rpc.ownParty(), outHeader);
     // waiting for receving a packet with below header
-    DataPacketHeader expect = new DataPacketHeader(header.getTaskId(), header.getPtoId(), 2,
-        meta.extraInfo, outHeader.getReceiverId(), outHeader.getSenderId());
-    LOG.debug("Party [{}] wait for packet {}", rpc.ownParty(), expect);
+    DataPacketHeader expect = new DataPacketHeader(meta.taskId, ProtocolType.PK_OT.getId(), 2,
+        meta.extraInfo, meta.otherId, meta.ownId);
+    LOG.debug("{} wait for packet {}", rpc.ownParty(), expect);
     return expect;
   }
 
@@ -103,7 +89,7 @@ public class PublicKeyOT extends ProtocolExecutor {
     int n = publicKeyBytes.size();
     List<byte[]> encryptedSecrets = new ArrayList<>();
     KeyFactory keyFactory = null;
-    LOG.debug("Party [{}] encrypts secrets with public keys from Party [{}]", rpc.ownParty(),
+    LOG.debug("{} encrypts secrets with public keys from Party [{}]", rpc.ownParty(),
         header.getSenderId());
     try {
       keyFactory = KeyFactory.getInstance("RSA");
@@ -122,7 +108,7 @@ public class PublicKeyOT extends ProtocolExecutor {
     DataPacketHeader outHeader = new DataPacketHeader(header.getTaskId(), header.getPtoId(), 2,
         meta.extraInfo, header.getReceiverId(), header.getSenderId());
     rpc.send(DataPacket.fromByteArrayList(outHeader, encryptedSecrets));
-    LOG.debug("Party [{}] send {}", rpc.ownParty(), outHeader);
+    LOG.debug("{} send {}", rpc.ownParty(), outHeader);
     return null;
   }
 
@@ -132,7 +118,7 @@ public class PublicKeyOT extends ProtocolExecutor {
     int b = meta.b;
     byte[] target = packet.getPayload().get(b);
     byte[] decryptedBytes = null;
-    LOG.debug("Party [{}] decrypt secret [{}]", rpc.ownParty(), b);
+    LOG.debug("{} decrypt secret [{}]", rpc.ownParty(), b);
     try {
       Cipher decryptCipher = Cipher.getInstance("RSA");
       decryptCipher.init(Cipher.DECRYPT_MODE, key);
@@ -143,18 +129,17 @@ public class PublicKeyOT extends ProtocolExecutor {
     return ImmutableList.of(decryptedBytes);
   }
 
-  List<byte[]> senderProcedure(DataPacket initPacket) {
-    LOG.debug("Party [{}] is sender of OT", rpc.ownParty());
-    OTMeta meta = new OTMeta();
-    DataPacketHeader expectHeader = storeSecrets(initPacket, meta);
-    encryptSecrets(rpc.receive(expectHeader), meta);
+  List<byte[]> senderProcedure(OTMeta meta) {
+    LOG.debug("{} is sender of OT", rpc.ownParty());
+    DataPacketHeader expect = new DataPacketHeader(meta.taskId, ProtocolType.PK_OT.getId(), 1,
+        meta.extraInfo, meta.otherId, meta.ownId);
+    encryptSecrets(rpc.receive(expect), meta);
     return ImmutableList.of();
   }
 
-  List<byte[]> receiverProcedure(DataPacket initPacket) {
-    LOG.debug("Party [{}] is receiver of OT", rpc.ownParty());
-    OTMeta meta = new OTMeta();
-    DataPacketHeader expectHeader = generateKeys(initPacket, meta);
+  List<byte[]> receiverProcedure(OTMeta meta) {
+    LOG.debug("{} is receiver of OT", rpc.ownParty());
+    DataPacketHeader expectHeader = generateKeys(meta);
     return decryptSecrets(rpc.receive(expectHeader), meta);
   }
 
@@ -164,18 +149,33 @@ public class PublicKeyOT extends ProtocolExecutor {
   }
 
   @Override
-  public List<byte[]> run(DataPacket initPacket) {
-    DataPacketHeader header = initPacket.getHeader();
-    assert header.getPtoId() == type.getId();
-    if (isSender(header)) {
-      return senderProcedure(initPacket);
+  public List<byte[]> run(long taskId, List<Integer> parties, List<byte[]> inputData,
+      Object... args) {
+    // DataPacketHeader header = initPacket.getHeader();
+
+    // assert header.getPtoId() == type.getId();
+    int senderId = (Integer) args[0];
+    int receiverId = (Integer) args[1];
+    long extraInfo = 0L;
+    if (args.length == 3) {
+      extraInfo = (Long) args[2];
+    }
+    int ownId = rpc.ownParty().getPartyId();
+    if (senderId == ownId) {
+      return senderProcedure(new OTMeta(taskId, ownId, receiverId, extraInfo, inputData));
+    } else if (receiverId == ownId) {
+      return receiverProcedure(new OTMeta(taskId, ownId, senderId, extraInfo, inputData));
     } else {
-      return receiverProcedure(initPacket);
+      LOG.error("{} is not participant of Publickey OT", rpc.ownParty());
+      throw new RuntimeException("Not participant of PK_OT");
     }
   }
 
   static class OTMeta {
+    long taskId;
     int b;
+    int ownId;
+    int otherId;
     long extraInfo;
     PrivateKey key;
     List<byte[]> secrets;
@@ -185,6 +185,14 @@ public class PublicKeyOT extends ProtocolExecutor {
     OTMeta(int b, PrivateKey key) {
       this.b = b;
       this.key = key;
+    }
+
+    OTMeta(long taskId, int ownId, int otherId, long extraInfo, List<byte[]> inputs) {
+      this.taskId = taskId;
+      this.ownId = ownId;
+      this.otherId = otherId;
+      this.extraInfo = extraInfo;
+      this.secrets = inputs;
     }
 
     OTMeta(List<byte[]> secrets) {

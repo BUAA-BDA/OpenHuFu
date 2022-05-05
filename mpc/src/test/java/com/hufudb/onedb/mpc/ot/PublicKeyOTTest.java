@@ -36,15 +36,12 @@ public class PublicKeyOTTest {
 
   public static OneDBRandom rand = new BasicRandom();
 
-  public DataPacket generateInitPacket4Sender(int sender, int receiver, List<String> secrets) {
-    DataPacketHeader header = new DataPacketHeader(0, ProtocolType.PK_OT.getId(), 0, 0, sender, receiver);
-    List<byte[]> payloads = secrets.stream().map(s -> s.getBytes()).collect(Collectors.toList());
-    return DataPacket.fromByteArrayList(header, payloads);
+  public List<byte[]> encode4Sender(List<String> secrets) {
+    return secrets.stream().map(s -> s.getBytes()).collect(Collectors.toList());
   }
 
-  public DataPacket generateInitPacket4Receiver(int sender, int receiver, int select) {
-    DataPacketHeader header = new DataPacketHeader(0, ProtocolType.PK_OT.getId(), 0, 0, sender, receiver);
-    return DataPacket.fromByteArrayList(header, ImmutableList.of(OneDBCodec.encodeInt(2), OneDBCodec.encodeInt(select)));
+  public List<byte[]> encode4Receiver(int select) {
+    return ImmutableList.of(OneDBCodec.encodeInt(2), OneDBCodec.encodeInt(select));
   }
 
   @Test
@@ -80,7 +77,7 @@ public class PublicKeyOTTest {
         new Callable<List<byte[]>>() {
           @Override
           public List<byte[]> call() throws Exception {
-            return otSender.run(generateInitPacket4Sender(0, 1, secrets));
+            return otSender.run(0, ImmutableList.of(0, 1), encode4Sender(secrets), 0, 1);
           }
         }
       );
@@ -88,7 +85,7 @@ public class PublicKeyOTTest {
         new Callable<List<byte[]>>() {
         @Override
         public List<byte[]> call() throws Exception {
-          return otReceiver.run(generateInitPacket4Receiver(0, 1, tid));
+          return otReceiver.run(0, ImmutableList.of(0, 1), encode4Receiver(tid), 0, 1);
         }
       });
       List<byte[]> result = receiverRes.get();
