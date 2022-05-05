@@ -188,8 +188,8 @@ public class OneDBBinaryContext extends OneDBBaseContext {
 
   @Override
   public QueryableDataSet implement(OneDBImplementor implementor) {
-    QueryableDataSet leftResult = left.implement(implementor);
-    QueryableDataSet rightResult = right.implement(implementor);
+    QueryableDataSet leftResult = implementor.implement(left);
+    QueryableDataSet rightResult = implementor.implement(right);
     QueryableDataSet result = leftResult.join(implementor, rightResult, joinInfo);
     if (whereExps != null && !whereExps.isEmpty()) {
       result = result.filter(implementor, whereExps);
@@ -252,8 +252,8 @@ public class OneDBBinaryContext extends OneDBBaseContext {
     // for owners from left
     contextBuilder.setJoinInfo(joinInfo.toProto(true));
     for (Pair<OwnerClient, QueryContextProto> p : leftContext) {
-      QueryContextProto context = contextBuilder.setChildren(0, p.getValue())
-          .setChildren(1, OneDBPlaceholderContext.PLACEHOLDER_PROTO).build();
+      QueryContextProto context = contextBuilder.addChildren(0, p.getValue())
+          .addChildren(1, OneDBPlaceholderContext.PLACEHOLDER_PROTO).build();
       p.setValue(context);
       ownerContext.add(p);
     }

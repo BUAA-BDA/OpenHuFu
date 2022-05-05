@@ -3,7 +3,7 @@ package com.hufudb.onedb.core.client;
 import com.hufudb.onedb.core.config.OneDBConfig;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.data.Row;
-import com.hufudb.onedb.core.implementor.OneDBImplementor;
+import com.hufudb.onedb.core.implementor.UserSideImplementor;
 import com.hufudb.onedb.core.rewriter.BasicRewriter;
 import com.hufudb.onedb.core.sql.context.OneDBContext;
 import com.hufudb.onedb.core.sql.context.OneDBQueryContextPool;
@@ -173,6 +173,6 @@ public class OneDBClient {
     OneDBContext context = OneDBQueryContextPool.getContext(contextId);
     // todo: support for choosing the appropritate rewriter
     context = context.rewrite(new BasicRewriter());
-    return OneDBImplementor.getImplementor(context, this).implement(context);
+    return UserSideImplementor.getImplementor(context, this).implement(context);
   }
 }

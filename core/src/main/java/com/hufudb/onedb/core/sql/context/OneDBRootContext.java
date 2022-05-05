@@ -85,7 +85,7 @@ public class OneDBRootContext extends OneDBBaseContext {
 
   @Override
   public QueryableDataSet implement(OneDBImplementor implementor) {
-    return child.implement(implementor);
+    return implementor.implement(child);
   }
 
   @Override

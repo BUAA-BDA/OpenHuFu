@@ -196,7 +196,7 @@ public class OneDBUnaryContext extends OneDBBaseContext {
 
   @Override
   public QueryableDataSet implement(OneDBImplementor implementor) {
-    QueryableDataSet input = child.implement(implementor);
+    QueryableDataSet input = implementor.implement(child);
     return implementInternal(implementor, input);
   }
 

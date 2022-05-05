@@ -11,6 +11,7 @@ import com.hufudb.onedb.core.data.BasicDataSet;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.data.StreamBuffer;
+import com.hufudb.onedb.core.implementor.plaintext.PlaintextImplementor;
 import com.hufudb.onedb.core.implementor.plaintext.PlaintextQueryableDataSet;
 import com.hufudb.onedb.core.sql.context.OneDBContext;
 import com.hufudb.onedb.core.sql.context.OneDBContextType;
@@ -24,6 +25,17 @@ public abstract class UserSideImplementor implements OneDBImplementor {
 
   protected UserSideImplementor(OneDBClient client) {
     this.client = client;
+  }
+
+  public static OneDBImplementor getImplementor(OneDBContext context, OneDBClient client) {
+    switch (context.getContextLevel()) {
+      case PUBLIC:
+      case PROTECTED:
+        return new PlaintextImplementor(client);
+      default:
+        LOG.error("No implementor found for Level {}", context.getContextLevel().name());
+        throw new UnsupportedOperationException(String.format("No implementor found for Level %s", context.getContextLevel().name()));
+    }
   }
 
   boolean isMultiParty(OneDBContext context) {

@@ -18,12 +18,12 @@
     },
     {
       "originName": "student",
-      "publishedName": "st_pro",
+      "publishedName": "st_pro_2",
       "publishedFields": [
         {
           "name": "name",
           "type": "STRING",
-          "level": "public"
+          "level": "protected"
         },
         {
           "name": "score",
@@ -38,7 +38,34 @@
         {
           "name": "dept_name",
           "type": "STRING",
+          "level": "public"
+        }
+      ],
+      "originColumns": [0, 1, 2, 3]
+    },
+    {
+      "originName": "student",
+      "publishedName": "st_pro_3",
+      "publishedFields": [
+        {
+          "name": "name",
+          "type": "STRING",
           "level": "protected"
+        },
+        {
+          "name": "score",
+          "type": "INT",
+          "level": "protected"
+        },
+        {
+          "name": "age",
+          "type": "INT",
+          "level": "protected"
+        },
+        {
+          "name": "dept_name",
+          "type": "STRING",
+          "level": "public"
         }
       ],
       "originColumns": [0, 1, 2, 3]

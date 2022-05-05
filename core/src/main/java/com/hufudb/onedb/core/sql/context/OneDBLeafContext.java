@@ -14,6 +14,7 @@ import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.rel.OneDBOrder;
 import com.hufudb.onedb.core.table.OneDBTableInfo;
 import com.hufudb.onedb.rpc.OneDBCommon.QueryContextProto;
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 /*
@@ -56,7 +57,7 @@ public class OneDBLeafContext extends OneDBBaseContext {
     List<Pair<OwnerClient, QueryContextProto>> ownerContext = new ArrayList<>();
     for (Pair<OwnerClient, String> entry : tableClients) {
       contextBuilder.setTableName(entry.getRight());
-      ownerContext.add(Pair.of(entry.getLeft(), contextBuilder.build()));
+      ownerContext.add(MutablePair.of(entry.getLeft(), contextBuilder.build()));
     }
     return ownerContext;
   }
