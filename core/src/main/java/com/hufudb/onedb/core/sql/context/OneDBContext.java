@@ -89,13 +89,6 @@ public interface OneDBContext {
 
   OneDBContext rewrite(OneDBRewriter rewriter);
 
-  public static Header getOutputHeader(QueryContextProto proto) {
-    Header.Builder builder = Header.newBuilder();
-    List<FieldType> types = getOutputTypes(proto);
-    types.stream().forEach(type -> builder.add("", type));
-    return builder.build();
-  }
-
   public static Header getOutputHeader(OneDBContext context) {
     Header.Builder builder = Header.newBuilder();
     List<OneDBExpression> exps = context.getOutExpressions();

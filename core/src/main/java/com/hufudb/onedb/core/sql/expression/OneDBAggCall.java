@@ -69,7 +69,7 @@ public class OneDBAggCall implements OneDBExpression {
   @Override
   public ExpressionProto toProto() {
     return ExpressionProto.newBuilder().setOpType(OneDBOpType.AGG_FUNC.ordinal())
-        .setFunc(aggType.ordinal()).setOutType(outType.ordinal())
+        .setFunc(aggType.ordinal()).setOutType(outType.ordinal()).setLevel(level.getId())
         .addAllIn(in.stream().map(i -> OneDBReference.fromIndex(outType, level, i).toProto())
             .collect(Collectors.toList()))
         .setB(distinct).build();

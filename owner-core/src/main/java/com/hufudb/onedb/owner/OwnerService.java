@@ -88,8 +88,8 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
 
   @Override
   public void query(QueryContextProto request, StreamObserver<DataSetProto> responseObserver) {
-    Header header = OneDBContext.getOutputHeader(request);
     OneDBContext context = OneDBContext.fromProto(request);
+    Header header = OneDBContext.getOutputHeader(context);
     StreamObserverDataSet obDataSet = new StreamObserverDataSet(responseObserver, header);
     try {
       QueryableDataSet result = implementor.implement(context);

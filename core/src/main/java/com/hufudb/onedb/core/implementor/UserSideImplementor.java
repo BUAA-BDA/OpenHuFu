@@ -166,7 +166,7 @@ public abstract class UserSideImplementor implements OneDBImplementor {
     List<Pair<OwnerClient, String>> tableClients = client.getTableClients(leaf.getTableName());
     StreamBuffer<DataSetProto> streamProto = tableQuery(proto, tableClients);
 
-    Header header = OneDBContext.getOutputHeader(proto);
+    Header header = OneDBContext.getOutputHeader(leaf);
     // todo: optimze for streamDataSet
     BasicDataSet localDataSet = BasicDataSet.of(header);
     while (streamProto.hasNext()) {
