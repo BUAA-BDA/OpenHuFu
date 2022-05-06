@@ -33,6 +33,7 @@ public class OneDBBinaryContext extends OneDBBaseContext {
   int fetch;
   int offset;
   OneDBJoinInfo joinInfo;
+  TaskInfoProto taskInfo;
 
   public OneDBBinaryContext(OneDBContext parent, OneDBContext left, OneDBContext right) {
     this.parent = parent;
@@ -187,6 +188,11 @@ public class OneDBBinaryContext extends OneDBBaseContext {
   }
 
   @Override
+  public TaskInfoProto getTaskInfo() {
+    return taskInfo;
+  }
+
+  @Override
   public QueryableDataSet implement(OneDBImplementor implementor) {
     return implementor.binaryQuery(this);
   }
@@ -238,10 +244,27 @@ public class OneDBBinaryContext extends OneDBBaseContext {
     // for owners from right
     contextBuilder.setJoinInfo(joinInfo.toProto(false));
     for (Pair<OwnerClient, QueryContextProto> p : rightContext) {
-      QueryContextProto context = contextBuilder.setChildren(0, OneDBPlaceholderContext.PLACEHOLDER_PROTO).setChildren(1, p.getValue()).build();
+      QueryContextProto context =
+          contextBuilder.setChildren(0, OneDBPlaceholderContext.PLACEHOLDER_PROTO)
+              .setChildren(1, p.getValue()).build();
       p.setValue(context);
       ownerContext.add(p);
     }
     return ownerContext;
+  }
+
+  public static OneDBBinaryContext fromProto(QueryContextProto proto) {
+    OneDBBinaryContext context = new OneDBBinaryContext(null,
+        OneDBContext.fromProto(proto.getChildren(0)), OneDBContext.fromProto(proto.getChildren(1)));
+    context.setSelectExps(OneDBExpression.fromProto(proto.getSelectExpList()));
+    context.setWhereExps(OneDBExpression.fromProto(proto.getWhereExpList()));
+    context.setAggExps(OneDBExpression.fromProto(proto.getAggExpList()));
+    context.setGroups(proto.getGroupList());
+    context.setOrders(OneDBOrder.fromProto(proto.getOrderList()));
+    context.setFetch(proto.getFetch());
+    context.setOffset(proto.getOffset());
+    context.setJoinInfo(OneDBJoinInfo.fromProto(proto.getJoinInfo()));
+    context.taskInfo = proto.getTaskInfo();
+    return context;
   }
 }

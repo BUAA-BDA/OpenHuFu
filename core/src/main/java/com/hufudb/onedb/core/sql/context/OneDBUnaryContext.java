@@ -29,6 +29,7 @@ public class OneDBUnaryContext extends OneDBBaseContext {
   List<OneDBOrder> orders = ImmutableList.of();
   int fetch;
   int offset;
+  TaskInfoProto taskInfo;
 
   public OneDBUnaryContext() {
     super();
@@ -61,6 +62,19 @@ public class OneDBUnaryContext extends OneDBBaseContext {
       p.setValue(context);
     }
     return ownerContext;
+  }
+
+  public static OneDBUnaryContext fromProto(QueryContextProto proto) {
+    OneDBUnaryContext context = new OneDBUnaryContext();
+    context.setChildren(ImmutableList.of(OneDBContext.fromProto(proto.getChildren(0))));
+    context.setAggExps(OneDBExpression.fromProto(proto.getAggExpList()));
+    context.setSelectExps(OneDBExpression.fromProto(proto.getSelectExpList()));
+    context.setGroups(proto.getGroupList());
+    context.setOrders(OneDBOrder.fromProto(proto.getOrderList()));
+    context.setFetch(proto.getFetch());
+    context.setOffset(proto.getOffset());
+    context.taskInfo = proto.getTaskInfo();
+    return context;
   }
 
   @Override
@@ -181,6 +195,11 @@ public class OneDBUnaryContext extends OneDBBaseContext {
   @Override
   public OneDBContextType getContextType() {
     return OneDBContextType.UNARY;
+  }
+
+  @Override
+  public TaskInfoProto getTaskInfo() {
+    return taskInfo;
   }
 
   @Override

@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableList;
+import com.hufudb.onedb.core.client.OneDBClient;
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.sql.context.OneDBBinaryContext;
@@ -23,6 +24,11 @@ import com.hufudb.onedb.core.sql.expression.OneDBAggCall.AggregateType;
 import com.hufudb.onedb.core.sql.expression.OneDBOperator.FuncType;
 
 public class BasicRewriter implements OneDBRewriter {
+  final OneDBClient client;
+
+  public BasicRewriter(OneDBClient client) {
+    this.client = client;
+  }
 
   @Override
   public void rewriteChild(OneDBContext context) {
@@ -47,7 +53,7 @@ public class BasicRewriter implements OneDBRewriter {
   @Override
   public OneDBContext rewriteLeaf(OneDBLeafContext leaf) {
     // only horizontal partitioned table need rewrite
-    if (leaf.ownerSize() > 1) {
+    if (client.getTable(leaf.getTableName()).ownerSize() > 1) {
       boolean hasAgg = leaf.hasAgg();
       boolean hasLimit = leaf.getOffset() != 0 || leaf.getFetch() != 0;
       boolean hasSort = leaf.getOrders() != null && !leaf.getOrders().isEmpty();

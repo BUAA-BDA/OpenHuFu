@@ -13,6 +13,7 @@ import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.rel.OneDBOrder;
 import com.hufudb.onedb.core.table.OneDBTableInfo;
 import com.hufudb.onedb.rpc.OneDBCommon.QueryContextProto;
+import com.hufudb.onedb.rpc.OneDBCommon.TaskInfoProto;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -46,7 +47,7 @@ public interface OneDBContext {
 
   String getTableName();
 
-  void setTableInfo(OneDBTableInfo info);
+  void setTableName(String name);
 
   List<OneDBExpression> getSelectExps();
 
@@ -81,6 +82,8 @@ public interface OneDBContext {
   OneDBJoinInfo getJoinInfo();
 
   void setJoinInfo(OneDBJoinInfo joinInfo);
+
+  TaskInfoProto getTaskInfo();
 
   QueryableDataSet implement(OneDBImplementor implementor);
 
@@ -128,7 +131,19 @@ public interface OneDBContext {
     }
   }
 
-  public static OneDBContext fromProto() {
-    return null;
+  public static OneDBContext fromProto(QueryContextProto proto) {
+    switch (proto.getContextType()) {
+      case 1: // LEAF
+        return OneDBLeafContext.fromProto(proto);
+      case 2: // UNARY
+        return OneDBUnaryContext.fromProto(proto);
+      case 3: // BINARY
+        return OneDBBinaryContext.fromProto(proto);
+      case 4: // PLACEHOLDER
+        return OneDBPlaceholderContext.PLACEHOLDER;
+      default:
+        LOG.error("Not support converting context type {} into protocolbuffer", proto.getContextType());
+        throw new RuntimeException("Unsupport context type");
+    }
   }
 }

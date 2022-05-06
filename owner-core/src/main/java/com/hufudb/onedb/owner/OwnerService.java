@@ -9,11 +9,15 @@ import com.hufudb.onedb.core.data.Row;
 import com.hufudb.onedb.core.data.StreamObserverDataSet;
 import com.hufudb.onedb.core.data.TableInfo;
 import com.hufudb.onedb.core.data.utils.POJOPublishedTableInfo;
+import com.hufudb.onedb.core.implementor.QueryableDataSet;
 import com.hufudb.onedb.core.sql.context.OneDBContext;
+import com.hufudb.onedb.core.sql.context.OneDBContextType;
+import com.hufudb.onedb.core.sql.context.OneDBLeafContext;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.rel.OneDBOrder;
 import com.hufudb.onedb.core.sql.translator.OneDBTranslator;
 import com.hufudb.onedb.core.zk.DBZkClient;
+import com.hufudb.onedb.owner.implementor.OwnerSideImplementor;
 import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
 import com.hufudb.onedb.rpc.OneDBCommon.HeaderProto;
 import com.hufudb.onedb.rpc.OneDBCommon.LocalTableListProto;
@@ -55,6 +59,7 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
   protected final ExecutorService threadPool;
   protected final OneDBRpc ownerSideRpc;
   protected final ConcurrentBuffer<Long, DataSet> resultBuffer; // taskId -> bufferDataSet
+  protected final OwnerSideImplementor implementor;
 
   public OwnerService(String zkServers, String zkRootPath, String endpoint, String digest,
       ExecutorService threadPool, OneDBRpc ownerSideRpc) {
@@ -66,6 +71,7 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
     this.endpoint = endpoint;
     this.ownerSideRpc = ownerSideRpc;
     this.resultBuffer = new ConcurrentBuffer<Long, DataSet>();
+    this.implementor = new OwnerSideImplementor(ownerSideRpc, this);
     if (zkServers == null || zkRootPath == null || digest == null) {
       zkClient = null;
     } else {
@@ -83,10 +89,12 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
   @Override
   public void query(QueryContextProto request, StreamObserver<DataSetProto> responseObserver) {
     Header header = OneDBContext.getOutputHeader(request);
+    OneDBContext context = OneDBContext.fromProto(request);
     StreamObserverDataSet obDataSet = new StreamObserverDataSet(responseObserver, header);
     try {
-      oneDBQueryInternal(request, obDataSet);
-    } catch (SQLException e) {
+      QueryableDataSet result = implementor.implement(context);
+      obDataSet.addRows(result.getRows());
+    } catch (Exception e) {
       LOG.error("error when query table [{}]", request.getTableName());
       e.printStackTrace();
     }
@@ -264,31 +272,30 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
   }
 
   // template function for SQL database, rewrite this for database without sql
-  protected void oneDBQueryInternal(QueryContextProto query, DataSet dataSet) throws SQLException {
-    String sql = generateSQL(query);
+  public void dbQuery(OneDBLeafContext leafQuery, DataSet dataSet) throws SQLException {
+    String sql = generateSQL(leafQuery);
     if (sql.isEmpty()) {
       return;
     }
     executeSQL(sql, dataSet);
   }
 
-  protected String generateSQL(QueryContextProto query) {
+  protected String generateSQL(OneDBLeafContext query) {
     String originTableName = getOriginTableName(query.getTableName());
     Header tableHeader = getPublishedTableHeader(query.getTableName());
     LOG.info("{}: {}", originTableName, tableHeader);
-    final List<String> filters = OneDBTranslator.translateExps(tableHeader,
-        OneDBExpression.fromProto(query.getWhereExpList()));
+    final List<String> filters = OneDBTranslator.translateExps(tableHeader, query.getWhereExps());
     final List<String> selects = OneDBTranslator.translateExps(tableHeader,
-        OneDBExpression.fromProto(query.getSelectExpList()));
+        query.getSelectExps());
     final List<String> groups =
-        query.getGroupList().stream().map(ref -> selects.get(ref)).collect(Collectors.toList());
+        query.getGroups().stream().map(ref -> selects.get(ref)).collect(Collectors.toList());
     // order by
-    List<String> order = OneDBTranslator.translateOrders(selects, OneDBOrder.fromProto(query.getOrderList()));
+    List<String> order = OneDBTranslator.translateOrders(selects, query.getOrders());
     StringBuilder sql = new StringBuilder();
     // select from clause
-    if (query.getAggExpCount() > 0) {
+    if (!query.getAggExps().isEmpty()) {
       final List<String> aggs =
-          OneDBTranslator.translateAgg(selects, OneDBExpression.fromProto(query.getAggExpList()));
+          OneDBTranslator.translateAgg(selects, query.getAggExps());
       sql.append(String.format("SELECT %s from %s", String.join(",", aggs), originTableName));
     } else {
       sql.append(String.format("SELECT %s from %s", String.join(",", selects), originTableName));

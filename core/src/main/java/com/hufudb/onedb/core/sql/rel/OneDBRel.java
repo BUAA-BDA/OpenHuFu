@@ -14,7 +14,6 @@ import com.hufudb.onedb.core.sql.expression.OneDBJoinType;
 import com.hufudb.onedb.core.sql.expression.OneDBOperator;
 import com.hufudb.onedb.core.sql.expression.OneDBReference;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
-import com.hufudb.onedb.core.table.OneDBTableInfo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -104,8 +103,8 @@ public interface OneDBRel extends RelNode {
       }
     }
 
-    public void setTableInfo(OneDBTableInfo info) {
-      currentContext.setTableInfo(info);
+    public void setTableName(String name) {
+      currentContext.setTableName(name);
     }
 
     public void setSelectExps(List<OneDBExpression> exps) {

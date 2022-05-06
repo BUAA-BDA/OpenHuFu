@@ -12,7 +12,6 @@ import com.hufudb.onedb.core.implementor.QueryableDataSet;
 import com.hufudb.onedb.core.rewriter.OneDBRewriter;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.rel.OneDBOrder;
-import com.hufudb.onedb.core.table.OneDBTableInfo;
 import com.hufudb.onedb.rpc.OneDBCommon.QueryContextProto;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -22,7 +21,7 @@ import org.apache.commons.lang3.tuple.Pair;
  */
 public class OneDBLeafContext extends OneDBBaseContext {
   OneDBContext parent;
-  OneDBTableInfo info;
+  String tableName;
   List<OneDBExpression> selectExps = new ArrayList<>();
   List<OneDBExpression> whereExps = new ArrayList<>();
   List<OneDBExpression> aggExps = new ArrayList<>();
@@ -53,7 +52,7 @@ public class OneDBLeafContext extends OneDBBaseContext {
     if (orders != null) {
       contextBuilder.addAllOrder(OneDBOrder.toProto(orders));
     }
-    List<Pair<OwnerClient, String>> tableClients = info.getTableList();
+    List<Pair<OwnerClient, String>> tableClients = client.getTableClients(tableName);
     List<Pair<OwnerClient, QueryContextProto>> ownerContext = new ArrayList<>();
     for (Pair<OwnerClient, String> entry : tableClients) {
       contextBuilder.setTableName(entry.getRight());
@@ -62,9 +61,22 @@ public class OneDBLeafContext extends OneDBBaseContext {
     return ownerContext;
   }
 
+  public static OneDBLeafContext fromProto(QueryContextProto proto) {
+    OneDBLeafContext context = new OneDBLeafContext();
+    context.setTableName(proto.getTableName());
+    context.setSelectExps(OneDBExpression.fromProto(proto.getSelectExpList()));
+    context.setWhereExps(OneDBExpression.fromProto(proto.getWhereExpList()));
+    context.setAggExps(OneDBExpression.fromProto(proto.getAggExpList()));
+    context.setGroups(proto.getGroupList());
+    context.setOrders(OneDBOrder.fromProto(proto.getOrderList()));
+    context.setFetch(proto.getFetch());
+    context.setOffset(proto.getOffset());
+    return context;
+  }
+
   public QueryContextProto toProto() {
     QueryContextProto.Builder builder = QueryContextProto.newBuilder();
-    builder.setContextType(OneDBContextType.LEAF.ordinal()).setTableName(info.getName())
+    builder.setContextType(OneDBContextType.LEAF.ordinal()).setTableName(tableName)
         .addAllSelectExp(OneDBExpression.toProto(selectExps)).setFetch(fetch).setOffset(offset);
     if (whereExps != null) {
       builder.addAllWhereExp(OneDBExpression.toProto(whereExps));
@@ -98,12 +110,12 @@ public class OneDBLeafContext extends OneDBBaseContext {
 
   @Override
   public String getTableName() {
-    return info.getName();
+    return tableName;
   }
 
   @Override
-  public void setTableInfo(OneDBTableInfo info) {
-    this.info = info;
+  public void setTableName(String name) {
+    this.tableName = name;
   }
 
   @Override
@@ -214,10 +226,6 @@ public class OneDBLeafContext extends OneDBBaseContext {
 
   public List<FieldType> getSelectTypes() {
     return selectExps.stream().map(exp -> exp.getOutType()).collect(Collectors.toList());
-  }
-
-  public int ownerSize() {
-    return info.ownerSize();
   }
 
   @Override

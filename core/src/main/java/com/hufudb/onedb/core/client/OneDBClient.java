@@ -1,10 +1,12 @@
 package com.hufudb.onedb.core.client;
 
+import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.config.OneDBConfig;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.data.Row;
 import com.hufudb.onedb.core.implementor.UserSideImplementor;
 import com.hufudb.onedb.core.rewriter.BasicRewriter;
+import com.hufudb.onedb.core.rewriter.OneDBRewriter;
 import com.hufudb.onedb.core.sql.context.OneDBContext;
 import com.hufudb.onedb.core.sql.context.OneDBQueryContextPool;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
@@ -33,6 +35,7 @@ public class OneDBClient {
   private final Map<String, OneDBTableInfo> tableMap;
   final ExecutorService threadPool;
   private final AtomicInteger queryId;
+  private final OneDBRewriter rewriter;
 
   public OneDBClient(OneDBSchema schema) {
     this.schema = schema;
@@ -40,6 +43,7 @@ public class OneDBClient {
     this.tableMap = new ConcurrentHashMap<>();
     this.threadPool = Executors.newFixedThreadPool(OneDBConfig.CLIENT_THREAD_NUM);
     this.queryId = new AtomicInteger(0);
+    this.rewriter = new BasicRewriter(this);
   }
 
   int getQueryId() {
@@ -163,7 +167,7 @@ public class OneDBClient {
 
   public List<Pair<OwnerClient, String>> getTableClients(String tableName) {
     OneDBTableInfo table = getTable(tableName);
-    return table != null ? table.getTableList() : null;
+    return table != null ? table.getTableList() : ImmutableList.of();
   }
 
   /*
@@ -172,7 +176,7 @@ public class OneDBClient {
   public Enumerator<Row> oneDBQuery(long contextId) {
     OneDBContext context = OneDBQueryContextPool.getContext(contextId);
     // todo: support for choosing the appropritate rewriter
-    context = context.rewrite(new BasicRewriter());
+    context = context.rewrite(rewriter);
     return UserSideImplementor.getImplementor(context, this).implement(context);
   }
 }
