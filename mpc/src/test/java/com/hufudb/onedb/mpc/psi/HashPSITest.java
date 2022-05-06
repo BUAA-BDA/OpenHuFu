@@ -19,8 +19,6 @@ import com.hufudb.onedb.rpc.Party;
 import com.hufudb.onedb.rpc.grpc.OneDBOwnerInfo;
 import com.hufudb.onedb.rpc.grpc.OneDBRpcManager;
 import com.hufudb.onedb.rpc.grpc.OneDBRpc;
-import com.hufudb.onedb.rpc.utils.DataPacket;
-import com.hufudb.onedb.rpc.utils.DataPacketHeader;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;

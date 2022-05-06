@@ -9,6 +9,8 @@ import com.google.common.collect.ImmutableMap;
 public enum ProtocolType {
   UNKNOWN("UNKNOWN", -1, true),
   PLAINTEXT("PLAINTEXT", 0, false),
+  SENDER("SENDER", 1, true),
+  STREAM("STREAM", 2, true),
   PK_OT("PUBLIC_KEY_BASED_OT", 10, true),
   BEAVER_TRIPLE("BEAVER_TRIPLE", 20, true),
   GMW("GMW", 100, true),
