@@ -6,14 +6,17 @@ import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.implementor.OneDBImplementor;
 import com.hufudb.onedb.core.implementor.QueryableDataSet;
+import com.hufudb.onedb.core.implementor.plaintext.PlaintextCalculator;
 import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.sql.context.OneDBBinaryContext;
 import com.hufudb.onedb.core.sql.context.OneDBContext;
+import com.hufudb.onedb.core.sql.context.OneDBContextType;
 import com.hufudb.onedb.core.sql.context.OneDBLeafContext;
 import com.hufudb.onedb.core.sql.context.OneDBUnaryContext;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.rel.OneDBOrder;
 import com.hufudb.onedb.owner.OwnerService;
+import com.hufudb.onedb.owner.implementor.join.HashEqualJoin;
 import com.hufudb.onedb.rpc.Rpc;
 
 public class OwnerSideImplementor implements OneDBImplementor {
@@ -38,7 +41,29 @@ public class OwnerSideImplementor implements OneDBImplementor {
 
   @Override
   public QueryableDataSet binaryQuery(OneDBBinaryContext binary) {
-    return null;
+    List<OneDBContext> children = binary.getChildren();
+    assert children.size() == 2;
+    OneDBContext left = children.get(0);
+    OneDBContext right = children.get(1);
+    QueryableDataSet in;
+    if (left.getContextType().equals(OneDBContextType.PLACEHOLDER)) {
+      // right
+      in = right.implement(this);
+    } else if (right.getContextType().equals(OneDBContextType.PLACEHOLDER)) {
+      // left
+      in = left.implement(this);
+    } else {
+      LOG.error("Not support two side on a single owner yet");
+      throw new UnsupportedOperationException("Not support two side on a single owner yet");
+    }
+    Header leftHeader = OneDBContext.getOutputHeader(left);
+    Header rightHeader = OneDBContext.getOutputHeader(right);
+    Header outputHeader = Header.joinHeader(leftHeader, rightHeader);
+    QueryableDataSet result = HashEqualJoin.apply(in, binary.getJoinInfo(), rpc, binary.getTaskInfo(), outputHeader);
+    if (!binary.getSelectExps().isEmpty()) {
+      result = result.project(this, binary.getSelectExps());
+    }
+    return result;
   }
 
   @Override
@@ -63,25 +88,21 @@ public class OwnerSideImplementor implements OneDBImplementor {
   @Override
   public QueryableDataSet join(QueryableDataSet left, QueryableDataSet right,
       OneDBJoinInfo joinInfo) {
-    // TODO Auto-generated method stub
     return null;
   }
 
   @Override
   public QueryableDataSet filter(QueryableDataSet in, List<OneDBExpression> filters) {
-    // TODO Auto-generated method stub
     return null;
   }
 
   @Override
   public QueryableDataSet project(QueryableDataSet in, List<OneDBExpression> projects) {
-    // TODO Auto-generated method stub
-    return null;
+    return PlaintextCalculator.apply(in, projects);
   }
 
   @Override
   public QueryableDataSet sort(QueryableDataSet in, List<OneDBOrder> orders) {
-    // TODO Auto-generated method stub
     return null;
   }
 }

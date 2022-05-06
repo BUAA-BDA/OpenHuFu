@@ -104,14 +104,4 @@ public class BasicDataSet implements EnumerableDataSet {
   public List<Row> getRows() {
     return rows;
   }
-
-  public List<byte[]> encode(List<Integer> columns) {
-    List<byte[]> result = new ArrayList<>();
-    for (Row row : rows) {
-      for (Integer column : columns) {
-
-      }
-    }
-    return result;
-  }
 }

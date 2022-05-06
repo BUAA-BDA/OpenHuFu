@@ -207,7 +207,7 @@ public class OneDBBinaryContext extends OneDBBaseContext {
   @Override
   public List<Pair<OwnerClient, QueryContextProto>> generateOwnerContextProto(OneDBClient client) {
     QueryContextProto.Builder contextBuilder = QueryContextProto.newBuilder()
-        .setContextType(OneDBContextType.UNARY.ordinal()).setFetch(fetch).setOffset(offset);
+        .setContextType(OneDBContextType.BINARY.ordinal()).setFetch(fetch).setOffset(offset);
     if (selectExps != null) {
       contextBuilder.addAllSelectExp(OneDBExpression.toProto(selectExps));
     }
@@ -232,12 +232,13 @@ public class OneDBBinaryContext extends OneDBBaseContext {
       taskInfo.addParties(p.getLeft().getParty().getPartyId());
     }
     contextBuilder.setTaskInfo(taskInfo);
-
+    QueryContextProto leftPlaceholder = new OneDBPlaceholderContext(left.getOutExpressions()).toProto();
+    QueryContextProto rightPlaceholder = new OneDBPlaceholderContext(right.getOutExpressions()).toProto();
     // for owners from left
     contextBuilder.setJoinInfo(joinInfo.toProto(true));
     for (Pair<OwnerClient, QueryContextProto> p : leftContext) {
       QueryContextProto context = contextBuilder.addChildren(0, p.getValue())
-          .addChildren(1, OneDBPlaceholderContext.PLACEHOLDER_PROTO).build();
+          .addChildren(1, rightPlaceholder).build();
       p.setValue(context);
       ownerContext.add(p);
     }
@@ -245,7 +246,7 @@ public class OneDBBinaryContext extends OneDBBaseContext {
     contextBuilder.setJoinInfo(joinInfo.toProto(false));
     for (Pair<OwnerClient, QueryContextProto> p : rightContext) {
       QueryContextProto context =
-          contextBuilder.setChildren(0, OneDBPlaceholderContext.PLACEHOLDER_PROTO)
+          contextBuilder.setChildren(0, leftPlaceholder)
               .setChildren(1, p.getValue()).build();
       p.setValue(context);
       ownerContext.add(p);

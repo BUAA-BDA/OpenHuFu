@@ -148,8 +148,8 @@ public class HashPSI extends ProtocolExecutor {
         ByteBuffer senderHash = ByteBuffer.wrap(senderData.get(i));
         if (receiverIndex.containsKey(senderHash)) {
           for (Integer receiverId : receiverIndex.get(senderHash)) {
-            senderIntersect.add(OneDBCodec.encodeInt(receiverId));
-            receiverIntersect.add(OneDBCodec.encodeInt(i));
+            senderIntersect.add(OneDBCodec.encodeInt(i));
+            receiverIntersect.add(OneDBCodec.encodeInt(receiverId));
           }
         }
       }

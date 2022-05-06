@@ -124,7 +124,7 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
         if (table.getHeader().equals(header)) {
           table.addOwner(client, localName);
         } else {
-          LOG.warn("header in {} mismatch", endpoint);
+          LOG.warn("header in {} mismatc with origin[{}]", endpoint, table.getHeader());
         }
       }
     }

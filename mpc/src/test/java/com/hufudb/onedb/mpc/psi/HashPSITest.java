@@ -102,13 +102,13 @@ public class HashPSITest {
     });
     List<byte[]> expect0 = new ArrayList<>();
     List<byte[]> expect1 = new ArrayList<>();
-    for (int i = 0; i < data1.size(); ++i) {
-      byte[] d1 = data1.get(i);
-      for (int j = 0; j < data0.size(); ++j) {
-        byte[] d0 = data0.get(j);
+    for (int i = 0; i < data0.size(); ++i) {
+      byte[] d1 = data0.get(i);
+      for (int j = 0; j < data1.size(); ++j) {
+        byte[] d0 = data1.get(j);
         if (Arrays.equals(d0, d1)) {
-          expect0.add(OneDBCodec.encodeInt(j));
-          expect1.add(OneDBCodec.encodeInt(i));
+          expect0.add(OneDBCodec.encodeInt(i));
+          expect1.add(OneDBCodec.encodeInt(j));
         }
       }
     }
@@ -158,6 +158,25 @@ public class HashPSITest {
   public void testHashPSISenderLarger() throws Exception {
     try {
       runHashPSI(generateData(8, 10), generateData(8, 100), HashFunction.MD5, 1, 0);
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw e;
+    }
+  }
+
+  @Test
+  public void testHashPSIEqaul() throws Exception {
+    try {
+      List<byte[]> data0 = new ArrayList<>();
+      List<byte[]> data1 = new ArrayList<>();
+      data0.add(OneDBCodec.encodeInt(21));
+      data0.add(OneDBCodec.encodeInt(20));
+      data0.add(OneDBCodec.encodeInt(20));
+      data1.add(OneDBCodec.encodeInt(20));
+      data1.add(OneDBCodec.encodeInt(21));
+      data1.add(OneDBCodec.encodeInt(22));
+      runHashPSI(data0, data1, HashFunction.MD5, 0, 1);
+      runHashPSI(data1, data0, HashFunction.MD5, 0, 1);
     } catch (Exception e) {
       e.printStackTrace();
       throw e;

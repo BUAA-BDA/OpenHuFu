@@ -1,27 +1,35 @@
 package com.hufudb.onedb.core.sql.context;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import com.hufudb.onedb.core.client.OneDBClient;
 import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.rewriter.OneDBRewriter;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
+import com.hufudb.onedb.core.sql.expression.OneDBReference;
 import com.hufudb.onedb.rpc.OneDBCommon.QueryContextProto;
 import org.apache.commons.lang3.tuple.Pair;
 
 public class OneDBPlaceholderContext extends OneDBBaseContext {
-  public static final OneDBPlaceholderContext PLACEHOLDER = new OneDBPlaceholderContext();
-  public static final QueryContextProto PLACEHOLDER_PROTO = PLACEHOLDER.toProto();
+  List<OneDBExpression> output;
+
+  public OneDBPlaceholderContext(List<OneDBExpression> output) {
+    this.output = OneDBReference.fromExps(output);
+  }
 
   public QueryContextProto toProto() {
-    return QueryContextProto.newBuilder().setContextType(OneDBContextType.PLACEHOLDER.ordinal())
-        .build();
+    return QueryContextProto.newBuilder().setContextType(getContextType().ordinal())
+        .addAllSelectExp(OneDBExpression.toProto(output)).build();
+  }
+
+  public static OneDBPlaceholderContext fromProto(QueryContextProto proto) {
+    return new OneDBPlaceholderContext(OneDBExpression.fromProto(proto.getSelectExpList()));
   }
 
   @Override
-  public List<Pair<OwnerClient, QueryContextProto>> generateOwnerContextProto(
-      OneDBClient client) {
+  public List<Pair<OwnerClient, QueryContextProto>> generateOwnerContextProto(OneDBClient client) {
     LOG.error("not support");
     throw new UnsupportedOperationException();
   }
@@ -33,26 +41,22 @@ public class OneDBPlaceholderContext extends OneDBBaseContext {
 
   @Override
   public List<OneDBExpression> getOutExpressions() {
-    LOG.error("not support");
-    throw new UnsupportedOperationException();
+    return output;
   }
 
   @Override
   public List<FieldType> getOutTypes() {
-    LOG.error("not support");
-    throw new UnsupportedOperationException();
+    return output.stream().map(exp -> exp.getOutType()).collect(Collectors.toList());
   }
 
   @Override
   public Level getContextLevel() {
-    LOG.error("not support");
-    throw new UnsupportedOperationException();
+    return Level.findDominator(getOutExpressions());
   }
 
   @Override
   public List<Level> getOutLevels() {
-    LOG.error("not support");
-    throw new UnsupportedOperationException();
+    return output.stream().map(exp -> exp.getLevel()).collect(Collectors.toList());
   }
 
   @Override

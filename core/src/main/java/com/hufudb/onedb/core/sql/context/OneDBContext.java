@@ -133,7 +133,7 @@ public interface OneDBContext {
       case 3: // BINARY
         return OneDBBinaryContext.fromProto(proto);
       case 4: // PLACEHOLDER
-        return OneDBPlaceholderContext.PLACEHOLDER;
+        return OneDBPlaceholderContext.fromProto(proto);
       default:
         LOG.error("Not support converting context type {} into protocolbuffer", proto.getContextType());
         throw new RuntimeException("Unsupport context type");
