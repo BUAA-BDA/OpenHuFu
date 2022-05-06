@@ -25,11 +25,11 @@ public class OneDBBinaryContext extends OneDBBaseContext {
   OneDBContext parent;
   OneDBContext left;
   OneDBContext right;
-  List<OneDBExpression> selectExps;
-  List<OneDBExpression> whereExps;
-  List<OneDBExpression> aggExps;
-  List<Integer> groups;
-  List<OneDBOrder> orders;
+  List<OneDBExpression> selectExps = ImmutableList.of();
+  List<OneDBExpression> whereExps = ImmutableList.of();
+  List<OneDBExpression> aggExps = ImmutableList.of();
+  List<Integer> groups = ImmutableList.of();
+  List<OneDBOrder> orders = ImmutableList.of();
   int fetch;
   int offset;
   OneDBJoinInfo joinInfo;
@@ -188,28 +188,7 @@ public class OneDBBinaryContext extends OneDBBaseContext {
 
   @Override
   public QueryableDataSet implement(OneDBImplementor implementor) {
-    QueryableDataSet leftResult = implementor.implement(left);
-    QueryableDataSet rightResult = implementor.implement(right);
-    QueryableDataSet result = leftResult.join(implementor, rightResult, joinInfo);
-    if (whereExps != null && !whereExps.isEmpty()) {
-      result = result.filter(implementor, whereExps);
-    }
-    if (selectExps != null && !selectExps.isEmpty()) {
-      result = result.project(implementor, selectExps);
-    }
-    if (aggExps != null && !aggExps.isEmpty()) {
-      List<FieldType> types = new ArrayList<>();
-      types.addAll(left.getOutTypes());
-      types.addAll(right.getOutTypes());
-      result = result.aggregate(implementor, groups, aggExps, types);
-    }
-    if (orders != null && !orders.isEmpty()) {
-      result = result.sort(implementor, orders);
-    }
-    if (fetch > 0 || offset > 0) {
-      result = result.limit(offset, fetch);
-    }
-    return result;
+    return implementor.binaryQuery(this);
   }
 
   @Override
@@ -239,7 +218,6 @@ public class OneDBBinaryContext extends OneDBBaseContext {
     List<Pair<OwnerClient, QueryContextProto>> rightContext =
         right.generateOwnerContextProto(client);
     List<Pair<OwnerClient, QueryContextProto>> ownerContext = new ArrayList<>();
-    // contextBuilder.setJoinInfo(joinInfo.toProto());
     TaskInfoProto.Builder taskInfo = TaskInfoProto.newBuilder().setTaskId(client.getTaskId());
     for (Pair<OwnerClient, QueryContextProto> p : leftContext) {
       taskInfo.addParties(p.getLeft().getParty().getPartyId());

@@ -23,10 +23,10 @@ import org.apache.commons.lang3.tuple.Pair;
 public class OneDBUnaryContext extends OneDBBaseContext {
   OneDBContext parent;
   OneDBContext child;
-  List<OneDBExpression> aggExps;
-  List<OneDBExpression> selectExps;
-  List<Integer> groups;
-  List<OneDBOrder> orders;
+  List<OneDBExpression> aggExps = ImmutableList.of();
+  List<OneDBExpression> selectExps = ImmutableList.of();
+  List<Integer> groups = ImmutableList.of();
+  List<OneDBOrder> orders = ImmutableList.of();
   int fetch;
   int offset;
 
@@ -111,6 +111,11 @@ public class OneDBUnaryContext extends OneDBBaseContext {
   public void setAggExps(List<OneDBExpression> aggExps) {
     this.aggExps = aggExps;
   }
+  
+  @Override
+  public List<OneDBExpression> getSelectExps() {
+    return selectExps;
+  }
 
   @Override
   public void setSelectExps(List<OneDBExpression> selectExps) {
@@ -178,26 +183,9 @@ public class OneDBUnaryContext extends OneDBBaseContext {
     return OneDBContextType.UNARY;
   }
 
-  public QueryableDataSet implementInternal(OneDBImplementor implementor, QueryableDataSet input) {
-    if (selectExps != null && !selectExps.isEmpty()) {
-      input = input.project(implementor, selectExps);
-    }
-    if (aggExps != null && !aggExps.isEmpty()) {
-      input = input.aggregate(implementor, groups, aggExps, child.getOutTypes());
-    }
-    if (orders != null && !orders.isEmpty()) {
-      input = input.sort(implementor, orders);
-    }
-    if (fetch > 0 || offset > 0) {
-      input = input.limit(offset, fetch);
-    }
-    return input;
-  }
-
   @Override
   public QueryableDataSet implement(OneDBImplementor implementor) {
-    QueryableDataSet input = implementor.implement(child);
-    return implementInternal(implementor, input);
+    return implementor.unaryQuery(this);
   }
 
   @Override

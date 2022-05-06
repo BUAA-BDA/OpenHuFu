@@ -3,8 +3,10 @@ package com.hufudb.onedb.core.implementor;
 import java.util.List;
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
+import com.hufudb.onedb.core.sql.context.OneDBBinaryContext;
 import com.hufudb.onedb.core.sql.context.OneDBContext;
 import com.hufudb.onedb.core.sql.context.OneDBLeafContext;
+import com.hufudb.onedb.core.sql.context.OneDBUnaryContext;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.rel.OneDBOrder;
 import org.slf4j.Logger;
@@ -25,6 +27,10 @@ public interface OneDBImplementor {
       List<FieldType> inputTypes);
 
   QueryableDataSet sort(QueryableDataSet in, List<OneDBOrder> orders);
+
+  QueryableDataSet binaryQuery(OneDBBinaryContext binary);
+
+  QueryableDataSet unaryQuery(OneDBUnaryContext unary);
 
   QueryableDataSet leafQuery(OneDBLeafContext leaf);
 }

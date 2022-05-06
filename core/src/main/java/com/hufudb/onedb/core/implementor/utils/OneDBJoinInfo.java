@@ -13,6 +13,7 @@ public class OneDBJoinInfo {
   List<OneDBExpression> conditions;
   Level level;
   int leftSize;
+  int rightSize;
 
   public OneDBJoinInfo(OneDBJoinType type, List<Integer> leftKeys, List<Integer> rightKeys,
       List<OneDBExpression> conditions, Level level, int leftSize) {
