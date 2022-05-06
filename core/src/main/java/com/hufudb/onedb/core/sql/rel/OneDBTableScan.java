@@ -73,7 +73,7 @@ public class OneDBTableScan extends TableScan implements OneDBRel {
   @Override
   public void implement(Implementor implementor) {
     implementor.createLeafContext();
-    implementor.setTableInfo(oneDBTable.getTableInfo());
+    implementor.setTableName(oneDBTable.getTableName());
     implementor.setSchema(oneDBTable.getSchema());
     implementor.setSelectExps(OneDBReference.fromHeader(oneDBTable.getHeader()));
   }

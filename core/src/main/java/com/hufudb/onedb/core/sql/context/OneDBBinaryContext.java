@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableList;
+import com.hufudb.onedb.core.client.OneDBClient;
+import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.implementor.OneDBImplementor;
@@ -12,7 +14,9 @@ import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.rewriter.OneDBRewriter;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.rel.OneDBOrder;
-import com.hufudb.onedb.rpc.OneDBCommon.BinaryQueryProto;
+import com.hufudb.onedb.rpc.OneDBCommon.QueryContextProto;
+import com.hufudb.onedb.rpc.OneDBCommon.TaskInfoProto;
+import org.apache.commons.lang3.tuple.Pair;
 
 /*
  * context for join
@@ -21,40 +25,20 @@ public class OneDBBinaryContext extends OneDBBaseContext {
   OneDBContext parent;
   OneDBContext left;
   OneDBContext right;
-  List<OneDBExpression> selectExps;
-  List<OneDBExpression> whereExps;
-  List<OneDBExpression> aggExps;
-  List<Integer> groups;
-  List<OneDBOrder> orders;
+  List<OneDBExpression> selectExps = ImmutableList.of();
+  List<OneDBExpression> whereExps = ImmutableList.of();
+  List<OneDBExpression> aggExps = ImmutableList.of();
+  List<Integer> groups = ImmutableList.of();
+  List<OneDBOrder> orders = ImmutableList.of();
   int fetch;
   int offset;
   OneDBJoinInfo joinInfo;
+  TaskInfoProto taskInfo;
 
   public OneDBBinaryContext(OneDBContext parent, OneDBContext left, OneDBContext right) {
     this.parent = parent;
     this.left = left;
     this.right = right;
-  }
-
-  public BinaryQueryProto toProto() {
-    BinaryQueryProto.Builder builder = BinaryQueryProto.newBuilder();
-    if(selectExps != null) {
-      builder.addAllSelectExp(OneDBExpression.toProto(selectExps));
-    }
-    if (whereExps != null) {
-      builder.addAllWhereExp(OneDBExpression.toProto(whereExps));
-    }
-    if (aggExps != null) {
-      builder.addAllAggExp(OneDBExpression.toProto(aggExps));
-    }
-    if (groups != null) {
-      builder.addAllGroup(groups);
-    }
-    if (orders != null) {
-      builder.addAllOrder(OneDBOrder.toProto(orders));
-    }
-    builder.setFetch(fetch).setOffset(fetch).setJoinInfo(joinInfo.toProto());
-    return builder.build();
   }
 
   @Override
@@ -204,29 +188,13 @@ public class OneDBBinaryContext extends OneDBBaseContext {
   }
 
   @Override
+  public TaskInfoProto getTaskInfo() {
+    return taskInfo;
+  }
+
+  @Override
   public QueryableDataSet implement(OneDBImplementor implementor) {
-    QueryableDataSet leftResult = left.implement(implementor);
-    QueryableDataSet rightResult = right.implement(implementor);
-    QueryableDataSet result = leftResult.join(implementor, rightResult, joinInfo);
-    if (whereExps != null && !whereExps.isEmpty()) {
-      result = result.filter(implementor, whereExps);
-    }
-    if (selectExps != null && !selectExps.isEmpty()) {
-      result = result.project(implementor, selectExps);
-    }
-    if (aggExps != null && !aggExps.isEmpty()) {
-      List<FieldType> types = new ArrayList<>();
-      types.addAll(left.getOutTypes());
-      types.addAll(right.getOutTypes());
-      result = result.aggregate(implementor, groups, aggExps, types);
-    }
-    if (orders != null && !orders.isEmpty()) {
-      result = result.sort(implementor, orders);
-    }
-    if (fetch > 0 || offset > 0) {
-      result = result.limit(offset, fetch);
-    }
-    return result;
+    return implementor.binaryQuery(this);
   }
 
   @Override
@@ -234,5 +202,70 @@ public class OneDBBinaryContext extends OneDBBaseContext {
     this.left = left.rewrite(rewriter);
     this.right = right.rewrite(rewriter);
     return rewriter.rewriteBianry(this);
+  }
+
+  @Override
+  public List<Pair<OwnerClient, QueryContextProto>> generateOwnerContextProto(OneDBClient client) {
+    QueryContextProto.Builder contextBuilder = QueryContextProto.newBuilder()
+        .setContextType(OneDBContextType.BINARY.ordinal()).setFetch(fetch).setOffset(offset);
+    if (selectExps != null) {
+      contextBuilder.addAllSelectExp(OneDBExpression.toProto(selectExps));
+    }
+    if (aggExps != null) {
+      contextBuilder.addAllAggExp(OneDBExpression.toProto(aggExps));
+    }
+    if (groups != null) {
+      contextBuilder.addAllGroup(groups);
+    }
+    if (orders != null) {
+      contextBuilder.addAllOrder(OneDBOrder.toProto(orders));
+    }
+    List<Pair<OwnerClient, QueryContextProto>> leftContext = left.generateOwnerContextProto(client);
+    List<Pair<OwnerClient, QueryContextProto>> rightContext =
+        right.generateOwnerContextProto(client);
+    List<Pair<OwnerClient, QueryContextProto>> ownerContext = new ArrayList<>();
+    TaskInfoProto.Builder taskInfo = TaskInfoProto.newBuilder().setTaskId(client.getTaskId());
+    for (Pair<OwnerClient, QueryContextProto> p : leftContext) {
+      taskInfo.addParties(p.getLeft().getParty().getPartyId());
+    }
+    for (Pair<OwnerClient, QueryContextProto> p : rightContext) {
+      taskInfo.addParties(p.getLeft().getParty().getPartyId());
+    }
+    contextBuilder.setTaskInfo(taskInfo);
+    QueryContextProto leftPlaceholder = new OneDBPlaceholderContext(left.getOutExpressions()).toProto();
+    QueryContextProto rightPlaceholder = new OneDBPlaceholderContext(right.getOutExpressions()).toProto();
+    // for owners from left
+    contextBuilder.setJoinInfo(joinInfo.toProto(true));
+    for (Pair<OwnerClient, QueryContextProto> p : leftContext) {
+      QueryContextProto context = contextBuilder.addChildren(0, p.getValue())
+          .addChildren(1, rightPlaceholder).build();
+      p.setValue(context);
+      ownerContext.add(p);
+    }
+    // for owners from right
+    contextBuilder.setJoinInfo(joinInfo.toProto(false));
+    for (Pair<OwnerClient, QueryContextProto> p : rightContext) {
+      QueryContextProto context =
+          contextBuilder.setChildren(0, leftPlaceholder)
+              .setChildren(1, p.getValue()).build();
+      p.setValue(context);
+      ownerContext.add(p);
+    }
+    return ownerContext;
+  }
+
+  public static OneDBBinaryContext fromProto(QueryContextProto proto) {
+    OneDBBinaryContext context = new OneDBBinaryContext(null,
+        OneDBContext.fromProto(proto.getChildren(0)), OneDBContext.fromProto(proto.getChildren(1)));
+    context.setSelectExps(OneDBExpression.fromProto(proto.getSelectExpList()));
+    context.setWhereExps(OneDBExpression.fromProto(proto.getWhereExpList()));
+    context.setAggExps(OneDBExpression.fromProto(proto.getAggExpList()));
+    context.setGroups(proto.getGroupList());
+    context.setOrders(OneDBOrder.fromProto(proto.getOrderList()));
+    context.setFetch(proto.getFetch());
+    context.setOffset(proto.getOffset());
+    context.setJoinInfo(OneDBJoinInfo.fromProto(proto.getJoinInfo()));
+    context.taskInfo = proto.getTaskInfo();
+    return context;
   }
 }

@@ -7,12 +7,14 @@ import com.google.common.collect.ImmutableMap;
  * Don't change the id of existing protocols (relate to Level.java)
  */
 public enum ProtocolType {
-  UNKNOWN("UNKNOWN", -1, false),
-  PLAINTEXT("PLAINTEXT", 0, true),
-  PK_OT("PUBLIC_KEY_BASED_OT", 10, false),
-  BEAVER_TRIPLE("BEAVER_TRIPLE", 20, false),
-  GMW("GMW", 100, false),
-  HASH_PSI("PSI", 200, false);
+  UNKNOWN("UNKNOWN", -1, true),
+  PLAINTEXT("PLAINTEXT", 0, false),
+  SENDER("SENDER", 1, true),
+  STREAM("STREAM", 2, true),
+  PK_OT("PUBLIC_KEY_BASED_OT", 10, true),
+  BEAVER_TRIPLE("BEAVER_TRIPLE", 20, true),
+  GMW("GMW", 100, true),
+  HASH_PSI("PSI", 200, true);
 
   private static final ImmutableMap<Integer, ProtocolType> MAP;
 
@@ -26,12 +28,12 @@ public enum ProtocolType {
 
   private final String name;
   private final int id;
-  private final boolean plaintext;
+  private final boolean multiparty;
 
-  ProtocolType(String name, int id, boolean plaintext) {
+  ProtocolType(String name, int id, boolean multiparty) {
     this.name = name;
     this.id = id;
-    this.plaintext = plaintext;
+    this.multiparty = multiparty;
   }
 
   public int getId() {
@@ -42,8 +44,8 @@ public enum ProtocolType {
     return name;
   }
 
-  public boolean isPlaintext() {
-    return plaintext;
+  public boolean isMultiParty() {
+    return multiparty;
   }
 
   public String toString() {

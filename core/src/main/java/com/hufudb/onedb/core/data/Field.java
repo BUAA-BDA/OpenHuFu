@@ -28,7 +28,7 @@ public class Field {
   }
 
   public static Field fromProto(FieldProto proto) {
-    return new Field(proto.getName(), proto.getType());
+    return new Field(proto.getName(), proto.getType(), proto.getLevel());
   }
 
   public static Field of(String name, FieldType type) {
@@ -40,7 +40,7 @@ public class Field {
   }
 
   public FieldProto toProto() {
-    return FieldProto.newBuilder().setName(name).setType(type.ordinal()).build();
+    return FieldProto.newBuilder().setName(name).setType(type.ordinal()).setLevel(level.getId()).build();
   }
 
   public String getName() {

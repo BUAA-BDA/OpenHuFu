@@ -3,12 +3,16 @@ package com.hufudb.onedb.core.sql.context;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import com.google.common.collect.ImmutableList;
+import com.hufudb.onedb.core.client.OneDBClient;
+import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.implementor.OneDBImplementor;
 import com.hufudb.onedb.core.implementor.QueryableDataSet;
 import com.hufudb.onedb.core.rewriter.OneDBRewriter;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
+import com.hufudb.onedb.rpc.OneDBCommon.QueryContextProto;
+import org.apache.commons.lang3.tuple.Pair;
 
 public class OneDBRootContext extends OneDBBaseContext {
   private static final AtomicLong counter = new AtomicLong(0);
@@ -19,6 +23,11 @@ public class OneDBRootContext extends OneDBBaseContext {
   public OneDBRootContext() {
     counter.compareAndSet(Long.MAX_VALUE, 0);
     id = counter.addAndGet(1);
+  }
+
+  @Override
+  public List<Pair<OwnerClient, QueryContextProto>> generateOwnerContextProto(OneDBClient client) {
+    return child.generateOwnerContextProto(client);
   }
 
   public long getContextId() {
@@ -76,7 +85,7 @@ public class OneDBRootContext extends OneDBBaseContext {
 
   @Override
   public QueryableDataSet implement(OneDBImplementor implementor) {
-    return child.implement(implementor);
+    return implementor.implement(child);
   }
 
   @Override

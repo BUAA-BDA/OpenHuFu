@@ -1,5 +1,6 @@
 package com.hufudb.onedb.core.data;
 
+import com.google.common.collect.ImmutableMap;
 import com.hufudb.onedb.rpc.OneDBCommon.LocalTableInfoProto;
 import com.hufudb.onedb.rpc.OneDBCommon.LocalTableListProto;
 import java.util.HashMap;
@@ -32,6 +33,12 @@ public class TableInfo {
     }
   }
 
+  TableInfo(String name) {
+    this.name = name;
+    this.header = Header.EMPTY;
+    this.columnIndex = ImmutableMap.of();
+  }
+
   public static TableInfo fromProto(LocalTableInfoProto proto) {
     return new TableInfo(proto.getName(), Header.fromProto(proto.getHeader()));
   }
@@ -48,6 +55,10 @@ public class TableInfo {
 
   public static TableInfo of(String name, List<Field> fields) {
     return new TableInfo(name, new Header(fields));
+  }
+
+  public static TableInfo of(String name) {
+    return new TableInfo(name);
   }
 
   public static Builder newBuilder() {

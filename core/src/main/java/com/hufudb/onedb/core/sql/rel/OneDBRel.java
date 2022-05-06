@@ -14,7 +14,6 @@ import com.hufudb.onedb.core.sql.expression.OneDBJoinType;
 import com.hufudb.onedb.core.sql.expression.OneDBOperator;
 import com.hufudb.onedb.core.sql.expression.OneDBReference;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
-import com.hufudb.onedb.core.table.OneDBTableInfo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -104,8 +103,8 @@ public interface OneDBRel extends RelNode {
       }
     }
 
-    public void setTableInfo(OneDBTableInfo info) {
-      currentContext.setTableInfo(info);
+    public void setTableName(String name) {
+      currentContext.setTableName(name);
     }
 
     public void setSelectExps(List<OneDBExpression> exps) {
@@ -156,7 +155,7 @@ public interface OneDBRel extends RelNode {
     }
 
 
-    public void setJoinInfo(JoinInfo joinInfo, JoinRelType joinRelType) {
+    public void setJoinInfo(JoinInfo joinInfo, JoinRelType joinRelType, int leftSize) {
       List<OneDBExpression> outExpression = currentContext.getOutExpressions();
       List<OneDBExpression> condition = OneDBOperator.fromRexNodes(joinInfo.nonEquiConditions, currentContext.getOutExpressions());
       Level dominator = Level.findDominator(condition);
@@ -166,7 +165,7 @@ public interface OneDBRel extends RelNode {
       for (int key : joinInfo.rightKeys) {
         dominator = Level.dominate(dominator, outExpression.get(key).getLevel());
       }
-      currentContext.setJoinInfo(new OneDBJoinInfo(OneDBJoinType.of(joinRelType), joinInfo.leftKeys, joinInfo.rightKeys, condition, dominator));
+      currentContext.setJoinInfo(new OneDBJoinInfo(OneDBJoinType.of(joinRelType), joinInfo.leftKeys, joinInfo.rightKeys, condition, dominator, leftSize));
     }
 
     public List<OneDBExpression> getCurrentOutput() {

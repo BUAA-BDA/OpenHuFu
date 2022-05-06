@@ -1,12 +1,12 @@
 package com.hufudb.onedb.core.implementor;
 
 import java.util.List;
-import com.hufudb.onedb.core.client.OneDBClient;
 import com.hufudb.onedb.core.data.FieldType;
-import com.hufudb.onedb.core.implementor.plaintext.PlaintextImplementor;
 import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
+import com.hufudb.onedb.core.sql.context.OneDBBinaryContext;
 import com.hufudb.onedb.core.sql.context.OneDBContext;
 import com.hufudb.onedb.core.sql.context.OneDBLeafContext;
+import com.hufudb.onedb.core.sql.context.OneDBUnaryContext;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.rel.OneDBOrder;
 import org.slf4j.Logger;
@@ -15,9 +15,7 @@ import org.slf4j.LoggerFactory;
 public interface OneDBImplementor {
   static final Logger LOG = LoggerFactory.getLogger(OneDBImplementor.class);
 
-  default QueryableDataSet implement(OneDBContext context) {
-    return context.implement(this);
-  }
+  QueryableDataSet implement(OneDBContext context);
 
   QueryableDataSet join(QueryableDataSet left, QueryableDataSet right, OneDBJoinInfo joinInfo);
 
@@ -30,15 +28,9 @@ public interface OneDBImplementor {
 
   QueryableDataSet sort(QueryableDataSet in, List<OneDBOrder> orders);
 
-  QueryableDataSet leafQuery(OneDBLeafContext leaf);
+  QueryableDataSet binaryQuery(OneDBBinaryContext binary);
 
-  public static OneDBImplementor getImplementor(OneDBContext context, OneDBClient client) {
-    switch (context.getContextLevel()) {
-      case PUBLIC:
-        return new PlaintextImplementor(client);
-      default:
-        LOG.error("No implementor found for Level {}", context.getContextLevel().name());
-        throw new UnsupportedOperationException(String.format("No implementor found for Level %s", context.getContextLevel().name()));
-    }
-  }
+  QueryableDataSet unaryQuery(OneDBUnaryContext unary);
+
+  QueryableDataSet leafQuery(OneDBLeafContext leaf);
 }

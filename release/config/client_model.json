@@ -44,6 +44,46 @@
           }
         },
         {
+          "name": "st_pro_1",
+          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
+          "operand": {
+            "feds": [
+              {
+                "endpoint": "localhost:12345",
+                "name": "st_pro_1"
+              }
+            ]
+          }
+        },
+        {
+          "name": "st_pro_2",
+          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
+          "operand": {
+            "feds": [
+              {
+                "endpoint": "localhost:12346",
+                "name": "st_pro_2"
+              }
+            ]
+          }
+        },
+        {
+          "name": "st_pro_3",
+          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
+          "operand": {
+            "feds": [
+              {
+                "endpoint": "localhost:12345",
+                "name": "st_pro_3"
+              },
+              {
+                "endpoint": "localhost:12346",
+                "name": "st_pro_3"
+              }
+            ]
+          }
+        },
+        {
           "name": "student2",
           "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
           "operand": {

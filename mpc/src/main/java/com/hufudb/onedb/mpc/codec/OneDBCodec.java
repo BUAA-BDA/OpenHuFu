@@ -20,6 +20,10 @@ public class OneDBCodec {
     return ByteBuffer.allocate(Integer.BYTES).putLong(value).array();
   }
 
+  public static byte[] encodeString(String str) {
+    return str.getBytes();
+  }
+
   public static long decodeLong(byte[] value) {
     return ByteBuffer.wrap(value).getLong();
   }
@@ -31,6 +35,10 @@ public class OneDBCodec {
 
   public static boolean decodeBoolean(byte[] value) {
     return value[0] == TRUE;
+  }
+
+  public static String decodeString(byte[] value) {
+    return new String(value);
   }
 
   // a = a ^ b

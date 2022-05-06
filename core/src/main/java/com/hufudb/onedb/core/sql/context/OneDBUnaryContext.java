@@ -3,6 +3,8 @@ package com.hufudb.onedb.core.sql.context;
 import java.util.List;
 import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableList;
+import com.hufudb.onedb.core.client.OneDBClient;
+import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.implementor.OneDBImplementor;
@@ -10,6 +12,9 @@ import com.hufudb.onedb.core.implementor.QueryableDataSet;
 import com.hufudb.onedb.core.rewriter.OneDBRewriter;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.rel.OneDBOrder;
+import com.hufudb.onedb.rpc.OneDBCommon.QueryContextProto;
+import com.hufudb.onedb.rpc.OneDBCommon.TaskInfoProto;
+import org.apache.commons.lang3.tuple.Pair;
 
 /*
  * context for intermediate process with single input relation (e.g., outer layer of nested
@@ -18,15 +23,58 @@ import com.hufudb.onedb.core.sql.rel.OneDBOrder;
 public class OneDBUnaryContext extends OneDBBaseContext {
   OneDBContext parent;
   OneDBContext child;
-  List<OneDBExpression> aggExps;
-  List<OneDBExpression> selectExps;
-  List<Integer> groups;
-  List<OneDBOrder> orders;
+  List<OneDBExpression> aggExps = ImmutableList.of();
+  List<OneDBExpression> selectExps = ImmutableList.of();
+  List<Integer> groups = ImmutableList.of();
+  List<OneDBOrder> orders = ImmutableList.of();
   int fetch;
   int offset;
+  TaskInfoProto taskInfo;
 
   public OneDBUnaryContext() {
     super();
+  }
+
+  @Override
+  public List<Pair<OwnerClient, QueryContextProto>> generateOwnerContextProto(OneDBClient client) {
+    QueryContextProto.Builder contextBuilder = QueryContextProto.newBuilder().setContextType(OneDBContextType.UNARY.ordinal()).setFetch(fetch).setOffset(offset);
+    if (selectExps != null) {
+      contextBuilder.addAllSelectExp(OneDBExpression.toProto(selectExps));
+    }
+    if (aggExps != null) {
+      contextBuilder.addAllAggExp(OneDBExpression.toProto(aggExps));
+    }
+    if (groups != null) {
+      contextBuilder.addAllGroup(groups);
+    }
+    if (orders != null) {
+      contextBuilder.addAllOrder(OneDBOrder.toProto(orders));
+    }
+    List<Pair<OwnerClient, QueryContextProto>> ownerContext = child.generateOwnerContextProto(client);
+    // todo: generate task info for each expression
+    TaskInfoProto.Builder taskInfo = TaskInfoProto.newBuilder().setTaskId(client.getTaskId());
+    for (Pair<OwnerClient, QueryContextProto> p : ownerContext) {
+      taskInfo.addParties(p.getLeft().getParty().getPartyId());
+    }
+    contextBuilder.setTaskInfo(taskInfo);
+    for (Pair<OwnerClient, QueryContextProto> p : ownerContext) {
+      QueryContextProto context = contextBuilder.addChildren(p.getValue()).build();
+      p.setValue(context);
+    }
+    return ownerContext;
+  }
+
+  public static OneDBUnaryContext fromProto(QueryContextProto proto) {
+    OneDBUnaryContext context = new OneDBUnaryContext();
+    context.setChildren(ImmutableList.of(OneDBContext.fromProto(proto.getChildren(0))));
+    context.setAggExps(OneDBExpression.fromProto(proto.getAggExpList()));
+    context.setSelectExps(OneDBExpression.fromProto(proto.getSelectExpList()));
+    context.setGroups(proto.getGroupList());
+    context.setOrders(OneDBOrder.fromProto(proto.getOrderList()));
+    context.setFetch(proto.getFetch());
+    context.setOffset(proto.getOffset());
+    context.taskInfo = proto.getTaskInfo();
+    return context;
   }
 
   @Override
@@ -76,6 +124,11 @@ public class OneDBUnaryContext extends OneDBBaseContext {
   @Override
   public void setAggExps(List<OneDBExpression> aggExps) {
     this.aggExps = aggExps;
+  }
+  
+  @Override
+  public List<OneDBExpression> getSelectExps() {
+    return selectExps;
   }
 
   @Override
@@ -144,26 +197,14 @@ public class OneDBUnaryContext extends OneDBBaseContext {
     return OneDBContextType.UNARY;
   }
 
-  public QueryableDataSet implementInternal(OneDBImplementor implementor, QueryableDataSet input) {
-    if (selectExps != null && !selectExps.isEmpty()) {
-      input = input.project(implementor, selectExps);
-    }
-    if (aggExps != null && !aggExps.isEmpty()) {
-      input = input.aggregate(implementor, groups, aggExps, child.getOutTypes());
-    }
-    if (orders != null && !orders.isEmpty()) {
-      input = input.sort(implementor, orders);
-    }
-    if (fetch > 0 || offset > 0) {
-      input = input.limit(offset, fetch);
-    }
-    return input;
+  @Override
+  public TaskInfoProto getTaskInfo() {
+    return taskInfo;
   }
 
   @Override
   public QueryableDataSet implement(OneDBImplementor implementor) {
-    QueryableDataSet input = child.implement(implementor);
-    return implementInternal(implementor, input);
+    return implementor.unaryQuery(this);
   }
 
   @Override

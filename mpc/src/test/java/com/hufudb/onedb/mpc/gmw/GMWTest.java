@@ -8,7 +8,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import com.google.common.collect.ImmutableList;
-import com.hufudb.onedb.mpc.ProtocolType;
 import com.hufudb.onedb.mpc.bristol.CircuitType;
 import com.hufudb.onedb.mpc.codec.OneDBCodec;
 import com.hufudb.onedb.mpc.ot.PublicKeyOT;
@@ -18,8 +17,6 @@ import com.hufudb.onedb.rpc.Party;
 import com.hufudb.onedb.rpc.grpc.OneDBOwnerInfo;
 import com.hufudb.onedb.rpc.grpc.OneDBRpc;
 import com.hufudb.onedb.rpc.grpc.OneDBRpcManager;
-import com.hufudb.onedb.rpc.utils.DataPacket;
-import com.hufudb.onedb.rpc.utils.DataPacketHeader;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,10 +34,8 @@ public class GMWTest {
 
   public static OneDBRandom rand = new BasicRandom();
 
-  DataPacket generateInitPacket(int senderId, int receiverId, int value) {
-    DataPacketHeader header = new DataPacketHeader(0L, ProtocolType.GMW.getId(), 0, (long) CircuitType.ADD_32.getId(), senderId, receiverId);
-    byte[] payload = OneDBCodec.encodeInt(value);
-    return DataPacket.fromByteArrayList(header, ImmutableList.of(payload));
+  List<byte[]> encodeValue(int value) {
+    return ImmutableList.of(OneDBCodec.encodeInt(value));
   }
 
   @Test
@@ -79,7 +74,7 @@ public class GMWTest {
         new Callable<List<byte[]>>() {
           @Override
           public List<byte[]> call() throws Exception {
-            return gmwSender.run(generateInitPacket(0, 1, a));
+            return gmwSender.run(0, ImmutableList.of(0, 1), encodeValue(a), CircuitType.ADD_32.getId());
           }
         }
       );
@@ -87,7 +82,7 @@ public class GMWTest {
         new Callable<List<byte[]>>() {
         @Override
         public List<byte[]> call() throws Exception {
-          return gmwReceiver.run(generateInitPacket(1, 0, b));
+          return gmwReceiver.run(0, ImmutableList.of(0, 1), encodeValue(b), CircuitType.ADD_32.getId());
         }
       });
       byte[] senRes = senFuture.get().get(0);

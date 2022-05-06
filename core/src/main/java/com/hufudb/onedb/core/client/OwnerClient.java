@@ -6,8 +6,8 @@ import com.hufudb.onedb.core.utils.EmptyIterator;
 import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
 import com.hufudb.onedb.rpc.OneDBCommon.HeaderProto;
 import com.hufudb.onedb.rpc.OneDBCommon.LocalTableListProto;
-import com.hufudb.onedb.rpc.OneDBCommon.LeafQueryProto;
 import com.hufudb.onedb.rpc.OneDBCommon.OwnerInfoProto;
+import com.hufudb.onedb.rpc.OneDBCommon.QueryContextProto;
 import com.hufudb.onedb.rpc.OneDBService.GeneralRequest;
 import com.hufudb.onedb.rpc.OneDBService.GeneralResponse;
 import com.hufudb.onedb.rpc.grpc.OneDBOwnerInfo;
@@ -88,9 +88,9 @@ public class OwnerClient {
     return true;
   }
 
-  public Iterator<DataSetProto> leafQuery(LeafQueryProto query) {
+  public Iterator<DataSetProto> query(QueryContextProto query) {
     try {
-      return blockingStub.leafQuery(query);
+      return blockingStub.query(query);
     } catch (StatusRuntimeException e) {
       LOG.error("RPC failed in onDBQuery: {}", e.getStatus());
     }

@@ -12,6 +12,7 @@ message Point {
 message FieldProto {
   string name = 1;
   int32 type = 2;
+  int32 level = 3;
 }
 
 message HeaderProto {
@@ -69,52 +70,26 @@ message JoinConditionProto {
   repeated int32 leftKey = 3;
   repeated int32 rightKey = 4;
   repeated ExpressionProto condition = 5;
+  int32 leftSize = 6;
+  bool isLeft = 7;
 }
 
 message TaskInfoProto {
   int64 taskId = 1;
-  int32 ptoId = 2;
-  repeated int32 parties = 3;
+  repeated int32 parties = 2;
 }
 
-// beta message
-message SecureQueryProto {
-  TaskInfoProto taskInfo = 1;
-  oneof query {
-    BinaryQueryProto binary = 2;
-    UnaryQueryProto unary = 3;
-    LeafQueryProto leaf = 4;
-  }
-  repeated SecureQueryProto children = 5;
-}
-
-message BinaryQueryProto {
-  repeated ExpressionProto selectExp = 1;
-  repeated ExpressionProto whereExp = 2;
-  repeated ExpressionProto aggExp = 3;
-  repeated int32 group = 4;
-  repeated CollationProto order = 5;
-  int32 fetch = 6;
-  int32 offset = 7;
-  JoinConditionProto joinInfo = 8;
-}
-
-message UnaryQueryProto {
-  repeated ExpressionProto selectExp = 1;
-  repeated ExpressionProto aggExp = 2;
-  repeated int32 group = 3;
-  repeated CollationProto order = 4;
-  int32 fetch = 5;
-  int32 offset = 6;
-}
-
-message LeafQueryProto {
-  string tableName = 1;
-  repeated ExpressionProto selectExp = 2;
-  repeated ExpressionProto whereExp = 3;
-  repeated ExpressionProto aggExp = 4;
-  repeated int32 group = 5;
-  repeated CollationProto order = 6;
-  int32 fetch = 7;
-  int32 offset = 8;
+message QueryContextProto {
+  int32 contextType = 1;
+  TaskInfoProto taskInfo = 2;
+  string tableName = 3;
+  repeated ExpressionProto selectExp = 4;
+  repeated ExpressionProto whereExp = 5;
+  repeated ExpressionProto aggExp = 6;
+  repeated int32 group = 7;
+  repeated CollationProto order = 8;
+  int32 fetch = 9;
+  int32 offset = 10;
+  JoinConditionProto joinInfo = 11;
+  repeated QueryContextProto children = 12;
 }
