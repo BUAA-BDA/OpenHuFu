@@ -44,7 +44,7 @@ public class OwnerQueryableDataSet extends BasicDataSet implements QueryableData
   @Override
   public QueryableDataSet aggregate(OneDBImplementor implementor, List<Integer> groups,
       List<OneDBExpression> aggs, List<FieldType> inputTypes) {
-    return null;
+    return implementor.aggregate(this, groups, aggs, inputTypes);
   }
 
   @Override

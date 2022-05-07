@@ -30,7 +30,7 @@ import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.testing.GrpcCleanupRule;
 
 @RunWith(JUnit4.class)
-public class StreamTest {
+public class UtilTest {
   @Rule
   public final GrpcCleanupRule grpcCleanup = new GrpcCleanupRule();
   public static OneDBRandom rand = new BasicRandom();
@@ -110,6 +110,29 @@ public class StreamTest {
     }
   }
 
+  void runBoardcast(List<byte[]> payloads, Boardcast b0, Boardcast b1, int senderId, int receiverId) throws Exception {
+    ExecutorService service = Executors.newFixedThreadPool(2);
+    long taskId = 0;
+    Future<List<byte[]>> res0 = service.submit(new Callable<List<byte[]>>() {
+        @Override
+        public List<byte[]> call() throws Exception {
+          return b0.run(taskId, ImmutableList.of(b1.getOwnId()), payloads, b0.getOwnId());
+        }
+      });
+    Future<List<byte[]>> res1 = service.submit(new Callable<List<byte[]>>() {
+        @Override
+        public List<byte[]> call() throws Exception {
+          return b1.run(taskId, ImmutableList.of(b1.getOwnId()), ImmutableList.of(), b0.getOwnId());
+        }
+      });
+    
+    List<byte[]> actual = res1.get();
+    assertEquals(payloads.size(), actual.size());
+    for (int i = 0; i < payloads.size(); ++i) {
+      assertArrayEquals(payloads.get(i), actual.get(i));
+    }
+  }
+
   @Test
   public void testStream() throws Exception {
     runStream(generateRandomBytes(8, 32), new Stream(rpc0, 50), new Stream(rpc1, 50), 0, 1);
@@ -120,5 +143,11 @@ public class StreamTest {
   public void testStreamMultiple() throws Exception {
     runStream(generateRandomBytes(10, 10), new Stream(rpc0, 50), new Stream(rpc1, 50), 0, 1);
     runStream(generateRandomBytes(10, 10), new Stream(rpc0, 50), new Stream(rpc1, 50), 1, 0);
+  }
+
+  @Test
+  public void testBoardcast() throws Exception {
+    runBoardcast(generateRandomBytes(10, 10), new Boardcast(rpc0), new Boardcast(rpc1), 0, 1);
+    runBoardcast(generateRandomBytes(10, 10), new Boardcast(rpc0), new Boardcast(rpc1), 1, 0);
   }
 }
