@@ -97,7 +97,7 @@ public class BasicRewriter implements OneDBRewriter {
         // for distinct agg, the distinct key is not group key in global agg
         groupMap.put(inputRef, groupKeyIdx);
         localAggs.add(OneDBAggCall.create(AggregateType.GROUPKEY, ImmutableList.of(inputRef),
-            FieldType.UNKOWN, Level.PUBLIC));
+            FieldType.UNKOWN, agg.getLevel()));
         inputRefs.set(i, groupKeyIdx);
       } else {
         inputRefs.set(i, groupMap.get(inputRef));
@@ -109,18 +109,18 @@ public class BasicRewriter implements OneDBRewriter {
       Map<Integer, Integer> groupMap) {
     if (!agg.isDistinct()) {
       OneDBAggCall localAvgSum =
-          OneDBAggCall.create(AggregateType.SUM, agg.getInputRef(), agg.getOutType(), Level.PUBLIC);
+          OneDBAggCall.create(AggregateType.SUM, agg.getInputRef(), agg.getOutType(), agg.getLevel());
       int localAvgSumRef = localAggs.size();
       localAggs.add(localAvgSum);
       OneDBAggCall globalAvgSum = OneDBAggCall.create(AggregateType.SUM,
-          ImmutableList.of(localAvgSumRef), agg.getOutType(), Level.PUBLIC);
+          ImmutableList.of(localAvgSumRef), agg.getOutType(), agg.getLevel());
       // add a sum layer above count
       OneDBAggCall localAvgCount =
-          OneDBAggCall.create(AggregateType.COUNT, agg.getInputRef(), agg.getOutType(), Level.PUBLIC);
+          OneDBAggCall.create(AggregateType.COUNT, agg.getInputRef(), agg.getOutType(), agg.getLevel());
       int localAvgCntRef = localAggs.size();
       localAggs.add(localAvgCount);
       OneDBAggCall globalAvgCount = OneDBAggCall.create(AggregateType.SUM,
-          ImmutableList.of(localAvgCntRef), agg.getOutType(), Level.PUBLIC);
+          ImmutableList.of(localAvgCntRef), agg.getOutType(), agg.getLevel());
       return OneDBOperator.create(OneDBOpType.DIVIDE, agg.getOutType(),
           new ArrayList<>(Arrays.asList(globalAvgSum, globalAvgCount)), FuncType.NONE);
     } else {
@@ -135,7 +135,7 @@ public class BasicRewriter implements OneDBRewriter {
       localAggs.add(agg);
       // add a sum layer above count
       return OneDBAggCall.create(AggregateType.SUM, ImmutableList.of(localAggs.size() - 1),
-          agg.getOutType(), Level.PUBLIC);
+          agg.getOutType(), agg.getLevel());
     } else {
       updateGroupIdx(agg, localAggs, groupMap);
       return agg;
@@ -147,7 +147,7 @@ public class BasicRewriter implements OneDBRewriter {
     if (!agg.isDistinct()) {
       localAggs.add(agg);
       return OneDBAggCall.create(AggregateType.SUM, ImmutableList.of(localAggs.size() - 1),
-          agg.getOutType(), Level.PUBLIC);
+          agg.getOutType(), agg.getLevel());
     } else {
       updateGroupIdx(agg, localAggs, groupMap);
       return agg;
@@ -158,7 +158,7 @@ public class BasicRewriter implements OneDBRewriter {
       Map<Integer, Integer> groupMap) {
     if (groupMap.containsKey(agg.getInputRef().get(0))) {
       return OneDBAggCall.create(AggregateType.GROUPKEY,
-          ImmutableList.of(groupMap.get(agg.getInputRef().get(0))), agg.getOutType(), Level.PUBLIC);
+          ImmutableList.of(groupMap.get(agg.getInputRef().get(0))), agg.getOutType(), agg.getLevel());
     } else {
       LOG.error("Group key should be presented in group by clause");
       throw new RuntimeException("Group key should be presented in group by clause");
@@ -181,7 +181,7 @@ public class BasicRewriter implements OneDBRewriter {
       default: // others convert directly
         localAggs.add(agg);
         return OneDBAggCall.create(agg.getAggType(), ImmutableList.of(localAggs.size() - 1),
-            agg.getOutType(), Level.PUBLIC);
+            agg.getOutType(), agg.getLevel());
     }
   }
 
@@ -211,11 +211,13 @@ public class BasicRewriter implements OneDBRewriter {
     List<OneDBExpression> globalAggs = new ArrayList<>();
     List<Integer> globalGroups = new ArrayList<>();
     List<FieldType> selectTypes = leaf.getSelectTypes();
+    List<Level> selectLevels = leaf.getSelectExps().stream().map(exp -> exp.getLevel()).collect(Collectors.toList());
     // add local groups into local aggs as group key function
     int idx = 0;
     for (int groupRef : leaf.getGroups()) {
       FieldType type = selectTypes.get(groupRef);
-      localAggs.add(OneDBAggCall.create(AggregateType.GROUPKEY, ImmutableList.of(groupRef), type, Level.PUBLIC));
+      Level level = selectLevels.get(groupRef);
+      localAggs.add(OneDBAggCall.create(AggregateType.GROUPKEY, ImmutableList.of(groupRef), type, level));
       groupMap.put(groupRef, idx);
       globalGroups.add(idx);
       ++idx;

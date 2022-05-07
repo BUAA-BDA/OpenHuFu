@@ -16,6 +16,7 @@ import com.hufudb.onedb.core.sql.context.OneDBUnaryContext;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.rel.OneDBOrder;
 import com.hufudb.onedb.owner.OwnerService;
+import com.hufudb.onedb.owner.implementor.aggregate.OwnerAggregation;
 import com.hufudb.onedb.owner.implementor.join.HashEqualJoin;
 import com.hufudb.onedb.rpc.Rpc;
 
@@ -31,12 +32,6 @@ public class OwnerSideImplementor implements OneDBImplementor {
   @Override
   public QueryableDataSet implement(OneDBContext context) {
     return context.implement(this);
-  }
-
-  @Override
-  public QueryableDataSet aggregate(QueryableDataSet in, List<Integer> groups,
-          List<OneDBExpression> aggs, List<FieldType> inputTypes) {
-    return null;
   }
 
   @Override
@@ -68,7 +63,16 @@ public class OwnerSideImplementor implements OneDBImplementor {
 
   @Override
   public QueryableDataSet unaryQuery(OneDBUnaryContext unary) {
-    return null;
+    List<OneDBContext> children = unary.getChildren();
+    assert children.size() == 1;
+    QueryableDataSet input = implement(children.get(0));
+    if (!unary.getSelectExps().isEmpty()) {
+      input = input.project(this, unary.getSelectExps());
+    }
+    if (!unary.getAggExps().isEmpty()) {
+      input = OwnerAggregation.apply(input, unary.getGroups(), unary.getAggExps(), children.get(0).getOutTypes(), ownerAdapter, unary.getTaskInfo());
+    }
+    return input;
   }
 
   // todo: change database adapter as plugin and implement this method
@@ -83,6 +87,12 @@ public class OwnerSideImplementor implements OneDBImplementor {
       e.printStackTrace();
     }
     return new OwnerQueryableDataSet(dataSet);
+  }
+
+  @Override
+  public QueryableDataSet aggregate(QueryableDataSet in, List<Integer> groups,
+          List<OneDBExpression> aggs, List<FieldType> inputTypes) {
+    return null;
   }
 
   @Override

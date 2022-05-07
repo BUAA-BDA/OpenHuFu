@@ -11,10 +11,12 @@ import com.hufudb.onedb.rpc.utils.DataPacket;
 import com.hufudb.onedb.rpc.utils.DataPacketHeader;
 
 /*
- * for very large inputData, divide the payload into small pieces
+ * boardcast large data to all receiver, divide the data into small pieces and tranfer in stream
+ * params:
+ *   taskId, receiver parties, data to send (empty for receiver), senderId
  */
 public class Stream extends ProtocolExecutor {
-  static final long DEFAULT_MAX_SIZE = 4 * 1024 * 1024 - 100;
+  static final long DEFAULT_MAX_SIZE = 4 * 1024 * 1023;
 
   private final long MAX_SIZE;
 
@@ -78,6 +80,7 @@ public class Stream extends ProtocolExecutor {
     return result;
   }
 
+  // todo: add extraInfo to distinguish different request under the same task
   @Override
   public List<byte[]> run(long taskId, List<Integer> parties, List<byte[]> inputData,
       Object... args) {

@@ -127,6 +127,14 @@ public abstract class OwnerService extends ServiceGrpc.ServiceImplBase {
     responseObserver.onCompleted();
   }
 
+  public ExecutorService getThreadPool() {
+    return threadPool;
+  }
+
+  public OneDBRpc getOwnerSideRpc() {
+    return ownerSideRpc;
+  }
+
   public List<PublishedTableInfo> getAllPublishedTable() {
     publishedLock.readLock().lock();
     List<PublishedTableInfo> infos =
