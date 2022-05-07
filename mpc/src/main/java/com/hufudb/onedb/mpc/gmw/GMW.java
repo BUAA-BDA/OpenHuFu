@@ -21,13 +21,8 @@ import com.hufudb.onedb.rpc.utils.DataPacketHeader;
 /*-
  * GMW implementation
  *   Participants: A and B (A < B)
- *   Init DataPacket:
- *     A:
- *       Header: [ptoId: gmw, stepId: 0, senderId: A, receiverId: B, extraInfo: circuitType]
- *       DataPacket: [inputBytes]
- *     B:
- *       Header: [ptoId: gmw, stepId: 0, senderId: B, receiverId: A, extraInfo: circuitType]
- *       DataPacket: [inputBytes]
+ *   params:
+ *     taskId, participants(2 party id), inputdata, circuit type id
  *   Step1: A and B load corresponding Bristol format file of opType and cache the file,
  *         share inputBytes to each other and cache local bytes
  *     Send DataPacket Format for A/B:
@@ -43,7 +38,7 @@ public class GMW extends ProtocolExecutor {
   final PublicKeyOT otExecutor;
   final ExecutorService threadPool;
 
-  protected GMW(Rpc rpc, PublicKeyOT otExecutor, ExecutorService service) {
+  public GMW(Rpc rpc, PublicKeyOT otExecutor, ExecutorService service) {
     super(rpc, ProtocolType.GMW);
     this.otExecutor = otExecutor;
     this.threadPool = service;

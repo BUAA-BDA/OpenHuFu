@@ -70,9 +70,8 @@ public class OwnerSideImplementor implements OneDBImplementor {
       input = input.project(this, unary.getSelectExps());
     }
     if (!unary.getAggExps().isEmpty()) {
-      input = input.aggregate(this, unary.getGroups(), unary.getAggExps(), children.get(0).getOutTypes());
+      input = OwnerAggregation.apply(input, unary.getGroups(), unary.getAggExps(), children.get(0).getOutTypes(), ownerAdapter, unary.getTaskInfo());
     }
-    // not support sort limit yet
     return input;
   }
 
@@ -93,7 +92,7 @@ public class OwnerSideImplementor implements OneDBImplementor {
   @Override
   public QueryableDataSet aggregate(QueryableDataSet in, List<Integer> groups,
           List<OneDBExpression> aggs, List<FieldType> inputTypes) {
-    return OwnerAggregation.apply(in, groups, aggs, inputTypes);
+    return null;
   }
 
   @Override
