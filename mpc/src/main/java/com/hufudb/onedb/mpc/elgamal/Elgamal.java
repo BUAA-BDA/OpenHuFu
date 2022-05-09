@@ -13,14 +13,47 @@ public class Elgamal {
   private static final Logger LOG = LoggerFactory.getLogger(Elgamal.class);
   private final static int KEY_LENGTH = 1024;
   private final static int BYTE_LENGTH = 8;
+  private final static String P = "126535388605402049049542973700958236539328315496910854523023592117026468516051843151824028176566406798134663925084909684138624303619004726680611032556927207945968721000140659332734488248277781125853940159849610018715048962115920834878804577144091376289374425091008279570513505570480918437693088952695686351367";
+  private final static String G = "81248327123767948489976358691257319856321336397871450007082941210606545541618675883159315182973073472812273343241856124199389453023888448799933381897136941917208747028694565238655230858624623713754823869315162707332688928226163297833184607020661600543366919364959232770876947639319489546634455970916393673686";
+  private final static Random rnd = new Random();
   private final BigInteger p;
   private final BigInteger g;
-  private final Random rnd = new Random();
-  private BigInteger x;
   private final BigInteger h;
+  private BigInteger x;
 
+  public static Elgamal create(boolean usePreGenPG) {
+    BigInteger p;
+    BigInteger g;
+    if (usePreGenPG) {
+      p = new BigInteger(P);
+      g = new BigInteger(G);
+    } else {
+      BigInteger q = BigInteger.probablePrime(KEY_LENGTH - 1, rnd);
+      p = q.multiply(BigInteger.TWO).add(BigInteger.ONE);
+      while (!p.isProbablePrime(100) || p.bitLength() != KEY_LENGTH) {
+        q = BigInteger.probablePrime(KEY_LENGTH - 1, rnd);
+        p = q.multiply(BigInteger.TWO).add(BigInteger.ONE);
+      }
+      g = new BigInteger(KEY_LENGTH, rnd);
+      while (g.compareTo(p) >= 0) g = new BigInteger(KEY_LENGTH, rnd);
+      BigInteger gPow2 = g.modPow(BigInteger.TWO, p);
+      BigInteger gPowQ = g.modPow(q, p);
+      while (g.compareTo(BigInteger.ZERO) == 0 || gPow2.compareTo(BigInteger.ONE) == 0 || gPowQ.compareTo(BigInteger.ONE) == 0) {
+        g = new BigInteger(KEY_LENGTH, rnd);
+        while (g.compareTo(p) >= 0) g = new BigInteger(KEY_LENGTH, rnd);
+        gPow2 = g.modPow(BigInteger.TWO, p);
+        gPowQ = g.modPow(q, p);
+      }
+      LOG.debug("generate p, g successfully");
+    }
+    return new Elgamal(p, g);
+  }
 
-  public Elgamal(BigInteger p, BigInteger g) {
+  public static Elgamal create(byte[] pByteArray, byte[] gByteArray, byte[] publicKey) {
+    return new Elgamal(new BigInteger(pByteArray), new BigInteger(gByteArray), new BigInteger(publicKey));
+  }
+
+  private Elgamal(BigInteger p, BigInteger g) {
     this.p = p;
     this.g = g;
     x = new BigInteger(KEY_LENGTH, rnd);
@@ -28,7 +61,7 @@ public class Elgamal {
     h = g.modPow(x, p);
   }
 
-  public Elgamal(BigInteger p, BigInteger g, BigInteger h) {
+  private Elgamal(BigInteger p, BigInteger g, BigInteger h) {
     this.p = p;
     this.g = g;
     this.h = h;

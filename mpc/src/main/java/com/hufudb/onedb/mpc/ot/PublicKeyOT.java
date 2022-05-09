@@ -5,7 +5,6 @@ import com.hufudb.onedb.mpc.ProtocolExecutor;
 import com.hufudb.onedb.mpc.ProtocolType;
 import com.hufudb.onedb.mpc.codec.OneDBCodec;
 import com.hufudb.onedb.mpc.elgamal.Elgamal;
-import com.hufudb.onedb.mpc.elgamal.ElgamalFactory;
 import com.hufudb.onedb.rpc.Rpc;
 import com.hufudb.onedb.rpc.utils.DataPacket;
 import com.hufudb.onedb.rpc.utils.DataPacketHeader;
@@ -48,7 +47,7 @@ public class PublicKeyOT extends ProtocolExecutor {
     int b = OneDBCodec.decodeInt(meta.secrets.get(1)) & mask;
     LOG.debug("{} generate [{}] public keys, a private key for [{}]", rpc.ownParty(), n, b);
     List<byte[]> payloads = new ArrayList<>();
-    Elgamal privateKey = ElgamalFactory.createElgamal(true);
+    Elgamal privateKey = Elgamal.create(true);
     payloads.add(privateKey.getPByteArray());
     payloads.add(privateKey.getGByteArray());
     try {
@@ -88,7 +87,7 @@ public class PublicKeyOT extends ProtocolExecutor {
         header.getSenderId());
     try {
       for (int i = 0; i < n; ++i) {
-        Elgamal elgamal = ElgamalFactory.createElgamal(publicKeyBytes.get(0), publicKeyBytes.get(1), publicKeyBytes.get(i + 2));
+        Elgamal elgamal = Elgamal.create(publicKeyBytes.get(0), publicKeyBytes.get(1), publicKeyBytes.get(i + 2));
         encryptedSecrets.add(elgamal.encrypt(secrets.get(i)));
       }
     } catch (Exception e) {

@@ -10,7 +10,7 @@ public class ElgamalTest {
 
   @Test
   public void testNotPreGenPG() {
-    Elgamal elgamal = ElgamalFactory.createElgamal(false);
+    Elgamal elgamal = Elgamal.create(false);
     int[] len = {1, 10, 100, 1000, 10000};
     for (int p : len) {
       byte[] text = new byte[1000];
@@ -24,7 +24,7 @@ public class ElgamalTest {
 
   @Test
   public void testPreGenPG() {
-    Elgamal elgamal = ElgamalFactory.createElgamal(true);
+    Elgamal elgamal = Elgamal.create(true);
     int[] len = {1, 10, 100, 1000, 10000};
     for (int p : len) {
       byte[] text = new byte[1000];
