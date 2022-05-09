@@ -4,19 +4,14 @@ import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.mpc.ProtocolExecutor;
 import com.hufudb.onedb.mpc.ProtocolType;
 import com.hufudb.onedb.mpc.codec.OneDBCodec;
+import com.hufudb.onedb.mpc.elgamal.Elgamal;
+import com.hufudb.onedb.mpc.elgamal.ElgamalFactory;
 import com.hufudb.onedb.rpc.Rpc;
 import com.hufudb.onedb.rpc.utils.DataPacket;
 import com.hufudb.onedb.rpc.utils.DataPacketHeader;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.spec.EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
+
 import java.util.ArrayList;
 import java.util.List;
-import javax.crypto.Cipher;
 
 /*-
  * Public key based OT 1-out-of-n implementation
@@ -52,18 +47,16 @@ public class PublicKeyOT extends ProtocolExecutor {
     int mask = n - 1;
     int b = OneDBCodec.decodeInt(meta.secrets.get(1)) & mask;
     LOG.debug("{} generate [{}] public keys, a private key for [{}]", rpc.ownParty(), n, b);
-    Elgamal.setPG();
     List<byte[]> payloads = new ArrayList<>();
-    payloads.add(Elgamal.getPByteArray());
-    payloads.add(Elgamal.getGByteArray());
-    Elgamal privateKey = null;
+    Elgamal privateKey = ElgamalFactory.createElgamal(true);
+    payloads.add(privateKey.getPByteArray());
+    payloads.add(privateKey.getGByteArray());
     try {
       for (int i = 0; i < n; ++i) {
           if (i == b) {
-            privateKey = new Elgamal();
             payloads.add(privateKey.getPublicKey());
           } else {
-            payloads.add(Elgamal.generatePseudoPublicKey());
+            payloads.add(privateKey.generatePseudoPublicKey());
           }
 
       }
@@ -90,13 +83,12 @@ public class PublicKeyOT extends ProtocolExecutor {
     List<byte[]> secrets = meta.secrets;
     List<byte[]> publicKeyBytes = packet.getPayload();
     int n = publicKeyBytes.size() - 2;
-    Elgamal.setPG(publicKeyBytes.get(0), publicKeyBytes.get(1));
     List<byte[]> encryptedSecrets = new ArrayList<>();
     LOG.debug("{} encrypts secrets with public keys from Party [{}]", rpc.ownParty(),
         header.getSenderId());
     try {
       for (int i = 0; i < n; ++i) {
-        Elgamal elgamal = new Elgamal(publicKeyBytes.get(i + 2));
+        Elgamal elgamal = ElgamalFactory.createElgamal(publicKeyBytes.get(0), publicKeyBytes.get(1), publicKeyBytes.get(i + 2));
         encryptedSecrets.add(elgamal.encrypt(secrets.get(i)));
       }
     } catch (Exception e) {
