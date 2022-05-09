@@ -19,6 +19,7 @@
     <module>owner-postgresql</module>
     <module>owner-mysql</module>
     <module>user-client</module>
+    <module>adapter-postgresql</module>
   </modules>
 
   <properties>
