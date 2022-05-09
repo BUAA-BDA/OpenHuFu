@@ -4,19 +4,13 @@ import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.mpc.ProtocolExecutor;
 import com.hufudb.onedb.mpc.ProtocolType;
 import com.hufudb.onedb.mpc.codec.OneDBCodec;
+import com.hufudb.onedb.mpc.elgamal.Elgamal;
 import com.hufudb.onedb.rpc.Rpc;
 import com.hufudb.onedb.rpc.utils.DataPacket;
 import com.hufudb.onedb.rpc.utils.DataPacketHeader;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.spec.EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
+
 import java.util.ArrayList;
 import java.util.List;
-import javax.crypto.Cipher;
 
 /*-
  * Public key based OT 1-out-of-n implementation
@@ -53,16 +47,17 @@ public class PublicKeyOT extends ProtocolExecutor {
     int b = OneDBCodec.decodeInt(meta.secrets.get(1)) & mask;
     LOG.debug("{} generate [{}] public keys, a private key for [{}]", rpc.ownParty(), n, b);
     List<byte[]> payloads = new ArrayList<>();
-    PrivateKey privateKey = null;
+    Elgamal privateKey = Elgamal.create(true);
+    payloads.add(privateKey.getPByteArray());
+    payloads.add(privateKey.getGByteArray());
     try {
       for (int i = 0; i < n; ++i) {
-        KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
-        generator.initialize(1024);
-        KeyPair pair = generator.generateKeyPair();
-        payloads.add(pair.getPublic().getEncoded());
-        if (i == b) {
-          privateKey = pair.getPrivate();
-        }
+          if (i == b) {
+            payloads.add(privateKey.getPublicKey());
+          } else {
+            payloads.add(privateKey.generatePseudoPublicKey());
+          }
+
       }
     } catch (Exception e) {
       LOG.error("Error when generating key pair: {}", e.getMessage());
@@ -86,19 +81,14 @@ public class PublicKeyOT extends ProtocolExecutor {
     DataPacketHeader header = packet.getHeader();
     List<byte[]> secrets = meta.secrets;
     List<byte[]> publicKeyBytes = packet.getPayload();
-    int n = publicKeyBytes.size();
+    int n = publicKeyBytes.size() - 2;
     List<byte[]> encryptedSecrets = new ArrayList<>();
-    KeyFactory keyFactory = null;
     LOG.debug("{} encrypts secrets with public keys from Party [{}]", rpc.ownParty(),
         header.getSenderId());
     try {
-      keyFactory = KeyFactory.getInstance("RSA");
       for (int i = 0; i < n; ++i) {
-        EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes.get(i));
-        PublicKey key = keyFactory.generatePublic(publicKeySpec);
-        Cipher encryptCipher = Cipher.getInstance("RSA");
-        encryptCipher.init(Cipher.ENCRYPT_MODE, key);
-        encryptedSecrets.add(encryptCipher.doFinal(secrets.get(i)));
+        Elgamal elgamal = Elgamal.create(publicKeyBytes.get(0), publicKeyBytes.get(1), publicKeyBytes.get(i + 2));
+        encryptedSecrets.add(elgamal.encrypt(secrets.get(i)));
       }
     } catch (Exception e) {
       LOG.error("Error when encrypting: {}", e.getMessage());
@@ -114,15 +104,13 @@ public class PublicKeyOT extends ProtocolExecutor {
 
   // step3, run on R
   List<byte[]> decryptSecrets(DataPacket packet, OTMeta meta) {
-    PrivateKey key = meta.key;
+    Elgamal key = meta.key;
     int b = meta.b;
     byte[] target = packet.getPayload().get(b);
     byte[] decryptedBytes = null;
     LOG.debug("{} decrypt secret [{}]", rpc.ownParty(), b);
     try {
-      Cipher decryptCipher = Cipher.getInstance("RSA");
-      decryptCipher.init(Cipher.DECRYPT_MODE, key);
-      decryptedBytes = decryptCipher.doFinal(target);
+      decryptedBytes = key.decrypt(target);
     } catch (Exception e) {
       LOG.error("Error when decrypting: {}", e.getMessage());
     }
@@ -177,12 +165,12 @@ public class PublicKeyOT extends ProtocolExecutor {
     int ownId;
     int otherId;
     long extraInfo;
-    PrivateKey key;
+    Elgamal key;
     List<byte[]> secrets;
 
     OTMeta() {}
 
-    OTMeta(int b, PrivateKey key) {
+    OTMeta(int b, Elgamal key) {
       this.b = b;
       this.key = key;
     }
