@@ -1,6 +1,7 @@
 package com.hufudb.onedb.owner.implementor;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import com.hufudb.onedb.core.data.BasicDataSet;
 import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.core.data.Header;
@@ -15,18 +16,20 @@ import com.hufudb.onedb.core.sql.context.OneDBLeafContext;
 import com.hufudb.onedb.core.sql.context.OneDBUnaryContext;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.rel.OneDBOrder;
-import com.hufudb.onedb.owner.OwnerService;
+import com.hufudb.onedb.owner.adapter.Adapter;
 import com.hufudb.onedb.owner.implementor.aggregate.OwnerAggregation;
 import com.hufudb.onedb.owner.implementor.join.HashEqualJoin;
 import com.hufudb.onedb.rpc.Rpc;
 
 public class OwnerSideImplementor implements OneDBImplementor {
   Rpc rpc;
-  OwnerService ownerAdapter;
+  Adapter dataSourceAdapter;
+  ExecutorService threadPool;
 
-  public OwnerSideImplementor(Rpc rpc, OwnerService ownerAdapter) {
+  public OwnerSideImplementor(Rpc rpc, Adapter adapter, ExecutorService threadPool) {
     this.rpc = rpc;
-    this.ownerAdapter = ownerAdapter;
+    this.dataSourceAdapter = adapter;
+    this.threadPool = threadPool;
   }
 
   @Override
@@ -54,7 +57,8 @@ public class OwnerSideImplementor implements OneDBImplementor {
     Header leftHeader = OneDBContext.getOutputHeader(left);
     Header rightHeader = OneDBContext.getOutputHeader(right);
     Header outputHeader = Header.joinHeader(leftHeader, rightHeader);
-    QueryableDataSet result = HashEqualJoin.apply(in, binary.getJoinInfo(), rpc, binary.getTaskInfo(), outputHeader);
+    QueryableDataSet result =
+        HashEqualJoin.apply(in, binary.getJoinInfo(), rpc, binary.getTaskInfo(), outputHeader);
     if (!binary.getSelectExps().isEmpty()) {
       result = result.project(this, binary.getSelectExps());
     }
@@ -70,7 +74,8 @@ public class OwnerSideImplementor implements OneDBImplementor {
       input = input.project(this, unary.getSelectExps());
     }
     if (!unary.getAggExps().isEmpty()) {
-      input = OwnerAggregation.apply(input, unary.getGroups(), unary.getAggExps(), children.get(0).getOutTypes(), ownerAdapter, unary.getTaskInfo());
+      input = OwnerAggregation.apply(input, unary.getGroups(), unary.getAggExps(),
+          children.get(0).getOutTypes(), rpc, threadPool, unary.getTaskInfo());
     }
     return input;
   }
@@ -81,7 +86,7 @@ public class OwnerSideImplementor implements OneDBImplementor {
     Header header = OneDBContext.getOutputHeader(leaf);
     BasicDataSet dataSet = BasicDataSet.of(header);
     try {
-      ownerAdapter.dbQuery(leaf, dataSet);
+      dataSourceAdapter.query(leaf, dataSet);
     } catch (Exception e) {
       LOG.error("Error when execute query on Database");
       e.printStackTrace();
@@ -91,7 +96,7 @@ public class OwnerSideImplementor implements OneDBImplementor {
 
   @Override
   public QueryableDataSet aggregate(QueryableDataSet in, List<Integer> groups,
-          List<OneDBExpression> aggs, List<FieldType> inputTypes) {
+      List<OneDBExpression> aggs, List<FieldType> inputTypes) {
     return null;
   }
 

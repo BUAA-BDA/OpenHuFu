@@ -1,39 +1,49 @@
 package com.hufudb.onedb.owner.config;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Executors;
 import com.hufudb.onedb.core.config.OneDBConfig;
 import com.hufudb.onedb.core.data.utils.POJOPublishedTableInfo;
+import com.hufudb.onedb.owner.adapter.Adapter;
+import com.hufudb.onedb.owner.adapter.AdapterConfig;
+import com.hufudb.onedb.owner.adapter.AdapterFactory;
+import com.hufudb.onedb.owner.adapter.AdapterLoader;
 import com.hufudb.onedb.rpc.grpc.OneDBOwnerInfo;
 import com.hufudb.onedb.rpc.grpc.OneDBRpc;
 import io.grpc.TlsChannelCredentials;
 import io.grpc.TlsServerCredentials;
-import java.io.File;
-import java.util.List;
-import java.util.concurrent.Executors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/*
- * common json config for owner server
- */
-public abstract class TemplateConfig implements DBConfig {
+public class OwnerConfigFile {
+  public static final Logger LOG = LoggerFactory.getLogger(OwnerConfigFile.class);
 
-  public int threadnum;
   public int id;
   public int port;
+  public int threadnum;
   public String hostname;
   public String privatekeypath;
   public String certchainpath;
   public String trustcertpath;
-  public String url;
-  public String catalog;
-  public String user;
-  public String passwd;
-  public String zkservers;
-  public String zkroot;
-  public String digest;
   public List<POJOPublishedTableInfo> tables;
-  public List<String> endpoints;
+  public AdapterConfig adapterconfig;
 
-  // OwnerService is not generated in this method
-  protected OwnerConfig generateConfigInternal() {
+  public Adapter getAdapter() {
+    Path adapterDir = Paths.get(System.getenv("ONEDB_ROOT"), "adapter");
+    Map<String, AdapterFactory> adapterFactories = AdapterLoader.loadAdapters(adapterDir.toString());
+    AdapterFactory factory = adapterFactories.get(adapterconfig.datasource);
+    if (factory == null) {
+      LOG.error("Fail to get adapter for datasource [{}]", adapterconfig.datasource);
+      throw new RuntimeException("Fail to get adapter for datasource");
+    }
+    return factory.create(adapterconfig);
+  }
+
+  public OwnerConfig generateConfig() {
     OwnerConfig config = new OwnerConfig();
     config.party = new OneDBOwnerInfo(id, String.format("%s:%d", hostname, port));
     config.port = port;
@@ -49,6 +59,7 @@ public abstract class TemplateConfig implements DBConfig {
         File privateKey = new File(privatekeypath);
         config.serverCerts = TlsServerCredentials.create(certChain, privateKey);
         config.useTLS = true;
+        LOG.info("load certChainFile and privateKeyFile");
       } catch (Exception e) {
         LOG.error("Fail to read certChainFile or privateKeyFile: {}", e.getMessage());
         config.useTLS = false;
@@ -60,6 +71,7 @@ public abstract class TemplateConfig implements DBConfig {
         config.clientCerts = TlsChannelCredentials.newBuilder().trustManager(rootCert).build();
         config.acrossOwnerRpc =
             new OneDBRpc(config.party, config.threadPool, config.clientCerts);
+        LOG.info("load trustcertFile");
       } catch (Exception e) {
         LOG.error("Fail to read trustcertFile: {}", e.getMessage());
         config.acrossOwnerRpc = new OneDBRpc(config.party, config.threadPool);
@@ -67,6 +79,8 @@ public abstract class TemplateConfig implements DBConfig {
     } else {
       config.acrossOwnerRpc = new OneDBRpc(config.party, config.threadPool);
     }
+    config.adapter = getAdapter();
+    config.tables = tables;
     return config;
   }
 }

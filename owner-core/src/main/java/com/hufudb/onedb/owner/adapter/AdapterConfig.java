@@ -5,8 +5,8 @@ package com.hufudb.onedb.owner.adapter;
  * add new config item to support more adapters
  */
 public class AdapterConfig {
+  public String datasource;
   // for jdbc adapter
-  public String hostname;
   public String catalog;
   public String url;
   public String user;

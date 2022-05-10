@@ -1,41 +1,38 @@
-package com.hufudb.onedb.owner.postgresql;
+package com.hufudb.onedb.owner.adapter.mysql;
 
 import com.hufudb.onedb.core.data.FieldType;
+import com.hufudb.onedb.owner.adapter.AdapterTypeConverter;
 
-public class PostgresqlTypeConverter {
-  public static FieldType convert(String typeName) {
+public class MysqlTypeConverter implements AdapterTypeConverter {
+  public FieldType convert(String typeName) {
     switch (typeName) {
-      case "real":
-      case "float4":
+      case "FLOAT":
+      case "REAL":
         return FieldType.FLOAT;
-      case "float8":
-      case "double precision":
-      case "numeric":
+      case "DOUBLE":
         return FieldType.DOUBLE;
       case "TINYINT":
         return FieldType.BYTE;
+      case "INT2":
       case "SMALLINT":
         return FieldType.SHORT;
-      case "int2":
-      case "int4":
+      case "INTEGER":
+      case "INT":
         return FieldType.INT;
-      case "oid":
-      case "int8":
+      case "INT8":
+      case "BIGINT":
         return FieldType.LONG;
-      case "varchar":
-      case "char":
-      case "bpchar":
-      case "text":
-      case "name":
+      case "VARCHAR":
+      case "CHARACTER":
+      case "TEXT":
         return FieldType.STRING;
-      case "bit":
-      case "bool":
+      case "BOOLEAN":
         return FieldType.BOOLEAN;
-      case "date":
+      case "DATE":
         return FieldType.DATE;
-      case "time":
+      case "TIME":
         return FieldType.TIME;
-      case "timestamp":
+      case "TIMESTAMP":
         return FieldType.TIMESTAMP;
       default:
         return FieldType.STRING;

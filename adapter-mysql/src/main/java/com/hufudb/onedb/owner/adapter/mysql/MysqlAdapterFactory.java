@@ -1,4 +1,4 @@
-package com.hufudb.onedb.owner.adapter.postgresql;
+package com.hufudb.onedb.owner.adapter.mysql;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -7,11 +7,11 @@ import com.hufudb.onedb.owner.adapter.AdapterFactory;
 import com.hufudb.onedb.owner.adapter.Adapter;
 import com.hufudb.onedb.owner.adapter.AdapterConfig;
 
-public class PostgresqlAdapterFactory implements AdapterFactory {
+public class MysqlAdapterFactory implements AdapterFactory {
 
-  public PostgresqlAdapterFactory() {
+  public MysqlAdapterFactory() {
     try {
-      Class.forName("org.postgresql.Driver");
+      Class.forName("com.mysql.cj.jdbc.Driver");
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -19,11 +19,11 @@ public class PostgresqlAdapterFactory implements AdapterFactory {
 
   @Override
   public Adapter create(AdapterConfig config) {
-    assert(config.datasource.equals("postgresql"));
+    assert(config.datasource.equals("mysql"));
     try {
       Connection connection = DriverManager.getConnection(config.url, config.user, config.passwd);
       Statement statement = connection.createStatement();
-      return new PostgresqlAdapter(config.catalog, connection, statement, new PostgresqlTypeConverter());
+      return new MysqlAdapter(config.catalog, connection, statement, new MysqlTypeConverter());
     } catch (Exception e) {
       e.printStackTrace();
       return null;
@@ -32,6 +32,6 @@ public class PostgresqlAdapterFactory implements AdapterFactory {
 
   @Override
   public String getType() {
-    return "postgresql";
+    return "mysql";
   }
 }

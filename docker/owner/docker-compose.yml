@@ -6,9 +6,12 @@ services:
     container_name: owner1
     working_dir: /usr/src/mymvn
     restart: "no"
-    command: nohup java -jar ./bin/onedb_postgresql_owner.jar -c ./config/server1.json > ./log/owner1.log &
+    command: nohup java -jar ./bin/onedb_owner_server.jar -c ./config/server1.json > ./log/owner1.log &
+    environment:
+      - ONEDB_ROOT=/usr/src/mymvn
     volumes:
       - $PWD/../../release/bin:/usr/src/mymvn/bin
+      - $PWD/../../release/adapter:/usr/src/mymvn/adapter
       - $PWD/config:/usr/src/mymvn/config
       - $PWD/log:/usr/src/mymvn/log
       - $PWD/cert:/usr/src/mymvn/cert
@@ -23,9 +26,12 @@ services:
     container_name: owner2
     working_dir: /usr/src/mymvn
     restart: "no"
-    command: nohup java -jar ./bin/onedb_postgresql_owner.jar -c ./config/server2.json > ./log/owner2.log &
+    command: nohup java -jar ./bin/onedb_owner_server.jar -c ./config/server2.json > ./log/owner2.log &
+    environment:
+      - ONEDB_ROOT=/usr/src/mymvn
     volumes:
       - $PWD/../../release/bin:/usr/src/mymvn/bin
+      - $PWD/../../release/adapter:/usr/src/mymvn/adapter
       - $PWD/config:/usr/src/mymvn/config
       - $PWD/log:/usr/src/mymvn/log
       - $PWD/cert:/usr/src/mymvn/cert
@@ -40,9 +46,12 @@ services:
     container_name: owner3
     working_dir: /usr/src/mymvn
     restart: "no"
-    command: nohup java -jar ./bin/onedb_postgresql_owner.jar -c ./config/server3.json > ./log/owner3.log &
+    command: nohup java -jar ./bin/onedb_owner_server.jar -c ./config/server3.json > ./log/owner3.log &
+    environment:
+      - ONEDB_ROOT=/usr/src/mymvn
     volumes:
       - $PWD/../../release/bin:/usr/src/mymvn/bin
+      - $PWD/../../release/adapter:/usr/src/mymvn/adapter
       - $PWD/config:/usr/src/mymvn/config
       - $PWD/log:/usr/src/mymvn/log
       - $PWD/cert:/usr/src/mymvn/cert

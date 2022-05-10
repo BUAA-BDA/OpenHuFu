@@ -15,7 +15,9 @@ import org.slf4j.LoggerFactory;
 public class AdapterLoader {
   private static final Logger LOG = LoggerFactory.getLogger(AdapterLoader.class);
 
-  Map<String, AdapterFactory> loadAdapters(String adapterDirectory) {
+  private AdapterLoader() {}
+
+  public static Map<String, AdapterFactory> loadAdapters(String adapterDirectory) {
     File adapters[]= new File(adapterDirectory).listFiles(new FileFilter() {
       @Override
       public boolean accept(File file) {
