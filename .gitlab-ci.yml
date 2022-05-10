@@ -3,10 +3,6 @@ image: "docker/compose:1.28.5"
 services:
   - docker:dind
 
-variables:
-  DOCKER_DRIVER: overlay2
-  MOUNT_POINT: /builds/$CI_PROJECT_PATH
-
 before_script:
   - docker info
   - docker-compose --version
@@ -20,6 +16,10 @@ build:
   script:
     - cd docker/build
     - docker-compose up
+  artifacts:
+    paths:
+      - release/
+    expire_in: 20 minutes
 
 test:
   stage: test
