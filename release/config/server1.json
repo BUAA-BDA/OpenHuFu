@@ -1,14 +1,18 @@
 {
   "id": 0,
   "port": 12345,
+  "theadnum": 4,
   "hostname": "localhost",
   "privatekeypath": "./cert/owner1.key",
   "certchainpath": "./cert/owner1.pem",
   "trustcertpath": "./cert/ca.pem",
-  "url": "jdbc:postgresql://localhost:13101/postgres",
-  "catalog": "postgres",
-  "user": "postgres",
-  "passwd": "onedb",
+  "adapterconfig": {
+    "datasource": "postgresql",
+    "url": "jdbc:postgresql://localhost:13101/postgres",
+    "catalog": "postgres",
+    "user": "postgres",
+    "passwd": "onedb"
+  },
   "tables": [
     {
       "originName": "student",

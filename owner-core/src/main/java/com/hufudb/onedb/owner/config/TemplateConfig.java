@@ -58,14 +58,14 @@ public abstract class TemplateConfig implements DBConfig {
       try {
         File rootCert = new File(trustcertpath);
         config.clientCerts = TlsChannelCredentials.newBuilder().trustManager(rootCert).build();
-        config.acrossOwnerService =
+        config.acrossOwnerRpc =
             new OneDBRpc(config.party, config.threadPool, config.clientCerts);
       } catch (Exception e) {
         LOG.error("Fail to read trustcertFile: {}", e.getMessage());
-        config.acrossOwnerService = new OneDBRpc(config.party, config.threadPool);
+        config.acrossOwnerRpc = new OneDBRpc(config.party, config.threadPool);
       }
     } else {
-      config.acrossOwnerService = new OneDBRpc(config.party, config.threadPool);
+      config.acrossOwnerRpc = new OneDBRpc(config.party, config.threadPool);
     }
     return config;
   }

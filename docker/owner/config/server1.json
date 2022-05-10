@@ -5,10 +5,13 @@
   "privatekeypath": "./cert/owner1.key",
   "certchainpath": "./cert/owner1.pem",
   "trustcertpath": "./cert/ca.pem",
-  "url": "jdbc:postgresql://postgres1:5432/postgres",
-  "catalog": "postgres",
-  "user": "postgres",
-  "passwd": "onedb",
+  "adapterconfig": {
+    "datasource": "postgresql",
+    "url": "jdbc:postgresql://postgres1:5432/postgres",
+    "catalog": "postgres",
+    "user": "postgres",
+    "passwd": "onedb"
+  },
   "tables": [
     {
       "originName": "student",
