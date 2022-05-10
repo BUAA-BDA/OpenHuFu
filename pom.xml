@@ -19,6 +19,7 @@
     <module>user-client</module>
     <module>adapter-postgresql</module>
     <module>adapter-mysql</module>
+    <module>benchmark</module>
   </modules>
 
   <properties>
