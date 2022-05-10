@@ -1,4 +1,4 @@
-package com.hufudb.onedb.owner.adapter;
+package com.hufudb.onedb.owner.adapter.jdbc;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -14,6 +14,8 @@ import com.hufudb.onedb.core.data.Row;
 import com.hufudb.onedb.core.data.TableInfo;
 import com.hufudb.onedb.core.sql.context.OneDBContext;
 import com.hufudb.onedb.core.sql.translator.OneDBTranslator;
+import com.hufudb.onedb.owner.adapter.Adapter;
+import com.hufudb.onedb.owner.adapter.AdapterTypeConverter;
 import com.hufudb.onedb.owner.schema.SchemaManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,16 +23,16 @@ import org.slf4j.LoggerFactory;
 /**
  * Base adapter for datasource with jdbc support
  */
-public abstract class JDBCAdapter implements DataSourceAdapter {
+public abstract class JDBCAdapter implements Adapter {
   protected final static  Logger LOG = LoggerFactory.getLogger(JDBCAdapter.class);
 
   protected String catalog;
   protected Connection connection;
   protected Statement statement;
-  protected final DataSourceTypeConverter converter;
+  protected final AdapterTypeConverter converter;
   protected final SchemaManager schemaManager;
 
-  protected JDBCAdapter(String catalog, Connection connection, Statement statement, DataSourceTypeConverter converter) {
+  protected JDBCAdapter(String catalog, Connection connection, Statement statement, AdapterTypeConverter converter) {
     this.catalog = catalog;
     this.connection = connection;
     this.statement = statement;
@@ -63,7 +65,12 @@ public abstract class JDBCAdapter implements DataSourceAdapter {
   }
 
   @Override
-  public void beforeStop() {
+  public void init() {
+    // pass
+  }
+
+  @Override
+  public void shutdown() {
     try {
       statement.close();
       connection.close();

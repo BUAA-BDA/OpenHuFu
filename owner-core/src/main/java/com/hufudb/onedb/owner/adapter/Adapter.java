@@ -4,8 +4,9 @@ import com.hufudb.onedb.core.data.DataSet;
 import com.hufudb.onedb.core.sql.context.OneDBContext;
 import com.hufudb.onedb.owner.schema.SchemaManager;
 
-public interface DataSourceAdapter {
+public interface Adapter {
   SchemaManager getSchemaManager();
   void query(OneDBContext queryContext, DataSet dataSet);
-  void beforeStop();
+  void init();
+  void shutdown();
 }

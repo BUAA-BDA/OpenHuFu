@@ -6,14 +6,16 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.ServiceLoader;
+import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AdapterLoader {
   private static final Logger LOG = LoggerFactory.getLogger(AdapterLoader.class);
 
-  void loadAdapter(String adapterDirectory) {
+  Map<String, AdapterFactory> loadAdapters(String adapterDirectory) {
     File adapters[]= new File(adapterDirectory).listFiles(new FileFilter() {
       @Override
       public boolean accept(File file) {
@@ -29,10 +31,13 @@ public class AdapterLoader {
         e.printStackTrace();
       }
     }
-    ClassLoader adapterClassLoader = new URLClassLoader(adapterURLs.toArray(new URL[0]), DataSourceAdapter.class.getClassLoader());
-    ServiceLoader<DataSourceAdapter> adapterServices = ServiceLoader.load(DataSourceAdapter.class, adapterClassLoader);
-    for (DataSourceAdapter adapter : adapterServices) {
-      LOG.info("get adapter {}", adapter.getClass().getName());
+    ClassLoader adapterClassLoader = new URLClassLoader(adapterURLs.toArray(new URL[0]), AdapterFactory.class.getClassLoader());
+    ServiceLoader<AdapterFactory> adapterServices = ServiceLoader.load(AdapterFactory.class, adapterClassLoader);
+    ImmutableMap.Builder<String, AdapterFactory> adapterFactories = ImmutableMap.builder();
+    for (AdapterFactory factory : adapterServices) {
+      adapterFactories.put(factory.getType(), factory);
+      LOG.info("get adapter factory {}", factory.getClass().getName());
     }
+    return adapterFactories.build();
   }
 }

@@ -1,8 +1,12 @@
 package com.hufudb.onedb.owner.adapter;
 
-public class JDBCConfig {
+/**
+ * Adapter configurations
+ * add new config item to support more adapters
+ */
+public class AdapterConfig {
+  // for jdbc adapter
   public String hostname;
-  public int port;
   public String catalog;
   public String url;
   public String user;
