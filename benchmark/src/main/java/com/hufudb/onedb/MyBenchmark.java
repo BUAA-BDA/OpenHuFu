@@ -25,13 +25,54 @@
 
 package com.hufudb.onedb;
 
+import java.util.concurrent.TimeUnit;
 import org.openjdk.jmh.annotations.Benchmark;
-
+import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Fork;
+import org.openjdk.jmh.annotations.Level;
+import org.openjdk.jmh.annotations.Measurement;
+import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.OutputTimeUnit;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
+import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.TearDown;
+import org.openjdk.jmh.annotations.Warmup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+@BenchmarkMode(Mode.AverageTime)
+@OutputTimeUnit(TimeUnit.MILLISECONDS)
+@State(Scope.Benchmark)
 public class MyBenchmark {
+  private static final Logger LOG = LoggerFactory.getLogger(MyBenchmark.class);
+  
+  @State(Scope.Benchmark)
+  public static class OneDBState {
+    private OneDB cmd;
 
-    @Benchmark
-    public void testMethod() {
-        // place your benchmarked code here
+    @Setup(Level.Trial)
+    public void setUp() {
+      try {
+        Thread.sleep(3);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+      cmd = new OneDB();
     }
 
+    @TearDown(Level.Trial)
+    public void TearDown() {
+      cmd.close();
+      LOG.info("Close OneDB User Client");
+    }
+  }
+
+
+  @Benchmark
+  @Fork(0)
+  @Warmup(iterations = 2)
+  @Measurement(iterations = 5)
+  public void testMethod() {
+    // place your benchmarked code here
+  }
 }
