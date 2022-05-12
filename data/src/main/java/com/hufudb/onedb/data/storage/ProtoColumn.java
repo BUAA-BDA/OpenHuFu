@@ -1,7 +1,7 @@
 package com.hufudb.onedb.data.storage;
 
-import com.hufudb.onedb.data.OneDBData.ColumnProto;
-import com.hufudb.onedb.data.OneDBData.ColumnType;
+import com.hufudb.onedb.proto.OneDBData.ColumnProto;
+import com.hufudb.onedb.proto.OneDBData.ColumnType;
 
 public class ProtoColumn implements Column {
   final ColumnType type;

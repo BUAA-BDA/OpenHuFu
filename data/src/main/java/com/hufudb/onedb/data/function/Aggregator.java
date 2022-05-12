@@ -4,7 +4,7 @@ import com.hufudb.onedb.data.storage.DataSetIterator;
 import com.hufudb.onedb.data.storage.Row;
 
 public interface Aggregator {
-  void add(DataSetIterator iterator);
+  void set(DataSetIterator iterator);
   Row aggregate();
   boolean hasNext();
 }

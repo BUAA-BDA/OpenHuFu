@@ -31,8 +31,8 @@ public class POJOPublishedTableInfo {
         info.getMappings());
   }
 
-  public static List<POJOPublishedTableInfo> from(List<PublishedTableInfo> tableInfos) {
-    return tableInfos.stream().map(info -> from(info)).collect(Collectors.toList());
+  public static List<POJOPublishedTableInfo> from(List<PublishedTableInfo> tableSchemas) {
+    return tableSchemas.stream().map(info -> from(info)).collect(Collectors.toList());
   }
 
   public String getPublishedTableName() {

@@ -12,6 +12,8 @@
   <packaging>pom</packaging>
 
   <modules>
+    <module>proto</module>
+    <module>data</module>
     <module>rpc</module>
     <module>mpc</module>
     <module>core</module>
@@ -20,7 +22,6 @@
     <module>adapter-postgresql</module>
     <module>adapter-mysql</module>
     <module>benchmark</module>
-    <module>data</module>
   </modules>
 
   <properties>

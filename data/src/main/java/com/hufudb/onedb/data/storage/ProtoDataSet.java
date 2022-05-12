@@ -2,7 +2,7 @@ package com.hufudb.onedb.data.storage;
 
 import java.util.List;
 import com.google.common.collect.ImmutableList;
-import com.hufudb.onedb.data.OneDBData.DataSetProto;
+import com.hufudb.onedb.proto.OneDBData.DataSetProto;
 import com.hufudb.onedb.data.schema.Schema;
 
 /**
@@ -15,11 +15,11 @@ final public class ProtoDataSet implements DataSet {
   private final int rowCount;
 
   ProtoDataSet(DataSetProto dataSet) {
-    assert dataSet.getSchema().getColumnDescCount() == dataSet.getColumnsCount();
+    assert dataSet.getSchema().getColumnDescCount() == dataSet.getColumnCount();
     this.schema = Schema.fromProto(dataSet.getSchema());
     ImmutableList.Builder<ProtoColumn> cBuilder = ImmutableList.builder();
-    for (int i = 0; i < dataSet.getColumnsCount(); ++i) {
-      cBuilder.add(new ProtoColumn(schema.getType(i), dataSet.getColumns(i)));
+    for (int i = 0; i < dataSet.getColumnCount(); ++i) {
+      cBuilder.add(new ProtoColumn(schema.getType(i), dataSet.getColumn(i)));
     }
     this.columns = cBuilder.build();
     if (columns.isEmpty()) {

@@ -33,7 +33,7 @@ public class AggDataSet implements DataSet {
     Row row;
 
     AggIterator() {
-      aggregator.add(getIterator());
+      aggregator.set(getIterator());
     }
 
     @Override
