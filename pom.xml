@@ -20,6 +20,7 @@
     <module>adapter-postgresql</module>
     <module>adapter-mysql</module>
     <module>benchmark</module>
+    <module>data</module>
   </modules>
 
   <properties>
