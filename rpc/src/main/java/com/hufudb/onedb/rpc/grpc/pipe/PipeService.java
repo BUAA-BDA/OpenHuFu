@@ -1,9 +1,9 @@
 package com.hufudb.onedb.rpc.grpc.pipe;
 
 import java.util.Map;
-import com.hufudb.onedb.rpc.PipeGrpc;
-import com.hufudb.onedb.rpc.OneDBPipe.DataPacketProto;
-import com.hufudb.onedb.rpc.OneDBPipe.ResponseProto;
+import com.hufudb.onedb.proto.PipeGrpc;
+import com.hufudb.onedb.proto.DataPacket.DataPacketProto;
+import com.hufudb.onedb.proto.DataPacket.ResponseProto;
 import com.hufudb.onedb.rpc.grpc.concurrent.ConcurrentBuffer;
 import com.hufudb.onedb.rpc.utils.DataPacket;
 import com.hufudb.onedb.rpc.utils.DataPacketHeader;

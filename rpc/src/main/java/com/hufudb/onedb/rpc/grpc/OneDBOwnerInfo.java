@@ -1,7 +1,7 @@
 package com.hufudb.onedb.rpc.grpc;
 
 import com.hufudb.onedb.rpc.Party;
-import com.hufudb.onedb.rpc.OneDBCommon.OwnerInfoProto;
+import com.hufudb.onedb.proto.OneDBService.OwnerInfoProto;
 
 public class OneDBOwnerInfo implements Party {
   private final int id;

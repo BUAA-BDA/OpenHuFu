@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  * Base adapter for datasource with jdbc support
  */
 public abstract class JDBCAdapter implements Adapter {
-  protected final static  Logger LOG = LoggerFactory.getLogger(JDBCAdapter.class);
+  protected final static Logger LOG = LoggerFactory.getLogger(JDBCAdapter.class);
 
   protected String catalog;
   protected Connection connection;
