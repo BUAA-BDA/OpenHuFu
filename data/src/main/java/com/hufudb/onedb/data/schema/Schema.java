@@ -76,7 +76,7 @@ public class Schema {
             schema.equals(((Schema) obj).schema));
   }
 
-  static class Builder {
+  public static class Builder {
     private final SchemaProto.Builder builder;
 
     Builder() {

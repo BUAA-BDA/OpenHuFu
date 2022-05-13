@@ -20,6 +20,16 @@
   <dependencies>
     <dependency>
       <groupId>com.hufudb.onedb</groupId>
+      <artifactId>data</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.hufudb.onedb</groupId>
+      <artifactId>plan</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.hufudb.onedb</groupId>
       <artifactId>core</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>

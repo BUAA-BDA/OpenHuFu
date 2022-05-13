@@ -11,7 +11,7 @@ public class ResultDataSet implements DataSet {
   final Schema schema;
   final ResultSet result;
 
-  ResultDataSet(Schema schema, ResultSet result) {
+  public ResultDataSet(Schema schema, ResultSet result) {
     this.schema = schema;
     this.result = result;
   }

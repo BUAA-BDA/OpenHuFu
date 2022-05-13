@@ -2,7 +2,7 @@ syntax = "proto3";
 package onedb;
 
 import "data.proto";
-import "expression.proto";
+import "plan.proto";
 
 option java_package = "com.hufudb.onedb.proto";
 option java_outer_classname = "OneDBService";
@@ -17,50 +17,15 @@ message GeneralResponse {
   string msg = 2;
 }
 
-message OwnerInfoProto {
+message OwnerInfo {
   int32 id = 1;
   string endpoint = 2;
 }
 
-message CollationProto {
-  int32 ref = 1;
-  int32 direction = 2;
-}
-
-message JoinConditionProto {
-  int32 type = 1;
-  Modifier level = 2;
-  repeated int32 leftKey = 3;
-  repeated int32 rightKey = 4;
-  repeated ExpressionProto condition = 5;
-  int32 leftSize = 6;
-  bool isLeft = 7;
-}
-
-message TaskInfoProto {
-  int64 taskId = 1;
-  repeated int32 parties = 2;
-}
-
-message QueryContextProto {
-  int32 contextType = 1;
-  TaskInfoProto taskInfo = 2;
-  string tableName = 3;
-  repeated ExpressionProto selectExp = 4;
-  repeated ExpressionProto whereExp = 5;
-  repeated ExpressionProto aggExp = 6;
-  repeated int32 group = 7;
-  repeated CollationProto order = 8;
-  int32 fetch = 9;
-  int32 offset = 10;
-  JoinConditionProto joinInfo = 11;
-  repeated QueryContextProto children = 12;
-}
-
 service Service {
-  rpc getOwnerInfo(GeneralRequest) returns (OwnerInfoProto);
-  rpc AddOwner(OwnerInfoProto) returns (GeneralResponse);
+  rpc getOwnerInfo(GeneralRequest) returns (OwnerInfo);
+  rpc AddOwner(OwnerInfo) returns (GeneralResponse);
   rpc GetTableHeader(GeneralRequest) returns (SchemaProto);
   rpc GetAllLocalTable(GeneralRequest) returns (TableSchemaListProto);
-  rpc Query(QueryContextProto) returns (stream DataSetProto);
+  rpc Query(QueryPlanProto) returns (stream DataSetProto);
 }

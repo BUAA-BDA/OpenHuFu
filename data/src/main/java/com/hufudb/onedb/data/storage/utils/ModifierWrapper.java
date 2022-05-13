@@ -1,5 +1,6 @@
 package com.hufudb.onedb.data.storage.utils;
 
+import java.util.List;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.annotations.SerializedName;
 import com.hufudb.onedb.proto.OneDBData.Modifier;
@@ -73,5 +74,17 @@ public enum ModifierWrapper {
 
   public static ModifierWrapper of(Modifier modifier) {
     return MAP.get(modifier.getNumber());
+  }
+
+  public static Modifier dominate(Modifier a, Modifier b) {
+    if (a.getNumber() > b.getNumber()) {
+      return a;
+    } else {
+      return b;
+    }
+  }
+
+  public static Modifier dominate(List<Modifier> mods) {
+    return mods.stream().reduce(Modifier.PUBLIC, (d, m) -> dominate(d, m));
   }
 }

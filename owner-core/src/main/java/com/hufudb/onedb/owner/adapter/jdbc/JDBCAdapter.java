@@ -7,16 +7,17 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.stream.Collectors;
-import com.hufudb.onedb.core.data.DataSet;
-import com.hufudb.onedb.core.data.Header;
-import com.hufudb.onedb.core.data.Level;
-import com.hufudb.onedb.core.data.Row;
-import com.hufudb.onedb.core.data.TableInfo;
-import com.hufudb.onedb.core.sql.context.OneDBContext;
-import com.hufudb.onedb.core.sql.translator.OneDBTranslator;
+import com.hufudb.onedb.data.storage.DataSet;
+import com.hufudb.onedb.data.storage.EmptyDataSet;
+import com.hufudb.onedb.data.storage.ResultDataSet;
+import com.hufudb.onedb.data.schema.Schema;
+import com.hufudb.onedb.proto.OneDBData.Modifier;
+import com.hufudb.onedb.proto.OneDBPlan.PlanType;
+import com.hufudb.onedb.data.schema.TableSchema;
 import com.hufudb.onedb.owner.adapter.Adapter;
 import com.hufudb.onedb.owner.adapter.AdapterTypeConverter;
-import com.hufudb.onedb.owner.schema.SchemaManager;
+import com.hufudb.onedb.plan.Plan;
+import com.hufudb.onedb.data.schema.SchemaManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,22 +33,23 @@ public abstract class JDBCAdapter implements Adapter {
   protected final AdapterTypeConverter converter;
   protected final SchemaManager schemaManager;
 
-  protected JDBCAdapter(String catalog, Connection connection, Statement statement, AdapterTypeConverter converter) {
+  protected JDBCAdapter(String catalog, Connection connection, Statement statement,
+      AdapterTypeConverter converter) {
     this.catalog = catalog;
     this.connection = connection;
     this.statement = statement;
     this.converter = converter;
     this.schemaManager = new SchemaManager();
-    loadAllTableInfo();
+    loadAllTableSchema();
   }
 
-  public void loadAllTableInfo() {
+  public void loadAllTableSchema() {
     try {
       DatabaseMetaData meta = connection.getMetaData();
       ResultSet rs = meta.getTables(catalog, null, "%", new String[] {"TABLE"});
       while (rs.next()) {
         String tableName = rs.getString("TABLE_NAME");
-        schemaManager.addLocalTable(getTableInfo(tableName, meta));
+        schemaManager.addLocalTable(getTableSchema(tableName, meta));
       }
       rs.close();
     } catch (Exception e) {
@@ -57,16 +59,19 @@ public abstract class JDBCAdapter implements Adapter {
   }
 
   @Override
-  public void query(OneDBContext queryContext, DataSet dataSet) {
-    String sql = generateSQL(queryContext);
+  public DataSet query(Plan queryPlan) {
+    String sql = generateSQL(queryPlan);
+    Schema schema = queryPlan.getOutSchema();
     if (!sql.isEmpty()) {
-      executeSQL(sql, dataSet);
+      return executeSQL(sql, schema);
+    } else {
+      return EmptyDataSet.INSTANCE;
     }
   }
 
   @Override
   public void init() {
-    // pass
+    // do nothing
   }
 
   @Override
@@ -84,43 +89,42 @@ public abstract class JDBCAdapter implements Adapter {
     return schemaManager;
   }
 
-  protected TableInfo getTableInfo(String tableName, DatabaseMetaData meta) {
+  protected TableSchema getTableSchema(String tableName, DatabaseMetaData meta) {
     try {
       ResultSet rc = meta.getColumns(catalog, null, tableName, null);
-      TableInfo.Builder tableInfoBuilder = TableInfo.newBuilder();
-      tableInfoBuilder.setTableName(tableName);
+      TableSchema.Builder TableSchemaBuilder = TableSchema.newBuilder();
+      TableSchemaBuilder.setTableName(tableName);
       while (rc.next()) {
         String columnName = rc.getString("COLUMN_NAME");
-        tableInfoBuilder.add(columnName, converter.convert(rc.getString("TYPE_NAME")),
-            Level.PUBLIC);
+        TableSchemaBuilder.add(columnName, converter.convert(rc.getString("TYPE_NAME")),
+            Modifier.PUBLIC);
       }
       rc.close();
-      return tableInfoBuilder.build();
+      return TableSchemaBuilder.build();
     } catch (Exception e) {
-      LOG.error("Error when load tableinfo of {}: ", tableName, e.getMessage());
+      LOG.error("Error when load TableSchema of {}: ", tableName, e.getMessage());
       return null;
     }
   }
 
-  protected String generateSQL(OneDBContext query) {
-    String originTableName = schemaManager.getLocalTableName(query.getTableName());
-    Header tableHeader = schemaManager.getPublishedTableHeader(query.getTableName());
-    LOG.info("{}: {}", originTableName, tableHeader);
-    final List<String> filters = OneDBTranslator.translateExps(tableHeader, query.getWhereExps());
-    final List<String> selects = OneDBTranslator.translateExps(tableHeader,
-        query.getSelectExps());
+  protected String generateSQL(Plan plan) {
+    assert plan.getPlanType().equals(PlanType.LEAF);
+    String actualTableName = schemaManager.getActualTableName(plan.getTableName());
+    Schema tableSchema = schemaManager.getPublishedSchema(plan.getTableName());
+    LOG.info("{}: {}", actualTableName, tableSchema);
+    final List<String> filters = JDBCTranslator.translateExps(tableSchema, plan.getWhereExps());
+    final List<String> selects = JDBCTranslator.translateExps(tableSchema, plan.getSelectExps());
     final List<String> groups =
-        query.getGroups().stream().map(ref -> selects.get(ref)).collect(Collectors.toList());
+    plan.getGroups().stream().map(ref -> selects.get(ref)).collect(Collectors.toList());
     // order by
-    List<String> order = OneDBTranslator.translateOrders(selects, query.getOrders());
+    List<String> order = JDBCTranslator.translateOrders(selects, plan.getOrders());
     StringBuilder sql = new StringBuilder();
     // select from clause
-    if (!query.getAggExps().isEmpty()) {
-      final List<String> aggs =
-          OneDBTranslator.translateAgg(selects, query.getAggExps());
-      sql.append(String.format("SELECT %s from %s", String.join(",", aggs), originTableName));
+    if (!plan.getAggExps().isEmpty()) {
+      final List<String> aggs = JDBCTranslator.translateAgg(selects, plan.getAggExps());
+      sql.append(String.format("SELECT %s from %s", String.join(",", aggs), actualTableName));
     } else {
-      sql.append(String.format("SELECT %s from %s", String.join(",", selects), originTableName));
+      sql.append(String.format("SELECT %s from %s", String.join(",", selects), actualTableName));
     }
     // where clause
     if (!filters.isEmpty()) {
@@ -132,78 +136,21 @@ public abstract class JDBCAdapter implements Adapter {
     if (!order.isEmpty()) {
       sql.append(String.format(" order by %s", String.join(",", order)));
     }
-    if (query.getFetch() != 0) {
-      sql.append(" LIMIT ").append(query.getFetch() + query.getOffset());
+    if (plan.getFetch() != 0) {
+      sql.append(" LIMIT ").append(plan.getFetch() + plan.getOffset());
     }
     LOG.info(sql.toString());
     return sql.toString();
   }
 
-  protected void fillDataSet(ResultSet rs, DataSet dataSet) throws SQLException {
-    final Header header = dataSet.getHeader();
-    final int columnSize = header.size();
-    while (rs.next()) {
-      Row.RowBuilder builder = Row.newBuilder(columnSize);
-      for (int i = 0; i < columnSize; ++i) {
-        if (header.getLevel(i).equals(Level.HIDDEN)) {
-          continue;
-        }
-        switch (header.getType(i)) {
-          case BYTE:
-            builder.set(i, rs.getByte(i + 1));
-            break;
-          case SHORT:
-            builder.set(i, rs.getShort(i + 1));
-            break;
-          case INT:
-            builder.set(i, rs.getInt(i + 1));
-            break;
-          case LONG:
-            builder.set(i, rs.getLong(i + 1));
-            break;
-          case FLOAT:
-            builder.set(i, rs.getFloat(i + 1));
-            break;
-          case DOUBLE:
-            builder.set(i, rs.getDouble(i + 1));
-            break;
-          case STRING:
-            builder.set(i, rs.getString(i + 1));
-            break;
-          case BOOLEAN:
-            builder.set(i, rs.getBoolean(i + 1));
-            break;
-          case DATE:
-            // Divide by 86400000L to prune time field
-            Long date = rs.getDate(i + 1).getTime() / 86400000L;
-            builder.set(i, date);
-            break;
-          case TIME:
-            Long time = rs.getTime(i + 1).getTime();
-            builder.set(i, time);
-            break;
-          case TIMESTAMP:
-            Long timeStamp = rs.getTimestamp(i + 1).getTime();
-            builder.set(i, timeStamp);
-            break;
-          default:
-            builder.set(i, rs.getObject(i + 1));
-            break;
-        }
-      }
-      dataSet.addRow(builder.build());
-    }
-  }
-
-  protected void executeSQL(String sql, DataSet dataSet) {
-    ResultSet rs = null;
+  protected DataSet executeSQL(String sql, Schema schema) {
     try {
-      rs = statement.executeQuery(sql);
-      fillDataSet(rs, dataSet);
-      LOG.info("Execute {} returned {} rows", sql, dataSet.getRowCount());
-      rs.close();
+      ResultSet rs = statement.executeQuery(sql);
+      LOG.info("Execute {}", sql);
+      return new ResultDataSet(schema, rs);
     } catch (SQLException e) {
       LOG.error("Fail to execute SQL [{}]: {}", sql, e.getMessage());
+      return EmptyDataSet.INSTANCE;
     }
   }
 }
