@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 import io.grpc.ChannelCredentials;
 import org.apache.commons.lang3.tuple.Pair;
 
-/*
+/**
  * client for all DB
  */
 public class OneDBClient {

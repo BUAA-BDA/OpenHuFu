@@ -12,7 +12,7 @@ import com.hufudb.onedb.rpc.OneDBService.GeneralRequest;
 import com.hufudb.onedb.rpc.OneDBService.GeneralResponse;
 import com.hufudb.onedb.rpc.grpc.OneDBOwnerInfo;
 import com.hufudb.onedb.rpc.Party;
-import com.hufudb.onedb.rpc.ServiceGrpc;
+import com.hufudb.onedb.proto.ServiceGrpc;
 import io.grpc.Channel;
 import io.grpc.ChannelCredentials;
 import io.grpc.Grpc;

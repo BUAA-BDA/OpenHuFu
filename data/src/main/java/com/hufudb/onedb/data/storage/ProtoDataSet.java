@@ -26,7 +26,7 @@ final public class ProtoDataSet implements DataSet {
     if (columns.isEmpty()) {
       this.rowCount = 0;
     } else {
-      this.rowCount = columns.size();
+      this.rowCount = columns.get(0).size();
     }
   }
 
