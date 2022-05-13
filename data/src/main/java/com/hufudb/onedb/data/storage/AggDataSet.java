@@ -37,7 +37,7 @@ public class AggDataSet implements DataSet {
     }
 
     @Override
-    public boolean hasNext() {
+    public boolean next() {
       boolean next = aggregator.hasNext();
       if (next) {
         row = aggregator.aggregate();

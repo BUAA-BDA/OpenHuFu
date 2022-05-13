@@ -76,6 +76,12 @@ public class Schema {
             schema.equals(((Schema) obj).schema));
   }
 
+  public static Schema merge(Schema left, Schema right) {
+    SchemaProto.Builder builder = left.toProto().toBuilder();
+    builder.addAllColumnDesc(right.getColumnDescs());
+    return new Schema(builder.build());
+  }
+
   public static class Builder {
     private final SchemaProto.Builder builder;
 

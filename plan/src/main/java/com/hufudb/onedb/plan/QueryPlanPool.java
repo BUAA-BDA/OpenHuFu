@@ -4,17 +4,17 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class QueryPlanPool {
-  static final Map<Long, Plan> contexts = new ConcurrentHashMap<>();
+  static final Map<Long, Plan> plans = new ConcurrentHashMap<>();
 
-  public static Plan getContext(long cid) {
-    return contexts.get(cid);
+  public static Plan getPlan(long cid) {
+    return plans.get(cid);
   }
 
   public static void savePlan(RootPlan plan) {
-    contexts.put(plan.getPlanId(), plan);
+    plans.put(plan.getPlanId(), plan);
   }
 
-  public static void deleteContext(long id) {
-    contexts.remove(id);
+  public static void deletePlan(long id) {
+    plans.remove(id);
   }
 }

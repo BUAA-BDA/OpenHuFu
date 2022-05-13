@@ -10,4 +10,8 @@ public interface Column {
   interface CellGetter {
     Object get(int rowNum);
   }
+
+  interface CellAppender {
+    void append(Object val);
+  }
 }

@@ -37,8 +37,8 @@ public class FilterDataSet implements DataSet {
     }
 
     @Override
-    public boolean hasNext() {
-      while (iterator.hasNext()) {
+    public boolean next() {
+      while (iterator.next()) {
         if (filter.filter(iterator)) {
           return true;
         }

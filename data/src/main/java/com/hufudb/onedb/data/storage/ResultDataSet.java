@@ -2,7 +2,10 @@ package com.hufudb.onedb.data.storage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
+import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.data.schema.Schema;
+import com.hufudb.onedb.proto.OneDBData.ColumnDesc;
 
 /**
  * Dataset which encapsulate a @java.sql.ResultSet
@@ -23,7 +26,7 @@ public class ResultDataSet implements DataSet {
 
   @Override
   public DataSetIterator getIterator() {
-    return null;
+    return new ResultIterator();
   }
 
   @Override
@@ -36,14 +39,92 @@ public class ResultDataSet implements DataSet {
   }
 
   class ResultIterator implements DataSetIterator {
-    final ResultSet result;
+    List<Getter> getters;
 
-    ResultIterator(ResultSet result) {
-      this.result = result;
+    ResultIterator() {
+      ImmutableList.Builder<Getter> builder = ImmutableList.builder();
+      int i = 1;
+      for (ColumnDesc col : schema.getColumnDescs()) {
+        final int idx = i;
+        switch(col.getType()) {
+          case BLOB:
+            getters.add(() -> {
+              try {
+                return result.getBytes(idx);
+              } catch (SQLException e) {
+                throw new RuntimeException("Error in resultDataSet");
+              }
+            });
+            break;
+          case BOOLEAN:
+            getters.add(() -> {
+              try {
+                return result.getBoolean(idx);
+              } catch (SQLException e) {
+                throw new RuntimeException("Error in resultDataSet");
+              }
+            });
+            break;
+          case BYTE:
+          case SHORT:
+          case INT:
+            getters.add(() -> {
+              try {
+                return result.getInt(idx);
+              } catch (SQLException e) {
+                throw new RuntimeException("Error in resultDataSet");
+              }
+            });
+            break;
+          case DATE:
+          case TIME:
+          case TIMESTAMP:
+          case LONG:
+            getters.add(() -> {
+              try {
+                return result.getLong(idx);
+              } catch (SQLException e) {
+                throw new RuntimeException("Error in resultDataSet");
+              }
+            });
+            break;
+          case STRING:
+            getters.add(() -> {
+              try {
+                return result.getString(idx);
+              } catch (SQLException e) {
+                throw new RuntimeException("Error in resultDataSet");
+              }
+            });
+            break;
+          case DOUBLE:
+            getters.add(() -> {
+              try {
+                return result.getDouble(idx);
+              } catch (SQLException e) {
+                throw new RuntimeException("Error in resultDataSet");
+              }
+            });
+            break;
+          case FLOAT:
+            getters.add(() -> {
+              try {
+                return result.getFloat(idx);
+              } catch (SQLException e) {
+                throw new RuntimeException("Error in resultDataSet");
+              }
+            });
+            break;
+          default:
+            break;
+        }
+        ++i;
+      }
+      this.getters = builder.build();
     }
 
     @Override
-    public boolean hasNext() {
+    public boolean next() {
       try {
         return result.next();
       } catch (SQLException e) {
@@ -55,8 +136,8 @@ public class ResultDataSet implements DataSet {
     @Override
     public Object get(int columnIndex) {
       try {
-        return result.getObject(columnIndex);
-      } catch (SQLException e) {
+        return getters.get(columnIndex);
+      } catch (RuntimeException e) {
         LOG.error("Error in get of ResultDataSet: {}", e.getMessage());
         return null;
       }

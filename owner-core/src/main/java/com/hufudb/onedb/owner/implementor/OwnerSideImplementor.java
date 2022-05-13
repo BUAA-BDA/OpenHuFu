@@ -2,26 +2,22 @@ package com.hufudb.onedb.owner.implementor;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import com.hufudb.onedb.core.data.BasicDataSet;
-import com.hufudb.onedb.core.data.FieldType;
-import com.hufudb.onedb.core.data.Header;
-import com.hufudb.onedb.core.implementor.OneDBImplementor;
-import com.hufudb.onedb.core.implementor.QueryableDataSet;
-import com.hufudb.onedb.core.implementor.plaintext.PlaintextCalculator;
-import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
-import com.hufudb.onedb.core.sql.context.OneDBBinaryContext;
-import com.hufudb.onedb.core.sql.context.OneDBContext;
-import com.hufudb.onedb.core.sql.context.OneDBContextType;
-import com.hufudb.onedb.core.sql.context.OneDBLeafContext;
-import com.hufudb.onedb.core.sql.context.OneDBUnaryContext;
-import com.hufudb.onedb.core.sql.expression.OneDBExpression;
-import com.hufudb.onedb.core.sql.rel.OneDBOrder;
+import com.hufudb.onedb.data.schema.Schema;
+import com.hufudb.onedb.data.storage.DataSet;
+import com.hufudb.onedb.data.storage.EmptyDataSet;
+import com.hufudb.onedb.implementor.PlanImplementor;
 import com.hufudb.onedb.owner.adapter.Adapter;
 import com.hufudb.onedb.owner.implementor.aggregate.OwnerAggregation;
 import com.hufudb.onedb.owner.implementor.join.HashEqualJoin;
+import com.hufudb.onedb.plan.BasePlan;
+import com.hufudb.onedb.plan.BinaryPlan;
+import com.hufudb.onedb.plan.LeafPlan;
+import com.hufudb.onedb.plan.Plan;
+import com.hufudb.onedb.plan.UnaryPlan;
+import com.hufudb.onedb.proto.OneDBPlan.PlanType;
 import com.hufudb.onedb.rpc.Rpc;
 
-public class OwnerSideImplementor implements OneDBImplementor {
+public class OwnerSideImplementor implements PlanImplementor {
   Rpc rpc;
   Adapter dataSourceAdapter;
   ExecutorService threadPool;
@@ -33,91 +29,62 @@ public class OwnerSideImplementor implements OneDBImplementor {
   }
 
   @Override
-  public QueryableDataSet implement(OneDBContext context) {
+  public DataSet implement(Plan context) {
     return context.implement(this);
   }
 
   @Override
-  public QueryableDataSet binaryQuery(OneDBBinaryContext binary) {
-    List<OneDBContext> children = binary.getChildren();
+  public DataSet binaryQuery(BinaryPlan binary) {
+    List<Plan> children = binary.getChildren();
     assert children.size() == 2;
-    OneDBContext left = children.get(0);
-    OneDBContext right = children.get(1);
-    QueryableDataSet in;
-    if (left.getContextType().equals(OneDBContextType.PLACEHOLDER)) {
+    Plan left = children.get(0);
+    Plan right = children.get(1);
+    DataSet in;
+    if (left.getPlanType().equals(PlanType.EMPTY)) {
       // right
       in = right.implement(this);
-    } else if (right.getContextType().equals(OneDBContextType.PLACEHOLDER)) {
+    } else if (right.getPlanType().equals(PlanType.EMPTY)) {
       // left
       in = left.implement(this);
     } else {
       LOG.error("Not support two side on a single owner yet");
       throw new UnsupportedOperationException("Not support two side on a single owner yet");
     }
-    Header leftHeader = OneDBContext.getOutputHeader(left);
-    Header rightHeader = OneDBContext.getOutputHeader(right);
-    Header outputHeader = Header.joinHeader(leftHeader, rightHeader);
-    QueryableDataSet result =
-        HashEqualJoin.apply(in, binary.getJoinInfo(), rpc, binary.getTaskInfo(), outputHeader);
-    if (!binary.getSelectExps().isEmpty()) {
-      result = result.project(this, binary.getSelectExps());
-    }
-    return result;
+    Schema leftSchema = left.getOutSchema();
+    Schema rightSchema = right.getOutSchema();
+    Schema outputSchema = Schema.merge(leftSchema, rightSchema);
+    // DataSet result =
+    //     HashEqualJoin.apply(in, binary.getJoinCond(), rpc, binary.getTaskInfo(), outputSchema);
+    // if (!binary.getSelectExps().isEmpty()) {
+    //   result = result.project(this, binary.getSelectExps());
+    // }
+    return in;
   }
 
   @Override
-  public QueryableDataSet unaryQuery(OneDBUnaryContext unary) {
-    List<OneDBContext> children = unary.getChildren();
+  public DataSet unaryQuery(UnaryPlan unary) {
+    List<Plan> children = unary.getChildren();
     assert children.size() == 1;
-    QueryableDataSet input = implement(children.get(0));
-    if (!unary.getSelectExps().isEmpty()) {
-      input = input.project(this, unary.getSelectExps());
-    }
-    if (!unary.getAggExps().isEmpty()) {
-      input = OwnerAggregation.apply(input, unary.getGroups(), unary.getAggExps(),
-          children.get(0).getOutTypes(), rpc, threadPool, unary.getTaskInfo());
-    }
+    DataSet input = implement(children.get(0));
+    // if (!unary.getSelectExps().isEmpty()) {
+    //   input = input.project(this, unary.getSelectExps());
+    // }
+    // if (!unary.getAggExps().isEmpty()) {
+    //   input = OwnerAggregation.apply(input, unary.getGroups(), unary.getAggExps(),
+    //       children.get(0).getOutTypes(), rpc, threadPool, unary.getTaskInfo());
+    // }
     return input;
   }
 
   // todo: change database adapter as plugin and implement this method
   @Override
-  public QueryableDataSet leafQuery(OneDBLeafContext leaf) {
-    Header header = OneDBContext.getOutputHeader(leaf);
-    BasicDataSet dataSet = BasicDataSet.of(header);
+  public DataSet leafQuery(LeafPlan leaf) {
     try {
-      dataSourceAdapter.query(leaf, dataSet);
+      return dataSourceAdapter.query(leaf);
     } catch (Exception e) {
       LOG.error("Error when execute query on Database");
       e.printStackTrace();
+      return EmptyDataSet.INSTANCE;
     }
-    return new OwnerQueryableDataSet(dataSet);
-  }
-
-  @Override
-  public QueryableDataSet aggregate(QueryableDataSet in, List<Integer> groups,
-      List<OneDBExpression> aggs, List<FieldType> inputTypes) {
-    return null;
-  }
-
-  @Override
-  public QueryableDataSet join(QueryableDataSet left, QueryableDataSet right,
-      OneDBJoinInfo joinInfo) {
-    return null;
-  }
-
-  @Override
-  public QueryableDataSet filter(QueryableDataSet in, List<OneDBExpression> filters) {
-    return null;
-  }
-
-  @Override
-  public QueryableDataSet project(QueryableDataSet in, List<OneDBExpression> projects) {
-    return PlaintextCalculator.apply(in, projects);
-  }
-
-  @Override
-  public QueryableDataSet sort(QueryableDataSet in, List<OneDBOrder> orders) {
-    return null;
   }
 }

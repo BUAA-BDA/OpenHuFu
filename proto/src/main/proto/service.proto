@@ -25,7 +25,7 @@ message OwnerInfo {
 service Service {
   rpc getOwnerInfo(GeneralRequest) returns (OwnerInfo);
   rpc AddOwner(OwnerInfo) returns (GeneralResponse);
-  rpc GetTableHeader(GeneralRequest) returns (SchemaProto);
-  rpc GetAllLocalTable(GeneralRequest) returns (TableSchemaListProto);
+  rpc GetTableSchema(GeneralRequest) returns (SchemaProto);
+  rpc GetAllTableSchema(GeneralRequest) returns (TableSchemaListProto);
   rpc Query(QueryPlanProto) returns (stream DataSetProto);
 }

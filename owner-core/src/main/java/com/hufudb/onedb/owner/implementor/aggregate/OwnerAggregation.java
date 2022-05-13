@@ -49,7 +49,7 @@ public class OwnerAggregation {
     for (Row row : rows) {
       aggregator.add(row);
     }
-    while (aggregator.hasNext()) {
+    while (aggregator.next()) {
       Row row = aggregator.aggregate();
       if (isReporter) {
         result.addRow(row);

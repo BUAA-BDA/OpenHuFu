@@ -1,29 +1,27 @@
 package com.hufudb.onedb.owner;
 
-import com.hufudb.onedb.core.data.DataSet;
-import com.hufudb.onedb.core.data.Header;
-import com.hufudb.onedb.core.data.PublishedTableInfo;
-import com.hufudb.onedb.core.data.StreamObserverDataSet;
-import com.hufudb.onedb.core.data.TableInfo;
-import com.hufudb.onedb.core.data.utils.POJOPublishedTableInfo;
-import com.hufudb.onedb.core.implementor.QueryableDataSet;
-import com.hufudb.onedb.core.sql.context.OneDBContext;
 import com.hufudb.onedb.owner.adapter.Adapter;
 import com.hufudb.onedb.owner.config.OwnerConfig;
 import com.hufudb.onedb.owner.implementor.OwnerSideImplementor;
-import com.hufudb.onedb.owner.schema.SchemaManager;
-import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
-import com.hufudb.onedb.rpc.OneDBCommon.HeaderProto;
-import com.hufudb.onedb.rpc.OneDBCommon.LocalTableListProto;
-import com.hufudb.onedb.rpc.OneDBCommon.OwnerInfoProto;
-import com.hufudb.onedb.rpc.OneDBCommon.QueryContextProto;
-import com.hufudb.onedb.rpc.OneDBService.GeneralRequest;
-import com.hufudb.onedb.rpc.OneDBService.GeneralResponse;
+import com.hufudb.onedb.owner.storage.StreamDataSet;
+import com.hufudb.onedb.plan.Plan;
+import com.hufudb.onedb.data.schema.PublishedTableSchema;
+import com.hufudb.onedb.data.schema.Schema;
+import com.hufudb.onedb.data.schema.SchemaManager;
+import com.hufudb.onedb.data.schema.TableSchema;
+import com.hufudb.onedb.data.schema.utils.PojoPublishedTableSchema;
+import com.hufudb.onedb.data.storage.DataSet;
 import com.hufudb.onedb.rpc.grpc.OneDBOwnerInfo;
 import com.hufudb.onedb.rpc.grpc.OneDBRpc;
-import com.hufudb.onedb.rpc.grpc.concurrent.ConcurrentBuffer;
 import com.hufudb.onedb.rpc.Party;
-import com.hufudb.onedb.rpc.ServiceGrpc;
+import com.hufudb.onedb.proto.ServiceGrpc;
+import com.hufudb.onedb.proto.OneDBData.DataSetProto;
+import com.hufudb.onedb.proto.OneDBData.SchemaProto;
+import com.hufudb.onedb.proto.OneDBData.TableSchemaListProto;
+import com.hufudb.onedb.proto.OneDBPlan.QueryPlanProto;
+import com.hufudb.onedb.proto.OneDBService.GeneralRequest;
+import com.hufudb.onedb.proto.OneDBService.GeneralResponse;
+import com.hufudb.onedb.proto.OneDBService.OwnerInfo;
 import io.grpc.stub.StreamObserver;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -38,7 +36,6 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
   protected final String endpoint;
   protected final ExecutorService threadPool;
   protected final OneDBRpc ownerSideRpc;
-  protected final ConcurrentBuffer<Long, DataSet> resultBuffer; // taskId -> bufferDataSet
   protected final OwnerSideImplementor implementor;
   protected final Adapter adapter;
   protected final SchemaManager schemaManager;
@@ -47,7 +44,6 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
     this.threadPool = config.threadPool;
     this.endpoint = String.format("%s:%d", config.hostname, config.port);
     this.ownerSideRpc = config.acrossOwnerRpc;
-    this.resultBuffer = new ConcurrentBuffer<Long, DataSet>();
     this.adapter = config.adapter;
     this.implementor = new OwnerSideImplementor(ownerSideRpc, adapter, threadPool);
     this.schemaManager = this.adapter.getSchemaManager();
@@ -55,32 +51,31 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
   }
 
   @Override
-  public void query(QueryContextProto request, StreamObserver<DataSetProto> responseObserver) {
-    OneDBContext context = OneDBContext.fromProto(request);
-    Header header = OneDBContext.getOutputHeader(context);
-    StreamObserverDataSet obDataSet = new StreamObserverDataSet(responseObserver, header);
+  public void query(QueryPlanProto request, StreamObserver<DataSetProto> responseObserver) {
+    Plan plan = Plan.fromProto(request);
     try {
-      QueryableDataSet result = implementor.implement(context);
-      obDataSet.addRows(result.getRows());
+      DataSet result = implementor.implement(plan);
+      StreamDataSet output = new StreamDataSet(result, responseObserver);
+      output.stream();
+      output.close();
     } catch (Exception e) {
-      LOG.error("Error when query table [{}]", request.getTableName());
+      LOG.error("Error in query");
       e.printStackTrace();
     }
-    obDataSet.close();
   }
 
   @Override
   public void getOwnerInfo(GeneralRequest request,
-      StreamObserver<OwnerInfoProto> responseObserver) {
+      StreamObserver<OwnerInfo> responseObserver) {
     Party party = ownerSideRpc.ownParty();
     LOG.info("Get owner info {}", party);
     responseObserver.onNext(
-        OwnerInfoProto.newBuilder().setId(party.getPartyId()).setEndpoint(endpoint).build());
+        OwnerInfo.newBuilder().setId(party.getPartyId()).setEndpoint(endpoint).build());
     responseObserver.onCompleted();
   }
 
   @Override
-  public void addOwner(OwnerInfoProto request, StreamObserver<GeneralResponse> responseObserver) {
+  public void addOwner(OwnerInfo request, StreamObserver<GeneralResponse> responseObserver) {
     LOG.info("Connect to owner {}", OneDBOwnerInfo.fromProto(request));
     boolean ok = ownerSideRpc.addParty(OneDBOwnerInfo.fromProto(request));
     ownerSideRpc.connect();
@@ -90,11 +85,11 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
   }
 
   @Override
-  public void getTableHeader(GeneralRequest request, StreamObserver<HeaderProto> responseObserver) {
-    Header fakeHeader = getPublishedTableHeader(request.getValue());
-    HeaderProto headerProto = fakeHeader.toProto();
-    LOG.info("Get header of table {} {}", request.getValue(), fakeHeader);
-    responseObserver.onNext(headerProto);
+  public void getTableSchema(GeneralRequest request, StreamObserver<SchemaProto> responseObserver) {
+    Schema fakeSchema = getPublishedTableHeader(request.getValue());
+    SchemaProto schemaProto = fakeSchema.toProto();
+    LOG.info("Get schema of table {} {}", request.getValue(), fakeSchema);
+    responseObserver.onNext(schemaProto);
     responseObserver.onCompleted();
   }
 
@@ -106,34 +101,34 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
     return ownerSideRpc;
   }
 
-  public List<PublishedTableInfo> getAllPublishedTable() {
+  public List<PublishedTableSchema> getAllPublishedTable() {
     return schemaManager.getAllPublishedTable();
   }
 
   // todo: rename the funciton and rpc
   @Override
-  public void getAllLocalTable(GeneralRequest request,
-      StreamObserver<LocalTableListProto> responseObserver) {
-    LocalTableListProto.Builder builder = LocalTableListProto.newBuilder();
-    getAllPublishedTable().forEach(info -> builder.addTable(info.getFakeTableInfo().toProto()));
+  public void getAllTableSchema(GeneralRequest request,
+      StreamObserver<TableSchemaListProto> responseObserver) {
+    TableSchemaListProto.Builder builder = TableSchemaListProto.newBuilder();
+    getAllPublishedTable().forEach(info -> builder.addTable(info.getFakeTableSchema().toProto()));
     responseObserver.onNext(builder.build());
     LOG.info("Get {} local table infos", builder.getTableCount());
     responseObserver.onCompleted();
   }
 
   protected String getLocalTableName(String publishedTableName) {
-    return schemaManager.getLocalTableName(publishedTableName);
+    return schemaManager.getActualTableName(publishedTableName);
   }
 
-  protected Header getPublishedTableHeader(String publishedTableName) {
-    return schemaManager.getPublishedTableHeader(publishedTableName);
+  protected Schema getPublishedTableHeader(String publishedTableName) {
+    return schemaManager.getPublishedSchema(publishedTableName);
   }
 
-  public TableInfo getLocalTableInfo(String tableName) {
+  public TableSchema getLocalTableSchema(String tableName) {
     return schemaManager.getLocalTable(tableName);
   }
 
-  public List<TableInfo> getAllLocalTable() {
+  public List<TableSchema> getAllLocalTable() {
     return schemaManager.getAllLocalTable();
   }
 
@@ -145,11 +140,11 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
     schemaManager.dropPublishedTable(tableName);
   }
 
-  public void initPublishedTable(List<POJOPublishedTableInfo> infos) {
+  public void initPublishedTable(List<PojoPublishedTableSchema> infos) {
     if (infos == null) {
       return;
     }
-    for (POJOPublishedTableInfo info : infos) {
+    for (PojoPublishedTableSchema info : infos) {
       schemaManager.addPublishedTable(info);
     }
   }

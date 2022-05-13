@@ -45,8 +45,8 @@ public class MapDataSet implements DataSet {
     }
 
     @Override
-    public boolean hasNext() {
-      return iterator.hasNext();
+    public boolean next() {
+      return iterator.next();
     }
 
     @Override

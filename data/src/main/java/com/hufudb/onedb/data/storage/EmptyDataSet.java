@@ -18,7 +18,7 @@ public class EmptyDataSet implements DataSet {
         return null;
       }
       @Override
-      public boolean hasNext() {
+      public boolean next() {
         return false;
       }
     };
