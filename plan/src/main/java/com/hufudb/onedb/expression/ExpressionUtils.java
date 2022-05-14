@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.data.schema.Schema;
+import com.hufudb.onedb.data.storage.utils.ModifierWrapper;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBData.Modifier;
 import com.hufudb.onedb.proto.OneDBPlan.Expression;
@@ -38,5 +39,20 @@ public class ExpressionUtils {
   public static List<Integer> getAggInputs(Expression agg) {
     assert agg.getOpType().equals(OperatorType.AGG_FUNC);
     return agg.getInList().stream().map(exp -> exp.getI32()).collect(Collectors.toList());
+  }
+
+  public static Expression conjunctCondition(List<Expression> filters) {
+    final int size = filters.size();
+    if (size == 1) {
+      return filters.get(0);
+    }
+    Expression base = filters.get(0);
+    for (int i = 1; i < size; ++i) {
+      Expression filter = filters.get(i);
+      base = Expression.newBuilder().setOpType(OperatorType.AND).setOutType(ColumnType.BOOLEAN)
+          .setModifier(ModifierWrapper.dominate(base.getModifier(), filter.getModifier()))
+          .addIn(base).addIn(filter).build();
+    }
+    return base;
   }
 }

@@ -5,17 +5,19 @@ option java_package = "com.hufudb.onedb.proto";
 option java_outer_classname = "OneDBData";
 
 enum ColumnType {
+  // don't change the number of each type
+  // type of larger number has higher priority in type convertion
   UNKNOWN = 0;
   BOOLEAN = 1;
   BYTE = 2;
   SHORT = 3;
   INT = 4;
-  LONG = 5;
-  FLOAT = 6;
-  DOUBLE = 7;
-  DATE = 8;
-  TIME = 9;
-  TIMESTAMP = 10;
+  DATE = 5;
+  TIME = 6;
+  TIMESTAMP = 7;
+  LONG = 8;
+  FLOAT = 9;
+  DOUBLE = 10;
   STRING = 11;
   BLOB = 12;
 }
