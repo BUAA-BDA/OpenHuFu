@@ -23,6 +23,10 @@ public class EmptyDataSet implements DataSet {
       public boolean next() {
         return false;
       }
+      @Override
+      public int size() {
+        return 0;
+      }
     };
   }
 

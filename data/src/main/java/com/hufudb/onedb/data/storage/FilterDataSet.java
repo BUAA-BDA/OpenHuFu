@@ -50,5 +50,10 @@ public class FilterDataSet implements DataSet {
     public Object get(int columnIndex) {
       return iterator.get(columnIndex);
     }
+
+    @Override
+    public int size() {
+      return schema.size();
+    }
   }
 }

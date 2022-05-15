@@ -13,7 +13,7 @@ public class PlaintextSort {
     rows.sort((o1, o2) -> {
       for (OneDBOrder order : orders) {
         int compareResult;
-        switch (header.getType(order.inputRef)) {
+        switch (schema.getType(order.inputRef)) {
           case INT:
           case LONG:
           case SHORT:

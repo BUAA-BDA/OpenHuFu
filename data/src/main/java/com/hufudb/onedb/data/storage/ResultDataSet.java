@@ -142,5 +142,10 @@ public class ResultDataSet implements DataSet {
         return null;
       }
     }
+
+    @Override
+    public int size() {
+      return schema.size();
+    }
   }
 }

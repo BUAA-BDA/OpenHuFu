@@ -1,27 +1,28 @@
-package com.hufudb.onedb.core.data.utils;
+package com.hufudb.onedb.core.table.utils;
 
 import com.hufudb.onedb.core.table.OneDBTableSchema;
 import com.hufudb.onedb.core.table.TableMeta.LocalTableMeta;
+import com.hufudb.onedb.data.schema.utils.PojoSchema;
 import java.util.ArrayList;
 import java.util.List;
 
-public class POJOGlobalTableInfo {
+public class PojoGlobalTableSchema {
   String name;
-  POJOHeader header;
+  PojoSchema schema;
   List<LocalTableMeta> mappings;
 
-  public static POJOGlobalTableInfo from(OneDBTableSchema info) {
-    POJOGlobalTableInfo sinfo = new POJOGlobalTableInfo();
+  public static PojoGlobalTableSchema from(OneDBTableSchema info) {
+    PojoGlobalTableSchema sinfo = new PojoGlobalTableSchema();
     sinfo.setName(info.getName());
-    sinfo.setHeader(POJOHeader.fromHeader(info.getSchema()));
+    sinfo.setSchema(PojoSchema.fromSchema(info.getSchema()));
     sinfo.setMappings(info.getMappings());
     return sinfo;
   }
 
-  public static List<POJOGlobalTableInfo> from(List<OneDBTableSchema> info) {
-    List<POJOGlobalTableInfo> sinfo = new ArrayList<>();
+  public static List<PojoGlobalTableSchema> from(List<OneDBTableSchema> info) {
+    List<PojoGlobalTableSchema> sinfo = new ArrayList<>();
     for (OneDBTableSchema i : info) {
-      sinfo.add(POJOGlobalTableInfo.from(i));
+      sinfo.add(PojoGlobalTableSchema.from(i));
     }
     return sinfo;
   }
@@ -34,12 +35,12 @@ public class POJOGlobalTableInfo {
     this.name = name;
   }
 
-  public POJOHeader getHeader() {
-    return header;
+  public PojoSchema getSchema() {
+    return schema;
   }
 
-  public void setHeader(POJOHeader header) {
-    this.header = header;
+  public void setSchema(PojoSchema schema) {
+    this.schema = schema;
   }
 
   public List<LocalTableMeta> getMappings() {

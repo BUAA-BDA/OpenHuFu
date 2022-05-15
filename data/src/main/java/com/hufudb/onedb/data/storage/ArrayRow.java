@@ -16,8 +16,22 @@ public class ArrayRow implements Row {
     return values[columnIndex];
   }
 
+  @Override
+  public int size() {
+    return values.length;
+  }
+
   public static Builder newBuilder(int size) {
     return new Builder(size);
+  }
+
+  public static Row materialize(Row row) {
+    final int size = row.size();
+    Builder builder = new Builder(size);
+    for (int i = 0; i < size; ++i) {
+      builder.set(i, row.get(i));
+    }
+    return builder.build();
   }
 
   public static class Builder {

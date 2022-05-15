@@ -49,5 +49,10 @@ public class AggDataSet implements DataSet {
     public Object get(int columnIndex) {
       return row;
     }
+
+    @Override
+    public int size() {
+      return schema.size();
+    }
   }
 }

@@ -1,27 +1,26 @@
-package com.hufudb.onedb.core.data.utils;
+package com.hufudb.onedb.data.schema.utils;
 
-import com.hufudb.onedb.core.data.TypeConverter;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class POJOResultSet {
-  POJOHeader header;
+public class PojoResultSet {
+  PojoSchema schema;
   List<List<String>> rows;
 
-  public POJOResultSet() {}
+  public PojoResultSet() {}
 
-  public POJOResultSet(POJOHeader header, List<List<String>> rows) {
-    this.header = header;
+  public PojoResultSet(PojoSchema schema, List<List<String>> rows) {
+    this.schema = schema;
     this.rows = rows;
   }
 
-  public static POJOResultSet fromResultSet(ResultSet rs) {
+  public static PojoResultSet fromResultSet(ResultSet rs) {
     try {
       ResultSetMetaData meta = rs.getMetaData();
-      POJOHeader.Builder builder = POJOHeader.newBuilder();
+      PojoSchema.Builder builder = PojoSchema.newBuilder();
       List<List<String>> rows = new ArrayList<>();
       int columnCount = meta.getColumnCount();
       for (int i = 1; i <= columnCount; i++) {
@@ -34,19 +33,19 @@ public class POJOResultSet {
         }
         rows.add(row);
       }
-      return new POJOResultSet(builder.build(), rows);
+      return new PojoResultSet(builder.build(), rows);
     } catch (SQLException e) {
       e.printStackTrace();
-      return new POJOResultSet();
+      return new PojoResultSet();
     }
   }
 
-  public POJOHeader getHeader() {
-    return header;
+  public PojoSchema getSchema() {
+    return schema;
   }
 
-  public void setHeader(POJOHeader header) {
-    this.header = header;
+  public void setSchema(PojoSchema schema) {
+    this.schema = schema;
   }
 
   public List<List<String>> getRows() {

@@ -83,6 +83,11 @@ final public class ProtoDataSet implements DataSet {
     public Object get(int columnIndex) {
       return columns.get(columnIndex).getObject(pointer);
     }
+
+    @Override
+    public int size() {
+      return schema.size();
+    }
   }
 
   public static final class Builder {

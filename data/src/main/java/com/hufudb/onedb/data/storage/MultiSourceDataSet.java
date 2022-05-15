@@ -103,6 +103,11 @@ public class MultiSourceDataSet implements DataSet {
         return false;
       }
     }
+
+    @Override
+    public int size() {
+      return schema.size();
+    }
   }
 
   class Producer {

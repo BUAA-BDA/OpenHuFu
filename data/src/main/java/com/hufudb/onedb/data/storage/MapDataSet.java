@@ -19,6 +19,7 @@ public class MapDataSet implements DataSet {
   }
 
   public static MapDataSet create(Schema schema, List<Mapper> mappings, DataSet source) {
+    assert schema.size() == mappings.size();
     return new MapDataSet(schema, mappings, source);
   }
 
@@ -52,6 +53,11 @@ public class MapDataSet implements DataSet {
     @Override
     public Object get(int columnIndex) {
       return mappings.get(columnIndex).map(iterator);
+    }
+
+    @Override
+    public int size() {
+      return schema.size();
     }
   }
 }
