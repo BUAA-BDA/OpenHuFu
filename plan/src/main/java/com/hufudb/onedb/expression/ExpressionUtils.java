@@ -2,11 +2,9 @@ package com.hufudb.onedb.expression;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.data.storage.utils.ModifierWrapper;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
-import com.hufudb.onedb.proto.OneDBData.Modifier;
 import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
 import org.slf4j.Logger;
@@ -23,22 +21,33 @@ public class ExpressionUtils {
     return builder.build();
   }
 
-  public static Expression createRef(ColumnType type, Modifier modifier, int ref) {
-    return Expression.newBuilder().setOpType(OperatorType.REF).setOutType(type)
-        .setModifier(modifier).setI32(ref).build();
-  }
-
-  public static List<Expression> toRefs(List<Expression> exps) {
-    ImmutableList.Builder<Expression> ans = ImmutableList.builder();
-    for (int i = 0; i < exps.size(); ++i) {
-      ans.add(createRef(exps.get(i).getOutType(), exps.get(i).getModifier(), i));
-    }
-    return ans.build();
-  }
-
   public static List<Integer> getAggInputs(Expression agg) {
     assert agg.getOpType().equals(OperatorType.AGG_FUNC);
     return agg.getInList().stream().map(exp -> exp.getI32()).collect(Collectors.toList());
+  }
+
+  public static Object getLiteral(Expression lit) {
+    switch (lit.getOutType()) {
+      case BOOLEAN:
+        return lit.getB();
+      case STRING:
+        return lit.getStr();
+      case FLOAT:
+        return lit.getF32();
+      case DOUBLE:
+        return lit.getF64();
+      case BYTE:
+      case SHORT:
+      case INT:
+        return lit.getI32();
+      case LONG:
+      case DATE:
+      case TIME:
+      case TIMESTAMP:
+        return lit.getI64();
+      default:
+        throw new UnsupportedOperationException("Unsupported literal type");
+    }
   }
 
   public static Expression conjunctCondition(List<Expression> filters) {

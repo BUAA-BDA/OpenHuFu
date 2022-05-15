@@ -7,6 +7,7 @@ import com.hufudb.onedb.data.function.Mapper;
 import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.data.storage.DataSet;
 import com.hufudb.onedb.data.storage.FilterDataSet;
+import com.hufudb.onedb.data.storage.MapDataSet;
 import com.hufudb.onedb.data.storage.Row;
 import com.hufudb.onedb.expression.ExpressionUtils;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
@@ -14,15 +15,28 @@ import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
 
 public class Interpreter {
-  private Interpreter() {}
+  private Interpreter() {
+  }
 
   public static DataSet filter(DataSet source, List<Expression> conditions) {
     if (conditions.isEmpty()) {
       return source;
     } else {
-      Expression condition = ExpressionUtils.conjunctCondition(conditions);
-      Schema schema = source.getSchema();
+      final Expression condition = ExpressionUtils.conjunctCondition(conditions);
+      final Schema schema = source.getSchema();
       return new FilterDataSet(schema, new InterpretiveFilter(schema, condition), source);
+    }
+  }
+
+  public static DataSet map(DataSet source, List<Expression> exps) {
+    if (exps.isEmpty()) {
+      return source;
+    } else {
+      final Schema sourceSchema = source.getSchema();
+      final Schema outSchema = ExpressionUtils.createSchema(exps);
+      List<Mapper> maps = exps.stream().map(exp -> new InterpretivMapper(sourceSchema, exp))
+          .collect(Collectors.toList());
+      return MapDataSet.create(outSchema, maps, source);
     }
   }
 
@@ -63,7 +77,11 @@ public class Interpreter {
   public static Object implement(Row row, Expression e) {
     final List<Expression> inputs = e.getInList();
     final OperatorType type = e.getOpType();
-    switch(type) {
+    switch (type) {
+      case REF:
+        return row.get(e.getI32());
+      case LITERAL:
+        return ExpressionUtils.getLiteral(e);
       case AND:
       case OR:
       case NOT:
@@ -100,7 +118,6 @@ public class Interpreter {
         throw new UnsupportedOperationException("operator not support in intereperter");
     }
   }
-
 
   private static Boolean calBoolean(Row row, OperatorType type, List<Expression> inputs) {
     switch (type) {
@@ -151,7 +168,8 @@ public class Interpreter {
     if (left == null || right == null) {
       return null;
     }
-    final int cmp = ((Comparable) left).compareTo(right);
+    ColumnType dType = dominate(inputs.get(0).getOutType(), inputs.get(1).getOutType());
+    final int cmp = ((Comparable) cast(dType, (Number) left)).compareTo((Comparable) cast(dType, (Number) right));
     switch (type) {
       case GT:
         return cmp > 0;
@@ -179,9 +197,9 @@ public class Interpreter {
   }
 
   private static Number calculate(Row row, OperatorType type, List<Expression> inputExps) {
-    List<Number> inputs =
-      inputExps.stream().map(e -> (Number) implement(row, e)).collect(Collectors.toList());
-    ColumnType calType = inputExps.stream().reduce(ColumnType.INT, (d, t) -> dominate(d, t.getOutType()), (t1, t2) -> dominate(t1, t2));
+    List<Number> inputs = inputExps.stream().map(e -> (Number) implement(row, e)).collect(Collectors.toList());
+    ColumnType calType = inputExps.stream().reduce(ColumnType.INT, (d, t) -> dominate(d, t.getOutType()),
+        (t1, t2) -> dominate(t1, t2));
     for (Object in : inputs) {
       if (in == null) {
         return null;
@@ -204,19 +222,19 @@ public class Interpreter {
   private static int calInt(OperatorType type, List<Number> inputs) {
     switch (type) {
       case PLUS:
-        return (int) inputs.get(0) + (int) inputs.get(1);
+        return inputs.get(0).intValue() + inputs.get(1).intValue();
       case MINUS:
-        return (int) inputs.get(0) - (int) inputs.get(1);
+        return inputs.get(0).intValue() - inputs.get(1).intValue();
       case TIMES:
-        return (int) inputs.get(0) * (int) inputs.get(1);
+        return inputs.get(0).intValue() * inputs.get(1).intValue();
       case DIVIDE:
-        return (int) inputs.get(0) / (int) inputs.get(1);
+        return inputs.get(0).intValue() / inputs.get(1).intValue();
       case MOD:
-        return (int) inputs.get(0) % (int) inputs.get(1);
+        return inputs.get(0).intValue() % inputs.get(1).intValue();
       case PLUS_PRE:
-        return (int) inputs.get(0);
+        return inputs.get(0).intValue();
       case MINUS_PRE:
-        return -(int) inputs.get(0);
+        return -inputs.get(0).intValue();
       default:
         throw new UnsupportedOperationException("not support op type");
     }
@@ -225,19 +243,19 @@ public class Interpreter {
   private static long calLong(OperatorType type, List<Number> inputs) {
     switch (type) {
       case PLUS:
-        return (long) inputs.get(0) + (long) inputs.get(1);
+        return inputs.get(0).longValue() + inputs.get(1).longValue();
       case MINUS:
-        return (long) inputs.get(0) - (long) inputs.get(1);
+        return inputs.get(0).longValue() - inputs.get(1).longValue();
       case TIMES:
-        return (long) inputs.get(0) * (long) inputs.get(1);
+        return inputs.get(0).longValue() * inputs.get(1).longValue();
       case DIVIDE:
-        return (long) inputs.get(0) / (long) inputs.get(1);
+        return inputs.get(0).longValue() / inputs.get(1).longValue();
       case MOD:
-        return (long) inputs.get(0) % (long) inputs.get(1);
+        return inputs.get(0).longValue() % inputs.get(1).longValue();
       case PLUS_PRE:
-        return (long) inputs.get(0);
+        return inputs.get(0).longValue();
       case MINUS_PRE:
-        return -(long) inputs.get(0);
+        return -inputs.get(0).longValue();
       default:
         throw new UnsupportedOperationException("not support op type");
     }
@@ -246,19 +264,19 @@ public class Interpreter {
   private static float calFloat(OperatorType type, List<Number> inputs) {
     switch (type) {
       case PLUS:
-        return (float) inputs.get(0) + (float) inputs.get(1);
+        return inputs.get(0).floatValue() + inputs.get(1).floatValue();
       case MINUS:
-        return (float) inputs.get(0) - (float) inputs.get(1);
+        return inputs.get(0).floatValue() - inputs.get(1).floatValue();
       case TIMES:
-        return (float) inputs.get(0) * (float) inputs.get(1);
+        return inputs.get(0).floatValue() * inputs.get(1).floatValue();
       case DIVIDE:
-        return (float) inputs.get(0) / (float) inputs.get(1);
+        return inputs.get(0).floatValue() / inputs.get(1).floatValue();
       case MOD:
-        return (float) inputs.get(0) % (float) inputs.get(1);
+        return inputs.get(0).floatValue() % inputs.get(1).floatValue();
       case PLUS_PRE:
-        return (float) inputs.get(0);
+        return inputs.get(0).floatValue();
       case MINUS_PRE:
-        return -(float) inputs.get(0);
+        return -inputs.get(0).floatValue();
       default:
         throw new UnsupportedOperationException("not support op type");
     }
@@ -267,19 +285,19 @@ public class Interpreter {
   private static double calDouble(OperatorType type, List<Number> inputs) {
     switch (type) {
       case PLUS:
-        return (double) inputs.get(0) + (double) inputs.get(1);
+        return inputs.get(0).doubleValue() + inputs.get(1).doubleValue();
       case MINUS:
-        return (double) inputs.get(0) - (double) inputs.get(1);
+        return inputs.get(0).doubleValue() - inputs.get(1).doubleValue();
       case TIMES:
-        return (double) inputs.get(0) * (double) inputs.get(1);
+        return inputs.get(0).doubleValue() * inputs.get(1).doubleValue();
       case DIVIDE:
-        return (double) inputs.get(0) / (double) inputs.get(1);
+        return inputs.get(0).doubleValue() / inputs.get(1).doubleValue();
       case MOD:
-        return (double) inputs.get(0) % (double) inputs.get(1);
+        return inputs.get(0).doubleValue() % inputs.get(1).doubleValue();
       case PLUS_PRE:
-        return (double) inputs.get(0);
+        return inputs.get(0).doubleValue();
       case MINUS_PRE:
-        return -(double) inputs.get(0);
+        return -inputs.get(0).doubleValue();
       default:
         throw new UnsupportedOperationException("not support op type");
     }
@@ -289,6 +307,7 @@ public class Interpreter {
     if (value == null) {
       return null;
     }
+    // todo: support cast more types
     switch (type) {
       case INT:
         return value.intValue();

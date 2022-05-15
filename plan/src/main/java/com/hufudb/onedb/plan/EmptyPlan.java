@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.data.storage.utils.ModifierWrapper;
+import com.hufudb.onedb.expression.ExpressionFactory;
 import com.hufudb.onedb.expression.ExpressionUtils;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBData.Modifier;
@@ -17,7 +18,7 @@ public class EmptyPlan extends BasePlan {
   List<Expression> output;
 
   public EmptyPlan(List<Expression> output) {
-    this.output = ExpressionUtils.toRefs(output);
+    this.output = ExpressionFactory.createInputRef(output);
   }
 
   public QueryPlanProto toProto() {
