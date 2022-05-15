@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import com.hufudb.onedb.core.data.FieldType;
+import com.hufudb.onedb.core.data.ColumnType;
 import com.hufudb.onedb.core.data.Row;
 import com.hufudb.onedb.core.data.Row.RowBuilder;
 
@@ -14,10 +14,10 @@ public class GroupAggregator implements Aggregator {
   final int aggLength;
   final Map<Row, SingleAggregator> aggregatorMap;
   final RowBuilder keyBuilder;
-  final List<FieldType> types;
+  final List<ColumnType> types;
   Iterator<Map.Entry<Row, SingleAggregator>> iterator;
 
-  GroupAggregator(List<Integer> groups, List<FieldType> outTypes, SingleAggregator baseAggregator) {
+  GroupAggregator(List<Integer> groups, List<ColumnType> outTypes, SingleAggregator baseAggregator) {
     this.groups = groups;
     this.types = outTypes;
     this.baseAggregator = baseAggregator;
@@ -28,7 +28,7 @@ public class GroupAggregator implements Aggregator {
   }
 
   public GroupAggregator(List<Integer> groups, List<AggregateFunction<Row, Comparable>> aggFunc,
-      List<FieldType> aggOutputTypes) {
+      List<ColumnType> aggOutputTypes) {
     this.groups = groups;
     this.types = aggOutputTypes;
     this.baseAggregator = new SingleAggregator(aggFunc, aggOutputTypes);
@@ -88,7 +88,7 @@ public class GroupAggregator implements Aggregator {
   }
 
   @Override
-  public List<FieldType> getOutputTypes() {
+  public List<ColumnType> getOutputTypes() {
     return types;
   }
 

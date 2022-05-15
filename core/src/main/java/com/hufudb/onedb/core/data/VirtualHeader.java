@@ -5,7 +5,7 @@ import java.util.List;
 /*
  *
  */
-public class VirtualHeader extends Header {
+public class VirtualHeader extends Schema {
 
   private List<Integer> mapping;
 
@@ -29,7 +29,7 @@ public class VirtualHeader extends Header {
   }
 
   @Override
-  public FieldType getType(int index) {
+  public ColumnType getType(int index) {
     int idx = mapping.get(index);
     return super.getType(idx);
   }

@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 public interface DataSet {
   static final Logger LOG = LoggerFactory.getLogger(DataSet.class);
 
-  Header getHeader();
+  Schema getHeader();
 
   int getRowCount();
 

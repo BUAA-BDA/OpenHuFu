@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import com.hufudb.onedb.core.client.OneDBClient;
 import com.hufudb.onedb.core.client.OwnerClient;
-import com.hufudb.onedb.core.data.FieldType;
+import com.hufudb.onedb.core.data.ColumnType;
 import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.rewriter.OneDBRewriter;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
@@ -45,7 +45,7 @@ public class OneDBPlaceholderContext extends OneDBBaseContext {
   }
 
   @Override
-  public List<FieldType> getOutTypes() {
+  public List<ColumnType> getOutTypes() {
     return output.stream().map(exp -> exp.getOutType()).collect(Collectors.toList());
   }
 

@@ -5,7 +5,7 @@ import com.hufudb.onedb.core.data.TableInfo;
 import com.hufudb.onedb.core.sql.rel.OneDBTable;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
 import com.hufudb.onedb.core.sql.schema.OneDBSchemaFactory;
-import com.hufudb.onedb.core.table.OneDBTableInfo;
+import com.hufudb.onedb.core.table.OneDBTableSchema;
 import com.hufudb.onedb.core.table.TableMeta;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -110,15 +110,15 @@ public class OneDB {
   }
 
   public List<TableInfo> getDBTableInfo(String endpoint) {
-    return schema.getDBClient(endpoint).getAllLocalTable();
+    return schema.getOwnerClient(endpoint).getAllLocalTable();
   }
 
   // for table
-  public List<OneDBTableInfo> getAllOneDBTableInfo() {
+  public List<OneDBTableSchema> getAllOneDBTableInfo() {
     return schema.getAllOneDBTableInfo();
   }
 
-  public OneDBTableInfo getOneDBTableInfo(String tableName) {
+  public OneDBTableSchema getOneDBTableInfo(String tableName) {
     return schema.getOneDBTableInfo(tableName);
   }
 

@@ -11,10 +11,10 @@ public class StreamObserverDataSet implements DataSet {
   private final int BATCH_SIZE = 100;
   private int count;
   private int rowCount;
-  private final Header header;
+  private final Schema header;
   private final List<Row> rows;
 
-  public StreamObserverDataSet(final StreamObserver<DataSetProto> observer, Header header) {
+  public StreamObserverDataSet(final StreamObserver<DataSetProto> observer, Schema header) {
     this.header = header;
     this.observer = observer;
     count = 0;
@@ -23,7 +23,7 @@ public class StreamObserverDataSet implements DataSet {
   }
 
   @Override
-  public Header getHeader() {
+  public Schema getHeader() {
     return header;
   }
 

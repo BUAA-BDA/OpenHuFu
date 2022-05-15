@@ -1,7 +1,7 @@
 package com.hufudb.onedb;
 
 import com.google.common.collect.ImmutableList;
-import com.hufudb.onedb.core.data.FieldType;
+import com.hufudb.onedb.core.data.ColumnType;
 import com.hufudb.onedb.core.table.TableMeta;
 import org.junit.Before;
 import org.junit.Test;
@@ -62,7 +62,7 @@ public class OneDBTest {
             "l_quantity " +
             "from lineitem " +
             "where  l_shipdate <= 755366400 and l_extendedprice * l_tax >= 230");
-    List<FieldType> header = Arrays.asList(FieldType.STRING, FieldType.DOUBLE, FieldType.DOUBLE, FieldType.DOUBLE);
+    List<ColumnType> header = Arrays.asList(ColumnType.STRING, ColumnType.DOUBLE, ColumnType.DOUBLE, ColumnType.DOUBLE);
     ResultDataSet resultDataSet = new ResultDataSet();
     resultDataSet.addOutput(rs);
     resultDataSet.addRealAnswer("sql1.csv", header);
@@ -75,7 +75,7 @@ public class OneDBTest {
             "or o_orderpriority = '2-HIGH'  then 1  else 0  end " +
             "from  orders  where  " +
             "o_totalprice * o_totalprice / o_totalprice < 90000");
-    List<FieldType> header = Collections.singletonList(FieldType.INT);
+    List<ColumnType> header = Collections.singletonList(ColumnType.INT);
     ResultDataSet resultDataSet = new ResultDataSet();
     resultDataSet.addOutput(rs);
     resultDataSet.addRealAnswer("sql2.csv", header);
@@ -87,7 +87,7 @@ public class OneDBTest {
     ResultSet rs = oneDB.executeQuery("select distinct l_orderkey " +
             "from  lineitem where   " +
             "l_commitdate < l_receiptdate or l_discount > l_tax");
-    List<FieldType> header = Collections.singletonList(FieldType.INT);
+    List<ColumnType> header = Collections.singletonList(ColumnType.INT);
     ResultDataSet resultDataSet = new ResultDataSet();
     resultDataSet.addOutput(rs);
     resultDataSet.addRealAnswer("sql3.csv", header);
@@ -102,8 +102,8 @@ public class OneDBTest {
             "avg(l_extendedprice / (l_extendedprice * (1 - l_discount) * (1 + l_tax))),  " +
             "max(l_extendedprice) * min(l_extendedprice * (1 - l_discount)),  " +
             "count(*) from  lineitem");
-    List<FieldType> header = Arrays.asList(FieldType.DOUBLE, FieldType.DOUBLE, FieldType.DOUBLE,
-            FieldType.DOUBLE, FieldType.DOUBLE, FieldType.DOUBLE, FieldType.LONG);
+    List<ColumnType> header = Arrays.asList(ColumnType.DOUBLE, ColumnType.DOUBLE, ColumnType.DOUBLE,
+            ColumnType.DOUBLE, ColumnType.DOUBLE, ColumnType.DOUBLE, ColumnType.LONG);
     ResultDataSet resultDataSet = new ResultDataSet();
     resultDataSet.addOutput(rs);
     resultDataSet.addRealAnswer("sql4.csv", header);
@@ -120,9 +120,9 @@ public class OneDBTest {
             "avg(l_discount) as avg_disc,  count(*) as count_order " +
             "from  lineitem " +
             "group by  l_returnflag,  l_linestatus");
-    List<FieldType> header = Arrays.asList(FieldType.STRING, FieldType.STRING ,FieldType.DOUBLE,
-            FieldType.DOUBLE, FieldType.DOUBLE, FieldType.DOUBLE,
-            FieldType.DOUBLE, FieldType.DOUBLE, FieldType.DOUBLE, FieldType.LONG);
+    List<ColumnType> header = Arrays.asList(ColumnType.STRING, ColumnType.STRING ,ColumnType.DOUBLE,
+            ColumnType.DOUBLE, ColumnType.DOUBLE, ColumnType.DOUBLE,
+            ColumnType.DOUBLE, ColumnType.DOUBLE, ColumnType.DOUBLE, ColumnType.LONG);
     ResultDataSet resultDataSet = new ResultDataSet();
     resultDataSet.addOutput(rs);
     resultDataSet.addRealAnswer("sql5.csv", header);
@@ -137,7 +137,7 @@ public class OneDBTest {
             "l_shipinstruct DESC,  " +
             "l_extendedprice * l_discount / l_quantity ASC , l_orderkey " +
             "limit 100 offset 20");
-    List<FieldType> header = Arrays.asList(FieldType.INT, FieldType.DOUBLE);
+    List<ColumnType> header = Arrays.asList(ColumnType.INT, ColumnType.DOUBLE);
     ResultDataSet resultDataSet = new ResultDataSet();
     resultDataSet.addOutput(rs);
     resultDataSet.addRealAnswer("sql6.csv", header);
@@ -150,8 +150,8 @@ public class OneDBTest {
             "o_orderdate,  o_totalprice " +
             "from  customer,  orders,  lineitem " +
             "where  c_custkey = o_custkey  and o_orderkey = l_orderkey");
-    List<FieldType> header = Arrays.asList(FieldType.STRING, FieldType.INT, FieldType.INT,
-            FieldType.INT, FieldType.DOUBLE);
+    List<ColumnType> header = Arrays.asList(ColumnType.STRING, ColumnType.INT, ColumnType.INT,
+            ColumnType.INT, ColumnType.DOUBLE);
     ResultDataSet resultDataSet = new ResultDataSet();
     resultDataSet.addOutput(rs);
     resultDataSet.addRealAnswer("sql7.csv", header);

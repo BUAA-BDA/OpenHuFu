@@ -27,10 +27,6 @@ public interface Plan {
 
   List<Modifier> getOutModifiers();
 
-  Plan getParent();
-
-  void setParent(Plan parent);
-
   List<Plan> getChildren();
 
   void setChildren(List<Plan> children);

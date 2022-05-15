@@ -1,8 +1,8 @@
 package com.hufudb.onedb.core.sql.rel;
 
 import com.google.common.collect.ImmutableList;
-import com.hufudb.onedb.core.sql.expression.OneDBExpression;
-import com.hufudb.onedb.core.sql.expression.OneDBOperator;
+import com.hufudb.onedb.core.sql.expression.CalciteConverter;
+import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import java.util.List;
 import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelOptCost;
@@ -15,20 +15,16 @@ import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rex.RexNode;
 
 public class OneDBProject extends Project implements OneDBRel {
-  public OneDBProject(
-      RelOptCluster cluster,
-      RelTraitSet traitSet,
-      RelNode input,
-      List<? extends RexNode> projects,
-      RelDataType rowType) {
+  public OneDBProject(RelOptCluster cluster, RelTraitSet traitSet, RelNode input,
+      List<? extends RexNode> projects, RelDataType rowType) {
     super(cluster, traitSet, ImmutableList.of(), input, projects, rowType);
     assert getConvention() == OneDBProject.CONVENTION;
     assert getConvention() == input.getConvention();
   }
 
   @Override
-  public Project copy(
-      RelTraitSet traitSet, RelNode input, List<RexNode> projects, RelDataType rowType) {
+  public Project copy(RelTraitSet traitSet, RelNode input, List<RexNode> projects,
+      RelDataType rowType) {
     return new OneDBProject(getCluster(), traitSet, input, projects, rowType);
   }
 
@@ -40,12 +36,11 @@ public class OneDBProject extends Project implements OneDBRel {
   @Override
   public void implement(Implementor implementor) {
     implementor.visitChild((OneDBRel) getInput());
-    List<OneDBExpression> exps =
-        OneDBOperator.fromRexNodes(getProjects(), implementor.getCurrentOutput());
-    List<OneDBExpression> aggs = implementor.getAggExps();
-    if (aggs != null && !aggs.isEmpty()) {
-      aggs.clear();
-      aggs.addAll(exps);
+    List<Expression> exps =
+        CalciteConverter.convert(getProjects(), implementor.getCurrentOutput());
+    List<Expression> aggs = implementor.getAggExps();
+    if (!aggs.isEmpty()) {
+      implementor.setAggExps(exps);
     } else {
       implementor.setSelectExps(exps);
     }

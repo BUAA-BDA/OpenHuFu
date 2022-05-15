@@ -20,7 +20,6 @@ import com.hufudb.onedb.rewriter.Rewriter;
  * Plan for single global table query (horizontal partitioned table)
  */
 public class LeafPlan extends BasePlan {
-  Plan parent;
   String tableName;
   List<Expression> selectExps = ImmutableList.of();
   List<Expression> whereExps = ImmutableList.of();
@@ -66,16 +65,6 @@ public class LeafPlan extends BasePlan {
   @Override
   public PlanType getPlanType() {
     return PlanType.LEAF;
-  }
-
-  @Override
-  public Plan getParent() {
-    return parent;
-  }
-
-  @Override
-  public void setParent(Plan parent) {
-    this.parent = parent;
   }
 
   @Override

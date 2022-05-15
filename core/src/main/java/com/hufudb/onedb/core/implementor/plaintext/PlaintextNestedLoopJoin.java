@@ -1,6 +1,6 @@
 package com.hufudb.onedb.core.implementor.plaintext;
 
-import com.hufudb.onedb.core.data.Header;
+import com.hufudb.onedb.core.data.Schema;
 import com.hufudb.onedb.core.data.Row;
 import com.hufudb.onedb.core.implementor.QueryableDataSet;
 import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
@@ -17,7 +17,7 @@ public class PlaintextNestedLoopJoin {
     List<Row> rigthData = right.getRows();
     List<OneDBExpression> filters = joinInfo.getConditions();
     final boolean hasThetaJoin = filters.size() > 0;
-    Header outputHeader = Header.joinHeader(left.getHeader(), right.getHeader());
+    Schema outputHeader = Schema.joinHeader(left.getHeader(), right.getHeader());
     QueryableDataSet result = PlaintextQueryableDataSet.fromHeader(outputHeader);
     for (Row lr : leftData) {
       for (Row rr : rigthData) {

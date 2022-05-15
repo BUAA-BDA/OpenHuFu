@@ -22,7 +22,6 @@ import com.hufudb.onedb.rewriter.Rewriter;
  * (e.g., outer layer of nested aggregation)
  */
 public class UnaryPlan extends BasePlan {
-  Plan parent;
   Plan child;
   List<Expression> aggExps = ImmutableList.of();
   List<Expression> selectExps = ImmutableList.of();
@@ -47,16 +46,6 @@ public class UnaryPlan extends BasePlan {
     plan.setOffset(proto.getOffset());
     plan.taskInfo = proto.getTaskInfo();
     return plan;
-  }
-
-  @Override
-  public Plan getParent() {
-    return parent;
-  }
-
-  @Override
-  public void setParent(Plan parent) {
-    this.parent = parent;
   }
 
   @Override

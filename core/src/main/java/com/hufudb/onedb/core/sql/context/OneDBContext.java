@@ -2,8 +2,8 @@ package com.hufudb.onedb.core.sql.context;
 
 import com.hufudb.onedb.core.client.OneDBClient;
 import com.hufudb.onedb.core.client.OwnerClient;
-import com.hufudb.onedb.core.data.FieldType;
-import com.hufudb.onedb.core.data.Header;
+import com.hufudb.onedb.core.data.ColumnType;
+import com.hufudb.onedb.core.data.Schema;
 import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.implementor.OneDBImplementor;
 import com.hufudb.onedb.core.implementor.QueryableDataSet;
@@ -28,7 +28,7 @@ public interface OneDBContext {
 
   List<OneDBExpression> getOutExpressions();
 
-  List<FieldType> getOutTypes();
+  List<ColumnType> getOutTypes();
 
   Level getContextLevel();
 
@@ -88,29 +88,29 @@ public interface OneDBContext {
 
   OneDBContext rewrite(OneDBRewriter rewriter);
 
-  public static Header getOutputHeader(OneDBContext context) {
-    Header.Builder builder = Header.newBuilder();
+  public static Schema getOutputHeader(OneDBContext context) {
+    Schema.Builder builder = Schema.newBuilder();
     List<OneDBExpression> exps = context.getOutExpressions();
     exps.stream().forEach(exp -> builder.add("", exp.getOutType(), exp.getLevel()));
     return builder.build();
   }
 
-  public static List<FieldType> getOutputTypes(QueryContextProto proto) {
+  public static List<ColumnType> getOutputTypes(QueryContextProto proto) {
     if (proto.getAggExpCount() > 0) {
-      return proto.getAggExpList().stream().map(agg -> FieldType.of(agg.getOutType()))
+      return proto.getAggExpList().stream().map(agg -> ColumnType.of(agg.getOutType()))
           .collect(Collectors.toList());
     } else {
-      return proto.getSelectExpList().stream().map(sel -> FieldType.of(sel.getOutType()))
+      return proto.getSelectExpList().stream().map(sel -> ColumnType.of(sel.getOutType()))
           .collect(Collectors.toList());
     }
   }
 
-  public static List<FieldType> getOutputTypes(QueryContextProto proto, List<Integer> indexs) {
+  public static List<ColumnType> getOutputTypes(QueryContextProto proto, List<Integer> indexs) {
     if (proto.getAggExpCount() > 0) {
-      return indexs.stream().map(id -> FieldType.of(proto.getAggExp(id).getOutType()))
+      return indexs.stream().map(id -> ColumnType.of(proto.getAggExp(id).getOutType()))
           .collect(Collectors.toList());
     } else {
-      return indexs.stream().map(id -> FieldType.of(proto.getSelectExp(id).getOutType()))
+      return indexs.stream().map(id -> ColumnType.of(proto.getSelectExp(id).getOutType()))
           .collect(Collectors.toList());
     }
   }

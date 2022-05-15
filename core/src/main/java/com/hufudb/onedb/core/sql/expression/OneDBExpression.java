@@ -1,7 +1,7 @@
 package com.hufudb.onedb.core.sql.expression;
 
-import com.hufudb.onedb.core.data.FieldType;
-import com.hufudb.onedb.core.data.Header;
+import com.hufudb.onedb.core.data.ColumnType;
+import com.hufudb.onedb.core.data.Schema;
 import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.sql.expression.OneDBOperator.FuncType;
 import com.hufudb.onedb.rpc.OneDBCommon.ExpressionProto;
@@ -13,18 +13,18 @@ import java.util.stream.Collectors;
  * OneDBTranslator.java, 2. add an entry in Interpreter
  */
 public interface OneDBExpression {
-  static Header generateHeader(List<OneDBExpression> exps) {
-    Header.Builder builder = Header.newBuilder();
+  static Schema generateHeader(List<OneDBExpression> exps) {
+    Schema.Builder builder = Schema.newBuilder();
     exps.stream().forEach(exp -> {
       builder.add("", exp.getOutType(), exp.getLevel());
     });
     return builder.build();
   }
 
-  static Header generateHeaderFromProto(List<ExpressionProto> exps) {
-    Header.Builder builder = Header.newBuilder();
+  static Schema generateHeaderFromProto(List<ExpressionProto> exps) {
+    Schema.Builder builder = Schema.newBuilder();
     exps.stream().forEach(exp -> {
-      builder.add("", FieldType.of(exp.getOutType()), Level.of(exp.getLevel()));
+      builder.add("", ColumnType.of(exp.getOutType()), Level.of(exp.getLevel()));
     });
     return builder.build();
   }
@@ -42,7 +42,7 @@ public interface OneDBExpression {
         break;
     }
     FuncType funcType = FuncType.of(proto.getFunc());
-    FieldType outType = FieldType.of(proto.getOutType());
+    ColumnType outType = ColumnType.of(proto.getOutType());
     Level level = Level.of(proto.getLevel());
     List<OneDBExpression> elements = proto.getInList().stream()
         .map(ele -> OneDBExpression.fromProto(ele)).collect(Collectors.toList());
@@ -59,7 +59,7 @@ public interface OneDBExpression {
 
   ExpressionProto toProto();
 
-  FieldType getOutType();
+  ColumnType getOutType();
 
   Level getLevel();
 

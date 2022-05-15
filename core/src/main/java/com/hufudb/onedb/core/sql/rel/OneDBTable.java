@@ -1,13 +1,13 @@
 package com.hufudb.onedb.core.sql.rel;
 
 import com.hufudb.onedb.core.client.OwnerClient;
-import com.hufudb.onedb.core.data.Header;
-import com.hufudb.onedb.core.data.TableInfo;
 import com.hufudb.onedb.core.data.TypeConverter;
 import com.hufudb.onedb.core.sql.enumerator.OneDBEnumerator;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
-import com.hufudb.onedb.core.table.OneDBTableInfo;
+import com.hufudb.onedb.core.table.OneDBTableSchema;
 import com.hufudb.onedb.core.table.TableMeta;
+import com.hufudb.onedb.data.schema.Schema;
+import com.hufudb.onedb.data.schema.TableSchema;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -39,58 +39,54 @@ import org.slf4j.LoggerFactory;
 public class OneDBTable extends AbstractQueryableTable implements TranslatableTable {
   private static final Logger LOG = LoggerFactory.getLogger(OneDBTable.class);
 
-  final OneDBSchema schema;
+  final OneDBSchema rootSchema;
   final RelProtoDataType protoRowType;
-  final OneDBTableInfo tableInfo;
+  final OneDBTableSchema tableInfo;
 
-  OneDBTable(String tableName, OneDBSchema schema, Header header, RelProtoDataType protoRowType) {
+  OneDBTable(String tableName, OneDBSchema rootSchema, Schema schema,
+      RelProtoDataType protoRowType) {
     super(Object[].class);
-    this.schema = schema;
+    this.rootSchema = rootSchema;
     this.protoRowType = protoRowType;
-    this.tableInfo = new OneDBTableInfo(tableName, header);
+    this.tableInfo = new OneDBTableSchema(tableName, schema);
   }
 
-  static Table create(
-      OneDBSchema schema, String tableName, Header header, RelProtoDataType protoRowType) {
-    return new OneDBTable(tableName, schema, header, protoRowType);
+  static Table create(OneDBSchema rootSchema, String tableName, Schema schema,
+      RelProtoDataType protoRowType) {
+    return new OneDBTable(tableName, rootSchema, schema, protoRowType);
   }
 
-  public static Table create(OneDBSchema schema, TableMeta tableMeta) {
+  public static Table create(OneDBSchema rootSchema, TableMeta tableMeta) {
     final String tableName = tableMeta.tableName;
     OneDBTable table = null;
-    List<Pair<OwnerClient, TableInfo>> localInfos = new ArrayList<>();
+    List<Pair<OwnerClient, TableSchema>> localInfos = new ArrayList<>();
     for (TableMeta.LocalTableMeta fedMeta : tableMeta.localTables) {
-      OwnerClient client = schema.getDBClient(fedMeta.endpoint);
+      OwnerClient client = rootSchema.getOwnerClient(fedMeta.endpoint);
       if (client == null) {
         LOG.error("No connection to owner {}", fedMeta.endpoint);
         continue;
       }
-      Header header = client.getTableHeader(fedMeta.localName);
-      LOG.info(
-          "Table {} header {} from {}", fedMeta.localName, header.toString(), fedMeta.endpoint);
-      localInfos.add(Pair.of(client, TableInfo.of(fedMeta.localName, header)));
+      Schema schema = client.getTableSchema(fedMeta.localName);
+      LOG.info("Table {} schema {} from {}", fedMeta.localName, schema.toString(),
+          fedMeta.endpoint);
+      localInfos.add(Pair.of(client, TableSchema.of(fedMeta.localName, schema)));
     }
     if (localInfos.size() > 0) {
-      TableInfo standard = localInfos.get(0).getValue();
-      for (Pair<OwnerClient, TableInfo> pair : localInfos) {
-        if (!standard.getHeader().equals(pair.getValue().getHeader())) {
-          LOG.warn(
-              "Header of {} {} {} mismatch with {} {} {}",
-              localInfos.get(0).getKey(),
-              localInfos.get(0).getValue().getName(),
-              standard,
-              pair.getKey(),
-              standard.getName(),
-              standard.getHeader());
+      TableSchema standard = localInfos.get(0).getValue();
+      for (Pair<OwnerClient, TableSchema> pair : localInfos) {
+        if (!standard.getSchema().equals(pair.getValue().getSchema())) {
+          LOG.warn("Schema of {} {} {} mismatch with {} {} {}", localInfos.get(0).getKey(),
+              localInfos.get(0).getValue().getName(), standard, pair.getKey(), standard.getName(),
+              standard.getSchema());
           return null;
         }
       }
-      RelProtoDataType dataType = getRelDataType(standard.getHeader());
-      table = new OneDBTable(tableName, schema, standard.getHeader(), dataType);
-      for (Pair<OwnerClient, TableInfo> pair : localInfos) {
+      RelProtoDataType dataType = getRelDataType(standard.getSchema());
+      table = new OneDBTable(tableName, rootSchema, standard.getSchema(), dataType);
+      for (Pair<OwnerClient, TableSchema> pair : localInfos) {
         table.addOwner(pair.getKey(), pair.getValue().getName());
       }
-      schema.addTable(tableMeta.tableName, table);
+      rootSchema.addTable(tableMeta.tableName, table);
     }
     if (table == null) {
       LOG.error("Fail to init table {}", tableMeta.tableName);
@@ -100,31 +96,30 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
     return table;
   }
 
-  public static Table create(
-      OneDBSchema schema, String tableName, Map operand, RelProtoDataType protoRowType) {
-    List<Map<String, Object>> feds =
-        (List<Map<String, Object>>) operand.get("feds");
+  public static Table create(OneDBSchema rootSchema, String tableName, Map operand,
+      RelProtoDataType protoRowType) {
+    List<Map<String, Object>> feds = (List<Map<String, Object>>) operand.get("feds");
     OneDBTable table = null;
     for (Map<String, Object> fed : feds) {
       String endpoint = fed.get("endpoint").toString();
       String localName = fed.get("name").toString();
-      OwnerClient client = schema.getDBClient(endpoint);
+      OwnerClient client = rootSchema.getOwnerClient(endpoint);
       if (client == null) {
         LOG.warn("endpoint {} not exist", endpoint);
         throw new RuntimeException("endpoint not exist");
       }
-      Header header = client.getTableHeader(localName);
-      LOG.info("{}: header {} from [{} : {}]", tableName, header.toString(), endpoint, localName);
+      Schema schema = client.getTableSchema(localName);
+      LOG.info("{}: schema {} from [{} : {}]", tableName, schema.toString(), endpoint, localName);
       if (table == null) {
-        RelProtoDataType dataType = getRelDataType(header);
-        table = new OneDBTable(tableName, schema, header, dataType);
+        RelProtoDataType dataType = getRelDataType(schema);
+        table = new OneDBTable(tableName, rootSchema, schema, dataType);
         table.addOwner(client, localName);
-        schema.addTable(tableName, table);
+        rootSchema.addTable(tableName, table);
       } else {
-        if (table.getHeader().equals(header)) {
+        if (table.getSchema().equals(schema)) {
           table.addOwner(client, localName);
         } else {
-          LOG.warn("header in {} mismatc with origin[{}]", endpoint, table.getHeader());
+          LOG.warn("schema in {} mismatc with origin[{}]", endpoint, table.getSchema());
         }
       }
     }
@@ -135,16 +130,16 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
   }
 
   public static RelProtoDataType getRelDataType(OwnerClient client, String localName) {
-    Header header = client.getTableHeader(localName);
-    return getRelDataType(header);
+    Schema schema = client.getTableSchema(localName);
+    return getRelDataType(schema);
   }
 
-  public static RelProtoDataType getRelDataType(Header header) {
+  public static RelProtoDataType getRelDataType(Schema schema) {
     final RelDataTypeFactory typeFactory = new SqlTypeFactoryImpl(RelDataTypeSystem.DEFAULT);
     final RelDataTypeFactory.Builder fieldInfo = typeFactory.builder();
-    for (int i = 0; i < header.size(); ++i) {
-      final SqlTypeName typeName = TypeConverter.convert2SqlType(header.getType(i));
-      fieldInfo.add(header.getName(i), typeName).nullable(true);
+    for (int i = 0; i < schema.size(); ++i) {
+      final SqlTypeName typeName = TypeConverter.convert2SqlType(schema.getType(i));
+      fieldInfo.add(schema.getName(i), typeName).nullable(true);
     }
     return RelDataTypeImpl.proto(fieldInfo.build());
   }
@@ -163,14 +158,14 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
     return query(-1);
   }
 
-  public Enumerable<Object> query(long contextId) {
+  public Enumerable<Object> query(long planId) {
     return new AbstractEnumerable<Object>() {
       Enumerator<Object> enumerator;
 
       @Override
       public Enumerator<Object> enumerator() {
         if (enumerator == null) {
-          this.enumerator = new OneDBEnumerator(OneDBTable.this.getSchema(), contextId);
+          this.enumerator = new OneDBEnumerator(rootSchema, planId);
         } else {
           this.enumerator.reset();
         }
@@ -180,37 +175,37 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
   }
 
   @Override
-  public <T> Queryable<T> asQueryable(
-      QueryProvider queryProvider, SchemaPlus schema, String tableName) {
+  public <T> Queryable<T> asQueryable(QueryProvider queryProvider, SchemaPlus schema,
+      String tableName) {
     return new OneDBQueryable<>(queryProvider, schema, this, tableName);
   }
 
   @Override
   public RelNode toRel(ToRelContext context, RelOptTable relOptTable) {
     final RelOptCluster cluster = context.getCluster();
-    return new OneDBTableScan(
-        cluster, cluster.traitSetOf(OneDBRel.CONVENTION), relOptTable, this, null);
+    return new OneDBTableScan(cluster, cluster.traitSetOf(OneDBRel.CONVENTION), relOptTable, this,
+        null);
   }
 
-  public OneDBTableInfo getTableInfo() {
+  public OneDBTableSchema getTableInfo() {
     return tableInfo;
   }
 
-  public Header getHeader() {
-    return tableInfo.getHeader();
+  public Schema getSchema() {
+    return tableInfo.getSchema();
   }
 
   public String getTableName() {
     return tableInfo.getName();
   }
 
-  protected OneDBSchema getSchema() {
-    return schema;
+  protected OneDBSchema getRootSchema() {
+    return rootSchema;
   }
 
   public static class OneDBQueryable<T> extends AbstractTableQueryable<T> {
-    public OneDBQueryable(
-        QueryProvider queryProvider, SchemaPlus schema, OneDBTable table, String tableName) {
+    public OneDBQueryable(QueryProvider queryProvider, SchemaPlus schema, OneDBTable table,
+        String tableName) {
       super(queryProvider, schema, table, tableName);
     }
 

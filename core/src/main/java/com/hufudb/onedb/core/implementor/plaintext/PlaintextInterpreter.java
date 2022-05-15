@@ -1,6 +1,6 @@
 package com.hufudb.onedb.core.implementor.plaintext;
 
-import com.hufudb.onedb.core.data.FieldType;
+import com.hufudb.onedb.core.data.ColumnType;
 import com.hufudb.onedb.core.data.Row;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.expression.OneDBLiteral;
@@ -195,7 +195,7 @@ public class PlaintextInterpreter {
     }
   }
 
-  public static Comparable cast(Comparable in, final FieldType type) {
+  public static Comparable cast(Comparable in, final ColumnType type) {
     if (in == null) {
       return in;
     }

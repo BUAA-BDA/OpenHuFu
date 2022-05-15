@@ -74,10 +74,10 @@ message Collation {
 
 message JoinCondition {
   JoinType type = 1;
-  Modifier level = 2;
+  Modifier modifier = 2;
   repeated int32 leftKey = 3;
   repeated int32 rightKey = 4;
-  repeated Expression condition = 5;
+  Expression condition = 5;
   bool isLeft = 7;
 }
 

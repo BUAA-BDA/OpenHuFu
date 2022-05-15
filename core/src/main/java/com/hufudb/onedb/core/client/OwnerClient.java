@@ -1,18 +1,18 @@
 package com.hufudb.onedb.core.client;
 
-import com.hufudb.onedb.core.data.Header;
-import com.hufudb.onedb.core.data.TableInfo;
 import com.hufudb.onedb.core.utils.EmptyIterator;
-import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
-import com.hufudb.onedb.rpc.OneDBCommon.HeaderProto;
-import com.hufudb.onedb.rpc.OneDBCommon.LocalTableListProto;
-import com.hufudb.onedb.rpc.OneDBCommon.OwnerInfoProto;
-import com.hufudb.onedb.rpc.OneDBCommon.QueryContextProto;
-import com.hufudb.onedb.rpc.OneDBService.GeneralRequest;
-import com.hufudb.onedb.rpc.OneDBService.GeneralResponse;
+import com.hufudb.onedb.data.schema.Schema;
+import com.hufudb.onedb.data.schema.TableSchema;
 import com.hufudb.onedb.rpc.grpc.OneDBOwnerInfo;
 import com.hufudb.onedb.rpc.Party;
 import com.hufudb.onedb.proto.ServiceGrpc;
+import com.hufudb.onedb.proto.OneDBData.DataSetProto;
+import com.hufudb.onedb.proto.OneDBData.SchemaProto;
+import com.hufudb.onedb.proto.OneDBData.TableSchemaListProto;
+import com.hufudb.onedb.proto.OneDBPlan.QueryPlanProto;
+import com.hufudb.onedb.proto.OneDBService.GeneralRequest;
+import com.hufudb.onedb.proto.OneDBService.GeneralResponse;
+import com.hufudb.onedb.proto.OneDBService.OwnerInfo;
 import io.grpc.Channel;
 import io.grpc.ChannelCredentials;
 import io.grpc.Grpc;
@@ -36,7 +36,8 @@ public class OwnerClient {
   private final Party party;
 
   public OwnerClient(String host, int port) {
-    this(ManagedChannelBuilder.forAddress(host, port).usePlaintext().build(), String.format("%s:%d", host, port));
+    this(ManagedChannelBuilder.forAddress(host, port).usePlaintext().build(),
+        String.format("%s:%d", host, port));
     LOG.info("Connect to {}", endpoint);
   }
 
@@ -62,8 +63,7 @@ public class OwnerClient {
 
   public Party getOwnerInfo() {
     try {
-      OwnerInfoProto proto =
-          blockingStub.getOwnerInfo(GeneralRequest.newBuilder().build());
+      OwnerInfo proto = blockingStub.getOwnerInfo(GeneralRequest.newBuilder().build());
       return OneDBOwnerInfo.fromProto(proto);
     } catch (StatusRuntimeException e) {
       LOG.error("RPC failed in getOwnerInfo: {}", e.getStatus());
@@ -72,7 +72,8 @@ public class OwnerClient {
   }
 
   public boolean addOwner(Party party) {
-    OwnerInfoProto request = OwnerInfoProto.newBuilder().setId(party.getPartyId()).setEndpoint(party.getPartyName()).build();
+    OwnerInfo request =
+        OwnerInfo.newBuilder().setId(party.getPartyId()).setEndpoint(party.getPartyName()).build();
     GeneralResponse response;
     try {
       response = blockingStub.addOwner(request);
@@ -88,7 +89,7 @@ public class OwnerClient {
     return true;
   }
 
-  public Iterator<DataSetProto> query(QueryContextProto query) {
+  public Iterator<DataSetProto> query(QueryPlanProto query) {
     try {
       return blockingStub.query(query);
     } catch (StatusRuntimeException e) {
@@ -114,22 +115,22 @@ public class OwnerClient {
     return endpoint.equals(((OwnerClient) obj).endpoint);
   }
 
-  public Header getTableHeader(String tableName) {
+  public Schema getTableSchema(String tableName) {
     try {
-      HeaderProto proto =
-          blockingStub.getTableHeader(GeneralRequest.newBuilder().setValue(tableName).build());
-      return Header.fromProto(proto);
+      SchemaProto proto =
+          blockingStub.getTableSchema(GeneralRequest.newBuilder().setValue(tableName).build());
+      return Schema.fromProto(proto);
     } catch (StatusRuntimeException e) {
-      LOG.error("RPC failed in getTableHeader: {}", e.getStatus());
-      return Header.newBuilder().build();
+      LOG.error("RPC failed in getTableSchema: {}", e.getStatus());
+      return Schema.newBuilder().build();
     }
   }
 
-  public List<TableInfo> getAllLocalTable() {
+  public List<TableSchema> getAllLocalTable() {
     try {
-      LocalTableListProto proto =
-          blockingStub.getAllLocalTable(GeneralRequest.newBuilder().build());
-      return TableInfo.fromProto(proto);
+      TableSchemaListProto proto =
+          blockingStub.getAllTableSchema(GeneralRequest.newBuilder().build());
+      return TableSchema.fromProto(proto);
     } catch (StatusRuntimeException e) {
       LOG.error("RPC failed in getAllLocalTable: {}", e.getStatus());
       return new ArrayList<>();

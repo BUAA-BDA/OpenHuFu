@@ -9,23 +9,23 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.SerializationUtils;
 
 public class BasicDataSet implements EnumerableDataSet {
-  protected Header header;
+  protected Schema header;
   protected List<Row> rows;
   protected int cursor = 0;
   protected Row current = null;
 
-  protected BasicDataSet(Header header, List<Row> rows) {
+  protected BasicDataSet(Schema header, List<Row> rows) {
     this.header = header;
     this.rows = rows;
   }
 
-  protected BasicDataSet(Header header) {
+  protected BasicDataSet(Schema header) {
     this.header = header;
     rows = new ArrayList<>();
   }
 
   public static BasicDataSet fromProto(DataSetProto proto) {
-    Header header = Header.fromProto(proto.getHeader());
+    Schema header = Schema.fromProto(proto.getSchema());
     RowsProto rowsProto = proto.getRows();
     // todo: optimize row serialization
     List<Row> rows =
@@ -35,7 +35,7 @@ public class BasicDataSet implements EnumerableDataSet {
     return new BasicDataSet(header, rows);
   }
 
-  public static BasicDataSet of(Header header) {
+  public static BasicDataSet of(Schema header) {
     return new BasicDataSet(header);
   }
 
@@ -49,7 +49,7 @@ public class BasicDataSet implements EnumerableDataSet {
   }
 
   @Override
-  public Header getHeader() {
+  public Schema getHeader() {
     return header;
   }
 

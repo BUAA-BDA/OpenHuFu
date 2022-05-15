@@ -1,7 +1,7 @@
 package com.hufudb.onedb;
 
 import com.csvreader.CsvReader;
-import com.hufudb.onedb.core.data.FieldType;
+import com.hufudb.onedb.core.data.ColumnType;
 import com.hufudb.onedb.core.data.Row;
 
 import java.io.IOException;
@@ -62,7 +62,7 @@ public class ResultDataSet {
     return compareWithOrder();
   }
 
-  void addRealAnswer(String csvPath, List<FieldType> header) {
+  void addRealAnswer(String csvPath, List<ColumnType> header) {
     ClassLoader classLoader = OneDBTest.class.getClassLoader();
     URL resource = classLoader.getResource(csvPath);
     try {

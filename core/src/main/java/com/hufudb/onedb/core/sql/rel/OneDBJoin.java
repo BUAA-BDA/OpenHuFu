@@ -1,7 +1,12 @@
 package com.hufudb.onedb.core.sql.rel;
 
 import com.google.common.collect.ImmutableList;
-import com.hufudb.onedb.core.sql.context.OneDBContext;
+import com.hufudb.onedb.core.sql.expression.CalciteConverter;
+import com.hufudb.onedb.expression.ExpressionFactory;
+import com.hufudb.onedb.plan.BinaryPlan;
+import com.hufudb.onedb.plan.Plan;
+import com.hufudb.onedb.proto.OneDBPlan.Expression;
+import com.hufudb.onedb.proto.OneDBPlan.JoinCondition;
 import java.util.Set;
 import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelOptCost;
@@ -40,13 +45,25 @@ public class OneDBJoin extends Join implements OneDBRel {
   @Override
   public void implement(Implementor implementor) {
     implementor.visitChild((OneDBRel) getLeft());
-    OneDBContext leftContext = implementor.getCurrentContext();
-    implementor.stepUp();
+    Plan leftPlan = implementor.getCurrentPlan();
+    implementor.setCurrentPlan(null);
     implementor.visitChild((OneDBRel) getRight());
-    OneDBContext rightContext = implementor.getCurrentContext();
-    implementor.stepUp();
-    implementor.createBinaryContext(leftContext, rightContext);
-    implementor.setJoinInfo(analyzeCondition(), getJoinType(), left.getRowType().getFieldCount());
+    Plan rightPlan = implementor.getCurrentPlan();
+    BinaryPlan joinPlan = new BinaryPlan(leftPlan, rightPlan);
+    ImmutableList.Builder<Expression> refBuilder = ImmutableList.builder();
+    int idx = 0;
+    for (Expression exp: leftPlan.getOutExpressions()) {
+      refBuilder.add(ExpressionFactory.createInputRef(idx, exp.getOutType(), exp.getModifier()));
+      ++idx;
+    }
+    for (Expression exp : rightPlan.getOutExpressions()) {
+      refBuilder.add(ExpressionFactory.createInputRef(idx, exp.getOutType(), exp.getModifier()));
+      ++idx;
+    }
+    joinPlan.setSelectExps(refBuilder.build());
+    JoinCondition joinCondition = CalciteConverter.convert(joinType, joinInfo, implementor.getCurrentOutput());
+    joinPlan.setJoinInfo(joinCondition);
+    implementor.setCurrentPlan(joinPlan);
   }
 
   @Override

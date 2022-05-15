@@ -1,7 +1,7 @@
 package com.hufudb.onedb.core.zk.watcher;
 
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
-import com.hufudb.onedb.core.table.OneDBTableInfo;
+import com.hufudb.onedb.core.table.OneDBTableSchema;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.zookeeper.WatchedEvent;
@@ -14,7 +14,7 @@ import org.apache.zookeeper.ZooKeeper;
  * dynamically add and remove local table according to zk
  */
 public class GlobalTableWatcher extends ZkWatcher {
-  private final OneDBTableInfo tableInfo;
+  private final OneDBTableSchema tableInfo;
 
   public GlobalTableWatcher(OneDBSchema schema, ZooKeeper zk, String path) {
     super(schema, zk, path);

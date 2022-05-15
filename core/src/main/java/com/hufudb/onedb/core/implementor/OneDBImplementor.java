@@ -1,7 +1,7 @@
 package com.hufudb.onedb.core.implementor;
 
 import java.util.List;
-import com.hufudb.onedb.core.data.FieldType;
+import com.hufudb.onedb.core.data.ColumnType;
 import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.sql.context.OneDBBinaryContext;
 import com.hufudb.onedb.core.sql.context.OneDBContext;
@@ -24,7 +24,7 @@ public interface OneDBImplementor {
   QueryableDataSet project(QueryableDataSet in, List<OneDBExpression> projects);
 
   QueryableDataSet aggregate(QueryableDataSet in, List<Integer> groups, List<OneDBExpression> aggs,
-      List<FieldType> inputTypes);
+      List<ColumnType> inputTypes);
 
   QueryableDataSet sort(QueryableDataSet in, List<OneDBOrder> orders);
 

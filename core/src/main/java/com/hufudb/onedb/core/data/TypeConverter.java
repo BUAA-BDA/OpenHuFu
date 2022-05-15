@@ -1,11 +1,11 @@
 package com.hufudb.onedb.core.data;
 
 import java.sql.Types;
-import org.apache.calcite.sql.type.ExtraSqlTypes;
+import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import org.apache.calcite.sql.type.SqlTypeName;
 
 public class TypeConverter {
-  public static SqlTypeName convert2SqlType(FieldType type) {
+  public static SqlTypeName convert2SqlType(ColumnType type) {
     switch (type) {
       case STRING:
         return SqlTypeName.VARCHAR;
@@ -29,76 +29,68 @@ public class TypeConverter {
         return SqlTypeName.TIME;
       case TIMESTAMP:
         return SqlTypeName.TIMESTAMP;
-      case POINT:
-        return SqlTypeName.GEOMETRY;
       default:
         return SqlTypeName.ANY;
     }
   }
 
-  public static FieldType convert2OneDBType(SqlTypeName type) {
+  public static ColumnType convert2OneDBType(SqlTypeName type) {
     switch (type) {
       case VARCHAR:
-        return FieldType.STRING;
+        return ColumnType.STRING;
       case BOOLEAN:
-        return FieldType.BOOLEAN;
+        return ColumnType.BOOLEAN;
       case TINYINT:
-        return FieldType.BYTE;
+        return ColumnType.BYTE;
       case INTEGER:
-        return FieldType.INT;
+        return ColumnType.INT;
       case SMALLINT:
-        return FieldType.SHORT;
+        return ColumnType.SHORT;
       case BIGINT:
-        return FieldType.LONG;
+        return ColumnType.LONG;
       case FLOAT:
-        return FieldType.FLOAT;
+        return ColumnType.FLOAT;
       case DOUBLE:
       case DECIMAL:
-        return FieldType.DOUBLE;
+        return ColumnType.DOUBLE;
       case DATE:
-        return FieldType.DATE;
+        return ColumnType.DATE;
       case TIME:
-        return FieldType.TIME;
+        return ColumnType.TIME;
       case TIMESTAMP:
-        return FieldType.TIMESTAMP;
-      case GEOMETRY:
-        return FieldType.POINT;
-      case SARG:
-        return FieldType.SARG;
+        return ColumnType.TIMESTAMP;
       default:
-        return FieldType.STRING;
+        return ColumnType.STRING;
     }
   }
 
-  public static FieldType convert2OneDBType(int sqlType) {
+  public static ColumnType convert2OneDBType(int sqlType) {
     switch (sqlType) {
       case Types.VARCHAR:
-        return FieldType.STRING;
+        return ColumnType.STRING;
       case Types.BOOLEAN:
-        return FieldType.BOOLEAN;
+        return ColumnType.BOOLEAN;
       case Types.TINYINT:
-        return FieldType.BYTE;
+        return ColumnType.BYTE;
       case Types.INTEGER:
-        return FieldType.INT;
+        return ColumnType.INT;
       case Types.SMALLINT:
-        return FieldType.SHORT;
+        return ColumnType.SHORT;
       case Types.BIGINT:
-        return FieldType.LONG;
+        return ColumnType.LONG;
       case Types.FLOAT:
-        return FieldType.FLOAT;
+        return ColumnType.FLOAT;
       case Types.DOUBLE:
       case Types.DECIMAL:
-        return FieldType.DOUBLE;
+        return ColumnType.DOUBLE;
       case Types.DATE:
-        return FieldType.DATE;
+        return ColumnType.DATE;
       case Types.TIME:
-        return FieldType.TIME;
+        return ColumnType.TIME;
       case Types.TIMESTAMP:
-        return FieldType.TIMESTAMP;
-      case ExtraSqlTypes.GEOMETRY:
-        return FieldType.POINT;
+        return ColumnType.TIMESTAMP;
       default:
-        return FieldType.STRING;
+        return ColumnType.STRING;
     }
   }
 }

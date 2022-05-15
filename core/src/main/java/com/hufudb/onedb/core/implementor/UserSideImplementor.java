@@ -8,8 +8,8 @@ import java.util.concurrent.Future;
 import com.hufudb.onedb.core.client.OneDBClient;
 import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.data.BasicDataSet;
-import com.hufudb.onedb.core.data.FieldType;
-import com.hufudb.onedb.core.data.Header;
+import com.hufudb.onedb.core.data.ColumnType;
+import com.hufudb.onedb.core.data.Schema;
 import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.data.StreamBuffer;
 import com.hufudb.onedb.core.implementor.plaintext.PlaintextImplementor;
@@ -91,7 +91,7 @@ public abstract class UserSideImplementor implements OneDBImplementor {
     } catch (Exception e) {
       LOG.error("Error in owner side query: {}", e.getMessage());
     }
-    Header header = OneDBContext.getOutputHeader(context);
+    Schema header = OneDBContext.getOutputHeader(context);
     BasicDataSet localDataSet = BasicDataSet.of(header);
     while (iterator.hasNext()) {
       localDataSet.mergeDataSet(BasicDataSet.fromProto(iterator.next()));
@@ -126,7 +126,7 @@ public abstract class UserSideImplementor implements OneDBImplementor {
       result = result.project(this, binary.getSelectExps());
     }
     if (!binary.getAggExps().isEmpty()) {
-      List<FieldType> types = new ArrayList<>();
+      List<ColumnType> types = new ArrayList<>();
       types.addAll(left.getOutTypes());
       types.addAll(right.getOutTypes());
       result = result.aggregate(this, binary.getGroups(), binary.getAggExps(), types);
@@ -166,7 +166,7 @@ public abstract class UserSideImplementor implements OneDBImplementor {
     List<Pair<OwnerClient, String>> tableClients = client.getTableClients(leaf.getTableName());
     StreamBuffer<DataSetProto> streamProto = tableQuery(proto, tableClients);
 
-    Header header = OneDBContext.getOutputHeader(leaf);
+    Schema header = OneDBContext.getOutputHeader(leaf);
     // todo: optimze for streamDataSet
     BasicDataSet localDataSet = BasicDataSet.of(header);
     while (streamProto.hasNext()) {

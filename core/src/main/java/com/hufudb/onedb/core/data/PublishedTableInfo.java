@@ -59,7 +59,7 @@ public class PublishedTableInfo {
     return VirtualHeader.of(this);
   }
 
-  public Header getFakeHeader() {
+  public Schema getFakeHeader() {
     return fakeTableInfo.getHeader();
   }
 

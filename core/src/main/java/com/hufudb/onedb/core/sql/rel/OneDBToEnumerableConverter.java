@@ -1,8 +1,8 @@
 package com.hufudb.onedb.core.sql.rel;
 
 import java.util.List;
-import com.hufudb.onedb.core.sql.context.OneDBQueryContextPool;
-import com.hufudb.onedb.core.sql.context.OneDBRootContext;
+import com.hufudb.onedb.plan.QueryPlanPool;
+import com.hufudb.onedb.plan.RootPlan;
 import org.apache.calcite.adapter.enumerable.EnumerableRel;
 import org.apache.calcite.adapter.enumerable.EnumerableRelImplementor;
 import org.apache.calcite.adapter.enumerable.PhysType;
@@ -55,13 +55,13 @@ public class OneDBToEnumerableConverter extends ConverterImpl implements Enumera
     final PhysType physType =
         PhysTypeImpl.of(implementor.getTypeFactory(), getRowType(), pref.preferArray());
     // build and save context for the query
-    OneDBRootContext root = oImplementor.getRootContext();
-    OneDBQueryContextPool.saveContext(root);
+    RootPlan root = oImplementor.generatePlan();
+    QueryPlanPool.savePlan(root);
     // get OneDBSchema for query
-    Expression schema = oImplementor.getSchemaExpression();
+    Expression schema = oImplementor.getRootSchemaExpression();
     // call the query method on onedbschema
     Expression enumerable = builder.append("enumerable",
-        Expressions.call(schema, "query", Expressions.constant(root.getContextId())));
+        Expressions.call(schema, "query", Expressions.constant(root.getPlanId())));
     builder.add(Expressions.return_(null, enumerable));
     try {
       return implementor.result(physType, builder.toBlock());

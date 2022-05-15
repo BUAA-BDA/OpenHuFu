@@ -4,6 +4,7 @@ import java.util.List;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.annotations.SerializedName;
 import com.hufudb.onedb.proto.OneDBData.Modifier;
+import com.hufudb.onedb.proto.OneDBPlan.Expression;
 
 /**
  * Wrapper for protocol buffer enum @OneDBData.Modifier
@@ -18,13 +19,12 @@ public enum ModifierWrapper {
   // protected columns can be scanned but data source information will be hidden from client and other dataServers
   @SerializedName("protected")
   PROTECTED("PROTECTED", Modifier.PORTECTED, 0, 200),
-  // can't scan private columns directly, only statistics including COUNT, SUM, AVG can use on these columns
+  // can't scan private columns directly, only statistics including COUNT, SUM, AVG can use on these 
   @SerializedName("private")
   PRIVATE("PRIVATE", Modifier.PRIVATE, 100, 200),
 
   /*
-   * Advanced ModifierWrappers
-   * id >= 10
+   * Advanced ModifierWrappers id >= 10
    * use a specific protocol/technique
    */
   @SerializedName("gmw")
@@ -86,5 +86,10 @@ public enum ModifierWrapper {
 
   public static Modifier dominate(List<Modifier> mods) {
     return mods.stream().reduce(Modifier.PUBLIC, (d, m) -> dominate(d, m));
+  }
+
+  public static Modifier deduceModifier(List<Expression> exps) {
+    return exps.stream().reduce(Modifier.PUBLIC, (d, e) -> dominate(d, e.getModifier()),
+        (m1, m2) -> dominate(m1, m2));
   }
 }

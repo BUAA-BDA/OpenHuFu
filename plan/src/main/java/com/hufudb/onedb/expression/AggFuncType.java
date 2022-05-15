@@ -29,11 +29,11 @@ public enum AggFuncType {
     this.id = id;
   }
 
-  String getName() {
+  public String getName() {
     return name;
   }
 
-  int getId() {
+  public int getId() {
     return id;
   }
 

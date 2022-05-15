@@ -1,6 +1,6 @@
 package com.hufudb.onedb.core.sql.expression;
 
-import com.hufudb.onedb.core.data.FieldType;
+import com.hufudb.onedb.core.data.ColumnType;
 import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.data.TypeConverter;
 import com.hufudb.onedb.rpc.OneDBCommon.ExpressionProto;
@@ -15,11 +15,11 @@ import org.apache.calcite.rel.core.AggregateCall;
 public class OneDBAggCall implements OneDBExpression {
   AggregateType aggType;
   List<Integer> in;
-  FieldType outType;
+  ColumnType outType;
   Level level;
   boolean distinct;
 
-  OneDBAggCall(AggregateType aggType, List<Integer> args, FieldType type, Level level,
+  OneDBAggCall(AggregateType aggType, List<Integer> args, ColumnType type, Level level,
       boolean distinct) {
     this.aggType = aggType;
     this.in = args;
@@ -28,7 +28,7 @@ public class OneDBAggCall implements OneDBExpression {
     this.distinct = distinct;
   }
 
-  OneDBAggCall(AggregateType aggType, List<Integer> args, FieldType type, Level level) {
+  OneDBAggCall(AggregateType aggType, List<Integer> args, ColumnType type, Level level) {
     this(aggType, args, type, level, false);
   }
 
@@ -44,13 +44,13 @@ public class OneDBAggCall implements OneDBExpression {
       List<Level> levels) {
     return calls.stream().map(call -> {
       AggregateType aggType = AggregateType.of(call);
-      FieldType outType = TypeConverter.convert2OneDBType(call.getType().getSqlTypeName());
+      ColumnType outType = TypeConverter.convert2OneDBType(call.getType().getSqlTypeName());
       return new OneDBAggCall(aggType, new ArrayList<>(call.getArgList()), outType,
           getAggLevel(call.getArgList(), levels), call.isDistinct());
     }).collect(Collectors.toList());
   }
 
-  public static List<OneDBExpression> fromGroups(List<Integer> groups, List<FieldType> outTypes, List<Level> outLevels) {
+  public static List<OneDBExpression> fromGroups(List<Integer> groups, List<ColumnType> outTypes, List<Level> outLevels) {
     return groups.stream()
         .map(g -> new OneDBAggCall(AggregateType.GROUPKEY, Arrays.asList(g), outTypes.get(g), outLevels.get(g)))
         .collect(Collectors.toList());
@@ -63,7 +63,7 @@ public class OneDBAggCall implements OneDBExpression {
     List<Integer> inputs =
         proto.getInList().stream().map(in -> in.getI32()).collect(Collectors.toList());
     return new OneDBAggCall(AggregateType.of(proto.getFunc()), inputs,
-        FieldType.of(proto.getOutType()), Level.of(proto.getLevel()), proto.getB());
+        ColumnType.of(proto.getOutType()), Level.of(proto.getLevel()), proto.getB());
   }
 
   @Override
@@ -76,7 +76,7 @@ public class OneDBAggCall implements OneDBExpression {
   }
 
   @Override
-  public FieldType getOutType() {
+  public ColumnType getOutType() {
     return outType;
   }
 
@@ -102,7 +102,7 @@ public class OneDBAggCall implements OneDBExpression {
     return distinct;
   }
 
-  public static OneDBAggCall create(AggregateType type, List<Integer> in, FieldType out, Level level) {
+  public static OneDBAggCall create(AggregateType type, List<Integer> in, ColumnType out, Level level) {
     return new OneDBAggCall(type, in, out, level);
   }
 

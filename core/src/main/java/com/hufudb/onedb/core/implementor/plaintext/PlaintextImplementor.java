@@ -1,7 +1,7 @@
 package com.hufudb.onedb.core.implementor.plaintext;
 
 import com.hufudb.onedb.core.client.OneDBClient;
-import com.hufudb.onedb.core.data.FieldType;
+import com.hufudb.onedb.core.data.ColumnType;
 import com.hufudb.onedb.core.implementor.QueryableDataSet;
 import com.hufudb.onedb.core.implementor.UserSideImplementor;
 import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
@@ -36,7 +36,7 @@ public class PlaintextImplementor extends UserSideImplementor {
 
   @Override
   public QueryableDataSet aggregate(QueryableDataSet in, List<Integer> groups,
-      List<OneDBExpression> aggs, List<FieldType> inputTypes) {
+      List<OneDBExpression> aggs, List<ColumnType> inputTypes) {
     return PlaintextAggregation.apply(in, groups, aggs, inputTypes);
   }
 

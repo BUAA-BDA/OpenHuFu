@@ -6,7 +6,7 @@ import com.hufudb.onedb.core.implementor.QueryableDataSet;
 import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
 import com.hufudb.onedb.core.sql.expression.OneDBExpression;
 import com.hufudb.onedb.core.sql.rel.OneDBOrder;
-import com.hufudb.onedb.core.table.OneDBTableInfo;
+import com.hufudb.onedb.core.table.OneDBTableSchema;
 import com.hufudb.onedb.rpc.OneDBCommon.TaskInfoProto;
 
 

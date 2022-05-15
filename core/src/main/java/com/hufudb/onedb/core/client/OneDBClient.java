@@ -2,15 +2,17 @@ package com.hufudb.onedb.core.client;
 
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.config.OneDBConfig;
-import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.data.Row;
 import com.hufudb.onedb.core.implementor.UserSideImplementor;
 import com.hufudb.onedb.core.rewriter.BasicRewriter;
-import com.hufudb.onedb.core.rewriter.OneDBRewriter;
 import com.hufudb.onedb.core.sql.context.OneDBContext;
 import com.hufudb.onedb.core.sql.context.OneDBQueryContextPool;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
-import com.hufudb.onedb.core.table.OneDBTableInfo;
+import com.hufudb.onedb.core.table.OneDBTableSchema;
+import com.hufudb.onedb.data.schema.Schema;
+import com.hufudb.onedb.plan.Plan;
+import com.hufudb.onedb.plan.QueryPlanPool;
+import com.hufudb.onedb.rewriter.Rewriter;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,10 +34,10 @@ public class OneDBClient {
   private static final Logger LOG = LoggerFactory.getLogger(OneDBClient.class);
   private final OneDBSchema schema;
   private final Map<String, OwnerClient> ownerMap;
-  private final Map<String, OneDBTableInfo> tableMap;
+  private final Map<String, OneDBTableSchema> tableMap;
   final ExecutorService threadPool;
   private final AtomicInteger queryId;
-  private final OneDBRewriter rewriter;
+  private final Rewriter rewriter;
 
   public OneDBClient(OneDBSchema schema) {
     this.schema = schema;
@@ -62,7 +64,7 @@ public class OneDBClient {
     return (((long) schema.getUserId()) << 32) | (long) getQueryId(offset);
   }
 
-  Map<String, OneDBTableInfo> getTableMap() {
+  Map<String, OneDBTableSchema> getTableMap() {
     return tableMap;
   }
 
@@ -116,7 +118,7 @@ public class OneDBClient {
   }
 
   // add global table through model.json
-  public void addTable(String tableName, OneDBTableInfo table) {
+  public void addTable(String tableName, OneDBTableSchema table) {
     this.tableMap.put(tableName, table);
   }
 
@@ -125,7 +127,7 @@ public class OneDBClient {
     tableMap.remove(tableName);
   }
 
-  public OneDBTableInfo getTable(String tableName) {
+  public OneDBTableSchema getTable(String tableName) {
     return tableMap.get(tableName);
   }
 
@@ -135,7 +137,7 @@ public class OneDBClient {
 
   // for local table
   public void removeLocalTable(String globalTableName, String endpoint, String localTableName) {
-    OneDBTableInfo table = getTable(globalTableName);
+    OneDBTableSchema table = getTable(globalTableName);
     if (table == null) {
       LOG.error("Gloabl table {} not exists", globalTableName);
       return;
@@ -148,35 +150,35 @@ public class OneDBClient {
   }
 
   public void removeLocalTable(String endpoint, String tableName) {
-    for (OneDBTableInfo info : tableMap.values()) {
+    for (OneDBTableSchema info : tableMap.values()) {
       info.dropLocalTable(ownerMap.get(endpoint), tableName);
     }
   }
 
   public void removeOwner(String endpoint) {
     OwnerClient client = ownerMap.remove(endpoint);
-    for (OneDBTableInfo info : tableMap.values()) {
+    for (OneDBTableSchema info : tableMap.values()) {
       info.removeOwner(client);
     }
   }
 
-  public Header getHeader(String tableName) {
-    OneDBTableInfo table = getTable(tableName);
-    return table != null ? table.getHeader() : null;
+  public Schema getSchema(String tableName) {
+    OneDBTableSchema table = getTable(tableName);
+    return table != null ? table.getSchema() : null;
   }
 
   public List<Pair<OwnerClient, String>> getTableClients(String tableName) {
-    OneDBTableInfo table = getTable(tableName);
+    OneDBTableSchema table = getTable(tableName);
     return table != null ? table.getTableList() : ImmutableList.of();
   }
 
   /*
    * onedb query
    */
-  public Enumerator<Row> oneDBQuery(long contextId) {
-    OneDBContext context = OneDBQueryContextPool.getContext(contextId);
+  public Enumerator<Row> oneDBQuery(long planId) {
+    Plan plan = QueryPlanPool.getPlan(planId);
     // todo: support for choosing the appropritate rewriter
-    context = context.rewrite(rewriter);
-    return UserSideImplementor.getImplementor(context, this).implement(context);
+    plan = plan.rewrite(rewriter);
+    return UserSideImplementor.getImplementor(plan, this).implement(plan);
   }
 }

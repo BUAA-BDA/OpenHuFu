@@ -1,8 +1,8 @@
 package com.hufudb.onedb.core.sql.rel;
 
 import com.google.common.collect.ImmutableList;
-import com.hufudb.onedb.core.sql.expression.OneDBAggCall;
-import com.hufudb.onedb.core.sql.expression.OneDBExpression;
+import com.hufudb.onedb.core.sql.expression.CalciteConverter;
+import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.calcite.plan.RelOptCluster;
@@ -30,10 +30,8 @@ public class OneDBAggregate extends Aggregate implements OneDBRel {
   public void implement(Implementor implementor) {
     implementor.visitChild((OneDBRel) getInput());
     List<Integer> groups = new ArrayList<>(getGroupSet().asList());
-    List<OneDBExpression> aggExps = new ArrayList<>();
-    aggExps.addAll(OneDBAggCall.fromGroups(groups, implementor.getOutputTypes(), implementor.getOutputLevels()));
-    aggExps.addAll(OneDBAggCall.fromAggregates(aggCalls, implementor.getOutputLevels()));
-    implementor.setAggExps(aggExps);
+    List<Expression> aggs = CalciteConverter.convert(groups, aggCalls, implementor.getCurrentOutput());
+    implementor.setAggExps(aggs);
     implementor.setGroupSet(groups);
   }
 

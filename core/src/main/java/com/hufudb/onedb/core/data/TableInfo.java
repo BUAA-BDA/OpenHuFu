@@ -11,17 +11,17 @@ import java.util.stream.Collectors;
 public class TableInfo {
 
   protected String name;
-  protected Header header;
+  protected Schema header;
 
   protected Map<String, Integer> columnIndex;
 
-  TableInfo(String name, Header header, Map<String, Integer> columnIndex) {
+  TableInfo(String name, Schema header, Map<String, Integer> columnIndex) {
     this.name = name;
     this.header = header;
     this.columnIndex = columnIndex;
   }
 
-  TableInfo(String name, Header header) {
+  TableInfo(String name, Schema header) {
     this.name = name;
     this.header = header.immutableCopy();
     this.columnIndex = new HashMap<>();
@@ -35,12 +35,12 @@ public class TableInfo {
 
   TableInfo(String name) {
     this.name = name;
-    this.header = Header.EMPTY;
+    this.header = Schema.EMPTY;
     this.columnIndex = ImmutableMap.of();
   }
 
   public static TableInfo fromProto(LocalTableInfoProto proto) {
-    return new TableInfo(proto.getName(), Header.fromProto(proto.getHeader()));
+    return new TableInfo(proto.getName(), Schema.fromProto(proto.getSchema()));
   }
 
   public static List<TableInfo> fromProto(LocalTableListProto proto) {
@@ -49,12 +49,12 @@ public class TableInfo {
         .collect(Collectors.toList());
   }
 
-  public static TableInfo of(String name, Header header) {
+  public static TableInfo of(String name, Schema header) {
     return new TableInfo(name, header);
   }
 
   public static TableInfo of(String name, List<Field> fields) {
-    return new TableInfo(name, new Header(fields));
+    return new TableInfo(name, new Schema(fields));
   }
 
   public static TableInfo of(String name) {
@@ -73,7 +73,7 @@ public class TableInfo {
     return name;
   }
 
-  public Header getHeader() {
+  public Schema getHeader() {
     return header;
   }
 
@@ -87,12 +87,12 @@ public class TableInfo {
   }
 
   public static class Builder {
-    protected final Header.Builder builder;
+    protected final Schema.Builder builder;
     protected final Map<String, Integer> columnIndex;
     protected String tableName;
 
     protected Builder() {
-      this.builder = Header.newBuilder();
+      this.builder = Schema.newBuilder();
       columnIndex = new HashMap<>();
     }
 
@@ -101,7 +101,7 @@ public class TableInfo {
       return this;
     }
 
-    public Builder add(String name, FieldType type) {
+    public Builder add(String name, ColumnType type) {
       if (columnIndex.containsKey(name)) {
         throw new RuntimeException("column " + name + " already exist");
       }
@@ -110,7 +110,7 @@ public class TableInfo {
       return this;
     }
 
-    public Builder add(String name, FieldType type, Level level) {
+    public Builder add(String name, ColumnType type, Level level) {
       if (columnIndex.containsKey(name)) {
         throw new RuntimeException("column " + name + " already exist");
       }

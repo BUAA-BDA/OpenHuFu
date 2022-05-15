@@ -21,16 +21,16 @@ public class SearchList {
 
   private List<Pair<Comparable, Comparable>> searchList;
   private SearchType searchType;
-  private FieldType fieldType;
+  private ColumnType fieldType;
 
-  public SearchList(FieldType type, SearchType searchType,
+  public SearchList(ColumnType type, SearchType searchType,
       List<Pair<Comparable, Comparable>> searchList) {
     this.fieldType = type;
     this.searchType = searchType;
     this.searchList = searchList;
   }
 
-  public SearchList(FieldType type, Object value) {
+  public SearchList(ColumnType type, Object value) {
     fieldType = type;
     switch (type) {
       case BYTE:
@@ -72,7 +72,7 @@ public class SearchList {
 
   public ExpressionProto toProto() {
     ExpressionProto.Builder builder = ExpressionProto.newBuilder()
-        .setOpType(OneDBOpType.LITERAL.ordinal()).setOutType(FieldType.SARG.ordinal());
+        .setOpType(OneDBOpType.LITERAL.ordinal()).setOutType(ColumnType.SARG.ordinal());
     for (Pair<Comparable, Comparable> p : searchList) {
       ExpressionProto.Builder lowerBuilder = ExpressionProto.newBuilder();
       ExpressionProto.Builder upperBuilder = ExpressionProto.newBuilder();
@@ -96,7 +96,7 @@ public class SearchList {
   }
 
   private String object2String(Comparable obj) {
-    if (fieldType == FieldType.STRING) {
+    if (fieldType == ColumnType.STRING) {
       return String.format("'%s'", obj.toString());
     } else {
       return obj.toString();
@@ -105,7 +105,7 @@ public class SearchList {
 
   public static SearchList fromProto(ExpressionProto proto) {
     List<ExpressionProto> protoList = proto.getInList();
-    FieldType type = FieldType.of(protoList.get(0).getOutType());
+    ColumnType type = ColumnType.of(protoList.get(0).getOutType());
     assert protoList.size() % 2 == 0;
     SearchType searchType;
     switch (type) {

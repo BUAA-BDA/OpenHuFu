@@ -13,17 +13,6 @@ import com.hufudb.onedb.proto.OneDBPlan.TaskInfo;
  * Base Plan which all methods are not supported
  */
 public abstract class BasePlan implements Plan {
-  @Override
-  public Plan getParent() {
-    LOG.error("not support getParent");
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public void setParent(Plan parent) {
-    LOG.error("not support setParent");
-    throw new UnsupportedOperationException();
-  }
 
   @Override
   public List<Plan> getChildren() {

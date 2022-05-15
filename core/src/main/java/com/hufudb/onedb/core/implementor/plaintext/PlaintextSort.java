@@ -1,6 +1,6 @@
 package com.hufudb.onedb.core.implementor.plaintext;
 
-import com.hufudb.onedb.core.data.Header;
+import com.hufudb.onedb.core.data.Schema;
 import com.hufudb.onedb.core.data.Row;
 import com.hufudb.onedb.core.implementor.QueryableDataSet;
 import com.hufudb.onedb.core.sql.rel.OneDBOrder;
@@ -9,7 +9,7 @@ import java.util.List;
 public class PlaintextSort {
   public static QueryableDataSet apply(QueryableDataSet input, List<OneDBOrder> orders) {
     List<Row> rows = input.getRows();
-    Header header = input.getHeader();
+    Schema header = input.getHeader();
     rows.sort((o1, o2) -> {
       for (OneDBOrder order : orders) {
         int compareResult;

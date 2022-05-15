@@ -22,7 +22,6 @@ import com.hufudb.onedb.rewriter.Rewriter;
  * plan for join
  */
 public class BinaryPlan extends BasePlan {
-  Plan parent;
   Plan left;
   Plan right;
   List<Expression> selectExps = ImmutableList.of();
@@ -35,20 +34,9 @@ public class BinaryPlan extends BasePlan {
   JoinCondition joinCond;
   TaskInfo taskInfo;
 
-  public BinaryPlan(Plan parent, Plan left, Plan right) {
-    this.parent = parent;
+  public BinaryPlan(Plan left, Plan right) {
     this.left = left;
     this.right = right;
-  }
-
-  @Override
-  public Plan getParent() {
-    return parent;
-  }
-
-  @Override
-  public void setParent(Plan parent) {
-    this.parent = parent;
   }
 
   @Override
@@ -132,7 +120,8 @@ public class BinaryPlan extends BasePlan {
 
   @Override
   public Modifier getPlanModifier() {
-    return ModifierWrapper.dominate(ModifierWrapper.dominate(getOutModifiers()), joinCond.getLevel());
+    return ModifierWrapper.dominate(ModifierWrapper.dominate(getOutModifiers()),
+        joinCond.getModifier());
   }
 
   @Override
@@ -210,8 +199,8 @@ public class BinaryPlan extends BasePlan {
   }
 
   public static BinaryPlan fromProto(QueryPlanProto proto) {
-    BinaryPlan plan = new BinaryPlan(null,
-        Plan.fromProto(proto.getChildren(0)), Plan.fromProto(proto.getChildren(1)));
+    BinaryPlan plan =
+        new BinaryPlan(Plan.fromProto(proto.getChildren(0)), Plan.fromProto(proto.getChildren(1)));
     plan.setSelectExps(proto.getSelectExpList());
     plan.setWhereExps(proto.getWhereExpList());
     plan.setAggExps(proto.getAggExpList());

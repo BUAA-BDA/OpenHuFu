@@ -1,7 +1,7 @@
 package com.hufudb.onedb.core.implementor.aggregate;
 
 import java.util.List;
-import com.hufudb.onedb.core.data.FieldType;
+import com.hufudb.onedb.core.data.ColumnType;
 import com.hufudb.onedb.core.data.Row;
 import com.hufudb.onedb.core.data.Row.RowBuilder;
 import com.hufudb.onedb.core.implementor.plaintext.PlaintextInterpreter;
@@ -9,10 +9,10 @@ import com.hufudb.onedb.core.implementor.plaintext.PlaintextInterpreter;
 public class SingleAggregator implements Aggregator {
 
   final List<AggregateFunction<Row, Comparable>> aggFunc;
-  final List<FieldType> types;
+  final List<ColumnType> types;
   boolean next;
 
-  SingleAggregator(List<AggregateFunction<Row, Comparable>> aggFunc, List<FieldType> types) {
+  SingleAggregator(List<AggregateFunction<Row, Comparable>> aggFunc, List<ColumnType> types) {
     this.aggFunc = aggFunc;
     this.types = types;
     this.next = true;
@@ -52,7 +52,7 @@ public class SingleAggregator implements Aggregator {
   }
 
   @Override
-  public List<FieldType> getOutputTypes() {
+  public List<ColumnType> getOutputTypes() {
     return types;
   }
 

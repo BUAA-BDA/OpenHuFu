@@ -1,6 +1,6 @@
 package com.hufudb.onedb.core.sql.expression;
 
-import com.hufudb.onedb.core.data.FieldType;
+import com.hufudb.onedb.core.data.ColumnType;
 import com.hufudb.onedb.core.data.Level;
 import com.hufudb.onedb.core.data.SearchList;
 import com.hufudb.onedb.core.data.TypeConverter;
@@ -11,18 +11,18 @@ import org.apache.calcite.rex.RexLiteral;
  * leaf node of expression tree
  */
 public class OneDBLiteral implements OneDBExpression {
-  FieldType type;
+  ColumnType type;
   Object value;
 
-  OneDBLiteral(FieldType type, Object value) {
+  OneDBLiteral(ColumnType type, Object value) {
     this.type = type;
     this.value = value;
   }
 
   public static OneDBExpression fromLiteral(RexLiteral literal) {
-    FieldType type = TypeConverter.convert2OneDBType(literal.getTypeName());
+    ColumnType type = TypeConverter.convert2OneDBType(literal.getTypeName());
     Object value = literal.getValue2();
-    if (type == FieldType.SARG) {
+    if (type == ColumnType.SARG) {
       SearchList searchList = new SearchList(
               TypeConverter.convert2OneDBType(literal.getType().getSqlTypeName()), value);
       return new OneDBLiteral(type, searchList);
@@ -31,7 +31,7 @@ public class OneDBLiteral implements OneDBExpression {
   }
 
   public static OneDBExpression fromProto(ExpressionProto proto) {
-    FieldType type = FieldType.of(proto.getOutType());
+    ColumnType type = ColumnType.of(proto.getOutType());
     Object value;
     switch (type) {
       case BOOLEAN:
@@ -99,7 +99,7 @@ public class OneDBLiteral implements OneDBExpression {
   }
 
   @Override
-  public FieldType getOutType() {
+  public ColumnType getOutType() {
     return type;
   }
 

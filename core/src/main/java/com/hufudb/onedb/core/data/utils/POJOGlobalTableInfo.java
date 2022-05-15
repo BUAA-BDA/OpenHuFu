@@ -1,6 +1,6 @@
 package com.hufudb.onedb.core.data.utils;
 
-import com.hufudb.onedb.core.table.OneDBTableInfo;
+import com.hufudb.onedb.core.table.OneDBTableSchema;
 import com.hufudb.onedb.core.table.TableMeta.LocalTableMeta;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,17 +10,17 @@ public class POJOGlobalTableInfo {
   POJOHeader header;
   List<LocalTableMeta> mappings;
 
-  public static POJOGlobalTableInfo from(OneDBTableInfo info) {
+  public static POJOGlobalTableInfo from(OneDBTableSchema info) {
     POJOGlobalTableInfo sinfo = new POJOGlobalTableInfo();
     sinfo.setName(info.getName());
-    sinfo.setHeader(POJOHeader.fromHeader(info.getHeader()));
+    sinfo.setHeader(POJOHeader.fromHeader(info.getSchema()));
     sinfo.setMappings(info.getMappings());
     return sinfo;
   }
 
-  public static List<POJOGlobalTableInfo> from(List<OneDBTableInfo> info) {
+  public static List<POJOGlobalTableInfo> from(List<OneDBTableSchema> info) {
     List<POJOGlobalTableInfo> sinfo = new ArrayList<>();
-    for (OneDBTableInfo i : info) {
+    for (OneDBTableSchema i : info) {
       sinfo.add(POJOGlobalTableInfo.from(i));
     }
     return sinfo;

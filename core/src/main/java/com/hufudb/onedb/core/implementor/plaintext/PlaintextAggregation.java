@@ -1,7 +1,7 @@
 package com.hufudb.onedb.core.implementor.plaintext;
 
-import com.hufudb.onedb.core.data.FieldType;
-import com.hufudb.onedb.core.data.Header;
+import com.hufudb.onedb.core.data.ColumnType;
+import com.hufudb.onedb.core.data.Schema;
 import com.hufudb.onedb.core.data.Row;
 import com.hufudb.onedb.core.implementor.QueryableDataSet;
 import com.hufudb.onedb.core.implementor.aggregate.AggregateFunction;
@@ -12,9 +12,9 @@ import java.util.List;
 
 public class PlaintextAggregation {
   public static QueryableDataSet apply(QueryableDataSet input, List<Integer> groups,
-      List<OneDBExpression> aggs, List<FieldType> types) {
+      List<OneDBExpression> aggs, List<ColumnType> types) {
     List<AggregateFunction<Row, Comparable>> aggFunctions = new ArrayList<>();
-    List<FieldType> aggTypes = new ArrayList<>();
+    List<ColumnType> aggTypes = new ArrayList<>();
     for (OneDBExpression exp : aggs) {
       aggFunctions.add(PlaintextAggregateFunctions.getAggregateFunc(exp));
       aggTypes.add(exp.getOutType());
@@ -26,7 +26,7 @@ public class PlaintextAggregation {
   public static QueryableDataSet applyAggregateFunctions(QueryableDataSet input,
       Aggregator aggregator) {
     // aggregate input rows
-    Header.Builder builder = Header.newBuilder();
+    Schema.Builder builder = Schema.newBuilder();
     aggregator.getOutputTypes().stream().forEach(type -> builder.add("", type));
     QueryableDataSet result = PlaintextQueryableDataSet.fromHeader(builder.build());
     List<Row> rows = input.getRows();

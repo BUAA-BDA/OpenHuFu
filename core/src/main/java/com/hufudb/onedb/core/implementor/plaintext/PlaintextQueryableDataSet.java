@@ -2,8 +2,8 @@ package com.hufudb.onedb.core.implementor.plaintext;
 
 
 import com.hufudb.onedb.core.data.BasicDataSet;
-import com.hufudb.onedb.core.data.FieldType;
-import com.hufudb.onedb.core.data.Header;
+import com.hufudb.onedb.core.data.ColumnType;
+import com.hufudb.onedb.core.data.Schema;
 import com.hufudb.onedb.core.implementor.OneDBImplementor;
 import com.hufudb.onedb.core.implementor.QueryableDataSet;
 import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
@@ -12,9 +12,9 @@ import com.hufudb.onedb.core.sql.rel.OneDBOrder;
 import java.util.List;
 
 public class PlaintextQueryableDataSet extends BasicDataSet implements QueryableDataSet {
-  public static final PlaintextQueryableDataSet EMPTY = new PlaintextQueryableDataSet(Header.EMPTY);
+  public static final PlaintextQueryableDataSet EMPTY = new PlaintextQueryableDataSet(Schema.EMPTY);
 
-  protected PlaintextQueryableDataSet(Header header) {
+  protected PlaintextQueryableDataSet(Schema header) {
     super(header);
   }
 
@@ -26,17 +26,17 @@ public class PlaintextQueryableDataSet extends BasicDataSet implements Queryable
     return new PlaintextQueryableDataSet(dataSet);
   }
 
-  public static QueryableDataSet fromHeader(Header header) {
+  public static QueryableDataSet fromHeader(Schema header) {
     return new PlaintextQueryableDataSet(header);
   }
 
   public static QueryableDataSet fromExpression(List<OneDBExpression> exps) {
-    Header header = OneDBExpression.generateHeader(exps);
+    Schema header = OneDBExpression.generateHeader(exps);
     return new PlaintextQueryableDataSet(header);
   }
 
   @Override
-  public List<FieldType> getTypeList() {
+  public List<ColumnType> getTypeList() {
     return header.getTypeList();
   }
 
@@ -58,7 +58,7 @@ public class PlaintextQueryableDataSet extends BasicDataSet implements Queryable
 
   @Override
   public QueryableDataSet aggregate(OneDBImplementor implementor, List<Integer> groups,
-      List<OneDBExpression> aggs, List<FieldType> inputTypes) {
+      List<OneDBExpression> aggs, List<ColumnType> inputTypes) {
     return implementor.aggregate(this, groups, aggs, inputTypes);
   }
 

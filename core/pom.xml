@@ -25,6 +25,11 @@
     </dependency>
     <dependency>
       <groupId>com.hufudb.onedb</groupId>
+      <artifactId>plan</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.hufudb.onedb</groupId>
       <artifactId>mpc</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>

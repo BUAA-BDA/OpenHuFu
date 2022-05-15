@@ -2,9 +2,8 @@ package com.hufudb.onedb.core.table;
 
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.client.OwnerClient;
-import com.hufudb.onedb.core.data.Header;
-import com.hufudb.onedb.core.sql.schema.OneDBSchema;
 import com.hufudb.onedb.core.table.TableMeta.LocalTableMeta;
+import com.hufudb.onedb.data.schema.Schema;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,49 +17,45 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.commons.lang3.tuple.Pair;
 
-public class OneDBTableInfo {
-  private static final Logger LOG = LoggerFactory.getLogger(OneDBSchema.class);
+public class OneDBTableSchema {
+  private static final Logger LOG = LoggerFactory.getLogger(OneDBTableSchema.class);
   private final ReadWriteLock lock;
   private final String name;
-  private final Header header;
+  private final Schema schema;
   private final Map<String, Integer> columnMap;
   private List<Pair<OwnerClient, String>> tableList;
 
-  public OneDBTableInfo(String name, Header header) {
+  public OneDBTableSchema(String name, Schema schema) {
     this.name = name;
-    this.header = header;
+    this.schema = schema;
     this.tableList = new ArrayList<>();
     this.columnMap = new HashMap<>();
     this.lock = new ReentrantReadWriteLock();
-    for (int i = 0; i < header.size(); ++i) {
-      columnMap.put(header.getName(i), i);
+    for (int i = 0; i < schema.size(); ++i) {
+      columnMap.put(schema.getName(i), i);
     }
   }
 
-  public OneDBTableInfo(String globalName, Header header, OwnerClient client, String localName) {
-    this(globalName, header);
+  public OneDBTableSchema(String globalName, Schema schema, OwnerClient client, String localName) {
+    this(globalName, schema);
     this.tableList.add(Pair.of(client, localName));
   }
 
   public void addLocalTable(OwnerClient client, String localName) {
-    Header header = client.getTableHeader(localName);
-    if (header.equals(this.header)) {
+    Schema schema = client.getTableSchema(localName);
+    if (schema.equals(this.schema)) {
       lock.writeLock().lock();
       tableList.add(Pair.of(client, localName));
       lock.writeLock().unlock();
     } else {
-      LOG.warn(
-          "Table {} header {} mismatch with global table {} header {}",
-          localName,
-          header,
-          name,
-          this.header);
+      LOG.warn("Table {} schema {} mismatch with global table {} schema {}", localName, schema,
+          name, this.schema);
     }
   }
 
   public void changeLocalTable(OwnerClient client, String localName) {
-    Header header = client.getTableHeader(localName);
-    if (header.equals(this.header)) {
+    Schema schema = client.getTableSchema(localName);
+    if (schema.equals(this.schema)) {
       lock.writeLock().lock();
       for (int i = 0; i < tableList.size(); ++i) {
         Pair<OwnerClient, String> pair = tableList.get(i);
@@ -72,17 +67,13 @@ public class OneDBTableInfo {
       tableList.add(Pair.of(client, localName));
       lock.writeLock().unlock();
     } else {
-      LOG.warn(
-          "Table {} header {} mismatch with global table {} header {}",
-          localName,
-          header,
-          name,
-          this.header);
+      LOG.warn("Table {} schema {} mismatch with global table {} schema {}", localName, schema,
+          name, this.schema);
     }
   }
 
-  public Header getHeader() {
-    return header;
+  public Schema getSchema() {
+    return schema;
   }
 
   public String getName() {
@@ -171,6 +162,6 @@ public class OneDBTableInfo {
   public String toString() {
     List<String> mappings =
         getMappings().stream().map(p -> p.toString()).collect(Collectors.toList());
-    return String.format("[%s](%s){%s}", name, header, StringUtils.join(mappings, ","));
+    return String.format("[%s](%s){%s}", name, schema, StringUtils.join(mappings, ","));
   }
 }
