@@ -18,7 +18,7 @@ public enum ModifierWrapper {
   PUBLIC("PUBLIC", Modifier.PUBLIC, 0, 0),
   // protected columns can be scanned but data source information will be hidden from client and other dataServers
   @SerializedName("protected")
-  PROTECTED("PROTECTED", Modifier.PORTECTED, 0, 200),
+  PROTECTED("PROTECTED", Modifier.PROTECTED, 0, 200),
   // can't scan private columns directly, only statistics including COUNT, SUM, AVG can use on these 
   @SerializedName("private")
   PRIVATE("PRIVATE", Modifier.PRIVATE, 100, 200),

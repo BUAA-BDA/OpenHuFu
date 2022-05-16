@@ -8,8 +8,8 @@ public class FilterDataSet implements DataSet {
   private final Filter filter;
   private final DataSet source;
 
-  public FilterDataSet(Schema schema, Filter filter, DataSet source) {
-    this.schema = schema;
+  public FilterDataSet(DataSet source, Filter filter) {
+    this.schema = source.getSchema();
     this.filter = filter;
     this.source = source;
   }

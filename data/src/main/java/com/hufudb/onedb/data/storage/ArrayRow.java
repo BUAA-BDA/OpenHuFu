@@ -25,7 +25,7 @@ public class ArrayRow implements Row {
     return new Builder(size);
   }
 
-  public static Row materialize(Row row) {
+  public static ArrayRow materialize(Row row) {
     final int size = row.size();
     Builder builder = new Builder(size);
     for (int i = 0; i < size; ++i) {
@@ -45,7 +45,7 @@ public class ArrayRow implements Row {
       values[index] = value;
     }
   
-    public Row build() {
+    public ArrayRow build() {
       return new ArrayRow(values);
     }
   

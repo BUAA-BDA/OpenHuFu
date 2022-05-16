@@ -11,6 +11,7 @@ import com.hufudb.onedb.core.implementor.plaintext.PlaintextImplementor;
 import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.data.storage.DataSet;
 import com.hufudb.onedb.data.storage.MultiSourceDataSet;
+import com.hufudb.onedb.data.storage.SortedDataSet;
 import com.hufudb.onedb.data.storage.MultiSourceDataSet.Producer;
 import com.hufudb.onedb.implementor.PlanImplementor;
 import com.hufudb.onedb.interpreter.Interpreter;
@@ -132,7 +133,8 @@ public abstract class UserSideImplementor implements PlanImplementor {
       result = result.aggregate(this, binary.getGroups(), binary.getAggExps(), types);
     }
     if (!binary.getOrders().isEmpty()) {
-      result = result.sort(this, binary.getOrders());
+      result = SortedDataSet.sort(result, binary.getOrders());
+
     }
     if (binary.getFetch() > 0 || binary.getOffset() > 0) {
       result = result.limit(binary.getOffset(), binary.getFetch());
@@ -152,7 +154,7 @@ public abstract class UserSideImplementor implements PlanImplementor {
       input = input.aggregate(this, unary.getGroups(), unary.getAggExps(), children.get(0).getOutTypes());
     }
     if (!unary.getOrders().isEmpty()) {
-      input = input.sort(this, unary.getOrders());
+      input = SortedDataSet.sort(input, unary.getOrders());
     }
     if (unary.getFetch() > 0 || unary.getOffset() > 0) {
       input = input.limit(unary.getOffset(), unary.getFetch());

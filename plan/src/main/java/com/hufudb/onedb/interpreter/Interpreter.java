@@ -23,8 +23,7 @@ public class Interpreter {
       return source;
     } else {
       final Expression condition = ExpressionUtils.conjunctCondition(conditions);
-      final Schema schema = source.getSchema();
-      return new FilterDataSet(schema, new InterpretiveFilter(schema, condition), source);
+      return new FilterDataSet(source, new InterpretiveFilter(source.getSchema(), condition));
     }
   }
 

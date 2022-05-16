@@ -2,16 +2,21 @@ package com.hufudb.onedb.data.storage;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.data.storage.MultiSourceDataSet.Producer;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBData.DataSetProto;
 import com.hufudb.onedb.proto.OneDBData.Modifier;
+import com.hufudb.onedb.proto.OneDBPlan.Collation;
+import com.hufudb.onedb.proto.OneDBPlan.Direction;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Test;
 
@@ -127,5 +132,79 @@ public class DataSetTest {
       count++;
     }
     assertEquals(46, count);
+  }
+
+  ProtoDataSet generateUnsortedDataSet() {
+    final Schema schema = Schema.newBuilder().add("A", ColumnType.INT, Modifier.PUBLIC)
+            .add("B", ColumnType.DOUBLE, Modifier.PUBLIC).build();
+    ProtoDataSet.Builder dBuilder = ProtoDataSet.newBuilder(schema);
+    ArrayRow.Builder builder = ArrayRow.newBuilder(2);
+    builder.reset();
+    builder.set(0, 3);
+    builder.set(1, 4.2);
+    dBuilder.addRow(builder.build());
+    builder.reset();
+    builder.set(0, 2);
+    builder.set(1, 5.3);
+    dBuilder.addRow(builder.build());
+    builder.reset();
+    builder.set(0, 7);
+    builder.set(1, 1.4);
+    dBuilder.addRow(builder.build());
+    builder.reset();
+    return dBuilder.build();
+  }
+
+  @Test
+  public void testSortLimitDataSet() {
+    Collation c1 = Collation.newBuilder().setDirection(Direction.ASC).setRef(0).build();
+    Collation c2 = Collation.newBuilder().setDirection(Direction.DESC).setRef(1).build();
+    DataSet source = generateUnsortedDataSet();
+    // test sort
+    DataSet d1 = SortedDataSet.sort(source, ImmutableList.of(c1));
+    DataSetIterator it1 = d1.getIterator();
+    assertTrue(it1.next()); 
+    assertEquals(2, it1.get(0));
+    assertTrue(it1.next());
+    assertEquals(3, it1.get(0));
+    assertTrue(it1.next());
+    assertEquals(7, it1.get(0));
+    assertFalse(it1.next());
+    DataSet d2 = SortedDataSet.sort(source, ImmutableList.of(c2));
+    DataSetIterator it2 = d2.getIterator();
+    assertTrue(it2.next()); 
+    assertEquals(5.3, (double) it2.get(1), 0.001);
+    assertTrue(it2.next());
+    assertEquals(4.2, (double) it2.get(1), 0.001);
+    assertTrue(it2.next());
+    assertEquals(1.4, (double) it2.get(1), 0.001);
+    assertFalse(it2.next());
+    // test limit
+    DataSet l1 = LimitDataSet.limit(source, 0, 0);
+    DataSetIterator itl1 = l1.getIterator();
+    assertTrue(itl1.next());
+    assertEquals(3, itl1.get(0));
+    assertTrue(itl1.next());
+    assertEquals(2, itl1.get(0));
+    assertTrue(itl1.next());
+    assertEquals(7, itl1.get(0));
+    assertFalse(itl1.next());
+    DataSet l2 = LimitDataSet.limit(source, 1, 1);
+    DataSetIterator itl2 = l2.getIterator();
+    assertTrue(itl2.next());
+    assertEquals(2, itl2.get(0));
+    assertFalse(itl2.next());
+    DataSet l3 = LimitDataSet.limit(source, 1, 0);
+    DataSetIterator itl3 = l3.getIterator();
+    assertTrue(itl3.next());
+    assertEquals(2, itl3.get(0));
+    assertTrue(itl3.next());
+    assertEquals(7, itl3.get(0));
+    assertFalse(itl3.next());
+    DataSet l4 = LimitDataSet.limit(source, 0, 1);
+    DataSetIterator itl4 = l4.getIterator();
+    assertTrue(itl4.next());
+    assertEquals(3, itl4.get(0));
+    assertFalse(itl4.next());
   }
 }
