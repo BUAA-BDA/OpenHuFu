@@ -10,6 +10,7 @@ import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.implementor.plaintext.PlaintextImplementor;
 import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.data.storage.DataSet;
+import com.hufudb.onedb.data.storage.LimitDataSet;
 import com.hufudb.onedb.data.storage.MultiSourceDataSet;
 import com.hufudb.onedb.data.storage.SortedDataSet;
 import com.hufudb.onedb.data.storage.MultiSourceDataSet.Producer;
@@ -137,7 +138,7 @@ public abstract class UserSideImplementor implements PlanImplementor {
 
     }
     if (binary.getFetch() > 0 || binary.getOffset() > 0) {
-      result = result.limit(binary.getOffset(), binary.getFetch());
+      result = LimitDataSet.limit(result, binary.getOffset(), binary.getFetch());
     }
     return result;
   }
@@ -157,7 +158,7 @@ public abstract class UserSideImplementor implements PlanImplementor {
       input = SortedDataSet.sort(input, unary.getOrders());
     }
     if (unary.getFetch() > 0 || unary.getOffset() > 0) {
-      input = input.limit(unary.getOffset(), unary.getFetch());
+      input = LimitDataSet.limit(input, unary.getOffset(), unary.getFetch());
     }
     return input;
   }

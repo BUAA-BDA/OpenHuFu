@@ -50,14 +50,16 @@ public class ExpressionUtils {
     }
   }
 
-  public static Expression conjunctCondition(List<Expression> filters) {
-    final int size = filters.size();
-    if (size == 1) {
-      return filters.get(0);
+  public static Expression conjunctCondition(List<Expression> conditions) {
+    final int size = conditions.size();
+    if (size == 0) {
+      return null;
+    } else if (size == 1) {
+      return conditions.get(0);
     }
-    Expression base = filters.get(0);
+    Expression base = conditions.get(0);
     for (int i = 1; i < size; ++i) {
-      Expression filter = filters.get(i);
+      Expression filter = conditions.get(i);
       base = Expression.newBuilder().setOpType(OperatorType.AND).setOutType(ColumnType.BOOLEAN)
           .setModifier(ModifierWrapper.dominate(base.getModifier(), filter.getModifier()))
           .addIn(base).addIn(filter).build();

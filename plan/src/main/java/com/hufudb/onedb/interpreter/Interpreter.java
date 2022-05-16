@@ -4,19 +4,21 @@ import java.util.List;
 import java.util.stream.Collectors;
 import com.hufudb.onedb.data.function.Filter;
 import com.hufudb.onedb.data.function.Mapper;
+import com.hufudb.onedb.data.function.Matcher;
 import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.data.storage.DataSet;
 import com.hufudb.onedb.data.storage.FilterDataSet;
+import com.hufudb.onedb.data.storage.JoinDataSet;
 import com.hufudb.onedb.data.storage.MapDataSet;
 import com.hufudb.onedb.data.storage.Row;
 import com.hufudb.onedb.expression.ExpressionUtils;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBPlan.Expression;
+import com.hufudb.onedb.proto.OneDBPlan.JoinCondition;
 import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
 
 public class Interpreter {
-  private Interpreter() {
-  }
+  private Interpreter() {}
 
   public static DataSet filter(DataSet source, List<Expression> conditions) {
     if (conditions.isEmpty()) {
@@ -37,6 +39,11 @@ public class Interpreter {
           .collect(Collectors.toList());
       return MapDataSet.create(outSchema, maps, source);
     }
+  }
+
+  public static DataSet join(DataSet left, DataSet right, JoinCondition condition) {
+    return JoinDataSet.create(left, right,
+        new InterpretiveMatcher(condition, left.getSchema(), right.getSchema()));
   }
 
   public static class InterpretiveFilter implements Filter {
@@ -70,6 +77,69 @@ public class Interpreter {
         return cast(exp.getOutType(), (Number) r);
       }
       return r;
+    }
+  }
+
+  public static class InterpretiveMatcher implements Matcher {
+    final List<Integer> leftKeys;
+    final List<Integer> rightKeys;
+    final Expression condition;
+    final Schema left;
+    final Schema right;
+
+    InterpretiveMatcher(JoinCondition joinCond, Schema left, Schema right) {
+      this.leftKeys = joinCond.getLeftKeyList();
+      this.rightKeys = joinCond.getRightKeyList();
+      this.condition = joinCond.getCondition();
+      this.left = left;
+      this.right = right;
+    }
+
+    @Override
+    public boolean match(Row r1, Row r2) {
+      int size = leftKeys.size();
+      for (int i = 0; i < size; ++i) {
+        int lk = leftKeys.get(i);
+        int rk = rightKeys.get(i);
+        if (!r1.get(lk).equals(r2.get(rk))) {
+          return false;
+        }
+      }
+      Row row = new MergedRow(r1, r2, left.size(), left.size() + right.size());
+      if (condition.getOpType().equals(OperatorType.NONE)) {
+        return true;
+      } else {
+        // todo: consider null case
+        return (boolean) implement(row, condition);
+      }
+    }
+  }
+
+  public static class MergedRow implements Row {
+    final Row left;
+    final Row right;
+    final int leftSize;
+    final int rowSize;
+
+    public MergedRow(Row left, Row right, int leftSize, int rowSize) {
+      this.left = left;
+      this.right = right;
+      this.leftSize = leftSize;
+      this.rowSize = rowSize;
+    }
+
+    @Override
+    public Object get(int columnIndex) {
+      if (columnIndex < leftSize) {
+        return left.get(columnIndex);
+      } else {
+        return right.get(columnIndex - leftSize);
+      }
+    }
+
+    @Override
+    public int size() {
+      return rowSize;
     }
   }
 
@@ -168,7 +238,8 @@ public class Interpreter {
       return null;
     }
     ColumnType dType = dominate(inputs.get(0).getOutType(), inputs.get(1).getOutType());
-    final int cmp = ((Comparable) cast(dType, (Number) left)).compareTo((Comparable) cast(dType, (Number) right));
+    final int cmp = ((Comparable) cast(dType, (Number) left))
+        .compareTo((Comparable) cast(dType, (Number) right));
     switch (type) {
       case GT:
         return cmp > 0;
@@ -196,9 +267,10 @@ public class Interpreter {
   }
 
   private static Number calculate(Row row, OperatorType type, List<Expression> inputExps) {
-    List<Number> inputs = inputExps.stream().map(e -> (Number) implement(row, e)).collect(Collectors.toList());
-    ColumnType calType = inputExps.stream().reduce(ColumnType.INT, (d, t) -> dominate(d, t.getOutType()),
-        (t1, t2) -> dominate(t1, t2));
+    List<Number> inputs =
+        inputExps.stream().map(e -> (Number) implement(row, e)).collect(Collectors.toList());
+    ColumnType calType = inputExps.stream().reduce(ColumnType.INT,
+        (d, t) -> dominate(d, t.getOutType()), (t1, t2) -> dominate(t1, t2));
     for (Object in : inputs) {
       if (in == null) {
         return null;

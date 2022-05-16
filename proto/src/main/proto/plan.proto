@@ -6,36 +6,37 @@ option java_package = "com.hufudb.onedb.proto";
 option java_outer_classname = "OneDBPlan";
 
 enum OperatorType {
-  REF = 0;
-  LITERAL = 1;
+  NONE = 0;
+  REF = 1;
+  LITERAL = 2;
   // for binary
-  PLUS = 2;
-  MINUS = 3;
-  TIMES = 4;
-  DIVIDE = 5;
-  MOD = 6;
-  GT = 7;
-  GE = 8;
-  LT = 9;
-  LE = 10;
-  EQ = 11;
-  NE = 12;
-  AND = 13;
-  OR = 14;
+  PLUS = 3;
+  MINUS = 4;
+  TIMES = 5;
+  DIVIDE = 6;
+  MOD = 7;
+  GT = 8;
+  GE = 9;
+  LT = 10;
+  LE = 11;
+  EQ = 12;
+  NE = 13;
+  AND = 14;
+  OR = 15;
   // for unary
-  AS = 15;
-  NOT = 16;
-  PLUS_PRE = 17;
-  MINUS_PRE = 18;
-  IS_NULL = 19;
-  IS_NOT_NULL = 20;
+  AS = 16;
+  NOT = 17;
+  PLUS_PRE = 18;
+  MINUS_PRE = 19;
+  IS_NULL = 20;
+  IS_NOT_NULL = 21;
   // for mutliple
-  CASE = 21;
-  SRAG = 22;
-  SEARCH = 23;
+  CASE = 22;
+  SRAG = 23;
+  SEARCH = 24;
   // for functions
-  SCALAR_FUNC = 24;
-  AGG_FUNC = 25;
+  SCALAR_FUNC = 25;
+  AGG_FUNC = 26;
 }
 
 enum Direction {

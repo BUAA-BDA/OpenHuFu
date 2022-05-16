@@ -156,11 +156,10 @@ public class DataSetTest {
   }
 
   @Test
-  public void testSortLimitDataSet() {
+  public void testSortDataSet() {
     Collation c1 = Collation.newBuilder().setDirection(Direction.ASC).setRef(0).build();
     Collation c2 = Collation.newBuilder().setDirection(Direction.DESC).setRef(1).build();
     DataSet source = generateUnsortedDataSet();
-    // test sort
     DataSet d1 = SortedDataSet.sort(source, ImmutableList.of(c1));
     DataSetIterator it1 = d1.getIterator();
     assertTrue(it1.next()); 
@@ -179,7 +178,11 @@ public class DataSetTest {
     assertTrue(it2.next());
     assertEquals(1.4, (double) it2.get(1), 0.001);
     assertFalse(it2.next());
-    // test limit
+  }
+
+  @Test
+  public void testLimitDataSet() {
+    DataSet source = generateUnsortedDataSet();
     DataSet l1 = LimitDataSet.limit(source, 0, 0);
     DataSetIterator itl1 = l1.getIterator();
     assertTrue(itl1.next());

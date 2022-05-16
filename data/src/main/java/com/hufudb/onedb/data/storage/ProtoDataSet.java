@@ -53,7 +53,7 @@ final public class ProtoDataSet implements DataSet {
     return rowCount;
   }
 
-  public static DataSet materalize(DataSet dataSet) {
+  public static ProtoDataSet materalize(DataSet dataSet) {
     Builder builder = new Builder(dataSet.getSchema());
     DataSetIterator it = dataSet.getIterator();
     while (it.next()) {
