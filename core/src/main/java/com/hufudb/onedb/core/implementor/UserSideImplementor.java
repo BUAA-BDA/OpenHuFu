@@ -7,23 +7,25 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import com.hufudb.onedb.core.client.OneDBClient;
 import com.hufudb.onedb.core.client.OwnerClient;
-import com.hufudb.onedb.core.data.BasicDataSet;
-import com.hufudb.onedb.core.data.ColumnType;
-import com.hufudb.onedb.core.data.Schema;
-import com.hufudb.onedb.core.data.Level;
-import com.hufudb.onedb.core.data.StreamBuffer;
 import com.hufudb.onedb.core.implementor.plaintext.PlaintextImplementor;
-import com.hufudb.onedb.core.implementor.plaintext.PlaintextQueryableDataSet;
-import com.hufudb.onedb.core.sql.context.OneDBBinaryContext;
-import com.hufudb.onedb.core.sql.context.OneDBContext;
-import com.hufudb.onedb.core.sql.context.OneDBContextType;
-import com.hufudb.onedb.core.sql.context.OneDBLeafContext;
-import com.hufudb.onedb.core.sql.context.OneDBUnaryContext;
-import com.hufudb.onedb.rpc.OneDBCommon.DataSetProto;
-import com.hufudb.onedb.rpc.OneDBCommon.QueryContextProto;
+import com.hufudb.onedb.data.schema.Schema;
+import com.hufudb.onedb.data.storage.DataSet;
+import com.hufudb.onedb.data.storage.MultiSourceDataSet;
+import com.hufudb.onedb.data.storage.MultiSourceDataSet.Producer;
+import com.hufudb.onedb.implementor.PlanImplementor;
+import com.hufudb.onedb.interpreter.Interpreter;
+import com.hufudb.onedb.plan.BinaryPlan;
+import com.hufudb.onedb.plan.LeafPlan;
+import com.hufudb.onedb.plan.Plan;
+import com.hufudb.onedb.plan.UnaryPlan;
+import com.hufudb.onedb.proto.OneDBData.ColumnType;
+import com.hufudb.onedb.proto.OneDBData.DataSetProto;
+import com.hufudb.onedb.proto.OneDBData.Modifier;
+import com.hufudb.onedb.proto.OneDBPlan.PlanType;
+import com.hufudb.onedb.proto.OneDBPlan.QueryPlanProto;
 import org.apache.commons.lang3.tuple.Pair;
 
-public abstract class UserSideImplementor implements OneDBImplementor {
+public abstract class UserSideImplementor implements PlanImplementor {
 
   protected final OneDBClient client;
 
@@ -31,53 +33,55 @@ public abstract class UserSideImplementor implements OneDBImplementor {
     this.client = client;
   }
 
-  public static OneDBImplementor getImplementor(OneDBContext context, OneDBClient client) {
-    switch (context.getContextLevel()) {
+  public static PlanImplementor getImplementor(Plan plan, OneDBClient client) {
+    switch (plan.getPlanModifier()) {
       case PUBLIC:
       case PROTECTED:
         return new PlaintextImplementor(client);
       default:
-        LOG.error("No implementor found for Level {}", context.getContextLevel().name());
+        LOG.error("No implementor found for Modifier {}", plan.getPlanModifier().name());
         throw new UnsupportedOperationException(
-            String.format("No implementor found for Level %s", context.getContextLevel().name()));
+            String.format("No implementor found for Modifier %s", plan.getPlanModifier().name()));
     }
   }
 
-  boolean isMultiParty(OneDBContext context) {
-    OneDBContextType type = context.getContextType();
-    Level level = context.getContextLevel();
+  boolean isMultiParty(Plan plan) {
+    PlanType type = plan.getPlanType();
+    Modifier modifier = plan.getPlanModifier();
     switch (type) {
-      case ROOT: // no operation in root context
+      case ROOT: // no operation in root plan
         return false;
       case LEAF:
       case UNARY:
       case BINARY:
         // todo: refinement needed
-        return !level.equals(Level.PUBLIC);
+        return !modifier.equals(Modifier.PUBLIC);
       default:
-        LOG.error("Unsupport context type {}", type);
+        LOG.error("Unsupport plan type {}", type);
         throw new UnsupportedOperationException();
     }
   }
 
-  QueryableDataSet ownerSideQuery(OneDBContext context) {
-    // todo: send context to owner and get result as queryable dataset
-    List<Pair<OwnerClient, QueryContextProto>> queries = context.generateOwnerContextProto(client);
-    StreamBuffer<DataSetProto> iterator = new StreamBuffer<>(queries.size());
+  DataSet ownerSideQuery(Plan plan) {
+    List<Pair<OwnerClient, QueryPlanProto>> queries = plan.generateOwnerContextProto(client);
     List<Callable<Boolean>> tasks = new ArrayList<Callable<Boolean>>();
-    for (Pair<OwnerClient, QueryContextProto> entry : queries) {
+    Schema schema = plan.getOutSchema();
+    MultiSourceDataSet concurrentDataSet = new MultiSourceDataSet(schema);
+    // todo: wait for producer
+    for (Pair<OwnerClient, QueryPlanProto> entry : queries) {
       tasks.add(() -> {
+        final Producer producer = concurrentDataSet.newProducer();
         try {
           Iterator<DataSetProto> it = entry.getLeft().query(entry.getRight());
           while (it.hasNext()) {
-            iterator.add(it.next());
+            producer.add(it.next());
           }
           return true;
         } catch (Exception e) {
           e.printStackTrace();
           return false;
         } finally {
-          iterator.finish();
+          producer.finish();
         }
       });
     }
@@ -91,39 +95,35 @@ public abstract class UserSideImplementor implements OneDBImplementor {
     } catch (Exception e) {
       LOG.error("Error in owner side query: {}", e.getMessage());
     }
-    Schema header = OneDBContext.getOutputHeader(context);
-    BasicDataSet localDataSet = BasicDataSet.of(header);
-    while (iterator.hasNext()) {
-      localDataSet.mergeDataSet(BasicDataSet.fromProto(iterator.next()));
-    }
-    return PlaintextQueryableDataSet.fromBasic(localDataSet);
+    return concurrentDataSet;
   }
 
   @Override
-  public QueryableDataSet implement(OneDBContext context) {
-    if (isMultiParty(context)) {
+  public DataSet implement(Plan plan) {
+    if (isMultiParty(plan)) {
       // implement on owner side
-      return ownerSideQuery(context);
+      return ownerSideQuery(plan);
     } else {
       // implement on user side
-      return context.implement(this);
+      return plan.implement(this);
     }
   }
 
   @Override
-  public QueryableDataSet binaryQuery(OneDBBinaryContext binary) {
-    List<OneDBContext> children = binary.getChildren();
+  public DataSet binaryQuery(BinaryPlan binary) {
+    List<Plan> children = binary.getChildren();
     assert children.size() == 2;
-    OneDBContext left = children.get(0);
-    OneDBContext right = children.get(1);
-    QueryableDataSet leftResult = implement(left);
-    QueryableDataSet rightResult = implement(right);
-    QueryableDataSet result = leftResult.join(this, rightResult, binary.getJoinInfo());
+    Plan left = children.get(0);
+    Plan right = children.get(1);
+    DataSet leftResult = implement(left);
+    DataSet rightResult = implement(right);
+    DataSet result = leftResult.join(this, rightResult, binary.getJoinCond());
     if (!binary.getWhereExps().isEmpty()) {
-      result = result.filter(this, binary.getWhereExps());
+      result = Interpreter.filter(result, binary.getWhereExps());
     }
     if (!binary.getSelectExps().isEmpty()) {
-      result = result.project(this, binary.getSelectExps());
+      // todo: avoid execute reference mapping
+      result = Interpreter.map(result, binary.getSelectExps());
     }
     if (!binary.getAggExps().isEmpty()) {
       List<ColumnType> types = new ArrayList<>();
@@ -141,12 +141,12 @@ public abstract class UserSideImplementor implements OneDBImplementor {
   }
 
   @Override
-  public QueryableDataSet unaryQuery(OneDBUnaryContext unary) {
-    List<OneDBContext> children = unary.getChildren();
+  public DataSet unaryQuery(UnaryPlan unary) {
+    List<Plan> children = unary.getChildren();
     assert children.size() == 1;
-    QueryableDataSet input = implement(children.get(0));
+    DataSet input = implement(children.get(0));
     if (!unary.getSelectExps().isEmpty()) {
-      input = input.project(this, unary.getSelectExps());
+      input = Interpreter.map(input, unary.getSelectExps());
     }
     if (!unary.getAggExps().isEmpty()) {
       input = input.aggregate(this, unary.getGroups(), unary.getAggExps(), children.get(0).getOutTypes());
@@ -161,38 +161,26 @@ public abstract class UserSideImplementor implements OneDBImplementor {
   }
 
   @Override
-  public QueryableDataSet leafQuery(OneDBLeafContext leaf) {
-    QueryContextProto proto = leaf.toProto();
+  public DataSet leafQuery(LeafPlan leaf) {
+    QueryPlanProto query = leaf.toProto();
     List<Pair<OwnerClient, String>> tableClients = client.getTableClients(leaf.getTableName());
-    StreamBuffer<DataSetProto> streamProto = tableQuery(proto, tableClients);
-
-    Schema header = OneDBContext.getOutputHeader(leaf);
-    // todo: optimze for streamDataSet
-    BasicDataSet localDataSet = BasicDataSet.of(header);
-    while (streamProto.hasNext()) {
-      localDataSet.mergeDataSet(BasicDataSet.fromProto(streamProto.next()));
-    }
-    return PlaintextQueryableDataSet.fromBasic(localDataSet);
-  }
-
-  private StreamBuffer<DataSetProto> tableQuery(QueryContextProto query,
-      List<Pair<OwnerClient, String>> tableClients) {
-    StreamBuffer<DataSetProto> iterator = new StreamBuffer<>(tableClients.size());
+    MultiSourceDataSet concurrentDataSet = new MultiSourceDataSet(leaf.getOutSchema());
     List<Callable<Boolean>> tasks = new ArrayList<Callable<Boolean>>();
     for (Pair<OwnerClient, String> entry : tableClients) {
       tasks.add(() -> {
+        final Producer producer = concurrentDataSet.newProducer();
         try {
-          QueryContextProto localQuery = query.toBuilder().setTableName(entry.getValue()).build();
+          QueryPlanProto localQuery = query.toBuilder().setTableName(entry.getValue()).build();
           Iterator<DataSetProto> it = entry.getKey().query(localQuery);
           while (it.hasNext()) {
-            iterator.add(it.next());
+            producer.add(it.next());
           }
           return true;
         } catch (Exception e) {
           e.printStackTrace();
           return false;
         } finally {
-          iterator.finish();
+          producer.finish();
         }
       });
     }
@@ -206,6 +194,6 @@ public abstract class UserSideImplementor implements OneDBImplementor {
     } catch (Exception e) {
       LOG.error("Error in leafQuery for {}", e.getMessage());
     }
-    return iterator;
+    return concurrentDataSet;
   }
 }

@@ -51,13 +51,13 @@ public class DataSetTest {
     Schema schema = Schema.newBuilder()
         .add("A", ColumnType.BOOLEAN, Modifier.HIDDEN)
         .add("B", ColumnType.BYTE, Modifier.PUBLIC)
-        .add("C", ColumnType.INT, Modifier.PORTECTED)
+        .add("C", ColumnType.INT, Modifier.PROTECTED)
         .add("D", ColumnType.LONG, Modifier.PRIVATE)
         .add("E", ColumnType.STRING, Modifier.PUBLIC)
         .add("F", ColumnType.BLOB, Modifier.PUBLIC).build();
     assertEquals("A", schema.getName(0));
     assertEquals(ColumnType.BYTE, schema.getType(1));
-    assertEquals(Modifier.PORTECTED, schema.getModifier(2));
+    assertEquals(Modifier.PROTECTED, schema.getModifier(2));
     ProtoDataSet.Builder dBuilder = ProtoDataSet.newBuilder(schema);
     List<Row> rows = generateRandomRowProto(10);
     for (Row row : rows) {

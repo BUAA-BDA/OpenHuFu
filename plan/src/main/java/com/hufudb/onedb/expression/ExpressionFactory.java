@@ -75,6 +75,11 @@ public class ExpressionFactory {
         .addAllIn(inputs).setModifier(mod).setI32(funcId).build();
   }
 
+  public static Expression createAggFunc(ColumnType type, Modifier mod, int funcId, List<Expression> inputs) {
+    return Expression.newBuilder().setOpType(OperatorType.AGG_FUNC).setOutType(type)
+        .addAllIn(inputs).setModifier(mod).setI32(funcId).build();
+  }
+
   public static Expression createLiteral(ColumnType type, Object value) {
     Expression.Builder builder = Expression.newBuilder().setOpType(OperatorType.LITERAL)
         .setOutType(type).setModifier(Modifier.PUBLIC);

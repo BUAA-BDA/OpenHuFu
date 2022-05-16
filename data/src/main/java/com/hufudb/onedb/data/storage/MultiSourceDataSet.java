@@ -110,7 +110,9 @@ public class MultiSourceDataSet implements DataSet {
     }
   }
 
-  class Producer {
+  public class Producer {
+    private Producer() {}
+
     public void add(DataSetProto proto) {
       lock.lock();
       queue.offer(proto);

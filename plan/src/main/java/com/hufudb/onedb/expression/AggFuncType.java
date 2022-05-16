@@ -38,6 +38,10 @@ public enum AggFuncType {
   }
 
   public static AggFuncType of(int id) {
-    return MAP.get(id);
+    return MAP.get(Math.abs(id));
+  }
+
+  public static boolean isDistinct(int id) {
+    return id < 0;
   }
 }

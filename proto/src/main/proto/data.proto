@@ -25,7 +25,7 @@ enum ColumnType {
 enum Modifier {
   HIDDEN = 0;
   PUBLIC = 1;
-  PORTECTED = 2;
+  PROTECTED = 2;
   PRIVATE = 3;
   UNSUPPORT = 100;
 }
