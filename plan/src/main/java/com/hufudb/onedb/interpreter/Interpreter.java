@@ -39,6 +39,19 @@ public class Interpreter {
     if (exps.isEmpty()) {
       return source;
     } else {
+      boolean isDirectMapping = exps.size() == source.getSchema().size();
+      if (isDirectMapping) {
+        for (int i = 0; i < exps.size(); ++i) {
+          Expression exp = exps.get(i);
+          if (!(exp.getOpType().equals(OperatorType.REF) && exp.getI32() == i)) {
+            isDirectMapping = false;
+            break;
+          }
+        }
+        if (isDirectMapping) {
+          return source;
+        }
+      }
       final Schema sourceSchema = source.getSchema();
       final Schema outSchema = ExpressionUtils.createSchema(exps);
       List<Mapper> maps = exps.stream().map(exp -> new InterpretivMapper(sourceSchema, exp))

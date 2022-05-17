@@ -7,7 +7,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import com.hufudb.onedb.core.client.OneDBClient;
 import com.hufudb.onedb.core.client.OwnerClient;
-import com.hufudb.onedb.core.implementor.plaintext.PlaintextImplementor;
 import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.data.storage.DataSet;
 import com.hufudb.onedb.data.storage.LimitDataSet;
@@ -27,7 +26,7 @@ import com.hufudb.onedb.proto.OneDBPlan.PlanType;
 import com.hufudb.onedb.proto.OneDBPlan.QueryPlanProto;
 import org.apache.commons.lang3.tuple.Pair;
 
-public abstract class UserSideImplementor implements PlanImplementor {
+public class UserSideImplementor implements PlanImplementor {
 
   protected final OneDBClient client;
 
@@ -39,7 +38,7 @@ public abstract class UserSideImplementor implements PlanImplementor {
     switch (plan.getPlanModifier()) {
       case PUBLIC:
       case PROTECTED:
-        return new PlaintextImplementor(client);
+        return new UserSideImplementor(client);
       default:
         LOG.error("No implementor found for Modifier {}", plan.getPlanModifier().name());
         throw new UnsupportedOperationException(
@@ -119,23 +118,19 @@ public abstract class UserSideImplementor implements PlanImplementor {
     Plan right = children.get(1);
     DataSet leftResult = implement(left);
     DataSet rightResult = implement(right);
-    DataSet result = leftResult.join(this, rightResult, binary.getJoinCond());
+    // DataSet result = leftResult.join(this, rightResult, binary.getJoinCond());
+    DataSet result = Interpreter.join(leftResult, rightResult, binary.getJoinCond());
     if (!binary.getWhereExps().isEmpty()) {
       result = Interpreter.filter(result, binary.getWhereExps());
     }
     if (!binary.getSelectExps().isEmpty()) {
-      // todo: avoid execute reference mapping
       result = Interpreter.map(result, binary.getSelectExps());
     }
     if (!binary.getAggExps().isEmpty()) {
-      List<ColumnType> types = new ArrayList<>();
-      types.addAll(left.getOutTypes());
-      types.addAll(right.getOutTypes());
-      result = result.aggregate(this, binary.getGroups(), binary.getAggExps(), types);
+      result = Interpreter.aggregate(result, binary.getGroups(), binary.getAggExps());
     }
     if (!binary.getOrders().isEmpty()) {
       result = SortedDataSet.sort(result, binary.getOrders());
-
     }
     if (binary.getFetch() > 0 || binary.getOffset() > 0) {
       result = LimitDataSet.limit(result, binary.getOffset(), binary.getFetch());
@@ -152,7 +147,7 @@ public abstract class UserSideImplementor implements PlanImplementor {
       input = Interpreter.map(input, unary.getSelectExps());
     }
     if (!unary.getAggExps().isEmpty()) {
-      input = input.aggregate(this, unary.getGroups(), unary.getAggExps(), children.get(0).getOutTypes());
+      input = Interpreter.aggregate(input, unary.getGroups(), unary.getAggExps());
     }
     if (!unary.getOrders().isEmpty()) {
       input = SortedDataSet.sort(input, unary.getOrders());
