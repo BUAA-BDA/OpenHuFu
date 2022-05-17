@@ -11,12 +11,15 @@ import com.hufudb.onedb.expression.ExpressionUtils;
 import com.hufudb.onedb.expression.ScalarFuncType;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBData.Modifier;
+import com.hufudb.onedb.proto.OneDBPlan.Collation;
+import com.hufudb.onedb.proto.OneDBPlan.Direction;
 import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import com.hufudb.onedb.proto.OneDBPlan.JoinCondition;
 import com.hufudb.onedb.proto.OneDBPlan.JoinType;
 import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
 import org.apache.calcite.rex.RexLiteral;
 import org.apache.calcite.rex.RexLocalRef;
+import org.apache.calcite.rel.RelFieldCollation;
 import org.apache.calcite.rel.core.AggregateCall;
 import org.apache.calcite.rel.core.JoinInfo;
 import org.apache.calcite.rel.core.JoinRelType;
@@ -29,6 +32,21 @@ import org.apache.calcite.sql.validate.SqlUserDefinedFunction;
 
 public class CalciteConverter {
   private CalciteConverter() {}
+
+  public static Direction convert(RelFieldCollation.Direction direction) {
+    switch(direction) {
+      case ASCENDING:
+        return Direction.ASC;
+      case DESCENDING:
+        return Direction.DESC;
+      default:
+        throw new UnsupportedOperationException("Unsupported direction for collation");
+    }
+  }
+
+  public static Collation convert(RelFieldCollation coll) {
+    return Collation.newBuilder().setRef(coll.getFieldIndex()).setDirection(convert(coll.getDirection())).build();
+  }
 
   public static AggFuncType convert(SqlKind aggType) {
     switch (aggType) {
@@ -82,7 +100,7 @@ public class CalciteConverter {
   public static JoinCondition convert(JoinRelType type, JoinInfo info, List<Expression> inputs) {
     Expression condition =
         ExpressionUtils.conjunctCondition(convert(info.nonEquiConditions, inputs));
-    Modifier dominator = condition.getModifier();
+    Modifier dominator = condition == null ? Modifier.PUBLIC : condition.getModifier();
     for (int key : info.leftKeys) {
       dominator = ModifierWrapper.dominate(dominator, inputs.get(key).getModifier());
     }

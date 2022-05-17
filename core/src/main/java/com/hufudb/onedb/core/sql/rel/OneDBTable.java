@@ -187,7 +187,7 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
         null);
   }
 
-  public OneDBTableSchema getTableInfo() {
+  public OneDBTableSchema getTableSchema() {
     return tableInfo;
   }
 

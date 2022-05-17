@@ -7,64 +7,64 @@
   "passwd": "onedb",
   "tables": [
     {
-      "originName": "student",
+      "actualName": "student",
       "publishedName": "student1",
-      "publishedFields": [],
-      "originColumns": []
+      "publishedColumns": [],
+      "actualColumns": []
     },
     {
-      "originName": "student",
+      "actualName": "student",
       "publishedName": "student2",
-      "publishedFields": [
+      "publishedColumns": [
         {
           "name": "name",
           "type": "STRING",
-          "level": "public"
+          "modifier": "public"
         },
         {
           "name": "score",
           "type": "INT",
-          "level": "public"
+          "modifier": "public"
         },
         {
           "name": "age",
           "type": "INT",
-          "level": "hidden"
+          "modifier": "hidden"
         },
         {
           "name": "dept_name",
           "type": "STRING",
-          "level": "hidden"
+          "modifier": "hidden"
         }
       ],
-      "originColumns": [0, 2, 1, 3]
+      "actualColumns": [0, 2, 1, 3]
     },
     {
-      "originName": "student",
+      "actualName": "student",
       "publishedName": "student3",
-      "publishedFields": [
+      "publishedColumns": [
         {
           "name": "name",
           "type": "STRING",
-          "level": "public"
+          "modifier": "public"
         },
         {
           "name": "score",
           "type": "INT",
-          "level": "public"
+          "modifier": "public"
         },
         {
           "name": "age",
           "type": "INT",
-          "level": "hidden"
+          "modifier": "hidden"
         },
         {
           "name": "dept_name",
           "type": "STRING",
-          "level": "hidden"
+          "modifier": "hidden"
         }
       ],
-      "originColumns": [0, 2, 1, 3]
+      "actualColumns": [0, 2, 1, 3]
     }
   ]
 }

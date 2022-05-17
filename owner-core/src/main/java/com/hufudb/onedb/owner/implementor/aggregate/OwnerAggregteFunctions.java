@@ -3,24 +3,25 @@ package com.hufudb.onedb.owner.implementor.aggregate;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import com.google.common.collect.ImmutableList;
-import com.hufudb.onedb.core.data.Row;
-import com.hufudb.onedb.core.implementor.aggregate.AggregateFunction;
-import com.hufudb.onedb.core.sql.expression.OneDBAggCall;
-import com.hufudb.onedb.core.sql.expression.OneDBExpression;
+import com.hufudb.onedb.data.function.AggregateFunction;
+import com.hufudb.onedb.data.storage.Row;
+import com.hufudb.onedb.expression.AggFuncType;
 import com.hufudb.onedb.mpc.bristol.CircuitType;
 import com.hufudb.onedb.mpc.codec.OneDBCodec;
 import com.hufudb.onedb.mpc.gmw.GMW;
 import com.hufudb.onedb.mpc.ot.PublicKeyOT;
 import com.hufudb.onedb.mpc.utils.Boardcast;
+import com.hufudb.onedb.proto.OneDBPlan.Expression;
+import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
+import com.hufudb.onedb.proto.OneDBPlan.TaskInfo;
 import com.hufudb.onedb.rpc.Rpc;
-import com.hufudb.onedb.rpc.OneDBCommon.TaskInfoProto;
 
 public class OwnerAggregteFunctions {
-  public static AggregateFunctions getAggregateFunc(OneDBExpression exp, Rpc rpc, ExecutorService threadPool, TaskInfoProto taskInfo) {
-    if (exp instanceof OneDBAggCall) {
-      switch (((OneDBAggCall) exp).getAggType()) {
+  public static AggregateFunction getAggregateFunc(Expression exp, Rpc rpc, ExecutorService threadPool, TaskInfo taskInfo) {
+    if (exp.getOpType().equals(OperatorType.AGG_FUNC)) {
+      switch (AggFuncType.of(exp.getI32())) {
         case SUM:
-          return new GMWSum((OneDBAggCall) exp, rpc, threadPool, taskInfo);
+          return new GMWSum(exp, rpc, threadPool, taskInfo);
         default:
           throw new UnsupportedOperationException("Unsupported aggregate function");
       }
@@ -29,14 +30,14 @@ public class OwnerAggregteFunctions {
     }
   }
 
-  public static class GMWSum implements AggregateFunctions<Row, Comparable> {
+  public static class GMWSum implements AggregateFunction<Row, Comparable> {
     int sum;
     final int inputRef;
     final GMW gmw;
     final Boardcast boardcast;
-    final TaskInfoProto taskInfo;
+    final TaskInfo taskInfo;
 
-    GMWSum(int inputRef, GMW gmw, Boardcast boardcast, TaskInfoProto taskInfo) {
+    GMWSum(int inputRef, GMW gmw, Boardcast boardcast, TaskInfo taskInfo) {
       this.sum = 0;
       this.inputRef = inputRef;
       this.gmw = gmw;
@@ -44,13 +45,13 @@ public class OwnerAggregteFunctions {
       this.taskInfo = taskInfo;
     }
 
-    GMWSum(OneDBAggCall agg, Rpc rpc, ExecutorService threadPool, TaskInfoProto taskInfo) {
-      this(agg.getInputRef().get(0), new GMW(rpc, new PublicKeyOT(rpc), threadPool), new Boardcast(rpc), taskInfo);
+    GMWSum(Expression agg, Rpc rpc, ExecutorService threadPool, TaskInfo taskInfo) {
+      this(agg.getIn(0).getI32(), new GMW(rpc, new PublicKeyOT(rpc), threadPool), new Boardcast(rpc), taskInfo);
     }
 
     @Override
     public void add(Row ele) {
-      Object e = ele.getObject(inputRef);
+      Object e = ele.get(inputRef);
       sum += ((Number) e).intValue();
     }
 
@@ -67,7 +68,7 @@ public class OwnerAggregteFunctions {
     }
 
     @Override
-    public AggregateFunctions<Row, Comparable> patternCopy() {
+    public AggregateFunction<Row, Comparable> copy() {
       return new GMWSum(inputRef, gmw, boardcast, taskInfo);
     }
   }

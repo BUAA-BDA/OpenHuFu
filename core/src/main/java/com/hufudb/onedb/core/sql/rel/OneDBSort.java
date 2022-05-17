@@ -1,6 +1,8 @@
 package com.hufudb.onedb.core.sql.rel;
 import java.util.ArrayList;
 import java.util.List;
+import com.hufudb.onedb.core.sql.expression.CalciteConverter;
+import com.hufudb.onedb.proto.OneDBPlan.Collation;
 import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelOptCost;
 import org.apache.calcite.plan.RelOptPlanner;
@@ -39,11 +41,11 @@ public class OneDBSort extends Sort implements OneDBRel {
   public void implement(Implementor implementor) {
     implementor.visitChild((OneDBRel) getInput());
     List<RelFieldCollation> sortCollations = collation.getFieldCollations();
-    List<OneDBOrder> fieldOrder = new ArrayList<>();
+    List<Collation> fieldOrder = new ArrayList<>();
     if (!sortCollations.isEmpty()) {
       // Construct a series of order clauses from the desired collation
       for (RelFieldCollation fieldCollation : sortCollations) {
-        fieldOrder.add(OneDBOrder.fromCollation(fieldCollation));
+        fieldOrder.add(CalciteConverter.convert(fieldCollation));
       }
       implementor.setOrderExps(fieldOrder);
     }

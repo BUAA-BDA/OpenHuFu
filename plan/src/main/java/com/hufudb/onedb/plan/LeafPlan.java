@@ -46,7 +46,7 @@ public class LeafPlan extends BasePlan {
 
   public static LeafPlan fromProto(QueryPlanProto proto) {
     LeafPlan plan = new LeafPlan();
-    plan.setTableName(plan.getTableName());
+    plan.setTableName(proto.getTableName());
     plan.setSelectExps(proto.getSelectExpList());
     plan.setWhereExps(proto.getWhereExpList());
     plan.setAggExps(proto.getAggExpList());

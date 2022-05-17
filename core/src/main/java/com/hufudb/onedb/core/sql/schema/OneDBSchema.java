@@ -69,14 +69,14 @@ public class OneDBSchema extends AbstractSchema {
     return client.getEndpoints();
   }
 
-  public OneDBTableSchema getOneDBTableInfo(String tableName) {
-    return ((OneDBTable) getTable(tableName)).getTableInfo();
+  public OneDBTableSchema getOneDBTableSchema(String tableName) {
+    return ((OneDBTable) getTable(tableName)).getTableSchema();
   }
 
-  public List<OneDBTableSchema> getAllOneDBTableInfo() {
+  public List<OneDBTableSchema> getAllOneDBTableSchema() {
     List<OneDBTableSchema> infos = new ArrayList<>();
     for (Table table : tableMap.values()) {
-      infos.add(((OneDBTable) table).getTableInfo());
+      infos.add(((OneDBTable) table).getTableSchema());
     }
     return infos;
   }
@@ -117,7 +117,7 @@ public class OneDBSchema extends AbstractSchema {
 
   public void addTable(String tableName, Table table) {
     parentSchema.add(tableName, table);
-    client.addTable(tableName, ((OneDBTable) table).getTableInfo());
+    client.addTable(tableName, ((OneDBTable) table).getTableSchema());
     tableMap.put(tableName, table);
   }
 
@@ -127,7 +127,7 @@ public class OneDBSchema extends AbstractSchema {
   }
 
   public void addLocalTable(String tableName, String endpoint, String localTableName) {
-    OneDBTableSchema table = getOneDBTableInfo(tableName);
+    OneDBTableSchema table = getOneDBTableSchema(tableName);
     OwnerClient client = getOwnerClient(endpoint);
     if (table != null && client != null) {
       table.addLocalTable(client, localTableName);
@@ -135,7 +135,7 @@ public class OneDBSchema extends AbstractSchema {
   }
 
   public void dropLocalTable(String tableName, String endpoint) {
-    OneDBTableSchema table = getOneDBTableInfo(tableName);
+    OneDBTableSchema table = getOneDBTableSchema(tableName);
     OwnerClient client = getOwnerClient(endpoint);
     if (table != null && client != null) {
       table.dropLocalTable(client);
@@ -143,7 +143,7 @@ public class OneDBSchema extends AbstractSchema {
   }
 
   public void changeLocalTable(String tableName, String endpoint, String localTableName) {
-    OneDBTableSchema table = getOneDBTableInfo(tableName);
+    OneDBTableSchema table = getOneDBTableSchema(tableName);
     OwnerClient client = getOwnerClient(endpoint);
     if (table != null && client != null) {
       table.changeLocalTable(client, localTableName);

@@ -2,11 +2,13 @@ package com.hufudb.onedb.core.client;
 
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.config.OneDBConfig;
+import com.hufudb.onedb.core.data.EnumerableDataSet;
 import com.hufudb.onedb.core.implementor.UserSideImplementor;
 import com.hufudb.onedb.core.rewriter.BasicRewriter;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
 import com.hufudb.onedb.core.table.OneDBTableSchema;
 import com.hufudb.onedb.data.schema.Schema;
+import com.hufudb.onedb.data.storage.DataSet;
 import com.hufudb.onedb.data.storage.Row;
 import com.hufudb.onedb.plan.Plan;
 import com.hufudb.onedb.plan.QueryPlanPool;
@@ -177,6 +179,7 @@ public class OneDBClient {
     Plan plan = QueryPlanPool.getPlan(planId);
     // todo: support for choosing the appropritate rewriter
     plan = plan.rewrite(rewriter);
-    return UserSideImplementor.getImplementor(plan, this).implement(plan);
+    DataSet result = UserSideImplementor.getImplementor(plan, this).implement(plan);
+    return new EnumerableDataSet(result);
   }
 }

@@ -7,10 +7,10 @@
   "passwd": "onedb",
   "tables": [
     {
-      "originName": "student",
+      "actualName": "student",
       "publishedName": "student1",
-      "publishedFields": [],
-      "originColumns": []
+      "publishedColumns": [],
+      "actualColumns": []
     }
   ]
 }

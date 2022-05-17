@@ -18,6 +18,7 @@ public class AdapterLoader {
   private AdapterLoader() {}
 
   public static Map<String, AdapterFactory> loadAdapters(String adapterDirectory) {
+    LOG.info("Load adapter from {}", adapterDirectory);
     File adapters[]= new File(adapterDirectory).listFiles(new FileFilter() {
       @Override
       public boolean accept(File file) {

@@ -7,6 +7,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import com.hufudb.onedb.core.client.OneDBClient;
 import com.hufudb.onedb.core.client.OwnerClient;
+import com.hufudb.onedb.core.sql.plan.PlanUtils;
 import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.data.storage.DataSet;
 import com.hufudb.onedb.data.storage.LimitDataSet;
@@ -19,7 +20,6 @@ import com.hufudb.onedb.plan.BinaryPlan;
 import com.hufudb.onedb.plan.LeafPlan;
 import com.hufudb.onedb.plan.Plan;
 import com.hufudb.onedb.plan.UnaryPlan;
-import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBData.DataSetProto;
 import com.hufudb.onedb.proto.OneDBData.Modifier;
 import com.hufudb.onedb.proto.OneDBPlan.PlanType;
@@ -64,7 +64,7 @@ public class UserSideImplementor implements PlanImplementor {
   }
 
   DataSet ownerSideQuery(Plan plan) {
-    List<Pair<OwnerClient, QueryPlanProto>> queries = plan.generateOwnerContextProto(client);
+    List<Pair<OwnerClient, QueryPlanProto>> queries = PlanUtils.generateOwnerPlans(client, plan);
     List<Callable<Boolean>> tasks = new ArrayList<Callable<Boolean>>();
     Schema schema = plan.getOutSchema();
     MultiSourceDataSet concurrentDataSet = new MultiSourceDataSet(schema);
@@ -160,16 +160,14 @@ public class UserSideImplementor implements PlanImplementor {
 
   @Override
   public DataSet leafQuery(LeafPlan leaf) {
-    QueryPlanProto query = leaf.toProto();
-    List<Pair<OwnerClient, String>> tableClients = client.getTableClients(leaf.getTableName());
     MultiSourceDataSet concurrentDataSet = new MultiSourceDataSet(leaf.getOutSchema());
     List<Callable<Boolean>> tasks = new ArrayList<Callable<Boolean>>();
-    for (Pair<OwnerClient, String> entry : tableClients) {
+    List<Pair<OwnerClient, QueryPlanProto>> plans = PlanUtils.generateLeafOwnerPlans(client, leaf);
+    for (Pair<OwnerClient, QueryPlanProto> entry : plans) {
       tasks.add(() -> {
         final Producer producer = concurrentDataSet.newProducer();
         try {
-          QueryPlanProto localQuery = query.toBuilder().setTableName(entry.getValue()).build();
-          Iterator<DataSetProto> it = entry.getKey().query(localQuery);
+          Iterator<DataSetProto> it = entry.getKey().query(entry.getValue());
           while (it.hasNext()) {
             producer.add(it.next());
           }

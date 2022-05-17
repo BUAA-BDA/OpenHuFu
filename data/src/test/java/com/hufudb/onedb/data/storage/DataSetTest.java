@@ -134,6 +134,54 @@ public class DataSetTest {
     assertEquals(46, count);
   }
 
+  @Test
+  public void testHorizontalDataSet() {
+    final Schema schema = Schema.newBuilder()
+    .add("A", ColumnType.INT, Modifier.PUBLIC)
+    .add("B", ColumnType.LONG, Modifier.PUBLIC).build();
+    ProtoDataSet d0 = ProtoDataSet.create(generateDataSet(schema, 3));
+    ProtoDataSet d1 = ProtoDataSet.create(generateDataSet(schema, 2));
+    ProtoDataSet d2 = ProtoDataSet.create(generateDataSet(schema, 5));
+    HorizontalDataSet r = new HorizontalDataSet(ImmutableList.of(d0, d1, d2));
+    assertEquals(r.rowCount(), 10);
+    DataSetIterator it = r.getIterator();
+    DataSetIterator it0 = d0.getIterator();
+    DataSetIterator it1 = d1.getIterator();
+    DataSetIterator it2 = d2.getIterator();
+    while(it0.next()) {
+      assertTrue(it.next());
+      assertEquals(it0.get(0), it.get(0));
+    }
+    while(it1.next()) {
+      assertTrue(it.next());
+      assertEquals(it1.get(0), it.get(0));
+    }
+    while(it2.next()) {
+      assertTrue(it.next());
+      assertEquals(it2.get(0), it.get(0));
+    }
+  }
+
+  @Test
+  public void testVerticalDataSet() {
+    final Schema schema = Schema.newBuilder()
+    .add("A", ColumnType.INT, Modifier.PUBLIC)
+    .add("B", ColumnType.LONG, Modifier.PUBLIC).build();
+    ProtoDataSet left = ProtoDataSet.create(generateDataSet(schema, 2));
+    ProtoDataSet right = ProtoDataSet.create(generateDataSet(schema, 2));
+    VerticalDataSet r = VerticalDataSet.create(left, right);
+    assertEquals(r.rowCount(), 2);
+    DataSetIterator it = r.getIterator();
+    DataSetIterator leftIt = left.getIterator();
+    DataSetIterator rightIt = right.getIterator();
+    while(it.next()) {
+      leftIt.next();
+      rightIt.next();
+      assertEquals(leftIt.get(0), it.get(0));
+      assertEquals(rightIt.get(0), it.get(2));
+    }
+  }
+
   ProtoDataSet generateUnsortedDataSet() {
     final Schema schema = Schema.newBuilder().add("A", ColumnType.INT, Modifier.PUBLIC)
             .add("B", ColumnType.DOUBLE, Modifier.PUBLIC).build();

@@ -11,13 +11,13 @@ public class PojoPublishedTableSchema {
   public List<Integer> actualColumns;
 
   public PojoPublishedTableSchema(
-        String publishedTableName,
-        String actualTableName,
-        List<PojoColumnDesc> publishedFields,
+        String publishedName,
+        String actualName,
+        List<PojoColumnDesc> publishedColumns,
         List<Integer> actualColumns) {
-    this.publishedName = publishedTableName;
-    this.actualName = actualTableName;
-    this.publishedColumns = publishedFields;
+    this.publishedName = publishedName;
+    this.actualName = actualName;
+    this.publishedColumns = publishedColumns;
     this.actualColumns = actualColumns;
   }
 
@@ -33,19 +33,19 @@ public class PojoPublishedTableSchema {
     return tableSchemas.stream().map(info -> from(info)).collect(Collectors.toList());
   }
 
-  public String getPublishedTableName() {
+  public String getPublishedName() {
     return publishedName;
   }
 
-  public void setPublishedTableName(String publishedTableName) {
+  public void setPublishedName(String publishedTableName) {
     this.publishedName = publishedTableName;
   }
 
-  public String getActualTableName() {
+  public String getActualName() {
     return actualName;
   }
 
-  public void setActualTableName(String originTableName) {
+  public void setActualName(String originTableName) {
     this.actualName = originTableName;
   }
 

@@ -1,8 +1,11 @@
 package com.hufudb.onedb.data.storage;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
-public class ArrayRow implements Row {
+public class ArrayRow implements Row, Serializable {
+  private static final long serialVersionUID = 12345L;
+
   final Object values[];
 
   ArrayRow(Object[] values) {

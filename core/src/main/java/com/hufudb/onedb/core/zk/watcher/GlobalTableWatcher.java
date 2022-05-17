@@ -20,7 +20,7 @@ public class GlobalTableWatcher extends ZkWatcher {
     super(schema, zk, path);
     String[] dic = path.split("/");
     String tableName = dic[dic.length - 1];
-    this.tableInfo = schema.getOneDBTableInfo(tableName);
+    this.tableInfo = schema.getOneDBTableSchema(tableName);
   }
 
   private void watchLocalTableChange(List<String> newEndpoints) {

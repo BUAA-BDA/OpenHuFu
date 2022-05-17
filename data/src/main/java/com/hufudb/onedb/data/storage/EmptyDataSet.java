@@ -3,7 +3,7 @@ package com.hufudb.onedb.data.storage;
 import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.proto.OneDBData.DataSetProto;
 
-public class EmptyDataSet implements DataSet {
+public class EmptyDataSet implements MaterializedDataSet {
   public final static EmptyDataSet INSTANCE = new EmptyDataSet();
   public final static DataSetProto PROTO = DataSetProto.newBuilder().build();
 
@@ -33,5 +33,15 @@ public class EmptyDataSet implements DataSet {
   @Override
   public void close() {
     // do nothing
+  }
+
+  @Override
+  public int rowCount() {
+    return 0;
+  }
+
+  @Override
+  public Object get(int rowIndex, int columnIndex) {
+    return null;
   }
 }

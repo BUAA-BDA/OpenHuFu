@@ -105,14 +105,13 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
     return schemaManager.getAllPublishedTable();
   }
 
-  // todo: rename the funciton and rpc
   @Override
   public void getAllTableSchema(GeneralRequest request,
       StreamObserver<TableSchemaListProto> responseObserver) {
     TableSchemaListProto.Builder builder = TableSchemaListProto.newBuilder();
     getAllPublishedTable().forEach(info -> builder.addTable(info.getFakeTableSchema().toProto()));
     responseObserver.onNext(builder.build());
-    LOG.info("Get {} local table infos", builder.getTableCount());
+    LOG.info("Get {} local table schemas", builder.getTableCount());
     responseObserver.onCompleted();
   }
 

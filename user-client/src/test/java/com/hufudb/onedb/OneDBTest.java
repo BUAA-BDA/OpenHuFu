@@ -1,8 +1,8 @@
 package com.hufudb.onedb;
 
 import com.google.common.collect.ImmutableList;
-import com.hufudb.onedb.core.data.ColumnType;
 import com.hufudb.onedb.core.table.TableMeta;
+import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import org.junit.Before;
 import org.junit.Test;
 

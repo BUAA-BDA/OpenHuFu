@@ -4,13 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import com.hufudb.onedb.data.schema.Schema;
 
-public class ArrayDataSet implements DataSet {
+public class ArrayDataSet implements MaterializedDataSet {
   final Schema schema;
   final List<ArrayRow> rows;
+  final int rowCount;
 
   ArrayDataSet(Schema schema, List<ArrayRow> rows) {
     this.schema = schema;
     this.rows = rows;
+    this.rowCount = rows.size();
   }
 
   public static ArrayDataSet materialize(DataSet dataSet) {
@@ -19,6 +21,7 @@ public class ArrayDataSet implements DataSet {
     while (iterator.next()) {
       rows.add(ArrayRow.materialize(iterator));
     }
+    dataSet.close();
     return new ArrayDataSet(dataSet.getSchema(), rows);
   }
 
@@ -35,6 +38,16 @@ public class ArrayDataSet implements DataSet {
   @Override
   public void close() {
     // do nothing
+  }
+
+  @Override
+  public Object get(int rowIndex, int columnIndex) {
+    return rows.get(rowIndex).get(columnIndex);
+  }
+
+  @Override
+  public int rowCount() {
+    return rowCount;
   }
 
   class Iterator implements DataSetIterator {

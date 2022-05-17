@@ -5,7 +5,7 @@ import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.proto.OneDBPlan.Collation;
 import com.hufudb.onedb.proto.OneDBPlan.Direction;
 
-public class SortedDataSet implements DataSet {
+public class SortedDataSet implements MaterializedDataSet {
   private final Schema schema;
   private final DataSet source;
   private final List<Collation> collations;
@@ -74,5 +74,15 @@ public class SortedDataSet implements DataSet {
   @Override
   public void close() {
     source.close();
+  }
+
+  @Override
+  public Object get(int rowIndex, int columnIndex) {
+    return output.get(rowIndex, columnIndex);
+  }
+
+  @Override
+  public int rowCount() {
+    return output.rowCount();
   }
 }

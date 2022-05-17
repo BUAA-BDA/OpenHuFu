@@ -6,8 +6,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
-import com.hufudb.onedb.core.config.OneDBConfig;
-import com.hufudb.onedb.core.data.utils.POJOPublishedTableInfo;
+import com.hufudb.onedb.data.schema.utils.PojoPublishedTableSchema;
 import com.hufudb.onedb.owner.adapter.Adapter;
 import com.hufudb.onedb.owner.adapter.AdapterConfig;
 import com.hufudb.onedb.owner.adapter.AdapterFactory;
@@ -20,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class OwnerConfigFile {
+  private static final int THREAD_NUM = 8;
   public static final Logger LOG = LoggerFactory.getLogger(OwnerConfigFile.class);
 
   public int id;
@@ -29,7 +29,7 @@ public class OwnerConfigFile {
   public String privatekeypath;
   public String certchainpath;
   public String trustcertpath;
-  public List<POJOPublishedTableInfo> tables;
+  public List<PojoPublishedTableSchema> tables;
   public AdapterConfig adapterconfig;
 
   public Adapter getAdapter() {
@@ -51,7 +51,7 @@ public class OwnerConfigFile {
     if (threadnum > 0) {
       config.threadPool = Executors.newFixedThreadPool(threadnum);
     } else {
-      config.threadPool = Executors.newFixedThreadPool(OneDBConfig.SERVER_THREAD_NUM);
+      config.threadPool = Executors.newFixedThreadPool(THREAD_NUM);
     }
     if (privatekeypath != null && certchainpath != null) {
       try {

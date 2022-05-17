@@ -6,6 +6,7 @@ import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.data.storage.utils.ModifierWrapper;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBData.Modifier;
+import com.hufudb.onedb.proto.OneDBPlan.Collation;
 import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import com.hufudb.onedb.proto.OneDBPlan.JoinCondition;
 import com.hufudb.onedb.proto.OneDBPlan.JoinType;
@@ -108,8 +109,12 @@ public class ExpressionFactory {
 
   public static JoinCondition createJoinCondition(JoinType joinType, List<Integer> leftKeys,
       List<Integer> rightKyes, Expression condition, Modifier modifier) {
-    return JoinCondition.newBuilder().setType(joinType).addAllLeftKey(leftKeys)
-        .addAllRightKey(rightKyes).setModifier(modifier).setCondition(condition).build();
+    JoinCondition.Builder builder = JoinCondition.newBuilder().setType(joinType).addAllLeftKey(leftKeys)
+        .addAllRightKey(rightKyes).setModifier(modifier);
+    if (condition != null) {
+      builder.setCondition(condition);
+    }
+    return builder.build();
   }
 
   public static JoinCondition createJoinCondition(JoinType joinType, List<Integer> leftKeys,

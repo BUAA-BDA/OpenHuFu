@@ -69,5 +69,10 @@ public class StreamDataSet implements DataSet {
     public boolean next() {
       return false;
     }
+
+    @Override
+    public int size() {
+        return 0;
+    }
   }
 }

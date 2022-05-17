@@ -1,5 +1,6 @@
 package com.hufudb.onedb.data.storage;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableList;
@@ -10,7 +11,7 @@ import com.hufudb.onedb.data.schema.Schema;
 /**
  * Dataset which store data in protobuf, represented as data source, Immutable.
  */
-final public class ProtoDataSet implements DataSet {
+final public class ProtoDataSet implements MaterializedDataSet {
   private final Schema schema;
   private final List<ProtoColumn> columns;
   private final int rowCount;
@@ -49,7 +50,13 @@ final public class ProtoDataSet implements DataSet {
     // do nothing
   }
 
-  public int size() {
+  @Override
+  public Object get(int rowIndex, int columnIndex) {
+    return columns.get(columnIndex).getObject(rowIndex);
+  }
+
+  @Override
+  public int rowCount() {
     return rowCount;
   }
 
@@ -59,7 +66,28 @@ final public class ProtoDataSet implements DataSet {
     while (it.next()) {
       builder.addRow(it);
     }
+    dataSet.close();
     return builder.build();
+  }
+
+  public static List<DataSetProto> slice(DataSet dataSet, int sliceSize) {
+    Builder builder = new Builder(dataSet.getSchema());
+    DataSetIterator it = dataSet.getIterator();
+    int count = 0;
+    List<DataSetProto> result = new ArrayList<>();
+    while (it.next()) {
+      builder.addRow(it);
+      count++;
+      if (count == sliceSize) {
+        result.add(builder.buildProto());
+        builder.clear();
+        count = 0;
+      }
+    }
+    if (count != 0) {
+      result.add(builder.buildProto());
+    }
+    return result;
   }
 
   public static Builder newBuilder(Schema schema) {

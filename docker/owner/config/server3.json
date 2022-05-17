@@ -14,46 +14,46 @@
   },
   "tables": [
     {
-      "originName": "student",
+      "actualName": "student",
       "publishedName": "student1",
-      "publishedFields": [],
-      "originColumns": []
+      "publishedColumns": [],
+      "actualColumns": []
     },
     {
-      "originName": "partsupp",
+      "actualName": "partsupp",
       "publishedName": "partsupp",
-      "publishedFields": [],
-      "originColumns": []
+      "publishedColumns": [],
+      "actualColumns": []
     },
     {
-      "originName": "customer",
+      "actualName": "customer",
       "publishedName": "customer",
-      "publishedFields": [],
-      "originColumns": []
+      "publishedColumns": [],
+      "actualColumns": []
     },
     {
-      "originName": "lineitem",
+      "actualName": "lineitem",
       "publishedName": "lineitem",
-      "publishedFields": [],
-      "originColumns": []
+      "publishedColumns": [],
+      "actualColumns": []
     },
     {
-      "originName": "orders",
+      "actualName": "orders",
       "publishedName": "orders",
-      "publishedFields": [],
-      "originColumns": []
+      "publishedColumns": [],
+      "actualColumns": []
     },
     {
-      "originName": "part",
+      "actualName": "part",
       "publishedName": "part",
-      "publishedFields": [],
-      "originColumns": []
+      "publishedColumns": [],
+      "actualColumns": []
     },
     {
-      "originName": "supplier",
+      "actualName": "supplier",
       "publishedName": "supplier",
-      "publishedFields": [],
-      "originColumns": []
+      "publishedColumns": [],
+      "actualColumns": []
     }
   ]
 }

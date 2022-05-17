@@ -86,16 +86,16 @@ public class SchemaManager {
   PublishedTableSchema generatePublishedTableSchema(PojoPublishedTableSchema publishedTableSchema) {
     ImmutableList.Builder<ColumnDesc> pFields = ImmutableList.builder();
     ImmutableList.Builder<Integer> mappings = ImmutableList.builder();
-    TableSchema actualSchema = actualTableSchemaMap.get(publishedTableSchema.getActualTableName());
-    List<PojoColumnDesc> publishedFields = publishedTableSchema.getPublishedColumns();
+    TableSchema actualSchema = actualTableSchemaMap.get(publishedTableSchema.getActualName());
+    List<PojoColumnDesc> publishedColumns = publishedTableSchema.getPublishedColumns();
     List<Integer> originNames = publishedTableSchema.getActualColumns();
-    for (int i = 0; i < publishedFields.size(); ++i) {
-      if (!publishedFields.get(i).getModifier().equals(Modifier.HIDDEN)) {
-        pFields.add(publishedFields.get(i).toColumnDesc());
+    for (int i = 0; i < publishedColumns.size(); ++i) {
+      if (!publishedColumns.get(i).getModifier().equals(Modifier.HIDDEN)) {
+        pFields.add(publishedColumns.get(i).toColumnDesc());
         mappings.add(originNames.get(i));
       }
     }
-    return new PublishedTableSchema(actualSchema, publishedTableSchema.getPublishedTableName(),
+    return new PublishedTableSchema(actualSchema, publishedTableSchema.getPublishedName(),
         pFields.build(), mappings.build());
   }
 

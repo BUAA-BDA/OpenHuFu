@@ -14,166 +14,166 @@
   },
   "tables": [
     {
-      "originName": "student",
+      "actualName": "student",
       "publishedName": "student1",
-      "publishedFields": [],
-      "originColumns": []
+      "publishedColumns": [],
+      "actualColumns": []
     },
     {
-      "originName": "student",
+      "actualName": "student",
       "publishedName": "student2",
-      "publishedFields": [
+      "publishedColumns": [
         {
           "name": "name",
           "type": "STRING",
-          "level": "public"
+          "modifier": "public"
         },
         {
           "name": "score",
           "type": "INT",
-          "level": "public"
+          "modifier": "public"
         },
         {
           "name": "age",
           "type": "INT",
-          "level": "hidden"
+          "modifier": "hidden"
         },
         {
           "name": "dept_name",
           "type": "STRING",
-          "level": "hidden"
+          "modifier": "hidden"
         }
       ],
-      "originColumns": [0, 2, 1, 3]
+      "actualColumns": [0, 2, 1, 3]
     },
     {
-      "originName": "student",
+      "actualName": "student",
       "publishedName": "student3",
-      "publishedFields": [
+      "publishedColumns": [
         {
           "name": "name",
           "type": "STRING",
-          "level": "public"
+          "modifier": "public"
         },
         {
           "name": "score",
           "type": "INT",
-          "level": "public"
+          "modifier": "public"
         },
         {
           "name": "age",
           "type": "INT",
-          "level": "hidden"
+          "modifier": "hidden"
         },
         {
           "name": "dept_name",
           "type": "STRING",
-          "level": "hidden"
+          "modifier": "hidden"
         }
       ],
-      "originColumns": [0, 2, 1, 3]
+      "actualColumns": [0, 2, 1, 3]
     },
     {
-      "originName": "student",
+      "actualName": "student",
       "publishedName": "st_pro_1",
-      "publishedFields": [
+      "publishedColumns": [
         {
           "name": "name",
           "type": "STRING",
-          "level": "protected"
+          "modifier": "protected"
         },
         {
           "name": "score",
           "type": "INT",
-          "level": "protected"
+          "modifier": "protected"
         },
         {
           "name": "age",
           "type": "INT",
-          "level": "protected"
+          "modifier": "protected"
         },
         {
           "name": "dept_name",
           "type": "STRING",
-          "level": "public"
+          "modifier": "public"
         }
       ],
-      "originColumns": [0, 1, 2, 3]
+      "actualColumns": [0, 1, 2, 3]
     },
     {
-      "originName": "student",
+      "actualName": "student",
       "publishedName": "st_pro_3",
-      "publishedFields": [
+      "publishedColumns": [
         {
           "name": "name",
           "type": "STRING",
-          "level": "protected"
+          "modifier": "protected"
         },
         {
           "name": "score",
           "type": "INT",
-          "level": "protected"
+          "modifier": "protected"
         },
         {
           "name": "age",
           "type": "INT",
-          "level": "protected"
+          "modifier": "protected"
         },
         {
           "name": "dept_name",
           "type": "STRING",
-          "level": "public"
+          "modifier": "public"
         }
       ],
-      "originColumns": [0, 1, 2, 3]
+      "actualColumns": [0, 1, 2, 3]
     },
     {
-      "originName": "region",
+      "actualName": "region",
       "publishedName": "region",
-      "publishedFields": [],
-      "originColumns": []
+      "publishedColumns": [],
+      "actualColumns": []
     },
     {
-      "originName": "nation",
+      "actualName": "nation",
       "publishedName": "nation",
-      "publishedFields": [],
-      "originColumns": []
+      "publishedColumns": [],
+      "actualColumns": []
     },
     {
-      "originName": "partsupp",
+      "actualName": "partsupp",
       "publishedName": "partsupp",
-      "publishedFields": [],
-      "originColumns": []
+      "publishedColumns": [],
+      "actualColumns": []
     },
     {
-      "originName": "customer",
+      "actualName": "customer",
       "publishedName": "customer",
-      "publishedFields": [],
-      "originColumns": []
+      "publishedColumns": [],
+      "actualColumns": []
     },
     {
-      "originName": "lineitem",
+      "actualName": "lineitem",
       "publishedName": "lineitem",
-      "publishedFields": [],
-      "originColumns": []
+      "publishedColumns": [],
+      "actualColumns": []
     },
     {
-      "originName": "orders",
+      "actualName": "orders",
       "publishedName": "orders",
-      "publishedFields": [],
-      "originColumns": []
+      "publishedColumns": [],
+      "actualColumns": []
     },
     {
-      "originName": "part",
+      "actualName": "part",
       "publishedName": "part",
-      "publishedFields": [],
-      "originColumns": []
+      "publishedColumns": [],
+      "actualColumns": []
     },
     {
-      "originName": "supplier",
+      "actualName": "supplier",
       "publishedName": "supplier",
-      "publishedFields": [],
-      "originColumns": []
+      "publishedColumns": [],
+      "actualColumns": []
     }
   ]
 }

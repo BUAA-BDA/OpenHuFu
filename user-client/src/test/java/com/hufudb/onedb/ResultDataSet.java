@@ -1,9 +1,8 @@
 package com.hufudb.onedb;
 
 import com.csvreader.CsvReader;
-import com.hufudb.onedb.core.data.ColumnType;
-import com.hufudb.onedb.core.data.Row;
-
+import com.hufudb.onedb.data.storage.ArrayRow;
+import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -13,22 +12,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ResultDataSet {
-  private final List<Row> realAnswer;
-  private final List<Row> output;
+  private final List<ArrayRow> realAnswer;
+  private final List<ArrayRow> output;
 
   public ResultDataSet() {
     realAnswer = new ArrayList<>();
     output = new ArrayList<>();
   }
 
-  private int compare(Row row1, Row row2) {
+  private int compare(ArrayRow row1, ArrayRow row2) {
     int compareResult = 0;
     assert row1.size() == row2.size();
     for (int i = 0; i < row1.size(); i++) {
-      compareResult = ((Comparable) row1.getObject(i)).compareTo((Comparable) row2.getObject(i));
-      if ((row1.getObject(i) instanceof Float) || (row1.getObject(i) instanceof Double)) {
-        double x = (Double) row1.getObject(i);
-        double y = (Double) row2.getObject(i);
+      compareResult = ((Comparable) row1.get(i)).compareTo((Comparable) row2.get(i));
+      if ((row1.get(i) instanceof Float) || (row1.get(i) instanceof Double)) {
+        double x = (Double) row1.get(i);
+        double y = (Double) row2.get(i);
         if (Math.abs(x - y) < 1e-5) {
           compareResult = 0;
         }
@@ -75,7 +74,7 @@ public class ResultDataSet {
       }
       reader.close();
       for (int i = 0; i < csvFileList.size(); i++) {
-        Row.RowBuilder builder = Row.newBuilder(csvFileList.get(0).length);
+        ArrayRow.Builder builder = ArrayRow.newBuilder(csvFileList.get(0).length);
         for (int j = 0; j < csvFileList.get(0).length; j++) {
           switch (header.get(j)) {
             case BYTE:
@@ -117,14 +116,14 @@ public class ResultDataSet {
   }
 
 
-  void addRealAnswer(Row row) {
+  void addRealAnswer(ArrayRow row) {
     realAnswer.add(row);
   }
 
   void  addOutput(ResultSet rs){
     try {
       while (rs.next()) {
-        Row.RowBuilder builder = Row.newBuilder(rs.getMetaData().getColumnCount());
+        ArrayRow.Builder builder = ArrayRow.newBuilder(rs.getMetaData().getColumnCount());
         for (int i = 0; i < rs.getMetaData().getColumnCount(); i++) {
           builder.set(i, rs.getObject(i + 1));
         }
@@ -136,7 +135,7 @@ public class ResultDataSet {
 
   }
 
-  void addOutput(Row row) {
+  void addOutput(ArrayRow row) {
     output.add(row);
   }
 }
