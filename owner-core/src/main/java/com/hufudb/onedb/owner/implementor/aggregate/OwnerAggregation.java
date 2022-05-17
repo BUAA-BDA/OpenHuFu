@@ -20,7 +20,7 @@ public class OwnerAggregation {
   static final Logger LOG = LoggerFactory.getLogger(OwnerAggregation.class);
 
   public static QueryableDataSet apply(QueryableDataSet input, List<Integer> groups, List<OneDBExpression> aggs, List<FieldType> types, Rpc rpc, ExecutorService threadPool, TaskInfoProto taskInfo) {
-    List<AggregateFunction<Row, Comparable>> aggFunctions = new ArrayList<>();
+    List<AggregateFunctions<Row, Comparable>> aggFunctions = new ArrayList<>();
     List<FieldType> aggTypes = new ArrayList<>();
     if (!groups.isEmpty()) {
       LOG.warn("Not support 'group by' clause");

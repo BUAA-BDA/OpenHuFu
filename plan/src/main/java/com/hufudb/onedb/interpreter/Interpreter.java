@@ -2,16 +2,22 @@ package com.hufudb.onedb.interpreter;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import com.hufudb.onedb.data.function.AggregateFunction;
+import com.hufudb.onedb.data.function.Aggregator;
 import com.hufudb.onedb.data.function.Filter;
 import com.hufudb.onedb.data.function.Mapper;
 import com.hufudb.onedb.data.function.Matcher;
 import com.hufudb.onedb.data.schema.Schema;
+import com.hufudb.onedb.data.storage.AggDataSet;
 import com.hufudb.onedb.data.storage.DataSet;
 import com.hufudb.onedb.data.storage.FilterDataSet;
 import com.hufudb.onedb.data.storage.JoinDataSet;
 import com.hufudb.onedb.data.storage.MapDataSet;
 import com.hufudb.onedb.data.storage.Row;
+import com.hufudb.onedb.expression.AggregateFunctions;
 import com.hufudb.onedb.expression.ExpressionUtils;
+import com.hufudb.onedb.expression.GroupAggregator;
+import com.hufudb.onedb.expression.SingleAggregator;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import com.hufudb.onedb.proto.OneDBPlan.JoinCondition;
@@ -38,6 +44,22 @@ public class Interpreter {
       List<Mapper> maps = exps.stream().map(exp -> new InterpretivMapper(sourceSchema, exp))
           .collect(Collectors.toList());
       return MapDataSet.create(outSchema, maps, source);
+    }
+  }
+
+  public static DataSet aggregate(DataSet source, List<Integer> groups, List<Expression> aggs) {
+    if (aggs.isEmpty()) {
+      return source;
+    } else {
+      List<AggregateFunction<Row, Comparable>> funcs = AggregateFunctions.createAggregateFunction(aggs);
+      Aggregator aggregator = null;
+      final Schema outSchema = ExpressionUtils.createSchema(aggs);
+      if (groups.isEmpty()) {
+        aggregator = new SingleAggregator(outSchema, funcs);
+      } else {
+        aggregator = new GroupAggregator(outSchema, groups, funcs);
+      }
+      return AggDataSet.create(outSchema, aggregator, source);
     }
   }
 
@@ -374,22 +396,27 @@ public class Interpreter {
     }
   }
 
-  public static Object cast(ColumnType type, Number value) {
+  public static Object cast(ColumnType type, Object value) {
     if (value == null) {
       return null;
     }
     // todo: support cast more types
     switch (type) {
+      case BYTE:
+      case SHORT:
       case INT:
-        return value.intValue();
+        return ((Number) value).intValue();
+      case DATE:
+      case TIME:
+      case TIMESTAMP:
       case LONG:
-        return value.longValue();
+        return ((Number) value).longValue();
       case FLOAT:
-        return value.floatValue();
+        return ((Number) value).floatValue();
       case DOUBLE:
-        return value.doubleValue();
+        return ((Number) value).doubleValue();
       default:
-        throw new UnsupportedOperationException("not support op type");
+        return value;
     }
   }
 }

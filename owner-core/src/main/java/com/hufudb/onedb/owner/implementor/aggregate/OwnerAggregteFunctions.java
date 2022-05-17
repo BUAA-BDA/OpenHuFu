@@ -16,7 +16,7 @@ import com.hufudb.onedb.rpc.Rpc;
 import com.hufudb.onedb.rpc.OneDBCommon.TaskInfoProto;
 
 public class OwnerAggregteFunctions {
-  public static AggregateFunction getAggregateFunc(OneDBExpression exp, Rpc rpc, ExecutorService threadPool, TaskInfoProto taskInfo) {
+  public static AggregateFunctions getAggregateFunc(OneDBExpression exp, Rpc rpc, ExecutorService threadPool, TaskInfoProto taskInfo) {
     if (exp instanceof OneDBAggCall) {
       switch (((OneDBAggCall) exp).getAggType()) {
         case SUM:
@@ -29,7 +29,7 @@ public class OwnerAggregteFunctions {
     }
   }
 
-  public static class GMWSum implements AggregateFunction<Row, Comparable> {
+  public static class GMWSum implements AggregateFunctions<Row, Comparable> {
     int sum;
     final int inputRef;
     final GMW gmw;
@@ -67,7 +67,7 @@ public class OwnerAggregteFunctions {
     }
 
     @Override
-    public AggregateFunction<Row, Comparable> patternCopy() {
+    public AggregateFunctions<Row, Comparable> patternCopy() {
       return new GMWSum(inputRef, gmw, boardcast, taskInfo);
     }
   }

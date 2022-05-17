@@ -3,12 +3,18 @@ package com.hufudb.onedb.interpreter;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.data.storage.ArrayRow;
 import com.hufudb.onedb.data.storage.DataSet;
 import com.hufudb.onedb.data.storage.DataSetIterator;
 import com.hufudb.onedb.data.storage.ProtoDataSet;
+import com.hufudb.onedb.expression.AggFuncType;
 import com.hufudb.onedb.expression.ExpressionFactory;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBData.Modifier;
@@ -208,5 +214,91 @@ public class InterpreterTest {
     assertEquals(6.3, (double) it.get(4), 0.001);
     assertEquals("Alice", it.get(5));
     assertFalse(it.next());
+  }
+
+  ProtoDataSet generatetestAggregateSourceDataSet() {
+    final Schema schema = Schema.newBuilder().add("A", ColumnType.INT, Modifier.PUBLIC)
+        .add("B", ColumnType.DOUBLE, Modifier.PUBLIC).build();
+    ProtoDataSet.Builder dBuilder = ProtoDataSet.newBuilder(schema);
+    ArrayRow.Builder builder = ArrayRow.newBuilder(2);
+    builder.reset();
+    builder.set(0, 3);
+    builder.set(1, 4.2);
+    dBuilder.addRow(builder.build());
+    builder.reset();
+    builder.set(0, 5);
+    builder.set(1, 6.3);
+    dBuilder.addRow(builder.build());
+    builder.reset();
+    builder.set(0, 7);
+    builder.set(1, 8.4);
+    dBuilder.addRow(builder.build());
+    builder.reset();
+    builder.set(0, 5);
+    builder.set(1, 4.2);
+    dBuilder.addRow(builder.build());
+    return dBuilder.build();
+  }
+
+  @Test
+  public void testAggregate() {
+    DataSet dataset = generatetestAggregateSourceDataSet();
+    Expression ref0 = ExpressionFactory.createInputRef(0, ColumnType.INT, Modifier.PUBLIC);
+    Expression ref1 = ExpressionFactory.createInputRef(1, ColumnType.DOUBLE, Modifier.PUBLIC);
+    Expression agg0 = ExpressionFactory.createAggFunc(ColumnType.INT, Modifier.PUBLIC, AggFuncType.COUNT.getId(), ImmutableList.of(ref0));
+    Expression agg1 = ExpressionFactory.createAggFunc(ColumnType.DOUBLE, Modifier.PUBLIC, AggFuncType.SUM.getId(), ImmutableList.of(ref1));
+    Expression agg2 = ExpressionFactory.createAggFunc(ColumnType.INT, Modifier.PUBLIC, AggFuncType.AVG.getId(), ImmutableList.of(ref0));
+    Expression agg3 = ExpressionFactory.createAggFunc(ColumnType.DOUBLE, Modifier.PUBLIC, AggFuncType.MIN.getId(), ImmutableList.of(ref1));
+    Expression agg4 = ExpressionFactory.createAggFunc(ColumnType.INT, Modifier.PUBLIC, AggFuncType.MAX.getId(), ImmutableList.of(ref0));
+    List<Expression> aggs = ImmutableList.of(agg0, agg1, agg2, agg3, agg4);
+    DataSet aggDataSet = Interpreter.aggregate(dataset, ImmutableList.of(), aggs);
+    DataSetIterator it = aggDataSet.getIterator();
+    assertTrue(it.next());
+    assertEquals(4, it.get(0));
+    assertEquals(23.1, (double) it.get(1), 0.001);
+    assertEquals(5, it.get(2));
+    assertEquals(4.2, it.get(3));
+    assertEquals(7, it.get(4));
+    assertFalse(false);
+  }
+
+  @Test
+  public void testDistinctAggregate() {
+    DataSet dataset = generatetestAggregateSourceDataSet();
+    Expression ref0 = ExpressionFactory.createInputRef(0, ColumnType.INT, Modifier.PUBLIC);
+    Expression ref1 = ExpressionFactory.createInputRef(1, ColumnType.DOUBLE, Modifier.PUBLIC);
+    Expression agg0 = ExpressionFactory.createAggFunc(ColumnType.INT, Modifier.PUBLIC, -AggFuncType.COUNT.getId(), ImmutableList.of(ref0));
+    Expression agg1 = ExpressionFactory.createAggFunc(ColumnType.DOUBLE, Modifier.PUBLIC, -AggFuncType.SUM.getId(), ImmutableList.of(ref1));
+    Expression agg2 = ExpressionFactory.createAggFunc(ColumnType.INT, Modifier.PUBLIC, -AggFuncType.AVG.getId(), ImmutableList.of(ref0));
+    Expression agg3 = ExpressionFactory.createAggFunc(ColumnType.DOUBLE, Modifier.PUBLIC, -AggFuncType.MIN.getId(), ImmutableList.of(ref1));
+    Expression agg4 = ExpressionFactory.createAggFunc(ColumnType.INT, Modifier.PUBLIC, -AggFuncType.MAX.getId(), ImmutableList.of(ref0));
+    List<Expression> aggs = ImmutableList.of(agg0, agg1, agg2, agg3, agg4);
+    DataSet aggDataSet = Interpreter.aggregate(dataset, ImmutableList.of(), aggs);
+    DataSetIterator it = aggDataSet.getIterator();
+    assertTrue(it.next());
+    assertEquals(3, it.get(0));
+    assertEquals(18.9, (double) it.get(1), 0.001);
+    assertEquals(5, it.get(2));
+    assertEquals(4.2, it.get(3));
+    assertEquals(7, it.get(4));
+    assertFalse(false);
+  }
+
+  @Test
+  public void testGroupAggregate() {
+    DataSet dataset = generatetestAggregateSourceDataSet();
+    // Expression ref0 = ExpressionFactory.createInputRef(0, ColumnType.INT, Modifier.PUBLIC);
+    Expression ref1 = ExpressionFactory.createInputRef(1, ColumnType.DOUBLE, Modifier.PUBLIC);
+    Expression agg1 = ExpressionFactory.createAggFunc(ColumnType.DOUBLE, Modifier.PUBLIC, AggFuncType.AVG.getId(), ImmutableList.of(ref1));
+    List<Expression> aggs = ImmutableList.of(agg1);
+    DataSet aggDataSet = Interpreter.aggregate(dataset, ImmutableList.of(0), aggs);
+    DataSetIterator it = aggDataSet.getIterator();
+    Set<Double> expect = ImmutableSet.of(4.2, 8.4, 5.25);
+    int count = 0;
+    while (it.next()) {
+      assertTrue(expect.contains(it.get(0)));
+      count++;
+    }
+    assertEquals(3, count);
   }
 }

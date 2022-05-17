@@ -6,6 +6,7 @@ import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.data.storage.DataSet;
 import com.hufudb.onedb.data.storage.EmptyDataSet;
 import com.hufudb.onedb.implementor.PlanImplementor;
+import com.hufudb.onedb.interpreter.Interpreter;
 import com.hufudb.onedb.owner.adapter.Adapter;
 import com.hufudb.onedb.owner.implementor.aggregate.OwnerAggregation;
 import com.hufudb.onedb.owner.implementor.join.HashEqualJoin;
@@ -14,6 +15,7 @@ import com.hufudb.onedb.plan.BinaryPlan;
 import com.hufudb.onedb.plan.LeafPlan;
 import com.hufudb.onedb.plan.Plan;
 import com.hufudb.onedb.plan.UnaryPlan;
+import com.hufudb.onedb.proto.OneDBPlan.JoinCondition;
 import com.hufudb.onedb.proto.OneDBPlan.PlanType;
 import com.hufudb.onedb.rpc.Rpc;
 
@@ -50,9 +52,9 @@ public class OwnerSideImplementor implements PlanImplementor {
       LOG.error("Not support two side on a single owner yet");
       throw new UnsupportedOperationException("Not support two side on a single owner yet");
     }
-    Schema leftSchema = left.getOutSchema();
-    Schema rightSchema = right.getOutSchema();
-    Schema outputSchema = Schema.merge(leftSchema, rightSchema);
+    // Schema leftSchema = left.getOutSchema();
+    // Schema rightSchema = right.getOutSchema();
+    // Schema outputSchema = Schema.merge(leftSchema, rightSchema);
     // DataSet result =
     //     HashEqualJoin.apply(in, binary.getJoinCond(), rpc, binary.getTaskInfo(), outputSchema);
     // if (!binary.getSelectExps().isEmpty()) {

@@ -14,6 +14,10 @@ public class AggDataSet implements DataSet {
     this.source = source;
   }
 
+  public static AggDataSet create(Schema schema, Aggregator aggregator, DataSet source) {
+    return new AggDataSet(schema, aggregator, source);
+  }
+
   @Override
   public Schema getSchema() {
     return schema;
@@ -21,7 +25,7 @@ public class AggDataSet implements DataSet {
 
   @Override
   public DataSetIterator getIterator() {
-    return null;
+    return new Iterator();
   }
 
   @Override
@@ -29,11 +33,18 @@ public class AggDataSet implements DataSet {
     source.close();
   }
 
-  class AggIterator implements DataSetIterator {
+  class Iterator implements DataSetIterator {
     Row row;
 
-    AggIterator() {
-      aggregator.set(getIterator());
+    Iterator() {
+      materialize();
+    }
+
+    void materialize() {
+      DataSetIterator it = source.getIterator();
+      while (it.next()) {
+        aggregator.add(it);
+      }
     }
 
     @Override
@@ -47,7 +58,7 @@ public class AggDataSet implements DataSet {
 
     @Override
     public Object get(int columnIndex) {
-      return row;
+      return row.get(columnIndex);
     }
 
     @Override

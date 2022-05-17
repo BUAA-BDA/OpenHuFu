@@ -1,5 +1,7 @@
 package com.hufudb.onedb.data.storage;
 
+import java.util.Arrays;
+
 public class ArrayRow implements Row {
   final Object values[];
 
@@ -19,6 +21,32 @@ public class ArrayRow implements Row {
   @Override
   public int size() {
     return values.length;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == this) {
+      return true;
+    } else if (obj instanceof Row) {
+      Row r = (Row) obj;
+      int size = r.size();
+      if (size != values.length) {
+        return false;
+      }
+      for (int i = 0; i < size; ++i) {
+        if (!get(i).equals(r.get(i))) {
+          return false;
+        }
+      }
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  @Override
+  public int hashCode() {
+    return Arrays.hashCode(values);
   }
 
   public static Builder newBuilder(int size) {

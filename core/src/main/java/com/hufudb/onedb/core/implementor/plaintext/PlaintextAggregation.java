@@ -16,7 +16,7 @@ public class PlaintextAggregation {
     List<AggregateFunction<Row, Comparable>> aggFunctions = new ArrayList<>();
     List<ColumnType> aggTypes = new ArrayList<>();
     for (OneDBExpression exp : aggs) {
-      aggFunctions.add(PlaintextAggregateFunctions.getAggregateFunc(exp));
+      aggFunctions.add(PlaintextAggregateFunctions.createAggregateFunction(exp));
       aggTypes.add(exp.getOutType());
     }
     Aggregator aggregator = Aggregator.create(groups, aggFunctions, aggTypes);
