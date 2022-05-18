@@ -32,8 +32,6 @@ enum OperatorType {
   IS_NOT_NULL = 21;
   // for mutliple
   CASE = 22;
-  SRAG = 23;
-  SEARCH = 24;
   // for functions
   SCALAR_FUNC = 25;
   AGG_FUNC = 26;

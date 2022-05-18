@@ -50,10 +50,6 @@ public class BasicTranslator implements Translator {
         return unary(exp);
       case CASE:
         return caseCall(exp);
-      case SRAG:
-        return sragCall(exp);
-      case SEARCH:
-        return searchCall(exp);
       case SCALAR_FUNC:
         return scalarFunc(exp);
       case AGG_FUNC:
@@ -173,14 +169,6 @@ public class BasicTranslator implements Translator {
     }
     String elseCase = String.format("ELSE %s", inputs.get(inputs.size() - 1));
     return String.format("CASE %s %s END", String.join(" ", caseList), elseCase);
-  }
-
-  protected String sragCall(Expression exp) {
-    throw new UnsupportedOperationException();
-  }
-
-  protected String searchCall(Expression exp) {
-    throw new UnsupportedOperationException();
   }
 
   protected String scalarFunc(Expression exp) {

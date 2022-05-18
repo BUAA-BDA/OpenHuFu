@@ -66,4 +66,21 @@ public class ExpressionUtils {
     }
     return base;
   }
+
+  public static Expression disjunctCondtion(List<Expression> conditions) {
+    final int size = conditions.size();
+    if (size == 0) {
+      return null;
+    } else if (size == 1) {
+      return conditions.get(0);
+    }
+    Expression base = conditions.get(0);
+    for (int i = 1; i < size; ++i) {
+      Expression filter = conditions.get(i);
+      base = Expression.newBuilder().setOpType(OperatorType.OR).setOutType(ColumnType.BOOLEAN)
+          .setModifier(ModifierWrapper.dominate(base.getModifier(), filter.getModifier()))
+          .addIn(base).addIn(filter).build();
+    }
+    return base;
+  }
 }

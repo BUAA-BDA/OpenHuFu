@@ -33,6 +33,7 @@ import org.apache.calcite.rex.RexNode;
 import org.apache.calcite.rex.RexProgram;
 import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.validate.SqlUserDefinedFunction;
+import org.apache.calcite.util.NlsString;
 import org.apache.calcite.util.Sarg;
 
 public class CalciteConverter {
@@ -345,11 +346,24 @@ public class CalciteConverter {
             throw new UnsupportedOperationException("Unsupported type for range");
         }
       }
-      return ExpressionUtils.conjunctCondition(rangeExps);
+      return ExpressionUtils.disjunctCondtion(rangeExps);
     }
 
     public static Expression convertRange(Object left, Object right, BoundType leftBound,
         BoundType rightBound, ColumnType cType, Expression in) {
+      if (cType.equals(ColumnType.STRING)) {
+        if (left instanceof NlsString) {
+          left = ((NlsString) left).getValue();
+        }
+        if (right instanceof NlsString) {
+          right = ((NlsString) right).getValue();
+        }
+      }
+      if (left.equals(right) && leftBound.equals(BoundType.CLOSED)
+          && rightBound.equals(BoundType.CLOSED)) {
+        return ExpressionFactory.createBinaryOperator(OperatorType.EQ, ColumnType.BOOLEAN, in,
+            ExpressionFactory.createLiteral(cType, left));
+      }
       Expression leftLit = ExpressionFactory.createLiteral(cType, left);
       Expression rightLit = ExpressionFactory.createLiteral(cType, right);
       Expression leftCmp = ExpressionFactory.createBinaryOperator(
