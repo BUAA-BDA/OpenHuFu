@@ -54,7 +54,7 @@ public class OwnerSideImplementor implements PlanImplementor {
     if (!binary.getSelectExps().isEmpty()) {
       result = Interpreter.map(result, binary.getSelectExps());
     }
-    return in;
+    return result;
   }
 
   @Override

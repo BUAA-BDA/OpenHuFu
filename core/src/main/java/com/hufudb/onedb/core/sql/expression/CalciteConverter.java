@@ -84,9 +84,15 @@ public class CalciteConverter {
       boolean distinct = agg.isDistinct();
       AggFuncType funcType = convert(agg.getAggregation().getKind());
       int funcTypeId = distinct ? -funcType.getId() : funcType.getId();
-      List<Expression> ins = ExpressionFactory.createInputRef(inputs, agg.getArgList());
-      builder.add(ExpressionFactory.createAggFunc(
-          TypeConverter.convert2OneDBType(agg.getType().getSqlTypeName()), funcTypeId, ins));
+      if (agg.getArgList().isEmpty()) {
+        builder.add(ExpressionFactory.createAggFunc(
+            TypeConverter.convert2OneDBType(agg.getType().getSqlTypeName()),
+            ModifierWrapper.deduceModifier(inputRefs), funcTypeId, ImmutableList.of()));
+      } else {
+        List<Expression> ins = ExpressionFactory.createInputRef(inputs, agg.getArgList());
+        builder.add(ExpressionFactory.createAggFunc(
+            TypeConverter.convert2OneDBType(agg.getType().getSqlTypeName()), funcTypeId, ins));
+      }
     }
     return builder.build();
   }

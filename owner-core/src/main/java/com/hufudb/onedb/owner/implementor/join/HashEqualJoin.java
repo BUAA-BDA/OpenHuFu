@@ -62,7 +62,7 @@ public class HashEqualJoin {
   }
 
   public static DataSet join(DataSet in, JoinCondition joinCond, Rpc rpc, TaskInfo taskInfo) {
-    if (!joinCond.hasCondition()) {
+    if (joinCond.hasCondition()) {
       LOG.error("HashEqualJoin not support theta join");
       throw new UnsupportedOperationException("HashEqualJoin not support theta join");
     }
