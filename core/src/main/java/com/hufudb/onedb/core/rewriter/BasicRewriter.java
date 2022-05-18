@@ -200,14 +200,18 @@ public class BasicRewriter implements Rewriter {
     // traverse exp tree, and convert each aggCall
     if (exp.getOpType().equals(OperatorType.AGG_FUNC)) {
       return convertAgg((Expression) exp, localAggs, groupMap);
-    } else {
+    } else if (exp.getInCount() > 0) {
       List<Expression> children = exp.getInList();
+      Expression.Builder builder = exp.toBuilder();
+      builder.clearIn();
       for (int i = 0; i < children.size(); ++i) {
         Expression globalExp = rewriteAggregate(children.get(i), localAggs, groupMap);
-        children.set(i, globalExp);
+        builder.addIn(globalExp);
       }
+      return builder.build();
+    } else {
+      return exp;
     }
-    return exp;
   }
 
   /*
