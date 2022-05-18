@@ -1,6 +1,7 @@
 package com.hufudb.onedb.core.sql.rel;
 
-import com.hufudb.onedb.core.sql.expression.OneDBOperator;
+import com.google.common.collect.ImmutableList;
+import com.hufudb.onedb.core.sql.expression.CalciteConverter;
 import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelOptCost;
 import org.apache.calcite.plan.RelOptPlanner;
@@ -24,7 +25,7 @@ public class OneDBFilter extends Filter implements OneDBRel {
   @Override
   public void implement(Implementor implementor) {
     implementor.visitChild((OneDBRel) getInput());
-    implementor.addFilterExps(OneDBOperator.fromRexNode(condition, implementor.getCurrentOutput()));
+    implementor.setFilterExps(CalciteConverter.convert(ImmutableList.of(condition), implementor.getCurrentOutput()));
   }
 
   @Override

@@ -1,6 +1,6 @@
 package com.hufudb.onedb.rpc.utils;
 
-import com.hufudb.onedb.rpc.OneDBPipe.HeaderProto;
+import com.hufudb.onedb.proto.DataPacket.HeaderProto;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 

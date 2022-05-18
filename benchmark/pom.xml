@@ -28,12 +28,12 @@ questions.
   <parent>
     <artifactId>onedb</artifactId>
     <groupId>com.hufudb.onedb</groupId>
-    <version>0.1-SNAPSHOT</version>
+    <version>1.0-SNAPSHOT</version>
   </parent>
 
   <groupId>com.hufudb.onedb</groupId>
   <artifactId>benchmark</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>benchmark</name>
 
@@ -45,7 +45,7 @@ questions.
     <dependency>
       <groupId>com.hufudb.onedb</groupId>
       <artifactId>user-client</artifactId>
-      <version>0.1-SNAPSHOT</version>
+      <version>1.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.openjdk.jmh</groupId>

@@ -1,7 +1,7 @@
 package com.hufudb.onedb.rpc.grpc;
 
 import com.hufudb.onedb.rpc.Party;
-import com.hufudb.onedb.rpc.OneDBCommon.OwnerInfoProto;
+import com.hufudb.onedb.proto.OneDBService.OwnerInfo;
 
 public class OneDBOwnerInfo implements Party {
   private final int id;
@@ -12,7 +12,7 @@ public class OneDBOwnerInfo implements Party {
     this.endpoint = endpoint;
   }
 
-  public static OneDBOwnerInfo fromProto(OwnerInfoProto proto) {
+  public static OneDBOwnerInfo fromProto(OwnerInfo proto) {
     return new OneDBOwnerInfo(proto.getId(), proto.getEndpoint());
   }
 

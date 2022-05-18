@@ -14,37 +14,37 @@
   },
   "tables": [
     {
-      "originName": "student",
+      "actualName": "student",
       "publishedName": "student1",
-      "publishedFields": [],
-      "originColumns": []
+      "publishedColumns": [],
+      "actualColumns": []
     },
     {
-      "originName": "student",
+      "actualName": "student",
       "publishedName": "st_pro",
-      "publishedFields": [
+      "publishedColumns": [
         {
           "name": "name",
           "type": "STRING",
-          "level": "public"
+          "modifier": "public"
         },
         {
           "name": "score",
           "type": "INT",
-          "level": "protected"
+          "modifier": "protected"
         },
         {
           "name": "age",
           "type": "INT",
-          "level": "protected"
+          "modifier": "protected"
         },
         {
           "name": "dept_name",
           "type": "STRING",
-          "level": "protected"
+          "modifier": "protected"
         }
       ],
-      "originColumns": [0, 1, 2, 3]
+      "actualColumns": [0, 1, 2, 3]
     }
   ]
 }

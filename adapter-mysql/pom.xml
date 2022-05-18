@@ -4,11 +4,11 @@
   <parent>
     <artifactId>onedb</artifactId>
     <groupId>com.hufudb.onedb</groupId>
-    <version>0.1-SNAPSHOT</version>
+    <version>1.0-SNAPSHOT</version>
   </parent>
   <groupId>com.hufudb.onedb</groupId>
   <artifactId>adapter-mysql</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>1.0-SNAPSHOT</version>
   <name>adapter-mysql</name>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -19,8 +19,8 @@
   <dependencies>
     <dependency>
       <groupId>com.hufudb.onedb</groupId>
-      <artifactId>owner-core</artifactId>
-      <version>0.1-SNAPSHOT</version>
+      <artifactId>owner</artifactId>
+      <version>1.0-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>

@@ -1,41 +1,41 @@
 package com.hufudb.onedb.owner.adapter.mysql;
 
-import com.hufudb.onedb.core.data.FieldType;
 import com.hufudb.onedb.owner.adapter.AdapterTypeConverter;
+import com.hufudb.onedb.proto.OneDBData.ColumnType;
 
 public class MysqlTypeConverter implements AdapterTypeConverter {
-  public FieldType convert(String typeName) {
+  public ColumnType convert(String typeName) {
     switch (typeName) {
       case "FLOAT":
       case "REAL":
-        return FieldType.FLOAT;
+        return ColumnType.FLOAT;
       case "DOUBLE":
-        return FieldType.DOUBLE;
+        return ColumnType.DOUBLE;
       case "TINYINT":
-        return FieldType.BYTE;
+        return ColumnType.BYTE;
       case "INT2":
       case "SMALLINT":
-        return FieldType.SHORT;
+        return ColumnType.SHORT;
       case "INTEGER":
       case "INT":
-        return FieldType.INT;
+        return ColumnType.INT;
       case "INT8":
       case "BIGINT":
-        return FieldType.LONG;
+        return ColumnType.LONG;
       case "VARCHAR":
       case "CHARACTER":
       case "TEXT":
-        return FieldType.STRING;
+        return ColumnType.STRING;
       case "BOOLEAN":
-        return FieldType.BOOLEAN;
+        return ColumnType.BOOLEAN;
       case "DATE":
-        return FieldType.DATE;
+        return ColumnType.DATE;
       case "TIME":
-        return FieldType.TIME;
+        return ColumnType.TIME;
       case "TIMESTAMP":
-        return FieldType.TIMESTAMP;
+        return ColumnType.TIMESTAMP;
       default:
-        return FieldType.STRING;
+        return ColumnType.STRING;
     }
   }
 }

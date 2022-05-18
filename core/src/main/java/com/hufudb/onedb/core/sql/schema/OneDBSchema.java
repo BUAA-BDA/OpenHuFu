@@ -2,13 +2,13 @@ package com.hufudb.onedb.core.sql.schema;
 
 import com.hufudb.onedb.core.client.OneDBClient;
 import com.hufudb.onedb.core.client.OwnerClient;
-import com.hufudb.onedb.core.data.Header;
 import com.hufudb.onedb.core.sql.enumerator.OneDBEnumerator;
 import com.hufudb.onedb.core.sql.rel.OneDBTable;
 import com.hufudb.onedb.core.sql.schema.OneDBSchemaFactory.OwnerMeta;
-import com.hufudb.onedb.core.table.OneDBTableInfo;
+import com.hufudb.onedb.core.table.OneDBTableSchema;
 import com.hufudb.onedb.core.zk.OneDBZkClient;
 import com.hufudb.onedb.core.zk.ZkConfig;
+import com.hufudb.onedb.data.schema.Schema;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -69,14 +69,14 @@ public class OneDBSchema extends AbstractSchema {
     return client.getEndpoints();
   }
 
-  public OneDBTableInfo getOneDBTableInfo(String tableName) {
-    return ((OneDBTable) getTable(tableName)).getTableInfo();
+  public OneDBTableSchema getOneDBTableSchema(String tableName) {
+    return ((OneDBTable) getTable(tableName)).getTableSchema();
   }
 
-  public List<OneDBTableInfo> getAllOneDBTableInfo() {
-    List<OneDBTableInfo> infos = new ArrayList<>();
+  public List<OneDBTableSchema> getAllOneDBTableSchema() {
+    List<OneDBTableSchema> infos = new ArrayList<>();
     for (Table table : tableMap.values()) {
-      infos.add(((OneDBTable) table).getTableInfo());
+      infos.add(((OneDBTable) table).getTableSchema());
     }
     return infos;
   }
@@ -117,7 +117,7 @@ public class OneDBSchema extends AbstractSchema {
 
   public void addTable(String tableName, Table table) {
     parentSchema.add(tableName, table);
-    client.addTable(tableName, ((OneDBTable) table).getTableInfo());
+    client.addTable(tableName, ((OneDBTable) table).getTableSchema());
     tableMap.put(tableName, table);
   }
 
@@ -127,24 +127,24 @@ public class OneDBSchema extends AbstractSchema {
   }
 
   public void addLocalTable(String tableName, String endpoint, String localTableName) {
-    OneDBTableInfo table = getOneDBTableInfo(tableName);
-    OwnerClient client = getDBClient(endpoint);
+    OneDBTableSchema table = getOneDBTableSchema(tableName);
+    OwnerClient client = getOwnerClient(endpoint);
     if (table != null && client != null) {
       table.addLocalTable(client, localTableName);
     }
   }
 
   public void dropLocalTable(String tableName, String endpoint) {
-    OneDBTableInfo table = getOneDBTableInfo(tableName);
-    OwnerClient client = getDBClient(endpoint);
+    OneDBTableSchema table = getOneDBTableSchema(tableName);
+    OwnerClient client = getOwnerClient(endpoint);
     if (table != null && client != null) {
       table.dropLocalTable(client);
     }
   }
 
   public void changeLocalTable(String tableName, String endpoint, String localTableName) {
-    OneDBTableInfo table = getOneDBTableInfo(tableName);
-    OwnerClient client = getDBClient(endpoint);
+    OneDBTableSchema table = getOneDBTableSchema(tableName);
+    OwnerClient client = getOwnerClient(endpoint);
     if (table != null && client != null) {
       table.changeLocalTable(client, localTableName);
     }
@@ -159,11 +159,11 @@ public class OneDBSchema extends AbstractSchema {
     return client.hasTable(tableName);
   }
 
-  public Header getHeader(String tableName) {
-    return client.getHeader(tableName);
+  public Schema getSchema(String tableName) {
+    return client.getSchema(tableName);
   }
 
-  public OwnerClient getDBClient(String endpoint) {
+  public OwnerClient getOwnerClient(String endpoint) {
     return client.getOwnerClient(endpoint);
   }
 
@@ -172,14 +172,14 @@ public class OneDBSchema extends AbstractSchema {
   }
 
   @SuppressWarnings("unused")
-  public Enumerable<Object> query(long contextId) {
+  public Enumerable<Object> query(long planId) {
     return new AbstractEnumerable<Object>() {
       Enumerator<Object> enumerator;
 
       @Override
       public Enumerator<Object> enumerator() {
         if (enumerator == null) {
-          this.enumerator = new OneDBEnumerator(OneDBSchema.this, contextId);
+          this.enumerator = new OneDBEnumerator(OneDBSchema.this, planId);
 
         } else {
           this.enumerator.reset();

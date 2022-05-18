@@ -1,29 +1,24 @@
 package com.hufudb.onedb.core.rewriter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.client.OneDBClient;
-import com.hufudb.onedb.core.data.FieldType;
-import com.hufudb.onedb.core.data.Level;
-import com.hufudb.onedb.core.sql.context.OneDBBinaryContext;
-import com.hufudb.onedb.core.sql.context.OneDBContext;
-import com.hufudb.onedb.core.sql.context.OneDBLeafContext;
-import com.hufudb.onedb.core.sql.context.OneDBRootContext;
-import com.hufudb.onedb.core.sql.context.OneDBUnaryContext;
-import com.hufudb.onedb.core.sql.expression.OneDBAggCall;
-import com.hufudb.onedb.core.sql.expression.OneDBExpression;
-import com.hufudb.onedb.core.sql.expression.OneDBOpType;
-import com.hufudb.onedb.core.sql.expression.OneDBOperator;
-import com.hufudb.onedb.core.sql.expression.OneDBReference;
-import com.hufudb.onedb.core.sql.expression.OneDBAggCall.AggregateType;
-import com.hufudb.onedb.core.sql.expression.OneDBOperator.FuncType;
+import com.hufudb.onedb.expression.AggFuncType;
+import com.hufudb.onedb.expression.ExpressionFactory;
+import com.hufudb.onedb.plan.BinaryPlan;
+import com.hufudb.onedb.plan.LeafPlan;
+import com.hufudb.onedb.plan.Plan;
+import com.hufudb.onedb.plan.RootPlan;
+import com.hufudb.onedb.plan.UnaryPlan;
+import com.hufudb.onedb.proto.OneDBPlan.Expression;
+import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
+import com.hufudb.onedb.rewriter.Rewriter;
 
-public class BasicRewriter implements OneDBRewriter {
+public class BasicRewriter implements Rewriter {
   final OneDBClient client;
 
   public BasicRewriter(OneDBClient client) {
@@ -31,27 +26,27 @@ public class BasicRewriter implements OneDBRewriter {
   }
 
   @Override
-  public void rewriteChild(OneDBContext context) {
+  public void rewriteChild(Plan context) {
     context.rewrite(this);
   }
 
   @Override
-  public OneDBContext rewriteRoot(OneDBRootContext root) {
+  public Plan rewriteRoot(RootPlan root) {
     return root;
   }
 
   @Override
-  public OneDBContext rewriteBianry(OneDBBinaryContext binary) {
+  public Plan rewriteBianry(BinaryPlan binary) {
     return binary;
   }
 
   @Override
-  public OneDBContext rewriteUnary(OneDBUnaryContext unary) {
+  public Plan rewriteUnary(UnaryPlan unary) {
     return unary;
   }
 
   @Override
-  public OneDBContext rewriteLeaf(OneDBLeafContext leaf) {
+  public Plan rewriteLeaf(LeafPlan leaf) {
     // only horizontal partitioned table need rewrite
     if (client.getTable(leaf.getTableName()).ownerSize() > 1) {
       boolean hasAgg = leaf.hasAgg();
@@ -61,10 +56,8 @@ public class BasicRewriter implements OneDBRewriter {
         // return leaf directly if no aggergate, limit or sort
         return leaf;
       }
-      OneDBUnaryContext unary = new OneDBUnaryContext();
+      UnaryPlan unary = new UnaryPlan();
       unary.setChildren(ImmutableList.of(leaf));
-      unary.setParent(leaf.getParent());
-      leaf.setParent(unary);
       if (hasAgg) {
         rewriteAggregations(unary, leaf);
       } else {
@@ -75,7 +68,7 @@ public class BasicRewriter implements OneDBRewriter {
         if (hasSort) {
           unary.setOrders(leaf.getOrders());
         }
-        unary.setSelectExps(OneDBReference.fromExps(leaf.getSelectExps()));
+        unary.setSelectExps(ExpressionFactory.createInputRef(leaf.getSelectExps()));
       }
       return unary;
     } else {
@@ -83,82 +76,95 @@ public class BasicRewriter implements OneDBRewriter {
     }
   }
 
-    /*
+  /**
    * for aggregate call with distinct flag, add the inputRefs into local group set and update the
    * global group set
    */
-  private void updateGroupIdx(OneDBAggCall agg, List<OneDBExpression> localAggs,
-      Map<Integer, Integer> groupMap) {
-    List<Integer> inputRefs = agg.getInputRef();
+  private Expression updateGroupIdx(Expression agg, List<Expression> localAggs,
+      Map<Integer, Expression> groupMap) {
+    Expression.Builder builder = agg.toBuilder();
+    builder.clearIn();
+    List<Expression> inputRefs = agg.getInList();
     for (int i = 0; i < inputRefs.size(); ++i) {
-      int inputRef = inputRefs.get(i);
-      if (!groupMap.containsKey(inputRef)) {
+      Expression inputRef = inputRefs.get(i);
+      int ref = inputRef.getI32();
+      if (!groupMap.containsKey(ref)) {
         int groupKeyIdx = localAggs.size();
         // for distinct agg, the distinct key is not group key in global agg
-        groupMap.put(inputRef, groupKeyIdx);
-        localAggs.add(OneDBAggCall.create(AggregateType.GROUPKEY, ImmutableList.of(inputRef),
-            FieldType.UNKOWN, agg.getLevel()));
-        inputRefs.set(i, groupKeyIdx);
+        Expression groupRef = ExpressionFactory.createInputRef(groupKeyIdx, inputRef.getOutType(),
+            inputRef.getModifier());
+        groupMap.put(ref, groupRef);
+        localAggs.add(ExpressionFactory.createAggFunc(inputRef.getOutType(), inputRef.getModifier(),
+            AggFuncType.GROUPKEY.getId(), ImmutableList.of(inputRef)));
+        builder.addIn(groupRef);
       } else {
-        inputRefs.set(i, groupMap.get(inputRef));
+        builder.addIn(groupMap.get(ref));
       }
     }
+    return builder.build();
   }
 
-  private OneDBExpression convertAvg(OneDBAggCall agg, List<OneDBExpression> localAggs,
-      Map<Integer, Integer> groupMap) {
-    if (!agg.isDistinct()) {
-      OneDBAggCall localAvgSum =
-          OneDBAggCall.create(AggregateType.SUM, agg.getInputRef(), agg.getOutType(), agg.getLevel());
+  private Expression convertAvg(Expression agg, List<Expression> localAggs,
+      Map<Integer, Expression> groupMap) {
+    if (!AggFuncType.isDistinct(agg.getI32())) {
+      Expression localAvgSum = ExpressionFactory.createAggFunc(agg.getOutType(), agg.getModifier(),
+          AggFuncType.SUM.getId(), agg.getInList());
       int localAvgSumRef = localAggs.size();
       localAggs.add(localAvgSum);
-      OneDBAggCall globalAvgSum = OneDBAggCall.create(AggregateType.SUM,
-          ImmutableList.of(localAvgSumRef), agg.getOutType(), agg.getLevel());
+      Expression localAvgSumRefExp =
+          ExpressionFactory.createInputRef(localAvgSumRef, agg.getOutType(), agg.getModifier());
+      Expression globalAvgSum = ExpressionFactory.createAggFunc(agg.getOutType(), agg.getModifier(),
+          AggFuncType.SUM.getId(), ImmutableList.of(localAvgSumRefExp));
+
       // add a sum layer above count
-      OneDBAggCall localAvgCount =
-          OneDBAggCall.create(AggregateType.COUNT, agg.getInputRef(), agg.getOutType(), agg.getLevel());
+      Expression localAvgCount = ExpressionFactory.createAggFunc(agg.getOutType(),
+          agg.getModifier(), AggFuncType.COUNT.getId(), agg.getInList());
       int localAvgCntRef = localAggs.size();
       localAggs.add(localAvgCount);
-      OneDBAggCall globalAvgCount = OneDBAggCall.create(AggregateType.SUM,
-          ImmutableList.of(localAvgCntRef), agg.getOutType(), agg.getLevel());
-      return OneDBOperator.create(OneDBOpType.DIVIDE, agg.getOutType(),
-          new ArrayList<>(Arrays.asList(globalAvgSum, globalAvgCount)), FuncType.NONE);
+      Expression localAvgCntRefExp =
+          ExpressionFactory.createInputRef(localAvgCntRef, agg.getOutType(), agg.getModifier());
+      Expression globalAvgCnt = ExpressionFactory.createAggFunc(agg.getOutType(), agg.getModifier(),
+          AggFuncType.SUM.getId(), ImmutableList.of(localAvgCntRefExp));
+
+      return ExpressionFactory.createBinaryOperator(OperatorType.DIVIDE, agg.getOutType(),
+          globalAvgSum, globalAvgCnt);
     } else {
-      updateGroupIdx(agg, localAggs, groupMap);
-      return agg;
+      return updateGroupIdx(agg, localAggs, groupMap);
     }
   }
 
-  private OneDBExpression convertCount(OneDBAggCall agg, List<OneDBExpression> localAggs,
-      Map<Integer, Integer> groupMap) {
-    if (!agg.isDistinct()) {
+  private Expression convertCount(Expression agg, List<Expression> localAggs,
+      Map<Integer, Expression> groupMap) {
+    if (!AggFuncType.isDistinct(agg.getI32())) {
       localAggs.add(agg);
       // add a sum layer above count
-      return OneDBAggCall.create(AggregateType.SUM, ImmutableList.of(localAggs.size() - 1),
-          agg.getOutType(), agg.getLevel());
+      Expression ref = ExpressionFactory.createInputRef(localAggs.size() - 1, agg.getOutType(),
+      agg.getModifier());
+      return ExpressionFactory.createAggFunc(agg.getOutType(), agg.getModifier(),
+      AggFuncType.SUM.getId(), ImmutableList.of(ref));
     } else {
-      updateGroupIdx(agg, localAggs, groupMap);
-      return agg;
+      return updateGroupIdx(agg, localAggs, groupMap);
     }
   }
 
-  private OneDBExpression convertSum(OneDBAggCall agg, List<OneDBExpression> localAggs,
-      Map<Integer, Integer> groupMap) {
-    if (!agg.isDistinct()) {
+  private Expression convertSum(Expression agg, List<Expression> localAggs,
+      Map<Integer, Expression> groupMap) {
+    if (!AggFuncType.isDistinct(agg.getI32())) {
       localAggs.add(agg);
-      return OneDBAggCall.create(AggregateType.SUM, ImmutableList.of(localAggs.size() - 1),
-          agg.getOutType(), agg.getLevel());
+      Expression ref = ExpressionFactory.createInputRef(localAggs.size() - 1, agg.getOutType(),
+          agg.getModifier());
+      return ExpressionFactory.createAggFunc(agg.getOutType(), agg.getModifier(),
+          AggFuncType.SUM.getId(), ImmutableList.of(ref));
     } else {
-      updateGroupIdx(agg, localAggs, groupMap);
-      return agg;
+      return updateGroupIdx(agg, localAggs, groupMap);
     }
   }
 
-  private OneDBExpression convertGroupKey(OneDBAggCall agg, List<OneDBExpression> localAggs,
-      Map<Integer, Integer> groupMap) {
-    if (groupMap.containsKey(agg.getInputRef().get(0))) {
-      return OneDBAggCall.create(AggregateType.GROUPKEY,
-          ImmutableList.of(groupMap.get(agg.getInputRef().get(0))), agg.getOutType(), agg.getLevel());
+  private Expression convertGroupKey(Expression agg, List<Expression> localAggs,
+      Map<Integer, Expression> groupMap) {
+    int groupRef = agg.getIn(0).getI32();
+    if (groupMap.containsKey(groupRef)) {
+      return ExpressionFactory.createAggFunc(agg.getOutType(), agg.getModifier(), AggFuncType.GROUPKEY.getId(), ImmutableList.of(groupMap.get(groupRef)));
     } else {
       LOG.error("Group key should be presented in group by clause");
       throw new RuntimeException("Group key should be presented in group by clause");
@@ -167,9 +173,10 @@ public class BasicRewriter implements OneDBRewriter {
 
   // convert agg into two parts: local aggs and global agg, local agg are added into localAggs,
   // global agg is returned
-  private OneDBExpression convertAgg(OneDBAggCall agg, List<OneDBExpression> localAggs,
-      Map<Integer, Integer> groupMap) {
-    switch (agg.getAggType()) {
+  private Expression convertAgg(Expression agg, List<Expression> localAggs,
+      Map<Integer, Expression> groupMap) {
+    AggFuncType type = AggFuncType.of(Math.abs(agg.getI32()));
+    switch (type) {
       case AVG: // avg converted to global: div(sum(sumref), sum(countref)), local: sum, count
         return convertAvg(agg, localAggs, groupMap);
       case COUNT: // count converted global sum(countref), local: count
@@ -180,54 +187,63 @@ public class BasicRewriter implements OneDBRewriter {
         return convertGroupKey(agg, localAggs, groupMap);
       default: // others convert directly
         localAggs.add(agg);
-        return OneDBAggCall.create(agg.getAggType(), ImmutableList.of(localAggs.size() - 1),
-            agg.getOutType(), agg.getLevel());
+        Expression ref = ExpressionFactory.createInputRef(localAggs.size() - 1, agg.getOutType(),
+            agg.getModifier());
+        return ExpressionFactory.createAggFunc(agg.getOutType(), agg.getModifier(), type.getId(),
+            ImmutableList.of(ref));
     }
   }
 
   // rewrite exp into global agg and add new local aggs into localAggs
-  private OneDBExpression rewriteAggregate(OneDBExpression exp, List<OneDBExpression> localAggs,
-      Map<Integer, Integer> groupMap) {
+  private Expression rewriteAggregate(Expression exp, List<Expression> localAggs,
+      Map<Integer, Expression> groupMap) {
     // traverse exp tree, and convert each aggCall
-    if (exp instanceof OneDBAggCall) {
-      return convertAgg((OneDBAggCall) exp, localAggs, groupMap);
-    } else if (exp instanceof OneDBOperator) {
-      List<OneDBExpression> children = ((OneDBOperator) exp).getInputs();
+    if (exp.getOpType().equals(OperatorType.AGG_FUNC)) {
+      return convertAgg((Expression) exp, localAggs, groupMap);
+    } else if (exp.getInCount() > 0) {
+      List<Expression> children = exp.getInList();
+      Expression.Builder builder = exp.toBuilder();
+      builder.clearIn();
       for (int i = 0; i < children.size(); ++i) {
-        OneDBExpression globalExp = rewriteAggregate(children.get(i), localAggs, groupMap);
-        children.set(i, globalExp);
+        Expression globalExp = rewriteAggregate(children.get(i), localAggs, groupMap);
+        builder.addIn(globalExp);
       }
+      return builder.build();
+    } else {
+      return exp;
     }
-    return exp;
   }
 
   /*
    * divide aggregation into local part and global part
    */
-  private void rewriteAggregations(OneDBUnaryContext unary, OneDBLeafContext leaf) {
-    Map<Integer, Integer> groupMap = new TreeMap<>(); // local group ref -> global group ref
-    List<OneDBExpression> originAggs = leaf.getAggExps();
-    List<OneDBExpression> localAggs = new ArrayList<>();
-    List<OneDBExpression> globalAggs = new ArrayList<>();
+  private void rewriteAggregations(UnaryPlan unary, LeafPlan leaf) {
+    Map<Integer, Expression> groupMap = new TreeMap<>(); // local group ref -> global group ref
+                                                         // expression
+    List<Expression> originAggs = leaf.getAggExps();
+    List<Expression> localAggs = new ArrayList<>();
+    List<Expression> globalAggs = new ArrayList<>();
     List<Integer> globalGroups = new ArrayList<>();
-    List<FieldType> selectTypes = leaf.getSelectTypes();
-    List<Level> selectLevels = leaf.getSelectExps().stream().map(exp -> exp.getLevel()).collect(Collectors.toList());
+    List<Expression> inputs = leaf.getSelectExps();
     // add local groups into local aggs as group key function
     int idx = 0;
     for (int groupRef : leaf.getGroups()) {
-      FieldType type = selectTypes.get(groupRef);
-      Level level = selectLevels.get(groupRef);
-      localAggs.add(OneDBAggCall.create(AggregateType.GROUPKEY, ImmutableList.of(groupRef), type, level));
-      groupMap.put(groupRef, idx);
+      Expression in = inputs.get(groupRef);
+      Expression ref =
+          ExpressionFactory.createInputRef(groupRef, in.getOutType(), in.getModifier());
+      localAggs.add(ExpressionFactory.createAggFunc(ref.getOutType(), ref.getModifier(),
+          AggFuncType.GROUPKEY.getId(), ImmutableList.of(ref)));
+      groupMap.put(groupRef,
+          ExpressionFactory.createInputRef(idx, ref.getOutType(), ref.getModifier()));
       globalGroups.add(idx);
       ++idx;
     }
     // note: keep the rewritten output pattern same as the origin
-    for (OneDBExpression exp : originAggs) {
-      OneDBExpression rewrittenExp = rewriteAggregate(exp, localAggs, groupMap);
+    for (Expression exp : originAggs) {
+      Expression rewrittenExp = rewriteAggregate(exp, localAggs, groupMap);
       globalAggs.add(rewrittenExp);
     }
-    unary.setSelectExps(OneDBReference.fromExps(localAggs));
+    unary.setSelectExps(ExpressionFactory.createInputRef(localAggs));
     unary.setAggExps(globalAggs);
     unary.setGroups(globalGroups);
     leaf.setGroups(groupMap.keySet().stream().collect(Collectors.toList()));
@@ -244,7 +260,6 @@ public class BasicRewriter implements OneDBRewriter {
       unary.setOrders(leaf.getOrders());
       leaf.setOrders(new ArrayList<>());
     }
-    originAggs.clear();
-    originAggs.addAll(localAggs);
+    leaf.setAggExps(localAggs);
   }
 }

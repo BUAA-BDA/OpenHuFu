@@ -1,11 +1,11 @@
 package com.hufudb.onedb.core.sql.rel;
 
 import com.google.common.collect.ImmutableList;
-import com.hufudb.onedb.core.data.Header;
-import com.hufudb.onedb.core.sql.expression.OneDBReference;
 import com.hufudb.onedb.core.sql.rule.OneDBRules;
+import com.hufudb.onedb.data.schema.Schema;
+import com.hufudb.onedb.expression.ExpressionFactory;
+import com.hufudb.onedb.plan.LeafPlan;
 import java.util.List;
-
 import org.apache.calcite.adapter.enumerable.EnumerableLimitRule;
 import org.apache.calcite.adapter.enumerable.EnumerableProjectToCalcRule;
 import org.apache.calcite.plan.RelOptCluster;
@@ -26,19 +26,15 @@ public class OneDBTableScan extends TableScan implements OneDBRel {
   final OneDBTable oneDBTable;
   final RelDataType projectRowType;
 
-  public OneDBTableScan(
-      RelOptCluster cluster,
-      RelTraitSet traitSet,
-      RelOptTable table,
-      OneDBTable oneDBTable,
-      RelDataType projectRowType) {
+  public OneDBTableScan(RelOptCluster cluster, RelTraitSet traitSet, RelOptTable table,
+      OneDBTable oneDBTable, RelDataType projectRowType) {
     super(cluster, traitSet, ImmutableList.of(), table);
     this.oneDBTable = oneDBTable;
     this.projectRowType = projectRowType;
   }
 
-  public Header getHeader() {
-    return oneDBTable.getHeader();
+  public Schema getSchema() {
+    return oneDBTable.getSchema();
   }
 
   @Override
@@ -72,9 +68,10 @@ public class OneDBTableScan extends TableScan implements OneDBRel {
 
   @Override
   public void implement(Implementor implementor) {
-    implementor.createLeafContext();
-    implementor.setTableName(oneDBTable.getTableName());
-    implementor.setSchema(oneDBTable.getSchema());
-    implementor.setSelectExps(OneDBReference.fromHeader(oneDBTable.getHeader()));
+    LeafPlan plan = new LeafPlan();
+    implementor.setRootSchema(oneDBTable.getRootSchema());
+    plan.setTableName(oneDBTable.getTableName());
+    plan.setSelectExps(ExpressionFactory.createInputRef(oneDBTable.getSchema()));
+    implementor.setCurrentPlan(plan);
   }
 }

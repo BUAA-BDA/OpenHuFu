@@ -1,27 +1,17 @@
 package com.hufudb.onedb.core.sql.rel;
 
-import com.google.common.collect.ImmutableList;
-import com.hufudb.onedb.core.data.FieldType;
-import com.hufudb.onedb.core.data.Level;
-import com.hufudb.onedb.core.implementor.utils.OneDBJoinInfo;
-import com.hufudb.onedb.core.sql.context.OneDBLeafContext;
-import com.hufudb.onedb.core.sql.context.OneDBBinaryContext;
-import com.hufudb.onedb.core.sql.context.OneDBContext;
-import com.hufudb.onedb.core.sql.context.OneDBRootContext;
-import com.hufudb.onedb.core.sql.context.OneDBUnaryContext;
-import com.hufudb.onedb.core.sql.expression.OneDBExpression;
-import com.hufudb.onedb.core.sql.expression.OneDBJoinType;
-import com.hufudb.onedb.core.sql.expression.OneDBOperator;
-import com.hufudb.onedb.core.sql.expression.OneDBReference;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
+import com.hufudb.onedb.plan.Plan;
+import com.hufudb.onedb.plan.RootPlan;
+import com.hufudb.onedb.proto.OneDBData.ColumnType;
+import com.hufudb.onedb.proto.OneDBData.Modifier;
+import com.hufudb.onedb.proto.OneDBPlan.Collation;
+import com.hufudb.onedb.proto.OneDBPlan.Expression;
+import com.hufudb.onedb.proto.OneDBPlan.JoinCondition;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
-import org.apache.calcite.linq4j.tree.Expression;
 import org.apache.calcite.plan.Convention;
 import org.apache.calcite.rel.RelNode;
-import org.apache.calcite.rel.core.JoinInfo;
-import org.apache.calcite.rel.core.JoinRelType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,150 +24,90 @@ public interface OneDBRel extends RelNode {
   class Implementor {
     static final Logger LOG = LoggerFactory.getLogger(Implementor.class);
     
-    OneDBSchema schema;
-    OneDBRootContext rootContext;
-    OneDBContext currentContext;
-    Stack<OneDBContext> stack;
+    OneDBSchema rootSchema;
+    RootPlan rootPlan;
+    Plan currentPlan;
 
     Implementor() {
-      rootContext = new OneDBRootContext();
-      currentContext = rootContext;
-      stack = new Stack<>();
+      rootPlan = null;
+      currentPlan = null;
     }
 
-    public Long getContextId() {
-      return rootContext.getContextId();
+    public org.apache.calcite.linq4j.tree.Expression getRootSchemaExpression() {
+      return rootSchema.getExpression();
     }
 
-    public OneDBRootContext getRootContext() {
-      return rootContext;
+    public Plan getCurrentPlan() {
+      return currentPlan;
     }
 
-    public Expression getSchemaExpression() {
-      return schema.getExpression();
-    }
-
-    public OneDBContext getCurrentContext() {
-      return currentContext;
+    public void setCurrentPlan(Plan plan) {
+      this.currentPlan = plan;
     }
 
     public void visitChild(OneDBRel input) {
       input.implement(this);
     }
 
-    public void stepUp() {
-      currentContext = currentContext.getParent();
-    }
-
-    public void createLeafContext() {
-      OneDBContext parent = currentContext;
-      currentContext = new OneDBLeafContext();
-      currentContext.setParent(parent);
-      parent.updateChild(currentContext, null);
-    }
-
-    public void createBinaryContext(OneDBContext left, OneDBContext right) {
-      OneDBContext parent = currentContext;
-      OneDBBinaryContext joinContext = new OneDBBinaryContext(parent, left, right);
-      left.setParent(joinContext);
-      right.setParent(joinContext);
-      // todo: tricy method, refactor this part
-      parent.updateChild(joinContext, right);
-      currentContext = joinContext;
-      List<OneDBExpression> exps = new ArrayList<>();
-      int idx = 0;
-      for (OneDBExpression exp: left.getOutExpressions()) {
-        exps.add(new OneDBReference(exp.getOutType(), exp.getLevel(), idx));
-        ++idx;
-      }
-      for (OneDBExpression exp : right.getOutExpressions()) {
-        exps.add(new OneDBReference(exp.getOutType(), exp.getLevel(), idx));
-        ++idx;
-      }
-      currentContext.setSelectExps(exps);
-    }
-
-    public void setSchema(OneDBSchema schema) {
-      if (this.schema == null) {
-        this.schema = schema;
+    public void setRootSchema(OneDBSchema rootSchema) {
+      if (this.rootSchema == null) {
+        this.rootSchema = rootSchema;
       }
     }
 
-    public void setTableName(String name) {
-      currentContext.setTableName(name);
+    public void setSelectExps(List<Expression> exps) {
+      currentPlan.setSelectExps(exps);
     }
 
-    public void setSelectExps(List<OneDBExpression> exps) {
-      currentContext.setSelectExps(exps);
+    public void setOrderExps(List<Collation> orderExps) {
+      currentPlan.setOrders(orderExps);
     }
 
-    public void setOrderExps(List<OneDBOrder> orderExps) {
-      currentContext.setOrders(orderExps);
+    public void setFilterExps(List<Expression> exp) {
+      currentPlan.setWhereExps(exp);
     }
 
-    public void addFilterExps(OneDBExpression exp) {
-      List<OneDBExpression> exps = currentContext.getWhereExps();
-      if (exps == null) {
-        List<OneDBExpression> filters = new ArrayList<>();
-        filters.add(exp);
-        currentContext.setWhereExps(filters);
-      } else {
-        exps.add(exp);
-      }
+    public void setAggExps(List<Expression> exps) {
+      currentPlan.setAggExps(exps);
     }
 
-    public void setAggExps(List<OneDBExpression> exps) {
-      List<OneDBExpression> currentAggs = currentContext.getAggExps();
-      if (currentAggs != null && !currentAggs.isEmpty()) {
-        OneDBUnaryContext unary = new OneDBUnaryContext();
-        unary.setChildren(ImmutableList.of(currentContext));
-        currentContext.getParent().updateChild(unary, currentContext);
-        currentContext.setParent(unary);
-        currentContext = unary;
-      }
-      currentContext.setAggExps(exps);
-    }
-
-    public List<OneDBExpression> getAggExps() {
-      return currentContext.getAggExps();
+    public List<Expression> getAggExps() {
+      return currentPlan.getAggExps();
     }
 
     public void setGroupSet(List<Integer> groups) {
-      currentContext.setGroups(groups);
+      currentPlan.setGroups(groups);
     }
 
     public void setOffset(int offset) {
-      currentContext.setOffset(offset);
+      currentPlan.setOffset(offset);
     }
 
     public void setFetch(int fetch) {
-      currentContext.setFetch(fetch);
+      currentPlan.setFetch(fetch);
     }
 
 
-    public void setJoinInfo(JoinInfo joinInfo, JoinRelType joinRelType, int leftSize) {
-      List<OneDBExpression> outExpression = currentContext.getOutExpressions();
-      List<OneDBExpression> condition = OneDBOperator.fromRexNodes(joinInfo.nonEquiConditions, currentContext.getOutExpressions());
-      Level dominator = Level.findDominator(condition);
-      for (int key : joinInfo.leftKeys) {
-        dominator = Level.dominate(dominator, outExpression.get(key).getLevel());
-      }
-      for (int key : joinInfo.rightKeys) {
-        dominator = Level.dominate(dominator, outExpression.get(key).getLevel());
-      }
-      currentContext.setJoinInfo(new OneDBJoinInfo(OneDBJoinType.of(joinRelType), joinInfo.leftKeys, joinInfo.rightKeys, condition, dominator, leftSize));
+    public void setJoinInfo(JoinCondition condition) {
+      currentPlan.setJoinInfo(condition);
     }
 
-    public List<OneDBExpression> getCurrentOutput() {
-      return currentContext.getOutExpressions();
+    public List<Expression> getCurrentOutput() {
+      return currentPlan.getOutExpressions();
     }
 
-    public List<FieldType> getOutputTypes() {
-      return currentContext.getOutTypes();
+    public List<ColumnType> getOutputTypes() {
+      return currentPlan.getOutTypes();
     }
 
-    public List<Level> getOutputLevels() {
-      return currentContext.getOutLevels();
+    public List<Modifier> getOutputModifier() {
+      return currentPlan.getOutModifiers();
+    }
+
+    public RootPlan generatePlan() {
+      rootPlan = new RootPlan();
+      rootPlan.setChild(currentPlan);
+      return rootPlan;
     }
   }
 }

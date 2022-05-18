@@ -1,8 +1,8 @@
 package com.hufudb.onedb.rpc.grpc.pipe;
 
-import com.hufudb.onedb.rpc.PipeGrpc;
-import com.hufudb.onedb.rpc.OneDBPipe.DataPacketProto;
-import com.hufudb.onedb.rpc.OneDBPipe.ResponseProto;
+import com.hufudb.onedb.proto.PipeGrpc;
+import com.hufudb.onedb.proto.DataPacket.DataPacketProto;
+import com.hufudb.onedb.proto.DataPacket.ResponseProto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.grpc.Channel;

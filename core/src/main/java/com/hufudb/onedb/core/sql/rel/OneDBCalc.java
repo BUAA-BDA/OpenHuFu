@@ -1,9 +1,8 @@
 package com.hufudb.onedb.core.sql.rel;
 
 import com.google.common.collect.ImmutableList;
-import com.hufudb.onedb.core.sql.expression.OneDBAggCall;
-import com.hufudb.onedb.core.sql.expression.OneDBExpression;
-import com.hufudb.onedb.core.sql.expression.OneDBOperator;
+import com.hufudb.onedb.core.sql.expression.CalciteConverter;
+import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import java.util.List;
 import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelOptCost;
@@ -38,7 +37,7 @@ public class OneDBCalc extends Calc implements OneDBRel {
   @Override
   public RelOptCost computeSelfCost(RelOptPlanner planner, RelMetadataQuery mq) {
     RelNode child = ((RelSubset) getInput()).getBest();
-    if (child instanceof OneDBAggCall) {
+    if (child instanceof OneDBAggregate) {
       return planner.getCostFactory().makeInfiniteCost();
     }
     return super.computeSelfCost(planner, mq).multiplyBy(0.05);
@@ -48,9 +47,9 @@ public class OneDBCalc extends Calc implements OneDBRel {
   public void implement(Implementor implementor) {
     implementor.visitChild((OneDBRel) getInput());
     RexProgram program = getProgram();
-    List<OneDBExpression> calcs =
-        OneDBOperator.fromRexNodes(program, implementor.getCurrentOutput());
-    if (implementor.getAggExps() != null && !implementor.getAggExps().isEmpty()) {
+    List<Expression> calcs =
+        CalciteConverter.convert(program, implementor.getCurrentOutput());
+    if (!implementor.getAggExps().isEmpty()) {
       implementor.setAggExps(calcs);
     } else {
       implementor.setSelectExps(calcs);

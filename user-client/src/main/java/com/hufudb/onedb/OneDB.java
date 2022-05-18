@@ -1,12 +1,12 @@
 package com.hufudb.onedb;
 
 import com.hufudb.onedb.client.utils.OneDBLine;
-import com.hufudb.onedb.core.data.TableInfo;
 import com.hufudb.onedb.core.sql.rel.OneDBTable;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
 import com.hufudb.onedb.core.sql.schema.OneDBSchemaFactory;
-import com.hufudb.onedb.core.table.OneDBTableInfo;
+import com.hufudb.onedb.core.table.OneDBTableSchema;
 import com.hufudb.onedb.core.table.TableMeta;
+import com.hufudb.onedb.data.schema.TableSchema;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -109,17 +109,17 @@ public class OneDB {
     schema.removeOnwer(endpoint);
   }
 
-  public List<TableInfo> getDBTableInfo(String endpoint) {
-    return schema.getDBClient(endpoint).getAllLocalTable();
+  public List<TableSchema> getOwnerTableSchema(String endpoint) {
+    return schema.getOwnerClient(endpoint).getAllLocalTable();
   }
 
   // for table
-  public List<OneDBTableInfo> getAllOneDBTableInfo() {
-    return schema.getAllOneDBTableInfo();
+  public List<OneDBTableSchema> getAllOneDBTableSchema() {
+    return schema.getAllOneDBTableSchema();
   }
 
-  public OneDBTableInfo getOneDBTableInfo(String tableName) {
-    return schema.getOneDBTableInfo(tableName);
+  public OneDBTableSchema getOneDBTableSchema(String tableName) {
+    return schema.getOneDBTableSchema(tableName);
   }
 
   public boolean createOneDBTable(TableMeta meta) {
