@@ -25,7 +25,7 @@ public class OneDBFilter extends Filter implements OneDBRel {
   @Override
   public void implement(Implementor implementor) {
     implementor.visitChild((OneDBRel) getInput());
-    implementor.addFilterExps(CalciteConverter.convert(ImmutableList.of(condition), implementor.getCurrentOutput()).get(0));
+    implementor.setFilterExps(CalciteConverter.convert(ImmutableList.of(condition), implementor.getCurrentOutput()));
   }
 
   @Override

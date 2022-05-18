@@ -63,16 +63,8 @@ public interface OneDBRel extends RelNode {
       currentPlan.setOrders(orderExps);
     }
 
-    public void addFilterExps(Expression exp) {
-      // todo: filter on aggregation
-      List<Expression> exps = currentPlan.getWhereExps();
-      if (exps == null) {
-        List<Expression> filters = new ArrayList<>();
-        filters.add(exp);
-        currentPlan.setWhereExps(filters);
-      } else {
-        exps.add(exp);
-      }
+    public void setFilterExps(List<Expression> exp) {
+      currentPlan.setWhereExps(exp);
     }
 
     public void setAggExps(List<Expression> exps) {
