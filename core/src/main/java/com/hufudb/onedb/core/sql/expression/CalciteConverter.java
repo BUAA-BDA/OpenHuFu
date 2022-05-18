@@ -67,8 +67,9 @@ public class CalciteConverter {
 
   public static List<Expression> convert(List<Integer> groups, List<AggregateCall> aggs, List<Expression> inputs) {
     ImmutableList.Builder<Expression> builder = ImmutableList.builder();
+    List<Expression> inputRefs = ExpressionFactory.createInputRef(inputs);
     for (int group : groups) {
-      builder.add(ExpressionFactory.createAggFunc(inputs.get(group).getOutType(), AggFuncType.GROUPKEY.getId(), ImmutableList.of(inputs.get(group))));
+      builder.add(ExpressionFactory.createAggFunc(inputRefs.get(group).getOutType(), AggFuncType.GROUPKEY.getId(), ImmutableList.of(inputRefs.get(group))));
     }
     for (AggregateCall agg : aggs) {
       boolean distinct = agg.isDistinct();
