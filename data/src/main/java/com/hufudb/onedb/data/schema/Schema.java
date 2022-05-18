@@ -28,6 +28,10 @@ public class Schema {
     return new Schema(proto);
   }
 
+  public static Schema fromColumnDesc(List<ColumnDesc> descs) {
+    return new Schema(SchemaProto.newBuilder().addAllColumnDesc(descs).build());
+  }
+
   public String getName(int id) {
     return schema.getColumnDesc(id).getName();
   }

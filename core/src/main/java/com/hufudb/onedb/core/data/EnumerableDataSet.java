@@ -11,7 +11,7 @@ public class EnumerableDataSet implements Enumerator<Row> {
   DataSet dataSet;
 
   public EnumerableDataSet(DataSet source) {
-    dataSet = ProtoDataSet.materalize(source);
+    dataSet = ProtoDataSet.materialize(source);
     iterator = dataSet.getIterator();
   }
 

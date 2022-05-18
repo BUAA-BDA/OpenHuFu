@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 public class ConcurrentBuffer<K, V> {
   private static final Logger LOG = LoggerFactory.getLogger(ConcurrentBuffer.class);
-  private static final long WAIT_TIMEOUT = 10000;
+  private static final long WAIT_TIMEOUT = 500000;
 
   private final static int DEFAULT_OFFSET = 8;
   private final Object buff[];
