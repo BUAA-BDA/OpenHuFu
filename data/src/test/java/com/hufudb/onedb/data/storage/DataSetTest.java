@@ -96,7 +96,7 @@ public class DataSetTest {
     final Schema schema = Schema.newBuilder()
       .add("A", ColumnType.INT, Modifier.PUBLIC)
       .add("B", ColumnType.LONG, Modifier.PUBLIC).build();
-    MultiSourceDataSet multi = new MultiSourceDataSet(schema);
+    MultiSourceDataSet multi = new MultiSourceDataSet(schema, 2);
     ExecutorService threadPool = Executors.newFixedThreadPool(2);
     final Producer p1 = multi.newProducer();
     final Producer p2 = multi.newProducer();
