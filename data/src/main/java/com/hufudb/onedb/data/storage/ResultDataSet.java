@@ -48,7 +48,7 @@ public class ResultDataSet implements DataSet {
         final int idx = i;
         switch(col.getType()) {
           case BLOB:
-            getters.add(() -> {
+            builder.add(() -> {
               try {
                 return result.getBytes(idx);
               } catch (SQLException e) {
@@ -57,7 +57,7 @@ public class ResultDataSet implements DataSet {
             });
             break;
           case BOOLEAN:
-            getters.add(() -> {
+            builder.add(() -> {
               try {
                 return result.getBoolean(idx);
               } catch (SQLException e) {
@@ -68,7 +68,7 @@ public class ResultDataSet implements DataSet {
           case BYTE:
           case SHORT:
           case INT:
-            getters.add(() -> {
+            builder.add(() -> {
               try {
                 return result.getInt(idx);
               } catch (SQLException e) {
@@ -80,7 +80,7 @@ public class ResultDataSet implements DataSet {
           case TIME:
           case TIMESTAMP:
           case LONG:
-            getters.add(() -> {
+            builder.add(() -> {
               try {
                 return result.getLong(idx);
               } catch (SQLException e) {
@@ -89,7 +89,7 @@ public class ResultDataSet implements DataSet {
             });
             break;
           case STRING:
-            getters.add(() -> {
+            builder.add(() -> {
               try {
                 return result.getString(idx);
               } catch (SQLException e) {
@@ -98,7 +98,7 @@ public class ResultDataSet implements DataSet {
             });
             break;
           case DOUBLE:
-            getters.add(() -> {
+            builder.add(() -> {
               try {
                 return result.getDouble(idx);
               } catch (SQLException e) {
@@ -107,7 +107,7 @@ public class ResultDataSet implements DataSet {
             });
             break;
           case FLOAT:
-            getters.add(() -> {
+            builder.add(() -> {
               try {
                 return result.getFloat(idx);
               } catch (SQLException e) {
@@ -136,7 +136,7 @@ public class ResultDataSet implements DataSet {
     @Override
     public Object get(int columnIndex) {
       try {
-        return getters.get(columnIndex);
+        return getters.get(columnIndex).get();
       } catch (RuntimeException e) {
         LOG.error("Error in get of ResultDataSet: {}", e.getMessage());
         return null;

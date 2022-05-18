@@ -22,7 +22,7 @@ public class OneDBEnumerator implements Enumerator<Object> {
     if (current.size() == 1) {
       return current.get(0);
     }
-    return ArrayRow.materialize(current);
+    return ArrayRow.materialize2ObjectArray(current);
   }
 
   @Override

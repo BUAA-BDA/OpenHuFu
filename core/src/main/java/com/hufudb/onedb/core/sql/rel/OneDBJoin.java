@@ -61,7 +61,7 @@ public class OneDBJoin extends Join implements OneDBRel {
       ++idx;
     }
     joinPlan.setSelectExps(refBuilder.build());
-    JoinCondition joinCondition = CalciteConverter.convert(joinType, joinInfo, implementor.getCurrentOutput());
+    JoinCondition joinCondition = CalciteConverter.convert(joinType, joinInfo, joinPlan.getSelectExps());
     joinPlan.setJoinInfo(joinCondition);
     implementor.setCurrentPlan(joinPlan);
   }

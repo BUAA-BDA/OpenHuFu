@@ -23,16 +23,15 @@ public class MultiSourceDataSet implements DataSet {
   final Lock lock;
   final Condition cond;
 
-  public MultiSourceDataSet(Schema schema) {
+  public MultiSourceDataSet(Schema schema, int productorNum) {
     this.schema = schema;
     this.queue = new ConcurrentLinkedDeque<>();
-    this.productorNum = new AtomicInteger(0);
+    this.productorNum = new AtomicInteger(productorNum);
     this.lock = new ReentrantLock();
     this.cond = lock.newCondition();
   }
 
   public Producer newProducer() {
-    productorNum.incrementAndGet();
     return new Producer();
   }
 

@@ -25,6 +25,7 @@ public class UnaryPlan extends BasePlan {
   Plan child;
   List<Expression> aggExps = ImmutableList.of();
   List<Expression> selectExps = ImmutableList.of();
+  List<Expression> whereExps = ImmutableList.of();
   List<Integer> groups = ImmutableList.of();
   List<Collation> orders = ImmutableList.of();
   int fetch;
@@ -95,6 +96,16 @@ public class UnaryPlan extends BasePlan {
   @Override
   public void setSelectExps(List<Expression> selectExps) {
     this.selectExps = selectExps;
+  }
+
+  @Override
+  public List<Expression> getWhereExps() {
+    return whereExps;
+  }
+
+  @Override
+  public void setWhereExps(List<Expression> whereExps) {
+    this.whereExps = whereExps;
   }
 
   @Override

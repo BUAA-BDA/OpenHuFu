@@ -56,6 +56,8 @@ public class BasicTranslator implements Translator {
         return searchCall(exp);
       case SCALAR_FUNC:
         return scalarFunc(exp);
+      case AGG_FUNC:
+        return aggregateFunc(exp);
       default:
         throw new RuntimeException("can't translate " + exp);
     }

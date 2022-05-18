@@ -256,7 +256,6 @@ public class BasicRewriter implements Rewriter {
       unary.setOrders(leaf.getOrders());
       leaf.setOrders(new ArrayList<>());
     }
-    originAggs.clear();
-    originAggs.addAll(localAggs);
+    leaf.setAggExps(localAggs);
   }
 }

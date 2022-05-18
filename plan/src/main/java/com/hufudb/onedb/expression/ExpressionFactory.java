@@ -6,7 +6,6 @@ import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.data.storage.utils.ModifierWrapper;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBData.Modifier;
-import com.hufudb.onedb.proto.OneDBPlan.Collation;
 import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import com.hufudb.onedb.proto.OneDBPlan.JoinCondition;
 import com.hufudb.onedb.proto.OneDBPlan.JoinType;

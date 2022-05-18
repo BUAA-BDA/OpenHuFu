@@ -64,6 +64,7 @@ public interface OneDBRel extends RelNode {
     }
 
     public void addFilterExps(Expression exp) {
+      // todo: filter on aggregation
       List<Expression> exps = currentPlan.getWhereExps();
       if (exps == null) {
         List<Expression> filters = new ArrayList<>();

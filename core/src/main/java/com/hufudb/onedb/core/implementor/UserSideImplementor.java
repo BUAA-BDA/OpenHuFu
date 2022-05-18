@@ -67,8 +67,7 @@ public class UserSideImplementor implements PlanImplementor {
     List<Pair<OwnerClient, QueryPlanProto>> queries = PlanUtils.generateOwnerPlans(client, plan);
     List<Callable<Boolean>> tasks = new ArrayList<Callable<Boolean>>();
     Schema schema = plan.getOutSchema();
-    MultiSourceDataSet concurrentDataSet = new MultiSourceDataSet(schema);
-    // todo: wait for producer
+    MultiSourceDataSet concurrentDataSet = new MultiSourceDataSet(schema, queries.size());
     for (Pair<OwnerClient, QueryPlanProto> entry : queries) {
       tasks.add(() -> {
         final Producer producer = concurrentDataSet.newProducer();
@@ -160,15 +159,16 @@ public class UserSideImplementor implements PlanImplementor {
 
   @Override
   public DataSet leafQuery(LeafPlan leaf) {
-    MultiSourceDataSet concurrentDataSet = new MultiSourceDataSet(leaf.getOutSchema());
-    List<Callable<Boolean>> tasks = new ArrayList<Callable<Boolean>>();
     List<Pair<OwnerClient, QueryPlanProto>> plans = PlanUtils.generateLeafOwnerPlans(client, leaf);
+    List<Callable<Boolean>> tasks = new ArrayList<Callable<Boolean>>();
+    MultiSourceDataSet concurrentDataSet = new MultiSourceDataSet(leaf.getOutSchema(), plans.size());
     for (Pair<OwnerClient, QueryPlanProto> entry : plans) {
       tasks.add(() -> {
         final Producer producer = concurrentDataSet.newProducer();
         try {
           Iterator<DataSetProto> it = entry.getKey().query(entry.getValue());
           while (it.hasNext()) {
+            LOG.debug("get dataset from owner {}", entry.getKey().getEndpoint());
             producer.add(it.next());
           }
           return true;

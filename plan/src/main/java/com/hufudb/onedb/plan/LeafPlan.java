@@ -136,10 +136,6 @@ public class LeafPlan extends BasePlan {
 
   @Override
   public void setAggExps(List<Expression> aggExps) {
-    if (this.aggExps != null && !this.aggExps.isEmpty()) {
-      LOG.error("leaf query does not support aggregate function nesting");
-      throw new RuntimeException("leaf query does not support aggregate function nesting");
-    }
     this.aggExps = aggExps;
   }
 

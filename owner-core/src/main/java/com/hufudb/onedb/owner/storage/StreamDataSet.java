@@ -16,10 +16,12 @@ public class StreamDataSet implements DataSet {
 
   private final DataSet source;
   private final StreamObserver<DataSetProto> observer;
+  long count;
 
   public StreamDataSet(DataSet source, StreamObserver<DataSetProto> observer) {
     this.source = source;
     this.observer = observer;
+    this.count = 0;
   }
 
   /**
@@ -28,19 +30,21 @@ public class StreamDataSet implements DataSet {
   public void stream() {
     DataSetIterator it = source.getIterator();
     ProtoDataSet.Builder builder = ProtoDataSet.newBuilder(getSchema());
-    int count = 0;
     while (it.next()) {
       builder.addRow(it);
       count++;
-      if (count > MAX_SIZE) {
+      if (count % MAX_SIZE == 0) {
         send(builder.buildProto());
         builder.clear();
-        count = 0;
       }
+    }
+    if (count % MAX_SIZE != 0) {
+      send(builder.buildProto());
     }
   }
 
   private void send(DataSetProto proto) {
+    LOG.debug("Send %d rows in total");
     observer.onNext(proto);
   }
 
@@ -56,6 +60,7 @@ public class StreamDataSet implements DataSet {
 
   @Override
   public void close() {
+    LOG.info("Send {} rows with schema {}", count, source.getSchema());
     observer.onCompleted();
   }
 

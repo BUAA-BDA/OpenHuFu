@@ -65,6 +65,15 @@ public class ArrayRow implements Row, Serializable {
     return builder.build();
   }
 
+  public static Object[] materialize2ObjectArray(Row row) {
+    final int size = row.size();
+    Builder builder = new Builder(size);
+    for (int i = 0; i < size; ++i) {
+      builder.set(i, row.get(i));
+    }
+    return builder.values;
+  }
+
   public static class Builder {
     Object[] values;
 
