@@ -1,8 +1,12 @@
 package com.hufudb.onedb.core.sql.expression;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
+import com.google.common.collect.BoundType;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Range;
 import com.hufudb.onedb.core.data.TypeConverter;
 import com.hufudb.onedb.data.storage.utils.ModifierWrapper;
 import com.hufudb.onedb.expression.AggFuncType;
@@ -29,12 +33,13 @@ import org.apache.calcite.rex.RexNode;
 import org.apache.calcite.rex.RexProgram;
 import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.validate.SqlUserDefinedFunction;
+import org.apache.calcite.util.Sarg;
 
 public class CalciteConverter {
   private CalciteConverter() {}
 
   public static Direction convert(RelFieldCollation.Direction direction) {
-    switch(direction) {
+    switch (direction) {
       case ASCENDING:
         return Direction.ASC;
       case DESCENDING:
@@ -45,7 +50,8 @@ public class CalciteConverter {
   }
 
   public static Collation convert(RelFieldCollation coll) {
-    return Collation.newBuilder().setRef(coll.getFieldIndex()).setDirection(convert(coll.getDirection())).build();
+    return Collation.newBuilder().setRef(coll.getFieldIndex())
+        .setDirection(convert(coll.getDirection())).build();
   }
 
   public static AggFuncType convert(SqlKind aggType) {
@@ -65,18 +71,21 @@ public class CalciteConverter {
     }
   }
 
-  public static List<Expression> convert(List<Integer> groups, List<AggregateCall> aggs, List<Expression> inputs) {
+  public static List<Expression> convert(List<Integer> groups, List<AggregateCall> aggs,
+      List<Expression> inputs) {
     ImmutableList.Builder<Expression> builder = ImmutableList.builder();
     List<Expression> inputRefs = ExpressionFactory.createInputRef(inputs);
     for (int group : groups) {
-      builder.add(ExpressionFactory.createAggFunc(inputRefs.get(group).getOutType(), AggFuncType.GROUPKEY.getId(), ImmutableList.of(inputRefs.get(group))));
+      builder.add(ExpressionFactory.createAggFunc(inputRefs.get(group).getOutType(),
+          AggFuncType.GROUPKEY.getId(), ImmutableList.of(inputRefs.get(group))));
     }
     for (AggregateCall agg : aggs) {
       boolean distinct = agg.isDistinct();
       AggFuncType funcType = convert(agg.getAggregation().getKind());
       int funcTypeId = distinct ? -funcType.getId() : funcType.getId();
       List<Expression> ins = ExpressionFactory.createInputRef(inputs, agg.getArgList());
-      builder.add(ExpressionFactory.createAggFunc(TypeConverter.convert2OneDBType(agg.getType().getSqlTypeName()), funcTypeId, ins));
+      builder.add(ExpressionFactory.createAggFunc(
+          TypeConverter.convert2OneDBType(agg.getType().getSqlTypeName()), funcTypeId, ins));
     }
     return builder.build();
   }
@@ -126,6 +135,7 @@ public class CalciteConverter {
     return ExpressionFactory.createLiteral(type, value);
   }
 
+
   static class ExpressionBuilder {
     List<? extends RexNode> outputs;
     List<RexNode> locals;
@@ -137,7 +147,8 @@ public class CalciteConverter {
       this.inputs = inputs;
     }
 
-    ExpressionBuilder(List<RexNode> exps, List<? extends RexNode> outputs, List<Expression> inputs) {
+    ExpressionBuilder(List<RexNode> exps, List<? extends RexNode> outputs,
+        List<Expression> inputs) {
       this.outputs = outputs;
       this.locals = exps;
       this.inputs = inputs;
@@ -151,8 +162,9 @@ public class CalciteConverter {
       switch (node.getKind()) {
         // leaf node
         case LITERAL:
+          return convertLiteral((RexLiteral) node);
         case INPUT_REF:
-          return leaf(node);
+          return inputs.get(((RexInputRef) node).getIndex());
         // binary
         case GREATER_THAN:
         case GREATER_THAN_OR_EQUAL:
@@ -179,6 +191,9 @@ public class CalciteConverter {
         // case
         case CASE:
           return caseCall((RexCall) node);
+        // search
+        case SEARCH:
+          return searchCall((RexCall) node);
         // local_ref
         case LOCAL_REF:
           return localRef((RexLocalRef) node);
@@ -191,20 +206,6 @@ public class CalciteConverter {
     }
 
     /**
-     * only accept literal and input reference node
-     */
-    Expression leaf(RexNode node) {
-      switch (node.getKind()) {
-        case LITERAL:
-          return convertLiteral((RexLiteral) node);
-        case INPUT_REF:
-          return inputs.get(((RexInputRef) node).getIndex());
-        default:
-          throw new RuntimeException("can't translate " + node);
-      }
-    }
-
-    /*
      * add binary operator
      */
     Expression binary(RexCall call) {
@@ -303,11 +304,62 @@ public class CalciteConverter {
     }
 
     Expression searchCall(RexCall call) {
-      OperatorType op = OperatorType.SEARCH;
-      List<Expression> eles =
-          call.operands.stream().map(c -> convert(c)).collect(Collectors.toList());
-      ColumnType type = TypeConverter.convert2OneDBType(call.getType().getSqlTypeName());
-      return ExpressionFactory.createMultiOperator(op, type, eles);
+      Expression in = convert(call.operands.get(0));
+      RexLiteral ranges = (RexLiteral) call.operands.get(1);
+      return convertRangeSet((Sarg) ranges.getValue2(),
+          TypeConverter.convert2OneDBType(ranges.getType().getSqlTypeName()), in);
+    }
+
+    public static Expression convertRangeSet(Sarg sarg, ColumnType type, Expression in) {
+      Set<Range<Comparable>> ranges = sarg.rangeSet.asRanges();
+      List<Expression> rangeExps = new ArrayList<>();
+      for (Range<Comparable> r : ranges) {
+        switch (type) {
+          // todo: deal with single side bound scenarios
+          case BYTE:
+          case SHORT:
+          case INT:
+            rangeExps.add(convertRange(r.lowerEndpoint(), r.upperEndpoint(), r.lowerBoundType(),
+                r.upperBoundType(), ColumnType.INT, in));
+            break;
+          case DATE:
+          case TIME:
+          case TIMESTAMP:
+          case LONG:
+            rangeExps.add(convertRange(r.lowerEndpoint(), r.upperEndpoint(), r.lowerBoundType(),
+                r.upperBoundType(), ColumnType.LONG, in));
+            break;
+          case FLOAT:
+            rangeExps.add(convertRange(r.lowerEndpoint(), r.upperEndpoint(), r.lowerBoundType(),
+                r.upperBoundType(), ColumnType.FLOAT, in));
+            break;
+          case DOUBLE:
+            rangeExps.add(convertRange(r.lowerEndpoint(), r.upperEndpoint(), r.lowerBoundType(),
+                r.upperBoundType(), ColumnType.DOUBLE, in));
+            break;
+          case STRING:
+            rangeExps.add(convertRange(r.lowerEndpoint(), r.upperEndpoint(), r.lowerBoundType(),
+                r.upperBoundType(), ColumnType.STRING, in));
+            break;
+          default:
+            throw new UnsupportedOperationException("Unsupported type for range");
+        }
+      }
+      return ExpressionUtils.conjunctCondition(rangeExps);
+    }
+
+    public static Expression convertRange(Object left, Object right, BoundType leftBound,
+        BoundType rightBound, ColumnType cType, Expression in) {
+      Expression leftLit = ExpressionFactory.createLiteral(cType, left);
+      Expression rightLit = ExpressionFactory.createLiteral(cType, right);
+      Expression leftCmp = ExpressionFactory.createBinaryOperator(
+          leftBound.equals(BoundType.CLOSED) ? OperatorType.GE : OperatorType.GT, cType, in,
+          leftLit);
+      Expression rightCmp = ExpressionFactory.createBinaryOperator(
+          rightBound.equals(BoundType.CLOSED) ? OperatorType.LE : OperatorType.LT, cType, in,
+          rightLit);
+      return ExpressionFactory.createBinaryOperator(OperatorType.AND, ColumnType.BOOLEAN, leftCmp,
+          rightCmp);
     }
 
     /*
@@ -323,7 +375,6 @@ public class CalciteConverter {
      * translate func
      */
     Expression scalarFunc(RexCall call) {
-      OperatorType op = OperatorType.SCALAR_FUNC;
       SqlUserDefinedFunction function = (SqlUserDefinedFunction) call.op;
       ScalarFuncType func;
       switch (function.getName()) {

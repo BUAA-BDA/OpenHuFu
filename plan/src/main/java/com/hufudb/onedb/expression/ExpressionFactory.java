@@ -106,6 +106,10 @@ public class ExpressionFactory {
     }
   }
 
+  public static Expression createRange(Object left, Object right, ColumnType cType) {
+    return null;
+  }
+
   public static JoinCondition createJoinCondition(JoinType joinType, List<Integer> leftKeys,
       List<Integer> rightKyes, Expression condition, Modifier modifier) {
     JoinCondition.Builder builder = JoinCondition.newBuilder().setType(joinType).addAllLeftKey(leftKeys)

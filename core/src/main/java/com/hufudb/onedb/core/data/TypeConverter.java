@@ -37,6 +37,7 @@ public class TypeConverter {
   public static ColumnType convert2OneDBType(SqlTypeName type) {
     switch (type) {
       case VARCHAR:
+      case CHAR:
         return ColumnType.STRING;
       case BOOLEAN:
         return ColumnType.BOOLEAN;
@@ -60,7 +61,7 @@ public class TypeConverter {
       case TIMESTAMP:
         return ColumnType.TIMESTAMP;
       default:
-        return ColumnType.STRING;
+        throw new UnsupportedOperationException("Unsupported type " + type.getName());
     }
   }
 
@@ -90,7 +91,7 @@ public class TypeConverter {
       case Types.TIMESTAMP:
         return ColumnType.TIMESTAMP;
       default:
-        return ColumnType.STRING;
+        throw new UnsupportedOperationException("Unsupported type");
     }
   }
 }
