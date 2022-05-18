@@ -355,6 +355,7 @@ public class AggregateFunctions {
           for (Expression child : children) {
             if (child.getOpType().equals(OperatorType.AGG_FUNC)) {
               int id = inSize;
+              inSize++;
               in.add(createAggregateFunction(child));
               builder.addIn(
                   ExpressionFactory.createInputRef(id, child.getOutType(), child.getModifier()));
