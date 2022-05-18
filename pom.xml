@@ -18,7 +18,7 @@
     <module>rpc</module>
     <module>mpc</module>
     <module>core</module>
-    <module>owner-core</module>
+    <module>owner</module>
     <module>user-client</module>
     <module>adapter-postgresql</module>
     <module>adapter-mysql</module>

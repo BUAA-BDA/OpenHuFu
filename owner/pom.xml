@@ -9,9 +9,9 @@
     <artifactId>onedb</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
-  <artifactId>owner-core</artifactId>
+  <artifactId>owner</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <name>owner-core</name>
+  <name>owner</name>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>11</maven.compiler.source>

@@ -19,7 +19,7 @@
   <dependencies>
     <dependency>
       <groupId>com.hufudb.onedb</groupId>
-      <artifactId>owner-core</artifactId>
+      <artifactId>owner</artifactId>
       <version>1.0-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
