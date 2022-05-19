@@ -5,7 +5,7 @@ import com.hufudb.onedb.core.sql.rel.OneDBTable;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
 import com.hufudb.onedb.core.sql.schema.OneDBSchemaFactory;
 import com.hufudb.onedb.core.table.OneDBTableSchema;
-import com.hufudb.onedb.core.table.TableMeta;
+import com.hufudb.onedb.core.table.GlobalTableConfig;
 import com.hufudb.onedb.data.schema.TableSchema;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -122,7 +122,7 @@ public class OneDB {
     return schema.getOneDBTableSchema(tableName);
   }
 
-  public boolean createOneDBTable(TableMeta meta) {
+  public boolean createOneDBTable(GlobalTableConfig meta) {
     return OneDBTable.create(schema, meta) != null;
   }
 

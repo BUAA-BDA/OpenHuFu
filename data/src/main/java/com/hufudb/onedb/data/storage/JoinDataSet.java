@@ -10,7 +10,7 @@ import com.hufudb.onedb.data.schema.Schema;
  */
 public class JoinDataSet implements DataSet {
   final Schema schema;
-  final DataSet left;
+  final MaterializedDataSet left;
   final DataSet right;
   final Matcher matcher;
   final int leftRowCount;

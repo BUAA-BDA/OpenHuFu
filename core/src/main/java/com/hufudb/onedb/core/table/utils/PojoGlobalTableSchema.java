@@ -1,7 +1,7 @@
 package com.hufudb.onedb.core.table.utils;
 
 import com.hufudb.onedb.core.table.OneDBTableSchema;
-import com.hufudb.onedb.core.table.TableMeta.LocalTableMeta;
+import com.hufudb.onedb.core.table.LocalTableConfig;
 import com.hufudb.onedb.data.schema.utils.PojoSchema;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.List;
 public class PojoGlobalTableSchema {
   String name;
   PojoSchema schema;
-  List<LocalTableMeta> mappings;
+  List<LocalTableConfig> mappings;
 
   public static PojoGlobalTableSchema from(OneDBTableSchema info) {
     PojoGlobalTableSchema sinfo = new PojoGlobalTableSchema();
@@ -43,11 +43,11 @@ public class PojoGlobalTableSchema {
     this.schema = schema;
   }
 
-  public List<LocalTableMeta> getMappings() {
+  public List<LocalTableConfig> getMappings() {
     return mappings;
   }
 
-  public void setMappings(List<LocalTableMeta> mappings) {
+  public void setMappings(List<LocalTableConfig> mappings) {
     this.mappings = mappings;
   }
 

@@ -87,6 +87,10 @@ public class SchemaManager {
     ImmutableList.Builder<ColumnDesc> pFields = ImmutableList.builder();
     ImmutableList.Builder<Integer> mappings = ImmutableList.builder();
     TableSchema actualSchema = actualTableSchemaMap.get(publishedTableSchema.getActualName());
+    if (actualSchema == null) {
+      LOG.error("Table {} not found in local database", publishedTableSchema.getActualName());
+      throw new RuntimeException("Table not found in local database");
+    }
     List<PojoColumnDesc> publishedColumns = publishedTableSchema.getPublishedColumns();
     List<Integer> originNames = publishedTableSchema.getActualColumns();
     for (int i = 0; i < publishedColumns.size(); ++i) {

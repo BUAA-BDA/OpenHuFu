@@ -61,15 +61,12 @@ final public class ProtoDataSet implements MaterializedDataSet {
   }
 
   public static ProtoDataSet materialize(DataSet dataSet) {
-    long startTime = System.currentTimeMillis();
     Builder builder = new Builder(dataSet.getSchema());
     DataSetIterator it = dataSet.getIterator();
     while (it.next()) {
       builder.addRow(it);
     }
     dataSet.close();
-    long endTime = System.currentTimeMillis();
-    LOG.info("Materalize use {} ms", endTime - startTime);
     return builder.build();
   }
 

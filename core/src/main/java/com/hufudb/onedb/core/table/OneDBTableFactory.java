@@ -29,7 +29,7 @@ public class OneDBTableFactory implements TableFactory {
     return OneDBTable.create(OneDBSchema, tableName, operand, protoRowType);
   }
 
-  public Table create(OneDBSchema schema, TableMeta meta) {
+  public Table create(OneDBSchema schema, GlobalTableConfig meta) {
     LOG.debug("create table {}", meta.tableName);
     return OneDBTable.create(schema, meta);
   }

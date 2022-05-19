@@ -2,7 +2,6 @@ package com.hufudb.onedb.core.table;
 
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.client.OwnerClient;
-import com.hufudb.onedb.core.table.TableMeta.LocalTableMeta;
 import com.hufudb.onedb.data.schema.Schema;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -152,9 +151,9 @@ public class OneDBTableSchema {
     return endpoints;
   }
 
-  public List<LocalTableMeta> getMappings() {
+  public List<LocalTableConfig> getMappings() {
     return getTableList().stream()
-        .map(p -> new LocalTableMeta(p.getLeft().getEndpoint(), p.getRight()))
+        .map(p -> new LocalTableConfig(p.getLeft().getEndpoint(), p.getRight()))
         .collect(Collectors.toList());
   }
 

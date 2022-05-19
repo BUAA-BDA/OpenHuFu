@@ -132,7 +132,6 @@ public class ResultDataSet {
     } catch (SQLException e) {
       e.printStackTrace();
     }
-
   }
 
   void addOutput(ArrayRow row) {

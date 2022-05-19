@@ -2,7 +2,7 @@ package com.hufudb.onedb.core.zk;
 
 import com.hufudb.onedb.core.sql.rel.OneDBTable;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
-import com.hufudb.onedb.core.table.TableMeta;
+import com.hufudb.onedb.core.table.GlobalTableConfig;
 import com.hufudb.onedb.core.zk.watcher.EndpointWatcher;
 import com.hufudb.onedb.core.zk.watcher.GlobalTableWatcher;
 import com.hufudb.onedb.core.zk.watcher.LocalTableWatcher;
@@ -58,11 +58,11 @@ public class OneDBZkClient extends ZkClient {
   public void watchGlobalTable(String tableName) throws KeeperException, InterruptedException {
     String gPath = buildPath(schemaDirectoryPath, tableName);
     List<String> endpoints = zk.getChildren(gPath, null);
-    TableMeta tableMeta = new TableMeta(tableName);
+    GlobalTableConfig tableMeta = new GlobalTableConfig(tableName);
     for (String endpoint : endpoints) {
       schema.addOwner(endpoint, null);
       String localTableName = watchLocalTable(buildPath(gPath, endpoint));
-      tableMeta.addFeds(endpoint, localTableName);
+      tableMeta.addLocalTable(endpoint, localTableName);
     }
     Table table = OneDBTable.create(schema, tableMeta);
     if (table != null) {
