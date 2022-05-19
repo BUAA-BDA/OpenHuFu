@@ -80,6 +80,26 @@ message ColumnProto {
   }
 }
 
+message CellProto {
+  oneof cel {
+    int32 i32cel = 1;
+    int64 i64cel = 2;
+    float f32cel = 3;
+    double f64cel = 4;
+    bool boolcel = 5;
+    string strcel = 6;
+    bytes bytescel = 7;
+  }
+}
+
+message RowProto {
+  repeated CellProto cells = 1;
+}
+
+message RowsProto {
+  repeated RowProto rows = 1;
+}
+
 message DataSetProto {
   SchemaProto schema = 1;
   repeated ColumnProto column = 2;

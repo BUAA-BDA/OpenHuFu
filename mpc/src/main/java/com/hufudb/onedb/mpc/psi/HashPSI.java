@@ -92,20 +92,26 @@ public class HashPSI extends ProtocolExecutor {
 
   // sender just generate a byte arry list
   List<byte[]> hash4Sender(List<byte[]> ori, HashFunction func) {
+    long startTime = System.currentTimeMillis();
     ImmutableList.Builder<byte[]> builder = ImmutableList.builder();
     for (byte[] row : ori) {
       builder.add(func.hash(row));
     }
+    long endTime = System.currentTimeMillis();
+    LOG.info("Sender hash use {} ms", endTime - startTime);
     return builder.build();
   }
 
   // receiver generate a multimap to speed up finding identical elements
   Multimap<ByteBuffer, Integer> hash4Receiver(List<byte[]> ori, HashFunction func) {
+    long startTime = System.currentTimeMillis();
     ImmutableMultimap.Builder<ByteBuffer, Integer> builder = ImmutableMultimap.builder();
     for (int i = 0; i < ori.size(); ++i) {
       byte[] key = func.hash(ori.get(i));
       builder.put(ByteBuffer.wrap(key), i);
     }
+    long endTime = System.currentTimeMillis();
+    LOG.info("Receiver hash use {} ms", endTime - startTime);
     return builder.build();
   }
 
@@ -141,6 +147,7 @@ public class HashPSI extends ProtocolExecutor {
           senderId);
       throw new RuntimeException("Fail to get hash result from sender in HashPSI");
     } else {
+      long startTime = System.currentTimeMillis();
       List<byte[]> senderData = senderHashResult.getPayload();
       ImmutableList.Builder<byte[]> senderIntersect = ImmutableList.builder();
       ImmutableList.Builder<byte[]> receiverIntersect = ImmutableList.builder();
@@ -153,6 +160,8 @@ public class HashPSI extends ProtocolExecutor {
           }
         }
       }
+      long endTime = System.currentTimeMillis();
+      LOG.info("Receiver intersection use {} ms", endTime - startTime);
       DataPacketHeader resultHeader = new DataPacketHeader(taskId, type.getId(), 3, func.getId(),
           rpc.ownParty().getPartyId(), senderId);
       rpc.send(DataPacket.fromByteArrayList(resultHeader, senderIntersect.build()));

@@ -5,13 +5,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.hufudb.onedb.data.storage.ArrayRow;
 import com.hufudb.onedb.data.storage.DataSet;
-import com.hufudb.onedb.data.storage.DataSetIterator;
 import com.hufudb.onedb.data.storage.EmptyDataSet;
 import com.hufudb.onedb.data.storage.HorizontalDataSet;
 import com.hufudb.onedb.data.storage.MaterializedDataSet;
 import com.hufudb.onedb.data.storage.ProtoDataSet;
+import com.hufudb.onedb.data.storage.ProtoRowDataSet;
 import com.hufudb.onedb.data.storage.VerticalDataSet;
 import com.hufudb.onedb.mpc.codec.HashFunction;
 import com.hufudb.onedb.mpc.codec.OneDBCodec;
@@ -21,7 +20,6 @@ import com.hufudb.onedb.proto.OneDBData.DataSetProto;
 import com.hufudb.onedb.proto.OneDBPlan.JoinCondition;
 import com.hufudb.onedb.proto.OneDBPlan.TaskInfo;
 import com.hufudb.onedb.rpc.Rpc;
-import org.apache.commons.lang3.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,18 +27,9 @@ public class HashEqualJoin {
   static final int MAX_SIZE = 1000;
   static final Logger LOG = LoggerFactory.getLogger(HashEqualJoin.class);
 
-  static List<byte[]> encode(List<Integer> keys, DataSetIterator iterator) {
-    final int keySize = keys.size();
-    List<byte[]> result = new ArrayList<>();
-    while (iterator.next()) {
-      ArrayRow.Builder builder = ArrayRow.newBuilder(keySize);
-      for (int i = 0; i < keySize; ++i) {
-        builder.set(i, iterator.get(keys.get(i)));
-      }
-      ArrayRow k = builder.build();
-      result.add(SerializationUtils.serialize(k));
-    }
-    return result;
+  static List<byte[]> encode(List<Integer> keys, DataSet dataSet) {
+    ProtoRowDataSet keySets = ProtoRowDataSet.project(dataSet, keys);
+    return keySets.toBytes();
   }
 
   static List<byte[]> encode(DataSet source) {
@@ -78,14 +67,20 @@ public class HashEqualJoin {
     // At present, the left party collect result
     int receiverId = parties.get(0);
     int senderId = parties.get(1);
-    MaterializedDataSet localSet = ProtoDataSet.materalize(in);
+    MaterializedDataSet localSet = ProtoDataSet.materialize(in);
     // todo: choose collector by data size
     if (joinCond.getIsLeft()) {
       assert parties.get(0) == rpc.ownParty().getPartyId();
-      joinKey = encode(joinCond.getLeftKeyList(), localSet.getIterator());
+      long startTime = System.currentTimeMillis();
+      joinKey = encode(joinCond.getLeftKeyList(), localSet);
+      long endTime = System.currentTimeMillis();
+      LOG.info("Left encode use {} ms", endTime - startTime);
     } else {
       assert parties.get(1) == rpc.ownParty().getPartyId();
-      joinKey = encode(joinCond.getRightKeyList(), localSet.getIterator());
+      long startTime = System.currentTimeMillis();
+      joinKey = encode(joinCond.getRightKeyList(), localSet);
+      long endTime = System.currentTimeMillis();
+      LOG.info("Right encode use {} ms", endTime - startTime);
     }
     List<byte[]> res = psi.run(taskInfo.getTaskId(), parties, joinKey, HashFunction.SHA256.getId());
     LOG.debug("Get {} rows in HashPSI", res.size());

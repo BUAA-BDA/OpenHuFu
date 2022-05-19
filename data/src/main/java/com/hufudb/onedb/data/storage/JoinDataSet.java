@@ -18,7 +18,7 @@ public class JoinDataSet implements DataSet {
 
   JoinDataSet(DataSet left, DataSet right, Matcher matcher) {
     this.schema = Schema.merge(left.getSchema(), right.getSchema());
-    ProtoDataSet leftDataSet = ProtoDataSet.materalize(left);
+    ProtoDataSet leftDataSet = ProtoDataSet.materialize(left);
     this.left = leftDataSet;
     this.leftRowCount = leftDataSet.rowCount();
     this.leftSize = left.getSchema().size();

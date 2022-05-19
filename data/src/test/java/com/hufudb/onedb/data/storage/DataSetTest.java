@@ -78,6 +78,41 @@ public class DataSetTest {
     it = dBuilder.build().getIterator();
     compareProto(rows, it);
   }
+  
+  @Test
+  public void testProtoRowDataSet() {
+    Schema schema = Schema.newBuilder()
+        .add("A", ColumnType.BOOLEAN, Modifier.HIDDEN)
+        .add("B", ColumnType.BYTE, Modifier.PUBLIC)
+        .add("C", ColumnType.INT, Modifier.PROTECTED)
+        .add("D", ColumnType.LONG, Modifier.PRIVATE)
+        .add("E", ColumnType.STRING, Modifier.PUBLIC)
+        .add("F", ColumnType.BLOB, Modifier.PUBLIC).build();
+    ProtoDataSet.Builder dBuilder = ProtoDataSet.newBuilder(schema);
+    List<Row> rows = generateRandomRowProto(10);
+    for (Row row : rows) {
+      dBuilder.addRow(row);
+    }
+    ProtoDataSet source = dBuilder.build();
+    ProtoRowDataSet rowDataSet = ProtoRowDataSet.materialize(source);
+    ProtoRowDataSet projectDataSet = ProtoRowDataSet.project(source, ImmutableList.of(0, 2));
+    assertEquals(source.getSchema(), rowDataSet.getSchema());
+    assertEquals(source.rowCount(), rowDataSet.rowCount());
+    assertEquals(source.rowCount(), projectDataSet.rowCount());
+    DataSetIterator vit = source.getIterator();
+    DataSetIterator rit = rowDataSet.getIterator();
+    DataSetIterator pit = projectDataSet.getIterator();
+    while (vit.next() && rit.next() && pit.next()) {
+      assertEquals(vit.get(0), rit.get(0));
+      assertEquals(((Number) vit.get(1)).intValue(), (int) rit.get(1));
+      assertEquals((Number) vit.get(2), (int) rit.get(2));
+      assertEquals((long) vit.get(3), (long) rit.get(3));
+      assertEquals((String) vit.get(4), (String) rit.get(4));
+      assertArrayEquals((byte[]) vit.get(5), (byte[]) rit.get(5));
+      assertEquals(vit.get(0), pit.get(0));
+      assertEquals((Number) vit.get(2), (int) pit.get(1));
+    }
+  }
 
   DataSetProto generateDataSet(Schema schema, int size) {
     ProtoDataSet.Builder dBuilder = ProtoDataSet.newBuilder(schema);

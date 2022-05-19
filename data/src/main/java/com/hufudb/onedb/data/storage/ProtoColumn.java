@@ -64,7 +64,7 @@ public class ProtoColumn implements Column {
 
   @Override
   public ColumnType getType() {
-    return null;
+    return type;
   }
 
   @Override
