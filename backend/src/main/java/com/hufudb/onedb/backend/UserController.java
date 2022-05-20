@@ -2,6 +2,8 @@ package com.hufudb.onedb.backend;
 
 import java.util.List;
 import java.util.Set;
+import com.hufudb.onedb.backend.beans.UserService;
+import com.hufudb.onedb.backend.utils.Request;
 import com.hufudb.onedb.core.table.GlobalTableConfig;
 import com.hufudb.onedb.core.table.OneDBTableSchema;
 import com.hufudb.onedb.core.table.utils.PojoGlobalTableSchema;
@@ -28,38 +30,38 @@ public class UserController {
 
   // for endpoints
   @GetMapping("/user/endpoints")
-  Set<String> getEndpoints() {
+  Set<String> getOwners() {
     return clientService.getEndpoints();
   }
 
   @PostMapping("/user/endpoints")
-  boolean addEndpoint(@RequestBody String endpoint) {
-    return clientService.addOwner(endpoint);
+  boolean addOwner(@RequestBody Request request) {
+    return clientService.addOwner(request.value);
   }
 
   @DeleteMapping("/user/endpoints/{endpoint}")
-  void delEndpoint(@PathVariable String endpoint) {
+  void delOwner(@PathVariable String endpoint) {
     clientService.removeOwner(endpoint);
   }
 
   @GetMapping("/user/endpoints/{endpoint}")
-  List<PojoTableSchema> getAllLocalTabelInfo(@PathVariable String endpoint) {
-    List<TableSchema> schemas = clientService.getOwnerTableSchema(endpoint);
-    LOG.info("get local table {} from endpoint {}", schemas, endpoint);
+  List<PojoTableSchema> getAllLocalTableSchema(@PathVariable Request request) {
+    List<TableSchema> schemas = clientService.getOwnerTableSchema(request.value);
+    LOG.info("get local table {} from owner {}", schemas, request.value);
     return PojoTableSchema.from(schemas);
   }
 
   // for global tables
   @GetMapping("/user/globaltables")
-  List<PojoGlobalTableSchema> getAllGlobalTableInfo() {
+  List<PojoGlobalTableSchema> getAllGlobalTableSchema() {
     List<OneDBTableSchema> schemas = clientService.getAllOneDBTableSchema();
     LOG.info("get global table {}", schemas);
     return PojoGlobalTableSchema.from(schemas);
   }
 
   @GetMapping("/user/globaltables/{name}")
-  PojoGlobalTableSchema getGlobalTableInfo(@PathVariable String name) {
-    return PojoGlobalTableSchema.from(clientService.getOneDBTableSchema(name));
+  PojoGlobalTableSchema getGlobalTableSchema(@PathVariable Request request) {
+    return PojoGlobalTableSchema.from(clientService.getOneDBTableSchema(request.value));
   }
 
   @PostMapping("/user/globaltables")
@@ -68,12 +70,12 @@ public class UserController {
   }
 
   @DeleteMapping("/user/globaltables/{name}")
-  void dropGlobalTable(@PathVariable String name) {
-    clientService.dropOneDBTable(name);
+  void dropGlobalTable(@PathVariable Request request) {
+    clientService.dropOneDBTable(request.value);
   }
 
   @PostMapping("/user/query")
-  PojoResultSet query(@RequestBody String sql) {
-    return PojoResultSet.fromResultSet(clientService.executeQuery(sql));
+  PojoResultSet query(@RequestBody Request request) {
+    return PojoResultSet.fromResultSet(clientService.executeQuery(request.value));
   }
 }

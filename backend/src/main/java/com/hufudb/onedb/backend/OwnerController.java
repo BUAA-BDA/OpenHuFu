@@ -1,8 +1,10 @@
 package com.hufudb.onedb.backend;
 
 import java.util.List;
+import com.hufudb.onedb.backend.utils.Request;
 import com.hufudb.onedb.data.schema.utils.PojoPublishedTableSchema;
 import com.hufudb.onedb.data.schema.utils.PojoTableSchema;
+import com.hufudb.onedb.owner.OwnerServer;
 import com.hufudb.onedb.owner.OwnerService;
 
 import org.slf4j.Logger;
@@ -17,14 +19,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @ConditionalOnProperty(
-    name = {"owner.db.enable"},
+    name = {"owner.enable"},
     havingValue = "true")
 public class OwnerController {
   private static final Logger LOG = LoggerFactory.getLogger(OwnerController.class);
+  private final OwnerServer server;
   private final OwnerService service;
 
-  OwnerController(OwnerService service) {
-    this.service = service;
+  OwnerController(OwnerServer server) {
+    this.server = server;
+    this.service = server.getService();
   }
 
   @GetMapping("/owner/localtables")
@@ -43,7 +47,7 @@ public class OwnerController {
   }
 
   @DeleteMapping("/owner/publishedtables/{name}")
-  void dropPublishedTable(@PathVariable String name) {
-    service.dropPublishedTable(name);
+  void dropPublishedTable(@PathVariable Request request) {
+    service.dropPublishedTable(request.value);
   }
 }

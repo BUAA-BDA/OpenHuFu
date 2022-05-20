@@ -7,8 +7,19 @@ import sqlline.SqlLine;
 import sqlline.SqlLineOpts;
 
 public class OneDBLine extends SqlLine {
+  private static String LOGO = String.join
+  ("\n",
+  "   ____                _____   ____  ",
+  "  / __ \\              |  __ \\ |  _ \\ ",
+  " | |  | | _ __    ___ | |  | || |_) |",
+  " | |  | || '_ \\  / _ \\| |  | ||  _ < ",
+  " | |__| || | | ||  __/| |__| || |_) |",
+  "  \\____/ |_| |_| \\___||_____/ |____/ "
+  );
+
   public static Status start(String[] args, InputStream inputStream, boolean saveHistory)
       throws IOException {
+    System.out.println(LOGO);
     OneDBLine onedbline = new OneDBLine();
     onedbline.getOpts().set(BuiltInProperty.PROMPT, "onedb>");
     onedbline.getOpts().set(BuiltInProperty.ISOLATION, "TRANSACTION_NONE");

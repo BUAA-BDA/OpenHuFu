@@ -1,29 +1,19 @@
-package com.hufudb.onedb.owner.config;
+package com.hufudb.onedb.backend.beans;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import com.hufudb.onedb.data.schema.utils.PojoPublishedTableSchema;
 import com.hufudb.onedb.owner.adapter.Adapter;
+import com.hufudb.onedb.owner.config.OwnerConfig;
 import com.hufudb.onedb.rpc.Party;
 import com.hufudb.onedb.rpc.grpc.OneDBRpc;
 import io.grpc.ChannelCredentials;
 import io.grpc.ServerCredentials;
 
-public class OwnerConfig {
-  public Party party;
-  public int port;
-  public String hostname;
-  public ExecutorService threadPool;
-  public Adapter adapter;
-  public OneDBRpc acrossOwnerRpc;
-  public boolean useTLS;
-  public ServerCredentials serverCerts;
-  public ChannelCredentials clientCerts;
-  public List<PojoPublishedTableSchema> tables;
+public class OwnerBackendConfig extends OwnerConfig {
+  public OwnerBackendConfig() {}
 
-  public OwnerConfig() {}
-
-  public OwnerConfig(Party party, int port, String hostname, ExecutorService threadPool,
+  public OwnerBackendConfig(Party party, int port, String hostname, ExecutorService threadPool,
       Adapter adapter, OneDBRpc acrossOwnerRpc, boolean useTLS, ServerCredentials serverCerts,
       ChannelCredentials clientCerts, List<PojoPublishedTableSchema> tables) {
     this.party = party;
