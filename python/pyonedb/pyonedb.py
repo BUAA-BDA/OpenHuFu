@@ -1,9 +1,10 @@
-from jnius import autoclass
 import os
 import jnius_config
+
 onedb_root = os.getenv("ONEDB_ROOT")
 jnius_config.set_classpath(onedb_root + "/bin/onedb_user_client.jar")
 
+from jnius import autoclass
 
 OneDB = autoclass("com.hufudb.onedb.OneDB")
 GlobalTableConfig = autoclass("com.hufudb.onedb.core.table.GlobalTableConfig")
@@ -20,6 +21,9 @@ class TableConfig:
 
     def get_config(self) -> GlobalTableConfig:
         return self._table_config
+
+    def get_table_name(self) -> str:
+        return self._table_config.getTableName()
 
 
 class Cursor(object):
@@ -57,23 +61,3 @@ class PyOneDB:
 
     def query(self, sql: str):
         return Cursor(self._onedb.executeQuery(sql))
-
-
-if __name__ == "__main__":
-    table_config = TableConfig("student1")
-    table_config.add_local_table('localhost:12345', "student1")
-    table_config.add_local_table('localhost:12346', "student1")
-    table_config.add_local_table('localhost:12347', "student1")
-
-    pyonedb = PyOneDB()
-    pyonedb.add_owner('localhost:12345', onedb_root + "/cert/ca.pem")
-    pyonedb.add_owner('localhost:12346', onedb_root + "/cert/ca.pem")
-    pyonedb.add_owner('localhost:12347', onedb_root + "/cert/ca.pem")
-
-    pyonedb.add_onedb_table(table_config)
-
-    result = pyonedb.query("select name, age from student1 limit 3")
-
-    for r in result:
-        for i in range(r.size()):
-            print(r.get(i))

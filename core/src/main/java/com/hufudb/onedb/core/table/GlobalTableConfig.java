@@ -27,7 +27,7 @@ public class GlobalTableConfig {
     this.tableName = tableName;
   }
 
-  public List<LocalTableConfig> getFeds() {
+  public List<LocalTableConfig> getLocalTables() {
     return localTables;
   }
 
