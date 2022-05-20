@@ -5,7 +5,8 @@ import com.hufudb.onedb.core.data.TypeConverter;
 import com.hufudb.onedb.core.sql.enumerator.OneDBEnumerator;
 import com.hufudb.onedb.core.sql.schema.OneDBSchema;
 import com.hufudb.onedb.core.table.OneDBTableSchema;
-import com.hufudb.onedb.core.table.TableMeta;
+import com.hufudb.onedb.core.table.GlobalTableConfig;
+import com.hufudb.onedb.core.table.LocalTableConfig;
 import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.data.schema.TableSchema;
 import java.util.ArrayList;
@@ -56,11 +57,11 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
     return new OneDBTable(tableName, rootSchema, schema, protoRowType);
   }
 
-  public static Table create(OneDBSchema rootSchema, TableMeta tableMeta) {
+  public static Table create(OneDBSchema rootSchema, GlobalTableConfig tableMeta) {
     final String tableName = tableMeta.tableName;
     OneDBTable table = null;
     List<Pair<OwnerClient, TableSchema>> localInfos = new ArrayList<>();
-    for (TableMeta.LocalTableMeta fedMeta : tableMeta.localTables) {
+    for (LocalTableConfig fedMeta : tableMeta.localTables) {
       OwnerClient client = rootSchema.getOwnerClient(fedMeta.endpoint);
       if (client == null) {
         LOG.error("No connection to owner {}", fedMeta.endpoint);

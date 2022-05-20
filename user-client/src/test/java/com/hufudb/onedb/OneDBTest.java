@@ -1,7 +1,8 @@
 package com.hufudb.onedb;
 
 import com.google.common.collect.ImmutableList;
-import com.hufudb.onedb.core.table.TableMeta;
+import com.hufudb.onedb.core.table.GlobalTableConfig;
+import com.hufudb.onedb.core.table.LocalTableConfig;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,29 +29,29 @@ public class OneDBTest {
       assert resource != null;
       oneDB.addOwner(e, resource.getPath());
     });
-    oneDB.createOneDBTable(new TableMeta("region",
-            Stream.of(endpoints.get(0)).map(e -> new TableMeta.LocalTableMeta(e, "region"))
+    oneDB.createOneDBTable(new GlobalTableConfig("region",
+            Stream.of(endpoints.get(0)).map(e -> new LocalTableConfig(e, "region"))
                     .collect(Collectors.toList())));
-    oneDB.createOneDBTable(new TableMeta("nation",
-            Stream.of(endpoints.get(0)).map(e -> new TableMeta.LocalTableMeta(e, "nation"))
+    oneDB.createOneDBTable(new GlobalTableConfig("nation",
+            Stream.of(endpoints.get(0)).map(e -> new LocalTableConfig(e, "nation"))
                     .collect(Collectors.toList())));
-    oneDB.createOneDBTable(new TableMeta("partsupp",
-            endpoints.stream().map(e -> new TableMeta.LocalTableMeta(e, "partsupp"))
+    oneDB.createOneDBTable(new GlobalTableConfig("partsupp",
+            endpoints.stream().map(e -> new LocalTableConfig(e, "partsupp"))
                     .collect(Collectors.toList())));
-    oneDB.createOneDBTable(new TableMeta("customer",
-            endpoints.stream().map(e -> new TableMeta.LocalTableMeta(e, "customer"))
+    oneDB.createOneDBTable(new GlobalTableConfig("customer",
+            endpoints.stream().map(e -> new LocalTableConfig(e, "customer"))
                     .collect(Collectors.toList())));
-    oneDB.createOneDBTable(new TableMeta("lineitem",
-            endpoints.stream().map(e -> new TableMeta.LocalTableMeta(e, "lineitem"))
+    oneDB.createOneDBTable(new GlobalTableConfig("lineitem",
+            endpoints.stream().map(e -> new LocalTableConfig(e, "lineitem"))
                     .collect(Collectors.toList())));
-    oneDB.createOneDBTable(new TableMeta("orders",
-            endpoints.stream().map(e -> new TableMeta.LocalTableMeta(e, "orders"))
+    oneDB.createOneDBTable(new GlobalTableConfig("orders",
+            endpoints.stream().map(e -> new LocalTableConfig(e, "orders"))
                     .collect(Collectors.toList())));
-    oneDB.createOneDBTable(new TableMeta("part",
-            endpoints.stream().map(e -> new TableMeta.LocalTableMeta(e, "part"))
+    oneDB.createOneDBTable(new GlobalTableConfig("part",
+            endpoints.stream().map(e -> new LocalTableConfig(e, "part"))
                     .collect(Collectors.toList())));
-    oneDB.createOneDBTable(new TableMeta("supplier",
-            endpoints.stream().map(e -> new TableMeta.LocalTableMeta(e, "supplier"))
+    oneDB.createOneDBTable(new GlobalTableConfig("supplier",
+            endpoints.stream().map(e -> new LocalTableConfig(e, "supplier"))
                     .collect(Collectors.toList())));
   }
 
