@@ -12,12 +12,12 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.hufudb.onedb.OneDB;
-import com.hufudb.onedb.backend.beans.OwnerBackendConfig;
-import com.hufudb.onedb.backend.beans.OwnerBackendConfigFile;
-import com.hufudb.onedb.backend.beans.OwnerBackendServer;
 import com.hufudb.onedb.core.table.GlobalTableConfig;
 import com.hufudb.onedb.data.schema.utils.PojoPublishedTableSchema;
+import com.hufudb.onedb.owner.OwnerServer;
 import com.hufudb.onedb.owner.adapter.AdapterConfig;
+import com.hufudb.onedb.owner.config.OwnerConfig;
+import com.hufudb.onedb.owner.config.OwnerConfigFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -84,8 +84,8 @@ public class BackendConfiguration {
   private List<GlobalTableConfig> userTableConfig;
 
   @Bean
-  OwnerBackendConfig generateOwnerConfig() {
-    OwnerBackendConfigFile ownerConfigFile = new OwnerBackendConfigFile(id, port, threadnum, hostname,
+  OwnerConfig generateOwnerConfig() {
+    OwnerConfigFile ownerConfigFile = new OwnerConfigFile(id, port, threadnum, hostname,
         privatekeypath, certchainpath, trustcertpath);
     List<PojoPublishedTableSchema> ownerTableConfig = ImmutableList.of();
     try (Reader reader = Files.newBufferedReader(Paths.get(ownerSchemaConfigPath))) {
@@ -101,7 +101,24 @@ public class BackendConfiguration {
     adapterConfig.user = user;
     adapterConfig.passwd = passwd;
     ownerConfigFile.adapterconfig = adapterConfig;
-    return ownerConfigFile.generate();
+    return ownerConfigFile.generateConfig();
+  }
+
+  @Bean
+  public OneDB initUser() {
+    return new OneDB();
+  }
+
+  @Bean
+  @ConditionalOnProperty(name = {"owner.enable"}, havingValue = "true")
+  public OwnerServer initOwner() {
+    try {
+      return new OwnerServer(generateOwnerConfig());
+    } catch (IOException e) {
+      LOG.error("Fail to init owner side server");
+      e.printStackTrace();
+      return null;
+    }
   }
 
   private void initClient(OneDB client) {
@@ -123,19 +140,6 @@ public class BackendConfiguration {
     }
   }
 
-
-  @Bean
-  @ConditionalOnProperty(name = {"owner.enable"}, havingValue = "true")
-  public OwnerBackendServer initServer() {
-    try {
-      return new OwnerBackendServer(generateOwnerConfig());
-    } catch (IOException e) {
-      LOG.error("Fail to init owner side server");
-      e.printStackTrace();
-      return null;
-    }
-  }
-
   @Bean
   @ConditionalOnProperty(name = {"owner.enable"}, havingValue = "false")
   CommandLineRunner Client(OneDB client) {
@@ -148,7 +152,7 @@ public class BackendConfiguration {
   @ConditionalOnProperty(
       name = {"owner.db.enable"},
       havingValue = "true")
-  public CommandLineRunner Server(OneDB client, OwnerBackendServer server) {
+  public CommandLineRunner Server(OneDB client, OwnerServer server) {
     LOG.info("init Server");
     return args -> {
       if (server != null) {
