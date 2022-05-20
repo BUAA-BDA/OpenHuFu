@@ -4,7 +4,7 @@ import com.hufudb.onedb.core.client.OneDBClient;
 import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.sql.enumerator.OneDBEnumerator;
 import com.hufudb.onedb.core.sql.rel.OneDBTable;
-import com.hufudb.onedb.core.sql.schema.OneDBSchemaFactory.OwnerMeta;
+import com.hufudb.onedb.core.sql.schema.OneDBSchemaFactory.OwnerInfo;
 import com.hufudb.onedb.core.table.OneDBTableSchema;
 import com.hufudb.onedb.core.zk.OneDBZkClient;
 import com.hufudb.onedb.core.zk.ZkConfig;
@@ -49,14 +49,14 @@ public class OneDBSchema extends AbstractSchema {
     this.queryCounter = new AtomicInteger(0);
   }
 
-  public OneDBSchema(List<OwnerMeta> owners, List<Map<String, Object>> tables, SchemaPlus schema, int userId) {
+  public OneDBSchema(List<OwnerInfo> owners, List<Map<String, Object>> tables, SchemaPlus schema, int userId) {
     this.parentSchema = schema;
     this.tableMap = new HashMap<>();
     this.client = new OneDBClient(this);
     this.zkClient = null;
     this.userId = userId;
     this.queryCounter = new AtomicInteger(0);
-    for (OwnerMeta owner : owners) {
+    for (OwnerInfo owner : owners) {
       addOwner(owner.getEndpoint(), owner.getTrustCertPath());
     }
   }

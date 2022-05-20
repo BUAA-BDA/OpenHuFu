@@ -2,14 +2,12 @@ package com.hufudb.onedb.backend;
 
 import java.util.List;
 import java.util.Set;
-
-import com.hufudb.onedb.core.data.TableInfo;
-import com.hufudb.onedb.core.data.utils.POJOGlobalTableInfo;
-import com.hufudb.onedb.core.data.utils.POJOLocalTableInfo;
-import com.hufudb.onedb.core.data.utils.POJOResultSet;
-import com.hufudb.onedb.core.table.OneDBTableInfo;
-import com.hufudb.onedb.core.table.TableMeta;
-
+import com.hufudb.onedb.core.table.GlobalTableConfig;
+import com.hufudb.onedb.core.table.OneDBTableSchema;
+import com.hufudb.onedb.core.table.utils.PojoGlobalTableSchema;
+import com.hufudb.onedb.data.schema.TableSchema;
+import com.hufudb.onedb.data.schema.utils.PojoResultSet;
+import com.hufudb.onedb.data.schema.utils.PojoTableSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -45,28 +43,28 @@ public class UserController {
   }
 
   @GetMapping("/user/endpoints/{endpoint}")
-  List<POJOLocalTableInfo> getAllLocalTabelInfo(@PathVariable String endpoint) {
-    List<TableInfo> infos = clientService.getDBTableInfo(endpoint);
-    LOG.info("get local table {} from endpoint {}", infos, endpoint);
-    return POJOLocalTableInfo.from(infos);
+  List<PojoTableSchema> getAllLocalTabelInfo(@PathVariable String endpoint) {
+    List<TableSchema> schemas = clientService.getOwnerTableSchema(endpoint);
+    LOG.info("get local table {} from endpoint {}", schemas, endpoint);
+    return PojoTableSchema.from(schemas);
   }
 
   // for global tables
   @GetMapping("/user/globaltables")
-  List<POJOGlobalTableInfo> getAllGlobalTableInfo() {
-    List<OneDBTableInfo> infos = clientService.getAllOneDBTableInfo();
-    LOG.info("get global table {}", infos);
-    return POJOGlobalTableInfo.from(infos);
+  List<PojoGlobalTableSchema> getAllGlobalTableInfo() {
+    List<OneDBTableSchema> schemas = clientService.getAllOneDBTableSchema();
+    LOG.info("get global table {}", schemas);
+    return PojoGlobalTableSchema.from(schemas);
   }
 
   @GetMapping("/user/globaltables/{name}")
-  POJOGlobalTableInfo getGlobalTableInfo(@PathVariable String name) {
-    return POJOGlobalTableInfo.from(clientService.getOneDBTableInfo(name));
+  PojoGlobalTableSchema getGlobalTableInfo(@PathVariable String name) {
+    return PojoGlobalTableSchema.from(clientService.getOneDBTableSchema(name));
   }
 
   @PostMapping("/user/globaltables")
-  boolean addGlobalTable(@RequestBody TableMeta meta) {
-    return clientService.createOneDBTable(meta);
+  boolean addGlobalTable(@RequestBody GlobalTableConfig config) {
+    return clientService.createOneDBTable(config);
   }
 
   @DeleteMapping("/user/globaltables/{name}")
@@ -75,7 +73,7 @@ public class UserController {
   }
 
   @PostMapping("/user/query")
-  POJOResultSet query(@RequestBody String sql) {
-    return POJOResultSet.fromResultSet(clientService.executeQuery(sql));
+  PojoResultSet query(@RequestBody String sql) {
+    return PojoResultSet.fromResultSet(clientService.executeQuery(sql));
   }
 }

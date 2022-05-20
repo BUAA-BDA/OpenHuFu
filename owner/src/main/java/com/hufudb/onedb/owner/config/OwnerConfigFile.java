@@ -32,6 +32,19 @@ public class OwnerConfigFile {
   public List<PojoPublishedTableSchema> tables;
   public AdapterConfig adapterconfig;
 
+  public OwnerConfigFile(int id, int port, int threadnum, String hostname, String privatekeypath,
+      String certchainpath, String trustcertpath) {
+    this.id = id;
+    this.port = port;
+    this.threadnum = threadnum;
+    this.hostname = hostname;
+    this.privatekeypath = privatekeypath;
+    this.certchainpath = certchainpath;
+    this.trustcertpath = trustcertpath;
+  }
+
+  public OwnerConfigFile() {}
+
   public Adapter getAdapter() {
     Path adapterDir = Paths.get(System.getenv("ONEDB_ROOT"), "adapter");
     Map<String, AdapterFactory> adapterFactories = AdapterLoader.loadAdapters(adapterDir.toString());

@@ -31,8 +31,8 @@ public class SchemaManager {
     actualTableSchemaMap.put(table.getName(), table);
   }
 
-  public void addPublishedTable(PojoPublishedTableSchema table) {
-    addPublishedTable(generatePublishedTableSchema(table));
+  public boolean addPublishedTable(PojoPublishedTableSchema table) {
+    return addPublishedTable(generatePublishedTableSchema(table));
   }
 
   public TableSchema getLocalTable(String tableName) {
@@ -103,12 +103,14 @@ public class SchemaManager {
         pFields.build(), mappings.build());
   }
 
-  void addPublishedTable(PublishedTableSchema publishedTable) {
+  boolean addPublishedTable(PublishedTableSchema publishedTable) {
     if (publishedTableSchemaMap.containsKey(publishedTable.getPublishedTableName())) {
       LOG.error("published table {} already exist", publishedTable.getPublishedTableName());
+      return false;
     } else {
       publishedTableSchemaMap.put(publishedTable.getPublishedTableName(), publishedTable);
       LOG.info("Add Published Table {}", publishedTable);
+      return true;
     }
   }
 }
