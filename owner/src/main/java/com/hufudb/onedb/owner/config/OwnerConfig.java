@@ -20,4 +20,21 @@ public class OwnerConfig {
   public ServerCredentials serverCerts;
   public ChannelCredentials clientCerts;
   public List<PojoPublishedTableSchema> tables;
+
+  public OwnerConfig() {}
+
+  public OwnerConfig(Party party, int port, String hostname, ExecutorService threadPool,
+      Adapter adapter, OneDBRpc acrossOwnerRpc, boolean useTLS, ServerCredentials serverCerts,
+      ChannelCredentials clientCerts, List<PojoPublishedTableSchema> tables) {
+    this.party = party;
+    this.port = port;
+    this.hostname = hostname;
+    this.threadPool = threadPool;
+    this.adapter = adapter;
+    this.acrossOwnerRpc = acrossOwnerRpc;
+    this.useTLS = useTLS;
+    this.serverCerts = serverCerts;
+    this.clientCerts = clientCerts;
+    this.tables = tables;
+  }
 }

@@ -90,6 +90,10 @@ public class OwnerServer {
     }
   }
 
+  public OwnerService getService() {
+    return service;
+  }
+
   public static void main(String[] args) {
     Options options = new Options();
     Option cmdConfig = new Option("c", "config", true, "postgresql config");

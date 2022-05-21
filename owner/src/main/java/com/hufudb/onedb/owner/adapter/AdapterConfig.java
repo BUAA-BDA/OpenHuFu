@@ -11,4 +11,10 @@ public class AdapterConfig {
   public String url;
   public String user;
   public String passwd;
+
+  public AdapterConfig() {}
+
+  public AdapterConfig(String datasource) {
+    this.datasource = datasource;
+  }
 }

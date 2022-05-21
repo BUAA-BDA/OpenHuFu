@@ -139,13 +139,17 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
     schemaManager.dropPublishedTable(tableName);
   }
 
-  public void initPublishedTable(List<PojoPublishedTableSchema> infos) {
-    if (infos == null) {
+  public void initPublishedTable(List<PojoPublishedTableSchema> schemas) {
+    if (schemas == null) {
       return;
     }
-    for (PojoPublishedTableSchema info : infos) {
-      schemaManager.addPublishedTable(info);
+    for (PojoPublishedTableSchema schema : schemas) {
+      schemaManager.addPublishedTable(schema);
     }
+  }
+
+  public boolean addPublishedTable(PojoPublishedTableSchema schema) {
+    return schemaManager.addPublishedTable(schema);
   }
 
   public boolean changeCatalog(String catalog) {

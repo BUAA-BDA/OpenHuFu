@@ -23,5 +23,8 @@ else
   elif [ $1 == "adapter-mysql" ]
   then
     cp adapter-mysql/target/*-with-dependencies.jar ./release/adapter/adapter-mysql.jar
+  elif [ $1 == "backend" ]
+  then
+    cp backend/target/backend*.jar ./release/bin/backend.jar
   fi
 fi

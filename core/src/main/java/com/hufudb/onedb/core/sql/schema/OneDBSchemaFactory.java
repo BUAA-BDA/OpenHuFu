@@ -18,18 +18,18 @@ public class OneDBSchemaFactory implements SchemaFactory {
 
   @Override
   public Schema create(SchemaPlus parentSchema, String name, Map<String, Object> operand) {
-    List<OwnerMeta> owners = new ArrayList<>();
+    List<OwnerInfo> owners = new ArrayList<>();
     List<Map<String, Object>> tableObjs = new ArrayList<>();
     int userId = 0;
     if (operand.containsKey("endpoints")) {
       for (Object endpoint : (List<Object>) operand.get("endpoints")) {
-        owners.add(new OwnerMeta((String) endpoint, null));
+        owners.add(new OwnerInfo((String) endpoint, null));
       }
     } else if (operand.containsKey("owners")) {
       for (Map<String, Object> owner : (List<Map<String, Object>>) operand.get("owners")) {
         String endpoint = (String) owner.get("endpoint");
         String trustCertPath = (String) owner.get("trustcertpath");
-        owners.add(new OwnerMeta(endpoint, trustCertPath));
+        owners.add(new OwnerInfo(endpoint, trustCertPath));
       }
     }
     if (operand.containsKey("userid")) {
@@ -53,13 +53,13 @@ public class OneDBSchemaFactory implements SchemaFactory {
     }
   }
 
-  static class OwnerMeta {
+  static class OwnerInfo {
     String endpoint;
     String trustCertPath;
 
-    OwnerMeta() {}
+    OwnerInfo() {}
 
-    OwnerMeta(String endpoint, String trustCertPath) {
+    OwnerInfo(String endpoint, String trustCertPath) {
       this.endpoint = endpoint;
       this.trustCertPath = trustCertPath;
     }
