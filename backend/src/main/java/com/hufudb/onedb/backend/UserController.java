@@ -28,23 +28,29 @@ public class UserController {
     this.onedb = service;
   }
 
+  // for alive test
+  @GetMapping("/alive")
+  boolean isAlive() {
+    return true;
+  }
+
   // for endpoints
-  @GetMapping("/user/endpoints")
+  @GetMapping("/user/owners")
   Set<String> getOwners() {
     return onedb.getEndpoints();
   }
 
-  @PostMapping("/user/endpoints")
+  @PostMapping("/user/owners")
   boolean addOwner(@RequestBody Request request) {
-    return onedb.addOwner(request.value);
+    return onedb.addOwner(request.value, "./cert/ca.pem");
   }
 
-  @DeleteMapping("/user/endpoints/{endpoint}")
+  @DeleteMapping("/user/owners/{endpoint}")
   void delOwner(@PathVariable String endpoint) {
     onedb.removeOwner(endpoint);
   }
 
-  @GetMapping("/user/endpoints/{endpoint}")
+  @GetMapping("/user/owners/{endpoint}")
   List<PojoTableSchema> getAllLocalTableSchema(@PathVariable Request request) {
     List<TableSchema> schemas = onedb.getOwnerTableSchema(request.value);
     LOG.info("get local table {} from owner {}", schemas, request.value);
