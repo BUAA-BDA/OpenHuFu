@@ -42,6 +42,7 @@ public class UserController {
 
   @PostMapping("/user/owners")
   boolean addOwner(@RequestBody Request request) {
+    LOG.info("Add owner: {}", request.value);
     return onedb.addOwner(request.value, "./cert/ca.pem");
   }
 
@@ -51,9 +52,9 @@ public class UserController {
   }
 
   @GetMapping("/user/owners/{endpoint}")
-  List<PojoTableSchema> getAllLocalTableSchema(@PathVariable Request request) {
-    List<TableSchema> schemas = onedb.getOwnerTableSchema(request.value);
-    LOG.info("get local table {} from owner {}", schemas, request.value);
+  List<PojoTableSchema> getAllLocalTableSchema(@PathVariable String endpoint) {
+    List<TableSchema> schemas = onedb.getOwnerTableSchema(endpoint);
+    LOG.info("get local table {} from owner {}", schemas, endpoint);
     return PojoTableSchema.from(schemas);
   }
 
@@ -66,8 +67,8 @@ public class UserController {
   }
 
   @GetMapping("/user/globaltables/{name}")
-  PojoGlobalTableSchema getGlobalTableSchema(@PathVariable Request request) {
-    return PojoGlobalTableSchema.from(onedb.getOneDBTableSchema(request.value));
+  PojoGlobalTableSchema getGlobalTableSchema(@PathVariable String endpoint) {
+    return PojoGlobalTableSchema.from(onedb.getOneDBTableSchema(endpoint));
   }
 
   @PostMapping("/user/globaltables")
@@ -76,8 +77,8 @@ public class UserController {
   }
 
   @DeleteMapping("/user/globaltables/{name}")
-  void dropGlobalTable(@PathVariable Request request) {
-    onedb.dropOneDBTable(request.value);
+  void dropGlobalTable(@PathVariable String tableName) {
+    onedb.dropOneDBTable(tableName);
   }
 
   @PostMapping("/user/query")

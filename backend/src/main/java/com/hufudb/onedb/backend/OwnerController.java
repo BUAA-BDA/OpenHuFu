@@ -47,7 +47,7 @@ public class OwnerController {
   }
 
   @DeleteMapping("/owner/publishedtables/{name}")
-  void dropPublishedTable(@PathVariable Request request) {
-    service.dropPublishedTable(request.value);
+  void dropPublishedTable(@PathVariable String tableName) {
+    service.dropPublishedTable(tableName);
   }
 }

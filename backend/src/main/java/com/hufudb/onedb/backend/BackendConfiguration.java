@@ -149,7 +149,7 @@ public class BackendConfiguration {
   }
 
   @Bean
-  @ConditionalOnProperty(name = {"owner.db.enable"}, havingValue = "true")
+  @ConditionalOnProperty(name = {"owner.enable"}, havingValue = "true")
   public CommandLineRunner Server(OneDB client, OwnerServer server) {
     LOG.info("init Owner");
     return args -> {
