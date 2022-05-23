@@ -7,9 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PojoGlobalTableSchema {
-  String name;
-  PojoSchema schema;
-  List<LocalTableConfig> mappings;
+  public String name;
+  public PojoSchema schema;
+  public List<LocalTableConfig> mappings;
+
+  public PojoGlobalTableSchema() {}
 
   public static PojoGlobalTableSchema from(OneDBTableSchema info) {
     PojoGlobalTableSchema sinfo = new PojoGlobalTableSchema();
