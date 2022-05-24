@@ -12,6 +12,7 @@ import com.hufudb.onedb.data.schema.utils.PojoResultSet;
 import com.hufudb.onedb.data.schema.utils.PojoTableSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +25,9 @@ public class UserController {
   private static final Logger LOG = LoggerFactory.getLogger(UserController.class);
   private final OneDB onedb;
 
+  @Value("${owner.enable}")
+  private boolean hasOwner;
+
   UserController(OneDB service) {
     this.onedb = service;
   }
@@ -31,7 +35,7 @@ public class UserController {
   // for alive test
   @GetMapping("/alive")
   boolean isAlive() {
-    return true;
+    return hasOwner;
   }
 
   // for endpoints
@@ -67,8 +71,8 @@ public class UserController {
   }
 
   @GetMapping("/user/globaltables/{name}")
-  PojoGlobalTableSchema getGlobalTableSchema(@PathVariable String endpoint) {
-    return PojoGlobalTableSchema.from(onedb.getOneDBTableSchema(endpoint));
+  PojoGlobalTableSchema getGlobalTableSchema(@PathVariable String name) {
+    return PojoGlobalTableSchema.from(onedb.getOneDBTableSchema(name));
   }
 
   @PostMapping("/user/globaltables")
@@ -77,8 +81,8 @@ public class UserController {
   }
 
   @DeleteMapping("/user/globaltables/{name}")
-  void dropGlobalTable(@PathVariable String tableName) {
-    onedb.dropOneDBTable(tableName);
+  void dropGlobalTable(@PathVariable String name) {
+    onedb.dropOneDBTable(name);
   }
 
   @PostMapping("/user/query")

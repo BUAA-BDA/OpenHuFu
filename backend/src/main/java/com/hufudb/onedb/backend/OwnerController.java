@@ -1,7 +1,6 @@
 package com.hufudb.onedb.backend;
 
 import java.util.List;
-import com.hufudb.onedb.backend.utils.Request;
 import com.hufudb.onedb.data.schema.utils.PojoPublishedTableSchema;
 import com.hufudb.onedb.data.schema.utils.PojoTableSchema;
 import com.hufudb.onedb.owner.OwnerServer;
@@ -47,7 +46,7 @@ public class OwnerController {
   }
 
   @DeleteMapping("/owner/publishedtables/{name}")
-  void dropPublishedTable(@PathVariable String tableName) {
-    service.dropPublishedTable(tableName);
+  void dropPublishedTable(@PathVariable String name) {
+    service.dropPublishedTable(name);
   }
 }

@@ -17,7 +17,7 @@ stop() {
   echo "stop $1"
   rm ./log/pid_$1
 }
-
+export ONEDB_ROOT=$PWD
 mkdir -p log
 if [ $# -eq 0 ]
 then
