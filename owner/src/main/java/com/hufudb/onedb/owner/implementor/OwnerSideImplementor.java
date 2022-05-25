@@ -39,9 +39,11 @@ public class OwnerSideImplementor implements PlanImplementor {
     Plan left = children.get(0);
     Plan right = children.get(1);
     DataSet in;
+    boolean isLeft = true;
     if (left.getPlanType().equals(PlanType.EMPTY)) {
       // right
       in = right.implement(this);
+      isLeft = false;
     } else if (right.getPlanType().equals(PlanType.EMPTY)) {
       // left
       in = left.implement(this);
@@ -50,7 +52,7 @@ public class OwnerSideImplementor implements PlanImplementor {
       throw new UnsupportedOperationException("Not support two side on a single owner yet");
     }
     DataSet result =
-        HashEqualJoin.join(in, binary.getJoinCond(), rpc, binary.getTaskInfo());
+        HashEqualJoin.join(in, binary.getJoinCond(), isLeft, rpc, binary.getTaskInfo());
     if (!binary.getSelectExps().isEmpty()) {
       result = Interpreter.map(result, binary.getSelectExps());
     }

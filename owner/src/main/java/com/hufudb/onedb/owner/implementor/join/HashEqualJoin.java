@@ -50,7 +50,7 @@ public class HashEqualJoin {
     }
   }
 
-  public static DataSet join(DataSet in, JoinCondition joinCond, Rpc rpc, TaskInfo taskInfo) {
+  public static DataSet join(DataSet in, JoinCondition joinCond, boolean isLeft, Rpc rpc, TaskInfo taskInfo) {
     if (joinCond.hasCondition()) {
       LOG.error("HashEqualJoin not support theta join");
       throw new UnsupportedOperationException("HashEqualJoin not support theta join");
@@ -69,7 +69,7 @@ public class HashEqualJoin {
     int senderId = parties.get(1);
     MaterializedDataSet localSet = ProtoDataSet.materialize(in);
     // todo: choose collector by data size
-    if (joinCond.getIsLeft()) {
+    if (isLeft) {
       assert parties.get(0) == rpc.ownParty().getPartyId();
       long startTime = System.currentTimeMillis();
       joinKey = encode(joinCond.getLeftKeyList(), localSet);
