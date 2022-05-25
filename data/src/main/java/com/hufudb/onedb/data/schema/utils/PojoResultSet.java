@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PojoResultSet {
-  PojoSchema schema;
-  List<List<String>> rows;
+  public PojoSchema schema;
+  public List<List<String>> rows;
 
   public PojoResultSet() {}
 

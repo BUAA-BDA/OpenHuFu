@@ -10,6 +10,8 @@ public class PojoPublishedTableSchema {
   public List<PojoColumnDesc> publishedColumns;
   public List<Integer> actualColumns;
 
+  public PojoPublishedTableSchema() {}
+
   public PojoPublishedTableSchema(
         String publishedName,
         String actualName,

@@ -9,9 +9,9 @@ import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBData.Modifier;
 
 public class PojoColumnDesc {
-  String name;
-  ColumnTypeWrapper type;
-  ModifierWrapper modifier;
+  public String name;
+  public ColumnTypeWrapper type;
+  public ModifierWrapper modifier;
 
   public ColumnType getType() {
     return type.get();
