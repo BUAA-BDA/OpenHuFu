@@ -1,7 +1,7 @@
 package com.hufudb.onedb.core.table;
 
 import com.hufudb.onedb.core.sql.rel.OneDBTable;
-import com.hufudb.onedb.core.sql.schema.OneDBSchema;
+import com.hufudb.onedb.core.sql.schema.OneDBSchemaManager;
 import java.util.Map;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rel.type.RelDataTypeImpl;
@@ -21,15 +21,15 @@ public class OneDBTableFactory implements TableFactory {
   @Override
   public Table create(SchemaPlus schema, String tableName, Map operand, RelDataType rowType) {
     LOG.debug("create table {}", tableName);
-    final OneDBSchema OneDBSchema = schema.unwrap(OneDBSchema.class);
+    final OneDBSchemaManager schemaManager = schema.unwrap(OneDBSchemaManager.class);
     if (operand.get("feds") == null) {
       throw new RuntimeException("feds is null");
     }
     final RelProtoDataType protoRowType = rowType != null ? RelDataTypeImpl.proto(rowType) : null;
-    return OneDBTable.create(OneDBSchema, tableName, operand, protoRowType);
+    return OneDBTable.create(schemaManager, tableName, operand, protoRowType);
   }
 
-  public Table create(OneDBSchema schema, GlobalTableConfig meta) {
+  public Table create(OneDBSchemaManager schema, GlobalTableConfig meta) {
     LOG.debug("create table {}", meta.tableName);
     return OneDBTable.create(schema, meta);
   }

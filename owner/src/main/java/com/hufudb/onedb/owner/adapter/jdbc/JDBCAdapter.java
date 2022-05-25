@@ -11,13 +11,13 @@ import com.hufudb.onedb.data.storage.DataSet;
 import com.hufudb.onedb.data.storage.EmptyDataSet;
 import com.hufudb.onedb.data.storage.ResultDataSet;
 import com.hufudb.onedb.data.schema.Schema;
+import com.hufudb.onedb.data.schema.SchemaManager;
 import com.hufudb.onedb.proto.OneDBData.Modifier;
 import com.hufudb.onedb.proto.OneDBPlan.PlanType;
 import com.hufudb.onedb.data.schema.TableSchema;
 import com.hufudb.onedb.owner.adapter.Adapter;
 import com.hufudb.onedb.owner.adapter.AdapterTypeConverter;
 import com.hufudb.onedb.plan.Plan;
-import com.hufudb.onedb.data.schema.SchemaManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

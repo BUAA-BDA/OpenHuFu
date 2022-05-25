@@ -1,4 +1,4 @@
-package com.hufudb.onedb.client.jdbc;
+package com.hufudb.onedb.user.client.jdbc;
 
 import org.apache.calcite.jdbc.Driver;
 

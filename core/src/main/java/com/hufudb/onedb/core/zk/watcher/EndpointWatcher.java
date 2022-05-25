@@ -1,6 +1,6 @@
 package com.hufudb.onedb.core.zk.watcher;
 
-import com.hufudb.onedb.core.sql.schema.OneDBSchema;
+import com.hufudb.onedb.core.sql.schema.OneDBSchemaManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -11,7 +11,7 @@ import org.apache.zookeeper.ZooKeeper;
 
 public class EndpointWatcher extends ZkWatcher {
 
-  public EndpointWatcher(OneDBSchema schema, ZooKeeper zk, String path) {
+  public EndpointWatcher(OneDBSchemaManager schema, ZooKeeper zk, String path) {
     super(schema, zk, path);
   }
 
@@ -41,7 +41,7 @@ public class EndpointWatcher extends ZkWatcher {
 
   private void dropEndpoint(List<String> endpoints) {
     for (String endpoint : endpoints) {
-      schema.removeOnwer(endpoint);
+      schema.removeOwner(endpoint);
     }
   }
 

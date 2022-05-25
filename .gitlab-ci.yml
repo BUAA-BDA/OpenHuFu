@@ -55,5 +55,5 @@ test:
         - mpc/target/surefire-reports/TEST-*.xml
         - data/target/surefire-reports/TEST-*.xml
         - plan/target/surefire-reports/TEST-*.xml
-        - user-client/target/surefire-reports/TEST-*.xml
+        - user/target/surefire-reports/TEST-*.xml
     expire_in: 20 minutes

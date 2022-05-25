@@ -48,7 +48,7 @@ public class BasicRewriter implements Rewriter {
   @Override
   public Plan rewriteLeaf(LeafPlan leaf) {
     // only horizontal partitioned table need rewrite
-    if (client.getTable(leaf.getTableName()).ownerSize() > 1) {
+    if (client.getTableSchema(leaf.getTableName()).ownerSize() > 1) {
       boolean hasAgg = leaf.hasAgg();
       boolean hasLimit = leaf.getOffset() != 0 || leaf.getFetch() != 0;
       boolean hasSort = leaf.getOrders() != null && !leaf.getOrders().isEmpty();

@@ -9,14 +9,15 @@ import com.hufudb.onedb.core.table.OneDBTableSchema;
 import com.hufudb.onedb.core.zk.OneDBZkClient;
 import com.hufudb.onedb.core.zk.ZkConfig;
 import com.hufudb.onedb.data.schema.Schema;
+import com.hufudb.onedb.data.storage.DataSet;
+import com.hufudb.onedb.plan.Plan;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.calcite.linq4j.AbstractEnumerable;
 import org.apache.calcite.linq4j.Enumerable;
 import org.apache.calcite.linq4j.Enumerator;
@@ -30,32 +31,35 @@ import org.slf4j.LoggerFactory;
 import io.grpc.ChannelCredentials;
 import io.grpc.TlsChannelCredentials;
 
-public class OneDBSchema extends AbstractSchema {
-  private static final Logger LOG = LoggerFactory.getLogger(OneDBSchema.class);
+/**
+ * Schema manager of user side, integrated with Calcite
+ */
+public class OneDBSchemaManager extends AbstractSchema {
+  private static final Logger LOG = LoggerFactory.getLogger(OneDBSchemaManager.class);
 
   private final SchemaPlus parentSchema;
   private final Map<String, Table> tableMap;
+  private final Map<String, OwnerClient> ownerMap;
   private final OneDBClient client;
   private final OneDBZkClient zkClient;
   private final int userId;
-  private final AtomicInteger queryCounter;
 
-  public OneDBSchema(List<Map<String, Object>> tables, SchemaPlus schema, ZkConfig zkConfig) {
+  public OneDBSchemaManager(List<Map<String, Object>> tables, SchemaPlus schema, ZkConfig zkConfig) {
     this.parentSchema = schema;
-    this.tableMap = new HashMap<>();
+    this.tableMap = new ConcurrentHashMap<>();
+    this.ownerMap = new ConcurrentHashMap<>();
     this.client = new OneDBClient(this);
     this.zkClient = new OneDBZkClient(zkConfig, this);
     this.userId = 0;
-    this.queryCounter = new AtomicInteger(0);
   }
 
-  public OneDBSchema(List<OwnerInfo> owners, List<Map<String, Object>> tables, SchemaPlus schema, int userId) {
+  public OneDBSchemaManager(List<OwnerInfo> owners, List<Map<String, Object>> tables, SchemaPlus schema, int userId) {
     this.parentSchema = schema;
-    this.tableMap = new HashMap<>();
+    this.tableMap = new ConcurrentHashMap<>();
+    this.ownerMap = new ConcurrentHashMap<>();
     this.client = new OneDBClient(this);
     this.zkClient = null;
     this.userId = userId;
-    this.queryCounter = new AtomicInteger(0);
     for (OwnerInfo owner : owners) {
       addOwner(owner.getEndpoint(), owner.getTrustCertPath());
     }
@@ -66,31 +70,7 @@ public class OneDBSchema extends AbstractSchema {
   }
 
   public Set<String> getEndpoints() {
-    return client.getEndpoints();
-  }
-
-  public OneDBTableSchema getOneDBTableSchema(String tableName) {
-    return ((OneDBTable) getTable(tableName)).getTableSchema();
-  }
-
-  public List<OneDBTableSchema> getAllOneDBTableSchema() {
-    List<OneDBTableSchema> infos = new ArrayList<>();
-    for (Table table : tableMap.values()) {
-      infos.add(((OneDBTable) table).getTableSchema());
-    }
-    return infos;
-  }
-
-  public int getUserId() {
-    return userId;
-  }
-
-  public int getAndIncrementQueryCounter() {
-    return queryCounter.getAndIncrement();
-  }
-
-  public long stampQueryId() {
-    return ((long) getUserId() << 32) | (long) getAndIncrementQueryCounter();
+    return ownerMap.keySet();
   }
 
   public OwnerClient addOwner(String endpoint, String trustCertPath) {
@@ -100,34 +80,84 @@ public class OneDBSchema extends AbstractSchema {
         File trustCertFile = new File(trustCertPath);
         cred = TlsChannelCredentials.newBuilder().trustManager(trustCertFile).build();
       }
-      return client.addOwner(endpoint, cred);
+      return addOwnerTLS(endpoint, cred);
     } catch (IOException e) {
       LOG.error("Fail to create channel credentials: {}", e.getMessage());
       return null;
     }
   }
 
-  public boolean hasOwner(String endpoint) {
-    return client.hasOwner(endpoint);
+  public OwnerClient addOwnerTLS(String endpoint, ChannelCredentials cred) {
+    if (hasOwner(endpoint)) {
+      LOG.info("Owner at {} already exists", endpoint);
+      return getOwnerClient(endpoint);
+    }
+    OwnerClient client = null;
+    try {
+      if (cred != null) {
+        client = new OwnerClient(endpoint, cred);
+      } else {
+        client = new OwnerClient(endpoint);
+      }
+      if (client != null) {
+        // establish connection among owners
+        for (Map.Entry<String, OwnerClient> entry : ownerMap.entrySet()) {
+          OwnerClient oldClient = entry.getValue();
+          oldClient.addOwner(client.getParty());
+          client.addOwner(oldClient.getParty());
+        }
+        ownerMap.put(endpoint, client);
+      }
+      LOG.info("Add owner {}", endpoint);
+    } catch (Exception e) {
+      LOG.warn("Fail to add owner {}: {}", endpoint, e.getMessage());
+    }
+    return client;
   }
 
-  public void removeOnwer(String endpoint) {
-    client.removeOwner(endpoint);
+  public OneDBTableSchema getTableSchema(String tableName) {
+    OneDBTable table = (OneDBTable) getTable(tableName);
+    if (table == null) {
+      LOG.warn("Table {} not exists", tableName);
+      return null;
+    }
+    return ((OneDBTable) getTable(tableName)).getTableSchema();
+  }
+
+  public List<OneDBTableSchema> getAllOneDBTableSchema() {
+    List<OneDBTableSchema> schemas = new ArrayList<>();
+    for (Table table : tableMap.values()) {
+      schemas.add(((OneDBTable) table).getTableSchema());
+    }
+    return schemas;
+  }
+
+  public int getUserId() {
+    return userId;
+  }
+
+  public boolean hasOwner(String endpoint) {
+    return ownerMap.containsKey(endpoint);
+  }
+
+  public void removeOwner(String endpoint) {
+    OwnerClient client = ownerMap.remove(endpoint);
+    for (Table table : tableMap.values()) {
+      ((OneDBTable) table).getTableSchema().removeOwner(client);
+    }
   }
 
   public void addTable(String tableName, Table table) {
     parentSchema.add(tableName, table);
-    client.addTable(tableName, ((OneDBTable) table).getTableSchema());
     tableMap.put(tableName, table);
   }
 
   public void dropTable(String tableName) {
-    client.dropTable(tableName);
     tableMap.remove(tableName);
   }
 
   public void addLocalTable(String tableName, String endpoint, String localTableName) {
-    OneDBTableSchema table = getOneDBTableSchema(tableName);
+    OneDBTableSchema table = getTableSchema(tableName);
     OwnerClient client = getOwnerClient(endpoint);
     if (table != null && client != null) {
       table.addLocalTable(client, localTableName);
@@ -135,7 +165,7 @@ public class OneDBSchema extends AbstractSchema {
   }
 
   public void dropLocalTable(String tableName, String endpoint) {
-    OneDBTableSchema table = getOneDBTableSchema(tableName);
+    OneDBTableSchema table = getTableSchema(tableName);
     OwnerClient client = getOwnerClient(endpoint);
     if (table != null && client != null) {
       table.dropLocalTable(client);
@@ -143,7 +173,7 @@ public class OneDBSchema extends AbstractSchema {
   }
 
   public void changeLocalTable(String tableName, String endpoint, String localTableName) {
-    OneDBTableSchema table = getOneDBTableSchema(tableName);
+    OneDBTableSchema table = getTableSchema(tableName);
     OwnerClient client = getOwnerClient(endpoint);
     if (table != null && client != null) {
       table.changeLocalTable(client, localTableName);
@@ -156,19 +186,23 @@ public class OneDBSchema extends AbstractSchema {
   }
 
   public boolean hasTable(String tableName) {
-    return client.hasTable(tableName);
+    return tableMap.containsKey(tableName);
   }
 
   public Schema getSchema(String tableName) {
-    return client.getSchema(tableName);
+    return getTableSchema(tableName).getSchema();
   }
 
   public OwnerClient getOwnerClient(String endpoint) {
-    return client.getOwnerClient(endpoint);
+    return ownerMap.get(endpoint);
   }
 
   public Expression getExpression() {
-    return Schemas.unwrap(super.getExpression(parentSchema, "onedb"), OneDBSchema.class);
+    return Schemas.unwrap(super.getExpression(parentSchema, "onedb"), OneDBSchemaManager.class);
+  }
+
+  public DataSet query(Plan plan) {
+    return client.executeQueryPlan(plan);
   }
 
   @SuppressWarnings("unused")
@@ -179,7 +213,7 @@ public class OneDBSchema extends AbstractSchema {
       @Override
       public Enumerator<Object> enumerator() {
         if (enumerator == null) {
-          this.enumerator = new OneDBEnumerator(OneDBSchema.this, planId);
+          this.enumerator = new OneDBEnumerator(OneDBSchemaManager.this, planId);
 
         } else {
           this.enumerator.reset();

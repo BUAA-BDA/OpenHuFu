@@ -13,7 +13,7 @@ public class PublishedTableSchema {
   private final TableSchema actualSchema;
   private final List<Integer> mappings;
 
-  PublishedTableSchema(
+  public PublishedTableSchema(
       TableSchema tableSchema,
       String publishedTableName,
       List<ColumnDesc> publishedColumns,

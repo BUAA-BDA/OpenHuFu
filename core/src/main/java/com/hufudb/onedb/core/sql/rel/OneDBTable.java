@@ -3,7 +3,7 @@ package com.hufudb.onedb.core.sql.rel;
 import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.data.TypeConverter;
 import com.hufudb.onedb.core.sql.enumerator.OneDBEnumerator;
-import com.hufudb.onedb.core.sql.schema.OneDBSchema;
+import com.hufudb.onedb.core.sql.schema.OneDBSchemaManager;
 import com.hufudb.onedb.core.table.OneDBTableSchema;
 import com.hufudb.onedb.core.table.GlobalTableConfig;
 import com.hufudb.onedb.core.table.LocalTableConfig;
@@ -40,29 +40,29 @@ import org.slf4j.LoggerFactory;
 public class OneDBTable extends AbstractQueryableTable implements TranslatableTable {
   private static final Logger LOG = LoggerFactory.getLogger(OneDBTable.class);
 
-  final OneDBSchema rootSchema;
+  final OneDBSchemaManager schemaManager;
   final RelProtoDataType protoRowType;
   final OneDBTableSchema tableInfo;
 
-  OneDBTable(String tableName, OneDBSchema rootSchema, Schema schema,
+  OneDBTable(String tableName, OneDBSchemaManager schemaManager, Schema schema,
       RelProtoDataType protoRowType) {
     super(Object[].class);
-    this.rootSchema = rootSchema;
+    this.schemaManager = schemaManager;
     this.protoRowType = protoRowType;
     this.tableInfo = new OneDBTableSchema(tableName, schema);
   }
 
-  static Table create(OneDBSchema rootSchema, String tableName, Schema schema,
+  static Table create(OneDBSchemaManager schemaManager, String tableName, Schema schema,
       RelProtoDataType protoRowType) {
-    return new OneDBTable(tableName, rootSchema, schema, protoRowType);
+    return new OneDBTable(tableName, schemaManager, schema, protoRowType);
   }
 
-  public static Table create(OneDBSchema rootSchema, GlobalTableConfig tableMeta) {
+  public static Table create(OneDBSchemaManager schemaManager, GlobalTableConfig tableMeta) {
     final String tableName = tableMeta.tableName;
     OneDBTable table = null;
     List<Pair<OwnerClient, TableSchema>> localInfos = new ArrayList<>();
     for (LocalTableConfig fedMeta : tableMeta.localTables) {
-      OwnerClient client = rootSchema.getOwnerClient(fedMeta.endpoint);
+      OwnerClient client = schemaManager.getOwnerClient(fedMeta.endpoint);
       if (client == null) {
         LOG.error("No connection to owner {}", fedMeta.endpoint);
         continue;
@@ -83,11 +83,11 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
         }
       }
       RelProtoDataType dataType = getRelDataType(standard.getSchema());
-      table = new OneDBTable(tableName, rootSchema, standard.getSchema(), dataType);
+      table = new OneDBTable(tableName, schemaManager, standard.getSchema(), dataType);
       for (Pair<OwnerClient, TableSchema> pair : localInfos) {
         table.addOwner(pair.getKey(), pair.getValue().getName());
       }
-      rootSchema.addTable(tableMeta.tableName, table);
+      schemaManager.addTable(tableMeta.tableName, table);
     }
     if (table == null) {
       LOG.error("Fail to init table {}", tableMeta.tableName);
@@ -97,14 +97,14 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
     return table;
   }
 
-  public static Table create(OneDBSchema rootSchema, String tableName, Map operand,
+  public static Table create(OneDBSchemaManager schemaManager, String tableName, Map operand,
       RelProtoDataType protoRowType) {
     List<Map<String, Object>> feds = (List<Map<String, Object>>) operand.get("feds");
     OneDBTable table = null;
     for (Map<String, Object> fed : feds) {
       String endpoint = fed.get("endpoint").toString();
       String localName = fed.get("name").toString();
-      OwnerClient client = rootSchema.getOwnerClient(endpoint);
+      OwnerClient client = schemaManager.getOwnerClient(endpoint);
       if (client == null) {
         LOG.warn("endpoint {} not exist", endpoint);
         throw new RuntimeException("endpoint not exist");
@@ -113,9 +113,9 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
       LOG.info("{}: schema {} from [{} : {}]", tableName, schema.toString(), endpoint, localName);
       if (table == null) {
         RelProtoDataType dataType = getRelDataType(schema);
-        table = new OneDBTable(tableName, rootSchema, schema, dataType);
+        table = new OneDBTable(tableName, schemaManager, schema, dataType);
         table.addOwner(client, localName);
-        rootSchema.addTable(tableName, table);
+        schemaManager.addTable(tableName, table);
       } else {
         if (table.getSchema().equals(schema)) {
           table.addOwner(client, localName);
@@ -166,7 +166,7 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
       @Override
       public Enumerator<Object> enumerator() {
         if (enumerator == null) {
-          this.enumerator = new OneDBEnumerator(rootSchema, planId);
+          this.enumerator = new OneDBEnumerator(schemaManager, planId);
         } else {
           this.enumerator.reset();
         }
@@ -200,8 +200,8 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
     return tableInfo.getName();
   }
 
-  protected OneDBSchema getRootSchema() {
-    return rootSchema;
+  protected OneDBSchemaManager getRootSchema() {
+    return schemaManager;
   }
 
   public static class OneDBQueryable<T> extends AbstractTableQueryable<T> {

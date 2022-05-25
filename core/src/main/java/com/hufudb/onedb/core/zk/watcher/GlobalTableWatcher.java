@@ -1,6 +1,6 @@
 package com.hufudb.onedb.core.zk.watcher;
 
-import com.hufudb.onedb.core.sql.schema.OneDBSchema;
+import com.hufudb.onedb.core.sql.schema.OneDBSchemaManager;
 import com.hufudb.onedb.core.table.OneDBTableSchema;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,11 +16,11 @@ import org.apache.zookeeper.ZooKeeper;
 public class GlobalTableWatcher extends ZkWatcher {
   private final OneDBTableSchema tableInfo;
 
-  public GlobalTableWatcher(OneDBSchema schema, ZooKeeper zk, String path) {
+  public GlobalTableWatcher(OneDBSchemaManager schema, ZooKeeper zk, String path) {
     super(schema, zk, path);
     String[] dic = path.split("/");
     String tableName = dic[dic.length - 1];
-    this.tableInfo = schema.getOneDBTableSchema(tableName);
+    this.tableInfo = schema.getTableSchema(tableName);
   }
 
   private void watchLocalTableChange(List<String> newEndpoints) {

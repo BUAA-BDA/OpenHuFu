@@ -2,7 +2,6 @@ package com.hufudb.onedb.backend;
 
 import java.util.List;
 import java.util.Set;
-import com.hufudb.onedb.OneDB;
 import com.hufudb.onedb.backend.utils.Request;
 import com.hufudb.onedb.core.table.GlobalTableConfig;
 import com.hufudb.onedb.core.table.OneDBTableSchema;
@@ -10,6 +9,7 @@ import com.hufudb.onedb.core.table.utils.PojoGlobalTableSchema;
 import com.hufudb.onedb.data.schema.TableSchema;
 import com.hufudb.onedb.data.schema.utils.PojoResultSet;
 import com.hufudb.onedb.data.schema.utils.PojoTableSchema;
+import com.hufudb.onedb.user.OneDB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;

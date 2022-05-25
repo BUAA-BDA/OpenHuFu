@@ -46,10 +46,10 @@ public class OneDBSchemaFactory implements SchemaFactory {
     zkConfig.passwd = (String) operand.get("passwd");
     if (zkConfig.valid()) {
       LOG.info("Use Zk");
-      return new OneDBSchema(tableObjs, parentSchema, zkConfig);
+      return new OneDBSchemaManager(tableObjs, parentSchema, zkConfig);
     } else {
       LOG.info("Use model");
-      return new OneDBSchema(owners, tableObjs, parentSchema, userId);
+      return new OneDBSchemaManager(owners, tableObjs, parentSchema, userId);
     }
   }
 

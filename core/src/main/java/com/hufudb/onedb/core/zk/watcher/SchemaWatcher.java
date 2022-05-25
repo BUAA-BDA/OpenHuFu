@@ -1,6 +1,6 @@
 package com.hufudb.onedb.core.zk.watcher;
 
-import com.hufudb.onedb.core.sql.schema.OneDBSchema;
+import com.hufudb.onedb.core.sql.schema.OneDBSchemaManager;
 import com.hufudb.onedb.core.zk.OneDBZkClient;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,7 @@ import org.apache.zookeeper.ZooKeeper;
 public class SchemaWatcher extends ZkWatcher {
   private final OneDBZkClient zkClient;
 
-  public SchemaWatcher(OneDBSchema schema, ZooKeeper zk, String path, OneDBZkClient zkClient) {
+  public SchemaWatcher(OneDBSchemaManager schema, ZooKeeper zk, String path, OneDBZkClient zkClient) {
     super(schema, zk, path);
     this.zkClient = zkClient;
   }
