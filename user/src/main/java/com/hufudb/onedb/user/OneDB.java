@@ -8,7 +8,7 @@ import com.hufudb.onedb.core.table.GlobalTableConfig;
 import com.hufudb.onedb.data.schema.TableSchema;
 import com.hufudb.onedb.data.storage.DataSet;
 import com.hufudb.onedb.plan.Plan;
-import com.hufudb.onedb.user.client.utils.OneDBLine;
+import com.hufudb.onedb.user.utils.OneDBLine;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -34,7 +34,7 @@ public class OneDB {
 
   public OneDB() {
     try {
-      Class.forName("com.hufudb.onedb.client.jdbc.OneDBDriver");
+      Class.forName("com.hufudb.onedb.user.jdbc.OneDBDriver");
       Properties props = new Properties();
       props.setProperty("lex", "JAVA");
       props.setProperty("caseSensitive", "false");
