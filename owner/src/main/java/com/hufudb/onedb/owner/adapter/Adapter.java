@@ -1,8 +1,8 @@
 package com.hufudb.onedb.owner.adapter;
 
+import com.hufudb.onedb.data.schema.SchemaManager;
 import com.hufudb.onedb.data.storage.DataSet;
 import com.hufudb.onedb.plan.Plan;
-import com.hufudb.onedb.data.schema.SchemaManager;
 
 public interface Adapter {
   SchemaManager getSchemaManager();

@@ -1,6 +1,6 @@
 package com.hufudb.onedb.core.zk.watcher;
 
-import com.hufudb.onedb.core.sql.schema.OneDBSchema;
+import com.hufudb.onedb.core.sql.schema.OneDBSchemaManager;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher.Event.EventType;
 import org.apache.zookeeper.Watcher.Event.KeeperState;
@@ -10,7 +10,7 @@ public class LocalTableWatcher extends ZkWatcher {
   private final String endpoint;
   private final String tableName;
 
-  public LocalTableWatcher(OneDBSchema schema, ZooKeeper zk, String path) {
+  public LocalTableWatcher(OneDBSchemaManager schema, ZooKeeper zk, String path) {
     super(schema, zk, path);
     String[] dic = path.split("/");
     this.endpoint = dic[dic.length - 1];

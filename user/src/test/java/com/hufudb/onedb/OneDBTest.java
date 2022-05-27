@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.table.GlobalTableConfig;
 import com.hufudb.onedb.core.table.LocalTableConfig;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
+import com.hufudb.onedb.user.OneDB;
 import org.junit.Before;
 import org.junit.Test;
 

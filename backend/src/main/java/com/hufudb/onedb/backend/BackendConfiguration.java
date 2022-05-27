@@ -11,13 +11,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
-import com.hufudb.onedb.OneDB;
 import com.hufudb.onedb.core.table.GlobalTableConfig;
 import com.hufudb.onedb.data.schema.utils.PojoPublishedTableSchema;
 import com.hufudb.onedb.owner.OwnerServer;
 import com.hufudb.onedb.owner.adapter.AdapterConfig;
 import com.hufudb.onedb.owner.config.OwnerConfig;
 import com.hufudb.onedb.owner.config.OwnerConfigFile;
+import com.hufudb.onedb.user.OneDB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,7 +27,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Configuration for owner and user-client see @OwnerConfigFile.java for detail
+ * Configuration for owner and user see @OwnerConfigFile.java for detail
  */
 @Configuration
 public class BackendConfiguration {

@@ -113,7 +113,7 @@ public class PlanUtils {
     QueryPlanProto leftPlaceholder = new EmptyPlan(left.getOutExpressions()).toProto();
     QueryPlanProto rightPlaceholder = new EmptyPlan(right.getOutExpressions()).toProto();
     // for owners from left
-    builder.setJoinInfo(plan.getJoinCond().toBuilder().setIsLeft(true).build());
+    builder.setJoinInfo(plan.getJoinCond().toBuilder().build());
     for (Pair<OwnerClient, QueryPlanProto> p : leftPlan) {
       QueryPlanProto context = builder.addChildren(0, p.getValue())
           .addChildren(1, rightPlaceholder).build();

@@ -1,7 +1,7 @@
 package com.hufudb.onedb.core.sql.enumerator;
 
 import com.hufudb.onedb.core.client.OneDBClient;
-import com.hufudb.onedb.core.sql.schema.OneDBSchema;
+import com.hufudb.onedb.core.sql.schema.OneDBSchemaManager;
 import com.hufudb.onedb.data.storage.ArrayRow;
 import com.hufudb.onedb.data.storage.Row;
 import com.hufudb.onedb.plan.QueryPlanPool;
@@ -10,7 +10,7 @@ import org.apache.calcite.linq4j.Enumerator;
 public class OneDBEnumerator implements Enumerator<Object> {
   private final Enumerator<Row> enumerator;
 
-  public OneDBEnumerator(OneDBSchema schema, long planId) {
+  public OneDBEnumerator(OneDBSchemaManager schema, long planId) {
     OneDBClient client = schema.getClient();
     enumerator = client.oneDBQuery(planId);
     QueryPlanPool.deletePlan(planId);

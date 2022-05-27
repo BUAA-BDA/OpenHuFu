@@ -77,7 +77,6 @@ message JoinCondition {
   repeated int32 leftKey = 3;
   repeated int32 rightKey = 4;
   Expression condition = 5;
-  bool isLeft = 7;
 }
 
 message TaskInfo {

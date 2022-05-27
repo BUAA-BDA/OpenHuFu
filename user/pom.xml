@@ -8,9 +8,9 @@
     <artifactId>onedb</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
-  <artifactId>user-client</artifactId>
+  <artifactId>user</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <name>user-client</name>
+  <name>user</name>
   <packaging>jar</packaging>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

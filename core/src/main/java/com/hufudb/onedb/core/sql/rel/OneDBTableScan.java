@@ -69,7 +69,7 @@ public class OneDBTableScan extends TableScan implements OneDBRel {
   @Override
   public void implement(Implementor implementor) {
     LeafPlan plan = new LeafPlan();
-    implementor.setRootSchema(oneDBTable.getRootSchema());
+    implementor.setSchemaManager(oneDBTable.getRootSchema());
     plan.setTableName(oneDBTable.getTableName());
     plan.setSelectExps(ExpressionFactory.createInputRef(oneDBTable.getSchema()));
     implementor.setCurrentPlan(plan);

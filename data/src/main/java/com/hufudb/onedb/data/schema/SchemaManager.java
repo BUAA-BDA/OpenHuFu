@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Used for schema mapping, give a virtual table schema for an actual table schema.
+ * Used for owner side schema mapping, give a virtual table schema for an actual table schema.
  * The virtual schema could has different table name, column names, column modifier from actual table,
  * the order of the columns can also be changed.
  */

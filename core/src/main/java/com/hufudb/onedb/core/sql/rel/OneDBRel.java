@@ -1,6 +1,6 @@
 package com.hufudb.onedb.core.sql.rel;
 
-import com.hufudb.onedb.core.sql.schema.OneDBSchema;
+import com.hufudb.onedb.core.sql.schema.OneDBSchemaManager;
 import com.hufudb.onedb.plan.Plan;
 import com.hufudb.onedb.plan.RootPlan;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
@@ -8,7 +8,6 @@ import com.hufudb.onedb.proto.OneDBData.Modifier;
 import com.hufudb.onedb.proto.OneDBPlan.Collation;
 import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import com.hufudb.onedb.proto.OneDBPlan.JoinCondition;
-import java.util.ArrayList;
 import java.util.List;
 import org.apache.calcite.plan.Convention;
 import org.apache.calcite.rel.RelNode;
@@ -24,7 +23,7 @@ public interface OneDBRel extends RelNode {
   class Implementor {
     static final Logger LOG = LoggerFactory.getLogger(Implementor.class);
     
-    OneDBSchema rootSchema;
+    OneDBSchemaManager schemaManager;
     RootPlan rootPlan;
     Plan currentPlan;
 
@@ -34,7 +33,7 @@ public interface OneDBRel extends RelNode {
     }
 
     public org.apache.calcite.linq4j.tree.Expression getRootSchemaExpression() {
-      return rootSchema.getExpression();
+      return schemaManager.getExpression();
     }
 
     public Plan getCurrentPlan() {
@@ -49,9 +48,9 @@ public interface OneDBRel extends RelNode {
       input.implement(this);
     }
 
-    public void setRootSchema(OneDBSchema rootSchema) {
-      if (this.rootSchema == null) {
-        this.rootSchema = rootSchema;
+    public void setSchemaManager(OneDBSchemaManager schemaManager) {
+      if (this.schemaManager == null) {
+        this.schemaManager = schemaManager;
       }
     }
 

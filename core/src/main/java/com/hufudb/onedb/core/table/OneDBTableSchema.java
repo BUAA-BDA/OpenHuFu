@@ -79,6 +79,14 @@ public class OneDBTableSchema {
     return name;
   }
 
+  public Integer getColumnId(String columnName) {
+    if (!columnMap.containsKey(columnName)) {
+      LOG.warn("Column {} not exists in {}", columnName, name);
+      throw new RuntimeException("Column  not exists");
+    }
+    return columnMap.get(columnName);
+  }
+
   public List<Pair<OwnerClient, String>> getTableList() {
     try {
       lock.readLock().lock();

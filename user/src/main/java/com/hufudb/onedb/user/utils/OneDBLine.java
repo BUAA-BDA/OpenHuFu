@@ -1,4 +1,4 @@
-package com.hufudb.onedb.client.utils;
+package com.hufudb.onedb.user.utils;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -1,7 +1,7 @@
 package com.hufudb.onedb.core.zk;
 
 import com.hufudb.onedb.core.sql.rel.OneDBTable;
-import com.hufudb.onedb.core.sql.schema.OneDBSchema;
+import com.hufudb.onedb.core.sql.schema.OneDBSchemaManager;
 import com.hufudb.onedb.core.table.GlobalTableConfig;
 import com.hufudb.onedb.core.zk.watcher.EndpointWatcher;
 import com.hufudb.onedb.core.zk.watcher.GlobalTableWatcher;
@@ -14,13 +14,13 @@ import org.apache.zookeeper.ZooDefs.Ids;
 
 public class OneDBZkClient extends ZkClient {
 
-  private final OneDBSchema schema;
+  private final OneDBSchemaManager manager;
   private final String schemaDirectoryPath;
 
-  public OneDBZkClient(ZkConfig zkConfig, OneDBSchema schema) {
+  public OneDBZkClient(ZkConfig zkConfig, OneDBSchemaManager manager) {
     super(zkConfig.servers, zkConfig.zkRoot);
     this.schemaDirectoryPath = buildPath(schemaRootPath, zkConfig.schemaName);
-    this.schema = schema;
+    this.manager = manager;
     loadZkTable();
   }
 
@@ -36,9 +36,9 @@ public class OneDBZkClient extends ZkClient {
 
   private void watchEndpoints() throws KeeperException, InterruptedException {
     List<String> endpoints =
-        zk.getChildren(endpointRootPath, new EndpointWatcher(schema, zk, endpointRootPath));
+        zk.getChildren(endpointRootPath, new EndpointWatcher(manager, zk, endpointRootPath));
     for (String endpoint : endpoints) {
-      schema.addOwner(endpoint, null);
+      manager.addOwner(endpoint, null);
     }
   }
 
@@ -60,18 +60,18 @@ public class OneDBZkClient extends ZkClient {
     List<String> endpoints = zk.getChildren(gPath, null);
     GlobalTableConfig tableMeta = new GlobalTableConfig(tableName);
     for (String endpoint : endpoints) {
-      schema.addOwner(endpoint, null);
+      manager.addOwner(endpoint, null);
       String localTableName = watchLocalTable(buildPath(gPath, endpoint));
       tableMeta.addLocalTable(endpoint, localTableName);
     }
-    Table table = OneDBTable.create(schema, tableMeta);
+    Table table = OneDBTable.create(manager, tableMeta);
     if (table != null) {
-      schema.addTable(tableName, table);
-      zk.getChildren(gPath, new GlobalTableWatcher(schema, zk, gPath));
+      manager.addTable(tableName, table);
+      zk.getChildren(gPath, new GlobalTableWatcher(manager, zk, gPath));
     }
   }
 
   private String watchLocalTable(String lPath) throws KeeperException, InterruptedException {
-    return new String(zk.getData(lPath, new LocalTableWatcher(schema, zk, lPath), null));
+    return new String(zk.getData(lPath, new LocalTableWatcher(manager, zk, lPath), null));
   }
 }

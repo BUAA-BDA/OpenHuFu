@@ -1,12 +1,14 @@
-package com.hufudb.onedb;
+package com.hufudb.onedb.user;
 
-import com.hufudb.onedb.client.utils.OneDBLine;
 import com.hufudb.onedb.core.sql.rel.OneDBTable;
-import com.hufudb.onedb.core.sql.schema.OneDBSchema;
+import com.hufudb.onedb.core.sql.schema.OneDBSchemaManager;
 import com.hufudb.onedb.core.sql.schema.OneDBSchemaFactory;
 import com.hufudb.onedb.core.table.OneDBTableSchema;
 import com.hufudb.onedb.core.table.GlobalTableConfig;
 import com.hufudb.onedb.data.schema.TableSchema;
+import com.hufudb.onedb.data.storage.DataSet;
+import com.hufudb.onedb.plan.Plan;
+import com.hufudb.onedb.user.utils.OneDBLine;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -27,12 +29,12 @@ import org.apache.commons.cli.Options;
 
 public class OneDB {
   private CalciteConnection calciteConnection;
-  private OneDBSchema schema;
+  private OneDBSchemaManager schema;
   private Connection connection;
 
   public OneDB() {
     try {
-      Class.forName("com.hufudb.onedb.client.jdbc.OneDBDriver");
+      Class.forName("com.hufudb.onedb.user.jdbc.OneDBDriver");
       Properties props = new Properties();
       props.setProperty("lex", "JAVA");
       props.setProperty("caseSensitive", "false");
@@ -41,7 +43,7 @@ public class OneDB {
       calciteConnection.setTransactionIsolation(Connection.TRANSACTION_NONE);
       SchemaPlus rootSchema = calciteConnection.getRootSchema();
       schema =
-          (OneDBSchema)
+          (OneDBSchemaManager)
               OneDBSchemaFactory.INSTANCE.create(
                   rootSchema, "onedb", new HashMap<String, Object>());
       rootSchema.add("onedb", schema);
@@ -84,6 +86,10 @@ public class OneDB {
     return null;
   }
 
+  public DataSet executeQuery(Plan plan) {
+    return schema.query(plan);
+  }
+
   public void close() {
     try {
       connection.close();
@@ -106,7 +112,7 @@ public class OneDB {
   }
 
   public void removeOwner(String endpoint) {
-    schema.removeOnwer(endpoint);
+    schema.removeOwner(endpoint);
   }
 
   public List<TableSchema> getOwnerTableSchema(String endpoint) {
@@ -119,7 +125,7 @@ public class OneDB {
   }
 
   public OneDBTableSchema getOneDBTableSchema(String tableName) {
-    return schema.getOneDBTableSchema(tableName);
+    return schema.getTableSchema(tableName);
   }
 
   public boolean createOneDBTable(GlobalTableConfig meta) {

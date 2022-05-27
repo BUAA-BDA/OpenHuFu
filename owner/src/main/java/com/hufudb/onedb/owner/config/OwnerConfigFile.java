@@ -72,7 +72,7 @@ public class OwnerConfigFile {
         File privateKey = new File(privatekeypath);
         config.serverCerts = TlsServerCredentials.create(certChain, privateKey);
         config.useTLS = true;
-        LOG.info("load certChainFile and privateKeyFile");
+        LOG.info("Load certChainFile and privateKeyFile");
       } catch (Exception e) {
         LOG.error("Fail to read certChainFile or privateKeyFile: {}", e.getMessage());
         config.useTLS = false;

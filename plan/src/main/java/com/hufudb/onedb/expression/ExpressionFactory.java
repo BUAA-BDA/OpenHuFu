@@ -119,11 +119,4 @@ public class ExpressionFactory {
     }
     return builder.build();
   }
-
-  public static JoinCondition createJoinCondition(JoinType joinType, List<Integer> leftKeys,
-      List<Integer> rightKyes, Expression condition, Modifier modifier, boolean isLeft) {
-    return JoinCondition.newBuilder().setType(joinType).addAllLeftKey(leftKeys)
-        .addAllRightKey(rightKyes).setModifier(modifier).setCondition(condition).setIsLeft(isLeft)
-        .build();
-  }
 }
