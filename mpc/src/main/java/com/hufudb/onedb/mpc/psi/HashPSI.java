@@ -5,8 +5,8 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import com.hufudb.onedb.mpc.ProtocolExecutor;
 import com.hufudb.onedb.mpc.ProtocolType;
+import com.hufudb.onedb.mpc.RpcProtocolExecutor;
 import com.hufudb.onedb.mpc.codec.HashFunction;
 import com.hufudb.onedb.mpc.codec.OneDBCodec;
 import com.hufudb.onedb.rpc.Rpc;
@@ -41,7 +41,7 @@ import org.apache.commons.lang3.tuple.Pair;
  *     [index of elements in the intersection result as byte arry]
  */
 
-public class HashPSI extends ProtocolExecutor {
+public class HashPSI extends RpcProtocolExecutor {
 
   public HashPSI(Rpc rpc) {
     super(rpc, ProtocolType.HASH_PSI);

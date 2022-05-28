@@ -7,8 +7,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import com.google.common.collect.ImmutableList;
-import com.hufudb.onedb.mpc.ProtocolExecutor;
 import com.hufudb.onedb.mpc.ProtocolType;
+import com.hufudb.onedb.mpc.RpcProtocolExecutor;
 import com.hufudb.onedb.mpc.bristol.BristolFile;
 import com.hufudb.onedb.mpc.bristol.CircuitType;
 import com.hufudb.onedb.mpc.bristol.BristolFile.Gate;
@@ -34,7 +34,7 @@ import com.hufudb.onedb.rpc.utils.DataPacketHeader;
  *     AND use 4-1 OT with init DataPacket  A/B:
  *       Header: [ptoId: ot, stepId: 0, senderId: A, receiverId: B, extraInfo: wireId]
  */
-public class GMW extends ProtocolExecutor {
+public class GMW extends RpcProtocolExecutor {
   final PublicKeyOT otExecutor;
   final ExecutorService threadPool;
 

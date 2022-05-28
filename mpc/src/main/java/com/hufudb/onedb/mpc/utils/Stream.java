@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.hufudb.onedb.mpc.ProtocolExecutor;
 import com.hufudb.onedb.mpc.ProtocolType;
+import com.hufudb.onedb.mpc.RpcProtocolExecutor;
 import com.hufudb.onedb.rpc.Rpc;
 import com.hufudb.onedb.rpc.utils.DataPacket;
 import com.hufudb.onedb.rpc.utils.DataPacketHeader;
@@ -15,7 +15,7 @@ import com.hufudb.onedb.rpc.utils.DataPacketHeader;
  * params:
  *   taskId, receiver parties, data to send (empty for receiver), senderId
  */
-public class Stream extends ProtocolExecutor {
+public class Stream extends RpcProtocolExecutor {
   static final long DEFAULT_MAX_SIZE = 4 * 1024 * 1023;
 
   private final long MAX_SIZE;

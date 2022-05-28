@@ -1,8 +1,8 @@
 package com.hufudb.onedb.mpc.ot;
 
 import com.google.common.collect.ImmutableList;
-import com.hufudb.onedb.mpc.ProtocolExecutor;
 import com.hufudb.onedb.mpc.ProtocolType;
+import com.hufudb.onedb.mpc.RpcProtocolExecutor;
 import com.hufudb.onedb.mpc.codec.OneDBCodec;
 import com.hufudb.onedb.mpc.elgamal.Elgamal;
 import com.hufudb.onedb.rpc.Rpc;
@@ -33,7 +33,7 @@ import java.util.List;
  *    Payload: [x_b]
  */
 
-public class PublicKeyOT extends ProtocolExecutor {
+public class PublicKeyOT extends RpcProtocolExecutor {
 
   public PublicKeyOT(Rpc rpc) {
     super(rpc, ProtocolType.PK_OT);

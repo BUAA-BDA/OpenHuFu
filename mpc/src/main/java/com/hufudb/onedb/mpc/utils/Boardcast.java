@@ -2,8 +2,8 @@ package com.hufudb.onedb.mpc.utils;
 
 import java.util.List;
 import com.google.common.collect.ImmutableList;
-import com.hufudb.onedb.mpc.ProtocolExecutor;
 import com.hufudb.onedb.mpc.ProtocolType;
+import com.hufudb.onedb.mpc.RpcProtocolExecutor;
 import com.hufudb.onedb.rpc.Rpc;
 import com.hufudb.onedb.rpc.utils.DataPacket;
 import com.hufudb.onedb.rpc.utils.DataPacketHeader;
@@ -13,7 +13,7 @@ import com.hufudb.onedb.rpc.utils.DataPacketHeader;
  * params:
  *   taskId, receiver parties, data to send (empty for receiver), senderId, extraInfo
  */
-public class Boardcast extends ProtocolExecutor {
+public class Boardcast extends RpcProtocolExecutor {
 
   public Boardcast(Rpc rpc) {
     super(rpc, ProtocolType.BOARDCAST);
