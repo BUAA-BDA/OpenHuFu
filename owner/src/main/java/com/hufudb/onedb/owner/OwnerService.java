@@ -159,5 +159,5 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
 
   protected void shutdown() {
     adapter.shutdown();
-  };
+  }
 }

@@ -60,7 +60,7 @@ public class OneDB {
     final CommandLineParser parser = new DefaultParser();
     CommandLine cmd;
     try {
-      Class.forName("com.hufudb.onedb.client.jdbc.OneDBDriver");
+      Class.forName("com.hufudb.onedb.user.jdbc.OneDBDriver");
       cmd = parser.parse(options, args);
       final String m = cmd.getOptionValue("model", "model.json");
       List<String> dbargs = new ArrayList<>();
