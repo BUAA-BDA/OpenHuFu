@@ -16,6 +16,7 @@ import com.hufudb.onedb.mpc.ProtocolExecutor;
 import com.hufudb.onedb.mpc.ProtocolFactory;
 import com.hufudb.onedb.mpc.ProtocolType;
 import com.hufudb.onedb.mpc.codec.OneDBCodec;
+import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
 import com.hufudb.onedb.proto.OneDBService.OwnerInfo;
 import org.junit.Ignore;
@@ -38,18 +39,18 @@ public class LibraryLoaderTest {
         ProtocolType.ABY);
     assertNotNull(aby0);
     ProtocolExecutor aby1 = factory.create(
-        OwnerInfo.newBuilder().setEndpoint("127.0.0.1:7766").setId(1).build(),
+        OwnerInfo.newBuilder().setEndpoint("127.0.0.1:7767").setId(1).build(),
         ProtocolType.ABY);
     assertNotNull(aby1);
     ExecutorService service = Executors.newFixedThreadPool(2);
     final int A = Math.abs(random.nextInt());
     final int B = Math.abs(random.nextInt());
-    final boolean expect = A <= B;
+    final boolean expect = A > B;
     Future<Boolean> r0 = service.submit(new Callable<Boolean>() {
       @Override
       public Boolean call() throws Exception {
         return OneDBCodec.decodeBoolean(aby0
-            .run(0, ImmutableList.of(0, 1), ImmutableList.of(OneDBCodec.encodeInt(A)), OperatorType.LE)
+            .run(0, ImmutableList.of(0, 1), ImmutableList.of(OneDBCodec.encodeInt(A)), OperatorType.GT, ColumnType.INT, "127.0.0.1", 7767)
             .get(0));
       }
     });
@@ -57,7 +58,7 @@ public class LibraryLoaderTest {
       @Override
       public Boolean call() throws Exception {
         return OneDBCodec.decodeBoolean(aby1
-            .run(0, ImmutableList.of(0, 1), ImmutableList.of(OneDBCodec.encodeInt(B)), OperatorType.LE)
+            .run(0, ImmutableList.of(0, 1), ImmutableList.of(OneDBCodec.encodeInt(B)), OperatorType.GT, ColumnType.INT, "127.0.0.1", 7766)
             .get(0));
       }
     });
