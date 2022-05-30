@@ -71,7 +71,7 @@
           </descriptorRefs>
           <archive>
             <manifest>
-              <mainClass>com.hufudb.onedb.OneDB</mainClass>
+              <mainClass>com.hufudb.onedb.user.OneDB</mainClass>
             </manifest>
           </archive>
         </configuration>
