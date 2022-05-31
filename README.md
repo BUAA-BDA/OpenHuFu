@@ -49,9 +49,9 @@ onedb>!q
 ## 配置文件简介
 
 
-### OwnerSide:
+### OwnerSide
 
-配置文件位于 `release/conf/server[x].json`：
+配置文件样例位于 `release/conf/server[x].json`：
 - id: owner 的标识 id，一个联邦中不允许两个 owner 有相同 id
 - port: owner side 监听的端口号（提供服务的端口）
 - threadnum: owner side 线程池中线程数量
@@ -77,7 +77,7 @@ onedb>!q
 
 ### UserSide
 
-配置文件位于 `release/conf/client_model.json`：
+配置文件样例位于 `release/conf/client_model.json`：
 - version: 该项请勿修改
 - defaultSchema: 该项请勿修改
 - schemas: 可用的全局表模式
