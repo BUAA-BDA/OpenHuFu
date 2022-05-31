@@ -6,11 +6,18 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
+import com.google.common.collect.ImmutableMap;
 import com.hufudb.onedb.data.schema.utils.PojoPublishedTableSchema;
+import com.hufudb.onedb.mpc.ProtocolExecutor;
+import com.hufudb.onedb.mpc.ProtocolFactory;
+import com.hufudb.onedb.mpc.ProtocolType;
+import com.hufudb.onedb.mpc.lib.LibraryConfig;
+import com.hufudb.onedb.mpc.lib.LibraryLoader;
 import com.hufudb.onedb.owner.adapter.Adapter;
 import com.hufudb.onedb.owner.adapter.AdapterConfig;
 import com.hufudb.onedb.owner.adapter.AdapterFactory;
 import com.hufudb.onedb.owner.adapter.AdapterLoader;
+import com.hufudb.onedb.proto.OneDBService.OwnerInfo;
 import com.hufudb.onedb.rpc.grpc.OneDBOwnerInfo;
 import com.hufudb.onedb.rpc.grpc.OneDBRpc;
 import io.grpc.TlsChannelCredentials;
@@ -31,6 +38,7 @@ public class OwnerConfigFile {
   public String trustcertpath;
   public List<PojoPublishedTableSchema> tables;
   public AdapterConfig adapterconfig;
+  public List<LibraryConfig> libraryconfigs;
 
   public OwnerConfigFile(int id, int port, int threadnum, String hostname, String privatekeypath,
       String certchainpath, String trustcertpath) {
@@ -47,13 +55,40 @@ public class OwnerConfigFile {
 
   public Adapter getAdapter() {
     Path adapterDir = Paths.get(System.getenv("ONEDB_ROOT"), "adapter");
-    Map<String, AdapterFactory> adapterFactories = AdapterLoader.loadAdapters(adapterDir.toString());
+    Map<String, AdapterFactory> adapterFactories =
+        AdapterLoader.loadAdapters(adapterDir.toString());
     AdapterFactory factory = adapterFactories.get(adapterconfig.datasource);
     if (factory == null) {
       LOG.error("Fail to get adapter for datasource [{}]", adapterconfig.datasource);
       throw new RuntimeException("Fail to get adapter for datasource");
     }
     return factory.create(adapterconfig);
+  }
+
+  public Map<ProtocolType, ProtocolExecutor> getLibrary() {
+    if (libraryconfigs == null || libraryconfigs.isEmpty()) {
+      return ImmutableMap.of();
+    }
+    Path libDir = Paths.get(System.getenv("ONEDB_ROOT"), "lib");
+    Map<ProtocolType, ProtocolFactory> factories =
+        LibraryLoader.loadProtocolLibrary(libDir.toString());
+    ImmutableMap.Builder<ProtocolType, ProtocolExecutor> libs = ImmutableMap.builder();
+    for (LibraryConfig config : this.libraryconfigs) {
+      switch (config.name.toLowerCase()) {
+        case "aby":
+          if (factories.containsKey(ProtocolType.ABY)) {
+            OwnerInfo own = OwnerInfo.newBuilder()
+                .setEndpoint(String.format("%s:%d", hostname, config.port)).setId(id).build();
+            libs.put(ProtocolType.ABY,
+                factories.get(ProtocolType.ABY).create(own, ProtocolType.ABY));
+          } else {
+            LOG.error("Library ABY not found");
+          }
+        default:
+          LOG.error("Not support library {}", config.name);
+      }
+    }
+    return libs.build();
   }
 
   public OwnerConfig generateConfig() {
@@ -82,8 +117,7 @@ public class OwnerConfigFile {
       try {
         File rootCert = new File(trustcertpath);
         config.clientCerts = TlsChannelCredentials.newBuilder().trustManager(rootCert).build();
-        config.acrossOwnerRpc =
-            new OneDBRpc(config.party, config.threadPool, config.clientCerts);
+        config.acrossOwnerRpc = new OneDBRpc(config.party, config.threadPool, config.clientCerts);
         LOG.info("load trustcertFile");
       } catch (Exception e) {
         LOG.error("Fail to read trustcertFile: {}", e.getMessage());
@@ -93,6 +127,7 @@ public class OwnerConfigFile {
       config.acrossOwnerRpc = new OneDBRpc(config.party, config.threadPool);
     }
     config.adapter = getAdapter();
+    config.librarys = getLibrary();
     config.tables = tables;
     return config;
   }

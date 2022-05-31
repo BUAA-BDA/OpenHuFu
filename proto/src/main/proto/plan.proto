@@ -32,9 +32,12 @@ enum OperatorType {
   IS_NOT_NULL = 21;
   // for mutliple
   CASE = 22;
+  // for set
+  INTERSECTION = 30;
+  UNION = 31;
   // for functions
-  SCALAR_FUNC = 25;
-  AGG_FUNC = 26;
+  SCALAR_FUNC = 100;
+  AGG_FUNC = 101;
 }
 
 enum Direction {

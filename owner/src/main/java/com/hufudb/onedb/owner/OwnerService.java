@@ -11,6 +11,8 @@ import com.hufudb.onedb.data.schema.SchemaManager;
 import com.hufudb.onedb.data.schema.TableSchema;
 import com.hufudb.onedb.data.schema.utils.PojoPublishedTableSchema;
 import com.hufudb.onedb.data.storage.DataSet;
+import com.hufudb.onedb.mpc.ProtocolExecutor;
+import com.hufudb.onedb.mpc.ProtocolType;
 import com.hufudb.onedb.rpc.grpc.OneDBOwnerInfo;
 import com.hufudb.onedb.rpc.grpc.OneDBRpc;
 import com.hufudb.onedb.rpc.Party;
@@ -24,6 +26,7 @@ import com.hufudb.onedb.proto.OneDBService.GeneralResponse;
 import com.hufudb.onedb.proto.OneDBService.OwnerInfo;
 import io.grpc.stub.StreamObserver;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 import org.slf4j.Logger;
@@ -38,6 +41,7 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
   protected final OneDBRpc ownerSideRpc;
   protected final OwnerSideImplementor implementor;
   protected final Adapter adapter;
+  protected final Map<ProtocolType, ProtocolExecutor> libraries;
   protected final SchemaManager schemaManager;
 
   public OwnerService(OwnerConfig config) {
@@ -47,6 +51,7 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
     this.adapter = config.adapter;
     this.implementor = new OwnerSideImplementor(ownerSideRpc, adapter, threadPool);
     this.schemaManager = this.adapter.getSchemaManager();
+    this.libraries = config.librarys;
     initPublishedTable(config.tables);
   }
 
@@ -159,5 +164,5 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
 
   protected void shutdown() {
     adapter.shutdown();
-  };
+  }
 }

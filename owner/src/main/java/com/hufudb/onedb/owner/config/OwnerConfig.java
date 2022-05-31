@@ -1,8 +1,11 @@
 package com.hufudb.onedb.owner.config;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import com.hufudb.onedb.data.schema.utils.PojoPublishedTableSchema;
+import com.hufudb.onedb.mpc.ProtocolExecutor;
+import com.hufudb.onedb.mpc.ProtocolType;
 import com.hufudb.onedb.owner.adapter.Adapter;
 import com.hufudb.onedb.rpc.Party;
 import com.hufudb.onedb.rpc.grpc.OneDBRpc;
@@ -20,6 +23,7 @@ public class OwnerConfig {
   public ServerCredentials serverCerts;
   public ChannelCredentials clientCerts;
   public List<PojoPublishedTableSchema> tables;
+  public Map<ProtocolType, ProtocolExecutor> librarys;
 
   public OwnerConfig() {}
 

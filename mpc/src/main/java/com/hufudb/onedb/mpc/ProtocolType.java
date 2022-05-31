@@ -2,9 +2,9 @@ package com.hufudb.onedb.mpc;
 
 import com.google.common.collect.ImmutableMap;
 
-/*
+/**
  * Protocols supported by OneDB
- * Don't change the id of existing protocols (relate to Level.java)
+ * Don't change the id of existing protocols (relate to @Modifier.java)
  */
 public enum ProtocolType {
   UNKNOWN("UNKNOWN", -1, true),
@@ -14,7 +14,8 @@ public enum ProtocolType {
   PK_OT("PUBLIC_KEY_BASED_OT", 10, true),
   BEAVER_TRIPLE("BEAVER_TRIPLE", 20, true),
   GMW("GMW", 100, true),
-  HASH_PSI("PSI", 200, true);
+  HASH_PSI("PSI", 200, true),
+  ABY("ABY", 300, true);
 
   private static final ImmutableMap<Integer, ProtocolType> MAP;
 
