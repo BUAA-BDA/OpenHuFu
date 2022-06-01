@@ -83,7 +83,9 @@ coverage:
   needs: ["test"]
   dependencies:
     - test
+  coverage: '/Total.*?([0-9]{1,3})%/'
   artifacts:
+    expire_in: 3 day
     reports:
       cobertura: coverage/target/site/coverage.xml
     paths:
