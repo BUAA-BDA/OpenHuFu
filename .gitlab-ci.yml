@@ -65,7 +65,8 @@ test:
         - user/target/surefire-reports/TEST-*.xml
     paths:
       - coverage/target/site/jacoco-aggregate/jacoco.xml
-    expire_in: 720 minutes
+      - coverage/target/site/jacoco-aggregate/index.xml
+    expire_in: 3 day
 
 coverage:
   stage: coverage
@@ -85,3 +86,5 @@ coverage:
   artifacts:
     reports:
       cobertura: coverage/target/site/coverage.xml
+    paths:
+      - coverage/target/site/jacoco-aggregate/index.xml
