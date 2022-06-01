@@ -3,13 +3,10 @@ image: "docker/compose:1.28.5"
 services:
   - docker:dind
 
-before_script:
-  - docker info
-  - docker-compose --version
-
 stages:
   - build
   - test
+  - coverage
 
 build:
   stage: build
@@ -23,8 +20,11 @@ build:
 
 test:
   stage: test
+  needs: ["build"]
+  dependencies:
+    - build
   before_script:
-    - cd docker/user
+    - cd docker/test
     - docker-compose down
     - cd ../owner
     - docker-compose down
@@ -36,10 +36,16 @@ test:
     - docker-compose up -d
     - sleep 5
     - cd ../owner
-    - cp -r ../cert/ci cert
+    - mkdir -p cert
+    - cp -r ../cert/ci/* cert
     - docker-compose up -d
     - cd ../test
-    - docker-compose up
+    - docker-compose up | grep "BUILD FAILED" && touch failed
+    - if [ -e failed ]; then
+        docker-compose logs;
+        rm failed;
+        exist 1;
+      fi
   after_script:
     - cd docker/test
     - docker-compose down
@@ -55,5 +61,27 @@ test:
         - mpc/target/surefire-reports/TEST-*.xml
         - data/target/surefire-reports/TEST-*.xml
         - plan/target/surefire-reports/TEST-*.xml
+        - owner/target/surefire-reports/TEST-*.xml
         - user/target/surefire-reports/TEST-*.xml
-    expire_in: 20 minutes
+    paths:
+      - coverage/target/site/jacoco-aggregate/jacoco.xml
+    expire_in: 720 minutes
+
+coverage:
+  stage: coverage
+  image: registry.gitlab.com/haynes/jacoco2cobertura:1.0.7
+  script:
+    - 'python /opt/cover2cover.py coverage/target/site/jacoco-aggregate/jacoco.xml 
+              $CI_PROJECT_DIR/rpc/src/main/java/
+              $CI_PROJECT_DIR/mpc/src/main/java/
+              $CI_PROJECT_DIR/data/src/main/java/
+              $CI_PROJECT_DIR/plan/src/main/java/
+              $CI_PROJECT_DIR/owner/src/main/java/
+              $CI_PROJECT_DIR/user/src/main/java/
+              > coverage/target/site/coverage.xml'
+  needs: ["test"]
+  dependencies:
+    - test
+  artifacts:
+    reports:
+      cobertura: coverage/target/site/coverage.xml

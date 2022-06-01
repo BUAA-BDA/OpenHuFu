@@ -13,7 +13,7 @@
 ```
 
 ## 运行
-`release` 文件夹下提供了一个本地运行的示例，运行该示例需要 docker-compose version >= 20.10
+`release` 文件夹下提供了一个本地运行的示例，运行该示例需要 docker-compose 20.10 及以上版本
 
 1. 初始化数据库环境并安装证书
 ```
@@ -46,8 +46,21 @@ onedb>!q
 ./stop_server.sh
 ```
 
-## 配置文件简介
+## 测试
 
+在项目根目录下运行测试命令，运行测试需要 docker-compose 20.10 及以上版本
+
+```
+./test.sh
+```
+
+测试覆盖率报告位于 `coverage/target/site/jacoco-aggregate/index.html`，使用清理命令清除测试相关文件
+
+```
+./clean.sh
+```
+
+## 配置文件简介
 
 ### OwnerSide
 
@@ -59,7 +72,7 @@ onedb>!q
 - certchainpath:
 - trustcertpath:
 - adapterconfig: 数据库适配器参数
-    - datasource: 数据库类型，例如 postgresql, msql
+    - datasource: 数据库类型，例如 postgresql, mysql
     - url: 数据库连接 url
     - catalog: 连接的数据库
     - user: 连接用户
@@ -95,4 +108,3 @@ onedb>!q
             - feds: 全局表对应的本地表（可以有多个）
                 - endpoint: 本地表所在的owner的 endpoint
                 - name: 本地表的表名
-
