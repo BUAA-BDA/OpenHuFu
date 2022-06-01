@@ -70,3 +70,4 @@ networks:
     external: true
   public_net:
     driver: bridge
+    name: public_net

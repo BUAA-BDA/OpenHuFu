@@ -24,6 +24,8 @@ build:
 
 test:
   stage: test
+  dependencies:
+    - build
   before_script:
     - cd docker/user
     - docker-compose down
