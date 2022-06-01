@@ -44,11 +44,8 @@ services:
 
 networks:
   owner_net_1:
-    name: owner_net_1
     driver: bridge
   owner_net_2:
-    name: owner_net_2
     driver: bridge
   owner_net_3:
-    name: owner_net_3
     driver: bridge

@@ -46,10 +46,7 @@ services:
 networks:
   owner_pg_1:
     driver: bridge
-    name: owner_pg_1
   owner_pg_2:
     driver: bridge
-    name: owner_pg_2
   owner_pg_3:
     driver: bridge
-    name: owner_pg_3

@@ -13,7 +13,7 @@
 ```
 
 ## 运行
-`release` 文件夹下提供了一个本地运行的示例，运行该示例需要 docker-compose version >= 20.10
+`release` 文件夹下提供了一个本地运行的示例，运行该示例需要预先安装 docker 和 docker-compose
 
 1. 初始化数据库环境并安装证书
 ```
@@ -47,7 +47,6 @@ onedb>!q
 ```
 
 ## 配置文件简介
-
 
 ### OwnerSide
 

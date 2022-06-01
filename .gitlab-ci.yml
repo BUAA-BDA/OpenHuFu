@@ -10,6 +10,7 @@ before_script:
 stages:
   - build
   - test
+  - coverage
 
 build:
   stage: build
@@ -42,11 +43,18 @@ test:
     - docker-compose up
   after_script:
     - cd docker/test
+    - docker-compose logs | grep "BUILD FAILED" && touch failed
     - docker-compose down
     - cd ../owner
     - docker-compose down
     - cd ../database
     - docker-compose down
+    - cd ../test
+    - if [ -e failed ]; then
+        echo "Test failed";
+        rm failed
+        exit 1;
+      fi
   artifacts:
     when: always
     reports:
@@ -55,5 +63,27 @@ test:
         - mpc/target/surefire-reports/TEST-*.xml
         - data/target/surefire-reports/TEST-*.xml
         - plan/target/surefire-reports/TEST-*.xml
+        - plan/target/surefire-reports/TEST-*.xml
         - user/target/surefire-reports/TEST-*.xml
-    expire_in: 20 minutes
+    paths:
+      - target/site/jacoco-aggregate/jacoco.xml
+    expire_in: 720 minutes
+
+coverage:
+  stage: coverage
+  image: registry.gitlab.com/haynes/jacoco2cobertura:1.0.7
+  script:
+    - 'python /opt/cover2cover.py jacoco/target/site/jacoco-aggregate/jacoco.xml 
+              $CI_PROJECT_DIR/rpc/src/main/java/
+              $CI_PROJECT_DIR/mpc/src/main/java/
+              $CI_PROJECT_DIR/data/src/main/java/
+              $CI_PROJECT_DIR/plan/src/main/java/
+              $CI_PROJECT_DIR/owner/src/main/java/
+              $CI_PROJECT_DIR/user/src/main/java/
+              > target/site/coverage.xml'
+  needs: ["test"]
+  dependencies:
+    - test
+  artifacts:
+    reports:
+      cobertura: target/site/coverage.xml

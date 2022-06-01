@@ -6,7 +6,7 @@ services:
     container_name: onedbtest
     restart: "no"
     working_dir: /usr/src/mymvn
-    command: mvn clean verify
+    command: mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent verify org.jacoco:jacoco-maven-plugin:report-aggregate
     volumes:
       - $HOME/.m2:/root/.m2
       - $PWD/../..:/usr/src/mymvn
