@@ -41,7 +41,7 @@ test:
     - cd ../test
     - docker-compose up | grep "BUILD FAILED" && touch failed
     - if [ -e failed ]; then
-        docker-compose logs
+        docker-compose logs;
         docker-compose logs >> failed;
       fi
   after_script:
