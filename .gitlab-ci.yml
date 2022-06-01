@@ -24,6 +24,7 @@ build:
 
 test:
   stage: test
+  needs: ["build"]
   dependencies:
     - build
   before_script:
@@ -42,10 +43,12 @@ test:
     - cp -r ../cert/ci cert
     - docker-compose up -d
     - cd ../test
-    - docker-compose up
+    - docker-compose up | grep "BUILD FAILED" && touch failed
+    - if [ -e failed ]; then
+        docker-compose logs >> failed
+      fi
   after_script:
     - cd docker/test
-    - docker-compose logs | grep "BUILD FAILED" && touch failed
     - docker-compose down
     - cd ../owner
     - docker-compose down
@@ -54,6 +57,7 @@ test:
     - cd ../test
     - if [ -e failed ]; then
         echo "Test failed";
+        cat failed
         rm failed
         exit 1;
       fi
