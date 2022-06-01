@@ -24,7 +24,7 @@ test:
   dependencies:
     - build
   before_script:
-    - cd docker/user
+    - cd docker/test
     - docker-compose down
     - cd ../owner
     - docker-compose down
@@ -42,7 +42,8 @@ test:
     - docker-compose up | grep "BUILD FAILED" && touch failed
     - if [ -e failed ]; then
         docker-compose logs;
-        docker-compose logs >> failed;
+        rm failed;
+        exist 1;
       fi
   after_script:
     - cd docker/test
@@ -51,13 +52,6 @@ test:
     - docker-compose down
     - cd ../database
     - docker-compose down
-    - cd ../test
-    - if [ -e failed ]; then
-        echo "Test failed";
-        cat failed;
-        rm failed;
-        exit 1;
-      fi
   artifacts:
     when: always
     reports:
@@ -89,4 +83,6 @@ coverage:
     - test
   artifacts:
     reports:
-      cobertura: target/site/coverage.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: target/site/coverage.xml
