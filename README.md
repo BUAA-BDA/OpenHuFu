@@ -1,5 +1,7 @@
 # OneDB
 
+[![coverage](https://gitlab.hufudb.com/pxc/onedb/badges/master/coverage.svg)](https://gitlab.hufudb.com/pxc/onedb)
+
 ## 介绍
 数据库联合查询中间件
 
