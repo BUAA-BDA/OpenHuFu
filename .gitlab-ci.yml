@@ -72,6 +72,7 @@ coverage:
   stage: coverage
   image: registry.gitlab.com/haynes/jacoco2cobertura:1.0.7
   script:
+    - cat coverage/target/site/jacoco-aggregate/index.html
     - 'python /opt/cover2cover.py coverage/target/site/jacoco-aggregate/jacoco.xml 
               $CI_PROJECT_DIR/rpc/src/main/java/
               $CI_PROJECT_DIR/mpc/src/main/java/
