@@ -3,10 +3,6 @@ image: "docker/compose:1.28.5"
 services:
   - docker:dind
 
-before_script:
-  - docker info
-  - docker-compose --version
-
 stages:
   - build
   - test
@@ -45,6 +41,7 @@ test:
     - cd ../test
     - docker-compose up | grep "BUILD FAILED" && touch failed
     - if [ -e failed ]; then
+        docker-compose logs
         docker-compose logs >> failed;
       fi
   after_script:
