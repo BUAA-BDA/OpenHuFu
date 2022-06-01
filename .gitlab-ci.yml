@@ -83,6 +83,4 @@ coverage:
     - test
   artifacts:
     reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: target/site/coverage.xml
+      cobertura: target/site/coverage.xml
