@@ -1,0 +1,58 @@
+version: '3.3'
+
+services:
+  mysql1:
+    image: mysql
+    restart: "no"
+    container_name: mysql1
+    ports:
+      - 13101:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: onedb
+      MYSQL_DATABASE: mydb
+      TZ: Asia/Shanghai
+    volumes:
+      - $PWD/config/db1.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - owner_net_1
+
+  mysql2:
+    image: mysql
+    restart: "no"
+    container_name: mysql2
+    ports:
+      - 13102:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: onedb
+      MYSQL_DATABASE: mydb
+      TZ: Asia/Shanghai
+    volumes:
+      - $PWD/config/db2.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - owner_net_2
+
+  mysql3:
+    image: mysql
+    restart: "no"
+    container_name: mysql3
+    ports:
+      - 13103:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: onedb
+      MYSQL_DATABASE: mydb
+      TZ: Asia/Shanghai
+    volumes:
+      - $PWD/config/db3.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - owner_net_3
+
+networks:
+  owner_net_1:
+    name: owner_net_1
+    driver: bridge
+  owner_net_2:
+    name: owner_net_2
+    driver: bridge
+  owner_net_3:
+    name: owner_net_3
+    driver: bridge

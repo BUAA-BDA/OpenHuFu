@@ -1,0 +1,24 @@
+{
+  "id": 1,
+  "port": 12346,
+  "theadnum": 4,
+  "hostname": "owner2",
+  "privatekeypath": "./cert/owner2.key",
+  "certchainpath": "./cert/owner2.pem",
+  "trustcertpath": "./cert/ca.pem",
+  "adapterconfig": {
+    "datasource": "postgresql",
+    "url": "jdbc:postgresql://postgres2:5432/postgres",
+    "catalog": "postgres",
+    "user": "postgres",
+    "passwd": "onedb"
+  },
+  "tables": [
+    {
+      "actualName": "student",
+      "publishedName": "student1",
+      "publishedColumns": [],
+      "actualColumns": []
+    }
+  ]
+}
