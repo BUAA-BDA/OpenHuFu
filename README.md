@@ -8,11 +8,37 @@
 ## 安装
 已安装 java jdk 11 及以上版本、maven 3.5.2 及以上版本
 
-在项目根目录下运行打包命令
+在项目根目录下运行打包命令，打包结果位于 `release` 目录下
 
 ```
 ./package.sh
 ```
+
+`release` 目录结构:
+
+- bin: 可执行文件目录
+    - onedb_owner_server.jar: OneDB Owner Side 可执行文件
+    - onedb_user_client.jar: OneDB User Side 可执行文件
+    - backend.jar: Owner && User Side 的 Spring boot 封装
+- config: 配置文件目录
+    - server[x].json: Owner Side 配置文件
+    - client_model.json: User Side 配置文件
+    - server[x].properties: Spring boot Owner Side 配置文件
+    - client.properties: Spring boot User Side 配置文件
+    - log4j.properties: 日志配置文件
+- adapter: 数据库适配器目录
+    - adapter_[x].jar: x数据库的适配器
+- log: Owner Side 的日志目录
+    - [x].log: owner x 的日志文件
+- cert: 安全证书目录(测试时直接从 docker/cert/local 目录下拷贝如下文件到该目录即可)
+    - ca.pem: CA 根证书
+    - owner[x].pem: CA 签发给 owner x 的证书
+    - owner[x].key: owner x 证书对应的私钥
+- start_server.sh: Owner Side 示例启动脚本
+- start_client.sh: User Side 示例启动脚本
+- stop_server.sh: Owner Side 示例关闭脚本
+- backend.sh: Spring boot 示例启动脚本
+- init_env.sh: 本地示例初始化脚本
 
 ## 运行
 `release` 文件夹下提供了一个本地运行的示例，运行该示例需要完成上述安装步骤并安装 docker-compose 20.10 及以上版本
@@ -70,9 +96,9 @@ onedb>!q
 - id: owner 的标识 id，一个联邦中不允许两个 owner 有相同 id
 - port: owner side 监听的端口号（提供服务的端口）
 - threadnum: owner side 线程池中线程数量
-- privatekeypath:
-- certchainpath:
-- trustcertpath:
+- privatekeypath: 证书私钥路径
+- certchainpath: 证书路径
+- trustcertpath: CA根证书路径
 - adapterconfig: 数据库适配器参数
     - datasource: 数据库类型，例如 postgresql, mysql
     - url: 数据库连接 url
