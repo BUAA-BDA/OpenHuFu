@@ -30,7 +30,7 @@
     - adapter_[x].jar: x数据库的适配器
 - log: Owner Side 的日志目录
     - [x].log: owner x 的日志文件
-- cert: 安全证书目录(测试时直接从 docker/cert/local 目录下拷贝如下文件到该目录即可)
+- cert: 安全证书目录(运行本地示例时直接从 docker/cert/local 目录下拷贝如下文件到该目录即可)
     - ca.pem: CA 根证书
     - owner[x].pem: CA 签发给 owner x 的证书
     - owner[x].key: owner x 证书对应的私钥
@@ -41,7 +41,7 @@
 - init_env.sh: 本地示例初始化脚本
 
 ## 运行
-`release` 文件夹下提供了一个本地运行的示例，运行该示例需要完成上述安装步骤并安装 docker-compose 20.10 及以上版本
+`release` 文件夹下提供了一个本地运行的示例，运行该示例需要完成上述安装步骤并安装 docker >= 20.10, docker-compose >= 1.29
 
 1. 初始化数据库环境并安装证书
 ```
@@ -76,7 +76,7 @@ onedb>!q
 
 ## 测试
 
-在项目根目录下运行测试命令，运行测试需要 docker-compose 20.10 及以上版本
+在项目根目录下运行测试命令，运行测试需要 docker >= 20.10, docker-compose >= 1.29
 
 ```
 ./test.sh
