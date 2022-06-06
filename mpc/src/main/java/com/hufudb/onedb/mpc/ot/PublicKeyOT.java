@@ -12,7 +12,7 @@ import com.hufudb.onedb.rpc.utils.DataPacketHeader;
 import java.util.ArrayList;
 import java.util.List;
 
-/*-
+/**
  * Public key based OT 1-out-of-n implementation
  *   Participants: S and R
  *   Init DataPacket:
