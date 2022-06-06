@@ -8,13 +8,16 @@ services:
     working_dir: /usr/src/mymvn
     command: mvn clean verify
     environment:
-      - ONEDB_ROOT=/usr/src/mymvn
+      - ONEDB_ROOT=/usr/src/mymvn/release
     volumes:
       - $HOME/.m2:/root/.m2
       - $PWD/../..:/usr/src/mymvn
     networks:
+      - owner_pg_1
       - public_net
 
 networks:
+  owner_pg_1:
+    external: true
   public_net:
     external: true

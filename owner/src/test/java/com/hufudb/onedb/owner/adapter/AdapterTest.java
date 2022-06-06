@@ -17,9 +17,7 @@ import com.hufudb.onedb.data.storage.DataSetIterator;
 import com.hufudb.onedb.data.storage.utils.ColumnTypeWrapper;
 import com.hufudb.onedb.data.storage.utils.ModifierWrapper;
 import com.hufudb.onedb.expression.ExpressionFactory;
-import com.hufudb.onedb.expression.ExpressionUtils;
 import com.hufudb.onedb.plan.LeafPlan;
-import com.hufudb.onedb.plan.Plan;
 
 @RunWith(JUnit4.class)
 public class AdapterTest {
@@ -47,7 +45,7 @@ public class AdapterTest {
   Adapter loadAdapter() {
     AdapterConfig adapterConfig = new AdapterConfig();
     adapterConfig.datasource = "postgresql";
-    adapterConfig.url = "jdbc:postgresql://localhost:13101/postgres";
+    adapterConfig.url = "jdbc:postgresql://postgres1:5432/postgres";
     adapterConfig.catalog = "postgres";
     adapterConfig.user = "postgres";
     adapterConfig.passwd = "onedb";
@@ -76,6 +74,6 @@ public class AdapterTest {
       count++;
     }
     assertEquals(3, count);
-    // todo: add more query plan
+    // todo: test more query plan
   }
 }
