@@ -13,6 +13,14 @@ public class PojoColumnDesc {
   public ColumnTypeWrapper type;
   public ModifierWrapper modifier;
 
+  public PojoColumnDesc() {}
+
+  public PojoColumnDesc(String name, ColumnTypeWrapper type, ModifierWrapper modifier) {
+    this.name = name;
+    this.type = type;
+    this.modifier = modifier;
+  }
+
   public ColumnType getType() {
     return type.get();
   }

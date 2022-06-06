@@ -41,9 +41,11 @@ public class OwnerServer {
       this.creds = config.serverCerts;
       this.server = Grpc.newServerBuilderForPort(port, creds).addService(service)
           .addService(pipeService).build();
+      LOG.info("Owner Server start with TLS");
     } else {
       this.creds = null;
       this.server = ServerBuilder.forPort(port).addService(service).addService(pipeService).build();
+      LOG.info("Owner Server start in plaintext");
     }
   }
 

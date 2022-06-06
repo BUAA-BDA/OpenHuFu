@@ -38,12 +38,12 @@ public class OwnerClient {
   public OwnerClient(String host, int port) {
     this(ManagedChannelBuilder.forAddress(host, port).usePlaintext().build(),
         String.format("%s:%d", host, port));
-    LOG.info("Connect to {}", endpoint);
+    LOG.info("Connect to {} in plaintext", endpoint);
   }
 
   public OwnerClient(String endpoint) {
     this(ManagedChannelBuilder.forTarget(endpoint).usePlaintext().build(), endpoint);
-    LOG.info("Connect to {}", endpoint);
+    LOG.info("Connect to {} in plaintext", endpoint);
   }
 
   public OwnerClient(String endpoint, ChannelCredentials creds) {

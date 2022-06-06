@@ -29,7 +29,6 @@ public class PublishedTableSchema {
       this.mappings = mapBuilder.build();
     } else {
       // todo: check unique of mapping
-      assert actualSchema.size() == mappings.size();
       assert mappings.size() == publishedColumns.size();
       ImmutableList.Builder<ColumnDesc> columnBuilder = ImmutableList.builder();
       ImmutableList.Builder<Integer> mapBuilder = ImmutableList.builder();

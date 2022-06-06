@@ -53,16 +53,16 @@ public class OwnerConfigFile {
 
   public OwnerConfigFile() {}
 
-  public Adapter getAdapter() {
+  public static Adapter getAdapter(AdapterConfig config) {
     Path adapterDir = Paths.get(System.getenv("ONEDB_ROOT"), "adapter");
     Map<String, AdapterFactory> adapterFactories =
         AdapterLoader.loadAdapters(adapterDir.toString());
-    AdapterFactory factory = adapterFactories.get(adapterconfig.datasource);
+    AdapterFactory factory = adapterFactories.get(config.datasource);
     if (factory == null) {
-      LOG.error("Fail to get adapter for datasource [{}]", adapterconfig.datasource);
+      LOG.error("Fail to get adapter for datasource [{}]", config.datasource);
       throw new RuntimeException("Fail to get adapter for datasource");
     }
-    return factory.create(adapterconfig);
+    return factory.create(config);
   }
 
   public Map<ProtocolType, ProtocolExecutor> getLibrary() {
@@ -126,7 +126,7 @@ public class OwnerConfigFile {
     } else {
       config.acrossOwnerRpc = new OneDBRpc(config.party, config.threadPool);
     }
-    config.adapter = getAdapter();
+    config.adapter = getAdapter(adapterconfig);
     config.librarys = getLibrary();
     config.tables = tables;
     return config;
