@@ -40,7 +40,7 @@ test:
     - cp -r ../cert/ci/* cert
     - docker-compose up -d
     - cd ../test
-    - docker-compose up | grep "BUILD FAILED" && touch failed
+    - docker-compose up | grep "BUILD FAILURE" && touch failed
     - if [ -e failed ]; then
         docker-compose logs;
         rm failed;
