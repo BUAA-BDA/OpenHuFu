@@ -117,7 +117,6 @@ public class OneDBRpc implements Rpc {
 
   @Override
   public void send(DataPacket dataPacket) {
-    payloadByteLength += dataPacket.getPayloadByteLength();
     int receiverId = dataPacket.getHeader().getReceiverId();
     int senderId = dataPacket.getHeader().getSenderId();
     assert senderId == own.getPartyId();
@@ -126,6 +125,8 @@ public class OneDBRpc implements Rpc {
     lock.readLock().unlock();
     if (client != null) {
       client.send(dataPacket.toProto());
+      dataPacketNum++;
+      payloadByteLength += dataPacket.getPayloadByteLength();
     } else {
       LOG.error("No connection to receiver[{}]", receiverId);
     }

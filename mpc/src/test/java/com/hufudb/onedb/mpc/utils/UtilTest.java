@@ -38,13 +38,13 @@ public class UtilTest {
   public List<byte[]> generateData(int size, int rowNum) {
     ImmutableList.Builder<byte[]> randomData = ImmutableList.builder();
     for (int i = 0; i < 5; ++i) {
-    // create duplicate elements
-    randomData.add(OneDBCodec.encodeInt(i));
-    randomData.add(OneDBCodec.encodeInt(i));
+      // create duplicate elements
+      randomData.add(OneDBCodec.encodeInt(i));
+      randomData.add(OneDBCodec.encodeInt(i));
     }
     for (int i = 0; i < rowNum; ++i) {
-    randomData.add(OneDBCodec.encodeInt(i));
-    randomData.add(OneDBCodec.encodeInt(i));
+      randomData.add(OneDBCodec.encodeInt(i));
+      randomData.add(OneDBCodec.encodeInt(i));
     }
     return randomData.build();
   }
@@ -60,15 +60,15 @@ public class UtilTest {
     Party owner1 = new OneDBOwnerInfo(1, ownerName1);
     List<Party> parties = ImmutableList.of(owner0, owner1);
     List<Channel> channels = Arrays.asList(
-      grpcCleanup.register(InProcessChannelBuilder.forName(ownerName0).directExecutor().build()),
-      grpcCleanup.register(InProcessChannelBuilder.forName(ownerName1).directExecutor().build()));
+        grpcCleanup.register(InProcessChannelBuilder.forName(ownerName0).directExecutor().build()),
+        grpcCleanup.register(InProcessChannelBuilder.forName(ownerName1).directExecutor().build()));
     OneDBRpcManager manager = new OneDBRpcManager(parties, channels);
     rpc0 = (OneDBRpc) manager.getRpc(0);
     rpc1 = (OneDBRpc) manager.getRpc(1);
     grpcCleanup.register(InProcessServerBuilder.forName(ownerName0).directExecutor()
-    .addService(rpc0.getgRpcService()).build().start());
+        .addService(rpc0.getgRpcService()).build().start());
     grpcCleanup.register(InProcessServerBuilder.forName(ownerName1).directExecutor()
-      .addService(rpc1.getgRpcService()).build().start());
+        .addService(rpc1.getgRpcService()).build().start());
     rpc0.connect();
     rpc1.connect();
   }
@@ -87,22 +87,23 @@ public class UtilTest {
     return res;
   }
 
-  void runStream(List<byte[]> payloads, Stream s0, Stream s1, int senderId, int receiverId) throws Exception {
+  void runStream(List<byte[]> payloads, Stream s0, Stream s1, int senderId, int receiverId)
+      throws Exception {
     ExecutorService service = Executors.newFixedThreadPool(2);
     long taskId = 0;
     Future<List<byte[]>> res0 = service.submit(new Callable<List<byte[]>>() {
-        @Override
-        public List<byte[]> call() throws Exception {
-          return s0.run(taskId, ImmutableList.of(s1.getOwnId()), payloads, s0.getOwnId());
-        }
-      });
+      @Override
+      public List<byte[]> call() throws Exception {
+        return s0.run(taskId, ImmutableList.of(s1.getOwnId()), payloads, s0.getOwnId());
+      }
+    });
     Future<List<byte[]>> res1 = service.submit(new Callable<List<byte[]>>() {
-        @Override
-        public List<byte[]> call() throws Exception {
-          return s1.run(taskId, ImmutableList.of(s1.getOwnId()), ImmutableList.of(), s0.getOwnId());
-        }
-      });
-    
+      @Override
+      public List<byte[]> call() throws Exception {
+        return s1.run(taskId, ImmutableList.of(s1.getOwnId()), ImmutableList.of(), s0.getOwnId());
+      }
+    });
+
     List<byte[]> actual = res1.get();
     assertEquals(payloads.size(), actual.size());
     for (int i = 0; i < payloads.size(); ++i) {
@@ -110,22 +111,23 @@ public class UtilTest {
     }
   }
 
-  void runBoardcast(List<byte[]> payloads, Boardcast b0, Boardcast b1, int senderId, int receiverId) throws Exception {
+  void runBoardcast(List<byte[]> payloads, Boardcast b0, Boardcast b1, int senderId, int receiverId)
+      throws Exception {
     ExecutorService service = Executors.newFixedThreadPool(2);
     long taskId = 0;
     Future<List<byte[]>> res0 = service.submit(new Callable<List<byte[]>>() {
-        @Override
-        public List<byte[]> call() throws Exception {
-          return b0.run(taskId, ImmutableList.of(b1.getOwnId()), payloads, b0.getOwnId());
-        }
-      });
+      @Override
+      public List<byte[]> call() throws Exception {
+        return b0.run(taskId, ImmutableList.of(b1.getOwnId()), payloads, b0.getOwnId(), 1);
+      }
+    });
     Future<List<byte[]>> res1 = service.submit(new Callable<List<byte[]>>() {
-        @Override
-        public List<byte[]> call() throws Exception {
-          return b1.run(taskId, ImmutableList.of(b1.getOwnId()), ImmutableList.of(), b0.getOwnId());
-        }
-      });
-    
+      @Override
+      public List<byte[]> call() throws Exception {
+        return b1.run(taskId, ImmutableList.of(b1.getOwnId()), ImmutableList.of(), b0.getOwnId(), 1);
+      }
+    });
+
     List<byte[]> actual = res1.get();
     assertEquals(payloads.size(), actual.size());
     for (int i = 0; i < payloads.size(); ++i) {
@@ -136,7 +138,7 @@ public class UtilTest {
   @Test
   public void testStream() throws Exception {
     runStream(generateRandomBytes(8, 32), new Stream(rpc0, 50), new Stream(rpc1, 50), 0, 1);
-    runStream(generateRandomBytes(8, 32), new Stream(rpc0, 50), new Stream(rpc1, 50), 1, 0);
+    runStream(generateRandomBytes(8, 32), new Stream(rpc0), new Stream(rpc1), 1, 0);
   }
 
   @Test
@@ -149,5 +151,7 @@ public class UtilTest {
   public void testBoardcast() throws Exception {
     runBoardcast(generateRandomBytes(10, 10), new Boardcast(rpc0), new Boardcast(rpc1), 0, 1);
     runBoardcast(generateRandomBytes(10, 10), new Boardcast(rpc0), new Boardcast(rpc1), 1, 0);
+    runBoardcast(generateRandomBytes(10, 10), new Boardcast(rpc0), new Boardcast(rpc1), 1, 0);
+
   }
 }

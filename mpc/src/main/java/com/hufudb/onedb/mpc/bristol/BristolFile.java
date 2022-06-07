@@ -16,7 +16,6 @@ public class BristolFile {
   final int in1;
   final int in2;
   final int out;
-  // final ImmutableList<Gate> gates;
   final ImmutableList<ImmutableList<Gate>> gates;
 
   private BristolFile(int gateNum, int wireNum, int in1, int in2, int out,
@@ -26,7 +25,6 @@ public class BristolFile {
     this.in1 = in1;
     this.in2 = in2;
     this.out = out;
-    // this.gates = gates;
     this.gates = gates;
   }
 

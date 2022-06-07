@@ -28,6 +28,10 @@ public class SchemaManager {
   }
 
   public void addLocalTable(TableSchema table) {
+    if (actualTableSchemaMap.containsKey(table.getName())) {
+      LOG.error("Local table {} already existed", table.getName());
+      return;
+    }
     actualTableSchemaMap.put(table.getName(), table);
   }
 

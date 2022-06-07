@@ -59,6 +59,10 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
 
   public static Table create(OneDBSchemaManager schemaManager, GlobalTableConfig tableMeta) {
     final String tableName = tableMeta.tableName;
+    if (schemaManager.hasTable(tableName)) {
+      LOG.warn("Table {} already exists", tableName);
+      return null;
+    }
     OneDBTable table = null;
     List<Pair<OwnerClient, TableSchema>> localInfos = new ArrayList<>();
     for (LocalTableConfig fedMeta : tableMeta.localTables) {

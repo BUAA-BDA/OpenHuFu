@@ -1,10 +1,12 @@
-package com.hufudb.onedb.data.schema.utils;
+package com.hufudb.onedb.backend.utils;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import com.hufudb.onedb.core.data.TypeConverter;
+import com.hufudb.onedb.data.schema.utils.PojoSchema;
 
 public class PojoResultSet {
   public PojoSchema schema;

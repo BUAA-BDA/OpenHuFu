@@ -1,10 +1,13 @@
 package com.hufudb.onedb.rpc.grpc;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.rpc.Party;
 import com.hufudb.onedb.rpc.utils.DataPacket;
@@ -50,6 +53,7 @@ public class OneDBRpcManagerTest {
     String ownerName1 = InProcessServerBuilder.generateName();
     Party owner0 = new OneDBOwnerInfo(0, ownerName0);
     Party owner1 = new OneDBOwnerInfo(1, ownerName1);
+    Party owner2 = new OneDBOwnerInfo(2, "fakeName");
     List<Party> parties = ImmutableList.of(
       owner0, owner1
     );
@@ -58,7 +62,13 @@ public class OneDBRpcManagerTest {
       grpcCleanup.register(InProcessChannelBuilder.forName(ownerName1).directExecutor().build())
     );
     OneDBRpcManager manager = new OneDBRpcManager(parties, channels);
+    assertEquals(2, manager.getPartyNum());
+    Set<Party> party = manager.getPartySet();
+    assertTrue(party.contains(owner0));
+    assertTrue(party.contains(owner1));
     OneDBRpc rpc0 = (OneDBRpc) manager.getRpc(0);
+    assertFalse("Error when adding an existing party", rpc0.addParty(owner1));
+    assertFalse("Error when removing an unexisting party", rpc0.removeParty(owner2));
     OneDBRpc rpc1 = (OneDBRpc) manager.getRpc(1);
     Server server0 = InProcessServerBuilder.forName(ownerName0).directExecutor().addService(rpc0.getgRpcService()).build().start();
     Server server1 = InProcessServerBuilder.forName(ownerName1).directExecutor().addService(rpc1.getgRpcService()).build().start();
@@ -70,6 +80,7 @@ public class OneDBRpcManagerTest {
     DataPacket packet1 = generateDataPacket(1, 0);
     DataPacket packet00 = generateDataPacket(0, 0);
     DataPacket packet11 = generateDataPacket(1, 1);
+    DataPacket fakePacket = generateDataPacket(1, 2);
     rpc0.send(packet0);
     rpc1.send(packet1);
     DataPacketHeader headerfrom0 = packet0.getHeader();
@@ -86,6 +97,13 @@ public class OneDBRpcManagerTest {
     assertTrue("rpc0 receive wrong message", r1.equals(packet0));
     assertTrue("rpc0 receive wrong message", r00.equals(packet00));
     assertTrue("rpc0 receive wrong message", r11.equals(packet11));
+    rpc1.send(fakePacket);
+    assertEquals(2, rpc0.getSendDataPacketNum(false));
+    assertEquals(2, rpc1.getSendDataPacketNum(true));
+    assertEquals(40, rpc0.getPayloadByteLength(false));
+    assertEquals(40, rpc1.getPayloadByteLength(true));
+    rpc0.removeParty(owner1);
+    rpc1.removeParty(owner0);
     rpc0.disconnect();
     rpc1.disconnect();
     Thread.sleep(1000);

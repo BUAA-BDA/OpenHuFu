@@ -73,17 +73,17 @@ public class OneDBSchemaManager extends AbstractSchema {
     return ownerMap.keySet();
   }
 
-  public OwnerClient addOwner(String endpoint, String trustCertPath) {
+  public void addOwner(String endpoint, String trustCertPath) {
     try {
       ChannelCredentials cred = null;
       if (trustCertPath != null) {
         File trustCertFile = new File(trustCertPath);
         cred = TlsChannelCredentials.newBuilder().trustManager(trustCertFile).build();
       }
-      return addOwnerTLS(endpoint, cred);
+      addOwnerTLS(endpoint, cred);
     } catch (IOException e) {
       LOG.error("Fail to create channel credentials: {}", e.getMessage());
-      return addOwnerTLS(endpoint, null);
+      addOwnerTLS(endpoint, null);
     }
   }
 
