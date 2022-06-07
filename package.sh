@@ -5,6 +5,7 @@ then
   mvn clean install -T 0.5C -Dmaven.test.skip=true
   mkdir -p ./release/bin
   mkdir -p ./release/adapter
+  mkdir -p ./release/lib
   cp user/target/*-with-dependencies.jar ./release/bin/onedb_user_client.jar
   cp owner/target/*-with-dependencies.jar ./release/bin/onedb_owner_server.jar
   cp adapter-postgresql/target/*-with-dependencies.jar ./release/adapter/adapter_postgresql.jar
