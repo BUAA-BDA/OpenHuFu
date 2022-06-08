@@ -30,7 +30,6 @@ public class OneDBRpcManager implements RpcManager {
     this.rpcMap = rpcMapBuilder.build();
   }
 
-  @VisibleForTesting
   public OneDBRpcManager(List<Party> parties, List<Channel> channels) {
     assert parties.size() == channels.size();
     this.parties = ImmutableSet.copyOf(parties);

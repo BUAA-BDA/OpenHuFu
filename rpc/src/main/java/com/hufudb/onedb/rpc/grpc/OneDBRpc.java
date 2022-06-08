@@ -67,7 +67,6 @@ public class OneDBRpc implements Rpc {
     this(own, new HashSet<>(Arrays.asList(own)), threadPool, rootCert);
   }
 
-  @VisibleForTesting
   public OneDBRpc(Party own, List<Party> parties, List<Channel> channels) {
     assert parties.size() == channels.size();
     this.own = own;
