@@ -62,8 +62,9 @@ public class OwnerAggregteFunctions {
       if (remoteShares.isEmpty()) {
         return null;
       } else {
-        OneDBCodec.xor(localShares.get(0), remoteShares.get(0));
-        return OneDBCodec.decodeInt(localShares.get(0));
+        byte[] res = new byte[4];
+        OneDBCodec.xor(localShares.get(0), remoteShares.get(0), res);
+        return OneDBCodec.decodeInt(res);
       }
     }
 

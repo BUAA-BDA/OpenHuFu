@@ -447,5 +447,44 @@ public class IntegrationTest {
     // todo: add more test
   }
 
-  
+  @Test
+  public void protectedJoinTest() throws SQLException {
+    ResultSet result = user.executeQuery("select student_pro_s1.name, student_pro_s2.name from student_pro_s1, student_pro_s2 where student_pro_s1.dept_name = student_pro_s2.dept_name");
+    List<ArrayRow> expect = toRows(ImmutableList.of(
+      ImmutableList.of("tom", "peter"),
+      ImmutableList.of("anna", "Brown"),
+      ImmutableList.of("Snow", "Brown")
+    ));
+    compareRows(expect, toRows(result));
+    result.close();
+
+    result = user.executeQuery("select student_pro_s2.name, student_pro_s1.name from student_pro_s1, student_pro_s2 where student_pro_s1.dept_name = student_pro_s2.dept_name");
+    expect = toRows(ImmutableList.of(
+      ImmutableList.of("peter", "tom"),
+      ImmutableList.of("Brown", "anna"),
+      ImmutableList.of("Brown", "Snow")
+    ));
+    compareRows(expect, toRows(result));
+    result.close();
+
+    result = user.executeQuery("select student_pro_s2.name, student_pro_s1.name from student_pro_s1, student_pro_s2 where student_pro_s1.score = student_pro_s2.score");
+    expect = toRows(ImmutableList.of(
+    ));
+    compareRows(expect, toRows(result));
+    result.close();
+
+    // todo: add more test
+  }
+
+  @Test
+  public void protectedSumTest() throws SQLException {
+    ResultSet result = user.executeQuery("select SUM(score) from student_pro_share");
+    List<ArrayRow> expect = toRows(ImmutableList.of(
+      ImmutableList.of(759)
+    ));
+    compareRows(expect, toRows(result));
+    result.close();
+
+    // todo: add more test
+  }
 }

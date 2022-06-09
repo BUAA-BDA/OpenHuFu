@@ -38,7 +38,7 @@
         {
           "name": "dept_name",
           "type": "STRING",
-          "modifier": "public"
+          "modifier": "protected"
         }
       ],
       "actualColumns": [0, 1, 2, 3]
@@ -65,7 +65,7 @@
         {
           "name": "dept_name",
           "type": "STRING",
-          "modifier": "public"
+          "modifier": "protected"
         }
       ],
       "actualColumns": [0, 1, 2, 3]

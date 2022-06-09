@@ -38,8 +38,7 @@ public class GMWTest {
     return ImmutableList.of(OneDBCodec.encodeInt(value));
   }
 
-  @Test
-  public void testGMW() throws Exception {
+  public void testcase(int a, int b) throws Exception {
     try {
       String ownerName0 = InProcessServerBuilder.generateName();
       String ownerName1 = InProcessServerBuilder.generateName();
@@ -68,8 +67,6 @@ public class GMWTest {
       GMW gmwSender = new GMW(rpc0, otSender, threadPool0);
       GMW gmwReceiver = new GMW(rpc1, otReceiver, threadPool1);
       ExecutorService service = Executors.newFixedThreadPool(2);
-      final int a = 4;
-      final int b = 2;
       Future<List<byte[]>> senFuture = service.submit(
         new Callable<List<byte[]>>() {
           @Override
@@ -87,8 +84,9 @@ public class GMWTest {
       });
       byte[] senRes = senFuture.get().get(0);
       byte[] recRes = recFuture.get().get(0);
-      OneDBCodec.xor(senRes, recRes);
-      int actual = OneDBCodec.decodeInt(senRes);
+      byte[] res = new byte[5];
+      OneDBCodec.xor(senRes, recRes, res);
+      int actual = OneDBCodec.decodeInt(res);
       int expect = a + b;
       assertEquals(expect, actual);
       rpc0.disconnect();
@@ -97,5 +95,10 @@ public class GMWTest {
       e.printStackTrace();
       throw e;
     }
+  }
+
+  @Test
+  public void testGMW() throws Exception {
+    testcase(1, 1);
   }
 }
