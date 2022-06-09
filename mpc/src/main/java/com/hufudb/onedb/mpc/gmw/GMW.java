@@ -1,6 +1,7 @@
 package com.hufudb.onedb.mpc.gmw;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -13,7 +14,6 @@ import com.hufudb.onedb.mpc.bristol.CircuitType;
 import com.hufudb.onedb.mpc.bristol.BristolFile.Gate;
 import com.hufudb.onedb.mpc.codec.OneDBCodec;
 import com.hufudb.onedb.mpc.ot.PublicKeyOT;
-import com.hufudb.onedb.mpc.utils.BitArray;
 import com.hufudb.onedb.rpc.Rpc;
 import com.hufudb.onedb.rpc.utils.DataPacket;
 import com.hufudb.onedb.rpc.utils.DataPacketHeader;
@@ -98,8 +98,11 @@ public class GMW extends RpcProtocolExecutor {
         packet.getHeader().getSenderId());
   }
 
-  boolean evaluateAnd(GMWMeta meta, int in1, int in2, int out) {
-        BitArray wireSet = meta.wireSet;
+  Callable<Boolean> evaluateAnd(GMWMeta meta, int in1, int in2, int out) {
+    return new Callable<Boolean>() {
+      @Override
+      public Boolean call() throws Exception {
+        BitSet wireSet = meta.wireSet;
         if (meta.isA) {
           boolean rb = random.nextBoolean();
           ImmutableList.Builder<byte[]> builder = ImmutableList.builder();
@@ -120,61 +123,72 @@ public class GMW extends RpcProtocolExecutor {
           wireSet.set(out, OneDBCodec.decodeBoolean(res));
         }
         return true;
+      }
+    };
   }
 
-  boolean evaluateXor(GMWMeta meta, int in1, int in2, int out) {
+  Callable<Boolean> evaluateXor(GMWMeta meta, int in1, int in2, int out) {
+    return new Callable<Boolean>() {
+      @Override
+      public Boolean call() throws Exception {
         meta.setBitSet(out, meta.getBitSet(in1) ^ meta.getBitSet(in2));
         return true;
+      }
+    };
   }
 
-  boolean evaluateNot(GMWMeta meta, int in, int out) {
+  Callable<Boolean> evaluateNot(GMWMeta meta, int in, int out) {
+    return new Callable<Boolean>() {
+      @Override
+      public Boolean call() throws Exception {
         if (meta.isA) {
           meta.setBitSet(out, !meta.getBitSet(in));
         } else {
           meta.setBitSet(out, meta.getBitSet(in));
         }
         return true;
+      }
+    };
   }
 
   void evaluateCircuit(GMWMeta meta) {
-    // ImmutableList<ImmutableList<Gate>> concurrentGates = meta.bristol.getGates();
-    Gate[] gates = meta.bristol.getGates();
+    ImmutableList<ImmutableList<Gate>> concurrentGates = meta.bristol.getGates();
     LOG.debug("{}]starts to evaluate circuit", rpc.ownParty());
-    // for (ImmutableList<Gate> gates : concurrentGates) {
-    //   List<Callable<Boolean>> concurrentTasks = new ArrayList<>();
-    //   LOG.debug("{} evaluate batch circuit", rpc.ownParty());
-      for (int i = 0; i < meta.bristol.getGateNum(); ++i) {
-        Gate gate = gates[i];
+    for (ImmutableList<Gate> gates : concurrentGates) {
+      List<Callable<Boolean>> concurrentTasks = new ArrayList<>();
+      LOG.debug("{} evaluate batch circuit", rpc.ownParty());
+      for (Gate gate : gates) {
         switch (gate.type) {
           case AND:
-            evaluateAnd(meta, gate.in1, gate.in2, gate.out);
+            concurrentTasks.add(evaluateAnd(meta, gate.in1, gate.in2, gate.out));
             break;
           case XOR:
-            evaluateXor(meta, gate.in1, gate.in2, gate.out);
+            concurrentTasks.add(evaluateXor(meta, gate.in1, gate.in2, gate.out));
             break;
           case NOT:
-            evaluateNot(meta, gate.in1, gate.out);
+            concurrentTasks.add(evaluateNot(meta, gate.in1, gate.out));
             break;
           default:
             LOG.error("Unsupported gate type {}", gate.toString());
             throw new UnsupportedOperationException("Unsupported gate type");
         }
       }
-      // try {
-      //   List<Future<Boolean>> futures = threadPool.invokeAll(concurrentTasks);
-      //   for (Future<Boolean> f : futures) {
-      //     f.get();
-      //   }
-      // } catch (Exception e) {
-      //   LOG.error("Error when evaluate circuit in GMW: {}", e.getMessage());
-      //   e.printStackTrace();
-      // }
-    // }
+      try {
+        List<Future<Boolean>> futures = threadPool.invokeAll(concurrentTasks);
+        for (Future<Boolean> f : futures) {
+          f.get();
+        }
+      } catch (Exception e) {
+        LOG.error("Error when evaluate circuit in GMW: {}", e.getMessage());
+        e.printStackTrace();
+      }
+    }
   }
 
   @Override
   public List<byte[]> run(long taskId, List<Integer> parties, List<byte[]> inputData,
       Object... args) {
+    assert parties.size() == 2;
     int circuitId = (Integer) args[0];
     CircuitType type = CircuitType.of(circuitId);
     LOG.debug("Load bristol of circuit {}", type);
@@ -184,7 +198,7 @@ public class GMW extends RpcProtocolExecutor {
     DataPacket sharesPacket = rpc.receive(expect);
     initWire(sharesPacket, meta);
     evaluateCircuit(meta);
-    BitArray resultSet = meta.wireSet.get(meta.bristol.getWireNum() - meta.bristol.getOut(),
+    BitSet resultSet = meta.wireSet.get(meta.bristol.getWireNum() - meta.bristol.getOut(),
         meta.bristol.getWireNum());
     LOG.debug("Result bitset [{}]", resultSet.toString());
     return ImmutableList.of(resultSet.toByteArray());
@@ -192,7 +206,7 @@ public class GMW extends RpcProtocolExecutor {
 
   static class GMWMeta {
     final BristolFile bristol;
-    final BitArray wireSet;
+    final BitSet wireSet;
     final long taskId;
     final int ownId;
     final int otherId;
@@ -201,7 +215,7 @@ public class GMW extends RpcProtocolExecutor {
 
     GMWMeta(CircuitType type, long taskId, int ownId, int otherId, int circuitType) {
       this.bristol = type.getBristol();
-      this.wireSet = new BitArray(this.bristol.getWireNum());
+      this.wireSet = new BitSet(this.bristol.getWireNum());
       this.taskId = taskId;
       this.ownId = ownId;
       this.otherId = otherId;
@@ -210,7 +224,7 @@ public class GMW extends RpcProtocolExecutor {
     }
 
     void initIn1(byte[] inBytes, int size) {
-      BitArray in1 = BitArray.valueOf(inBytes);
+      BitSet in1 = BitSet.valueOf(inBytes);
       final int in1Size = bristol.getIn1();
       for (int i = 0; i < in1Size; ++i) {
         wireSet.set(i, in1.get(i));
@@ -218,7 +232,7 @@ public class GMW extends RpcProtocolExecutor {
     }
 
     void initIn2(byte[] inBytes, int size) {
-      BitArray in2 = BitArray.valueOf(inBytes);
+      BitSet in2 = BitSet.valueOf(inBytes);
       final int in1Size = bristol.getIn1();
       final int in2Size = bristol.getIn2();
       for (int i = 0; i < in2Size; ++i) {

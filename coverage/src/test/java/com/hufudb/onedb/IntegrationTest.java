@@ -480,7 +480,7 @@ public class IntegrationTest {
   public void protectedSumTest() throws SQLException {
     ResultSet result = user.executeQuery("select SUM(score) from student_pro_share");
     List<ArrayRow> expect = toRows(ImmutableList.of(
-      ImmutableList.of(759)
+      ImmutableList.of(519)
     ));
     compareRows(expect, toRows(result));
     result.close();

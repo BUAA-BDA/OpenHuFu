@@ -22,7 +22,7 @@ public class OneDBCodec {
   }
 
   public static byte[] encodeLong(long value) {
-    return ByteBuffer.allocate(Integer.BYTES).order(ByteOrder.LITTLE_ENDIAN).putLong(value).array();
+    return ByteBuffer.allocate(Long.BYTES).order(ByteOrder.LITTLE_ENDIAN).putLong(value).array();
   }
 
   public static byte[] encodeString(String str) {

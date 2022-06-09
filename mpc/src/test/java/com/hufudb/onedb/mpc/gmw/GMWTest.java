@@ -84,7 +84,7 @@ public class GMWTest {
       });
       byte[] senRes = senFuture.get().get(0);
       byte[] recRes = recFuture.get().get(0);
-      byte[] res = new byte[5];
+      byte[] res = new byte[4];
       OneDBCodec.xor(senRes, recRes, res);
       int actual = OneDBCodec.decodeInt(res);
       int expect = a + b;
@@ -99,6 +99,12 @@ public class GMWTest {
 
   @Test
   public void testGMW() throws Exception {
-    testcase(1, 1);
+    testcase(2, 6);
+    testcase(1, 256);
+    testcase(2, 255);
+    testcase(241, 278);
+    testcase(278, 241);
+    testcase(65536, 258);
+    testcase(0x000F0F00, 0x10001000);
   }
 }

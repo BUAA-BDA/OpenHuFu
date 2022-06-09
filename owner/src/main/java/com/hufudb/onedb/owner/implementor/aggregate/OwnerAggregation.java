@@ -37,7 +37,6 @@ public class OwnerAggregation {
       aggFunctions.add(OwnerAggregteFunctions.getAggregateFunc(exp, rpc, threadPool, taskInfo));
       aggTypes.add(exp.getOutType());
     }
-    // Aggregator aggregator = Aggregator.create(groups, aggFunctions, aggTypes);
     Schema outSchema = ExpressionUtils.createSchema(aggs);
     DataSet result = ArrayDataSet.materialize(AggDataSet.create(outSchema, new SingleAggregator(outSchema, aggFunctions), input));
     if (taskInfo.getParties(1) == rpc.ownParty().getPartyId()) {
