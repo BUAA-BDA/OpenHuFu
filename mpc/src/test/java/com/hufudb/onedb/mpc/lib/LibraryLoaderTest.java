@@ -2,6 +2,7 @@ package com.hufudb.onedb.mpc.lib;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -25,12 +26,23 @@ import org.junit.Test;
 public class LibraryLoaderTest {
   static Random random = new Random();
 
+  @Test
+  public void testLoadEmptyProtocolLibrary() {
+    String onedbRoot = System.getenv("ONEDB_ROOT");
+    Path libDir = Paths.get(onedbRoot, "lib");
+    Map<ProtocolType, ProtocolFactory> factories =
+        LibraryLoader.loadProtocolLibrary(libDir.toString());
+    assertTrue(factories.size() >= 0);
+  }
+
+  /**
+   * require the installation of aby4j
+   */
   @Ignore
   @Test
   public void testLoadProtocolLibrary() throws InterruptedException, ExecutionException {
     String onedbRoot = System.getenv("ONEDB_ROOT");
     Path libDir = Paths.get(onedbRoot, "lib");
-    System.err.println(libDir.toString());
     Map<ProtocolType, ProtocolFactory> factories =
         LibraryLoader.loadProtocolLibrary(libDir.toString());
     ProtocolFactory factory = factories.get(ProtocolType.ABY);

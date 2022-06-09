@@ -22,8 +22,8 @@ public class PublishedTableSchema {
     if (publishedColumns.isEmpty()) {
       this.fakeSchema = TableSchema.of(publishedTableName, tableSchema.getSchema());
       ImmutableList.Builder<Integer> mapBuilder =
-          ImmutableList.builderWithExpectedSize(publishedColumns.size());
-      for (int i = 0; i < publishedColumns.size(); ++i) {
+          ImmutableList.builderWithExpectedSize(tableSchema.size());
+      for (int i = 0; i < tableSchema.size(); ++i) {
         mapBuilder.add(i);
       }
       this.mappings = mapBuilder.build();
@@ -61,23 +61,6 @@ public class PublishedTableSchema {
 
   public Schema getPublishedSchema() {
     return fakeSchema.getSchema();
-  }
-
-  public List<String> getActualNames() {
-    ImmutableList.Builder<String> builder = ImmutableList.builder();
-    for (int i = 0; i < actualSchema.schema.size(); ++i) {
-      builder.add(actualSchema.schema.getName(mappings.get(i)));
-    }
-    return builder.build();
-  }
-
-  public ColumnDesc getActualColumn(int index) {
-    // todo: check index out of range
-    return actualSchema.schema.getColumnDesc(mappings.get(index));
-  }
-
-  public List<ColumnDesc> getActualColumn() {
-    return actualSchema.getSchema().getColumnDescs();
   }
 
   public List<Integer> getMappings() {

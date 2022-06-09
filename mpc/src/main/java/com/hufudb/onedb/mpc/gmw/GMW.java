@@ -58,13 +58,14 @@ public class GMW extends RpcProtocolExecutor {
 
   byte[] generateShares(byte[] ori, GMWMeta meta) {
     final byte[] randomMask = random.randomBytes(ori.length);
-    OneDBCodec.xor(ori, randomMask);
+    byte[] shares = new byte[ori.length];
+    OneDBCodec.xor(ori, randomMask, shares);
     final int in1 = meta.bristol.getIn1();
     final int in2 = meta.bristol.getIn2();
     if (meta.isA) {
-      meta.initIn1(ori, in1);
+      meta.initIn1(shares, in1);
     } else {
-      meta.initIn2(ori, in2);
+      meta.initIn2(shares, in2);
     }
     return randomMask;
   }

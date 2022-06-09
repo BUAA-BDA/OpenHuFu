@@ -10,7 +10,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import com.google.common.annotations.VisibleForTesting;
 import com.hufudb.onedb.rpc.Party;
 import com.hufudb.onedb.rpc.Rpc;
 import com.hufudb.onedb.rpc.grpc.concurrent.ConcurrentBuffer;
@@ -67,7 +66,6 @@ public class OneDBRpc implements Rpc {
     this(own, new HashSet<>(Arrays.asList(own)), threadPool, rootCert);
   }
 
-  @VisibleForTesting
   public OneDBRpc(Party own, List<Party> parties, List<Channel> channels) {
     assert parties.size() == channels.size();
     this.own = own;
@@ -117,7 +115,6 @@ public class OneDBRpc implements Rpc {
 
   @Override
   public void send(DataPacket dataPacket) {
-    payloadByteLength += dataPacket.getPayloadByteLength();
     int receiverId = dataPacket.getHeader().getReceiverId();
     int senderId = dataPacket.getHeader().getSenderId();
     assert senderId == own.getPartyId();
@@ -126,6 +123,8 @@ public class OneDBRpc implements Rpc {
     lock.readLock().unlock();
     if (client != null) {
       client.send(dataPacket.toProto());
+      dataPacketNum++;
+      payloadByteLength += dataPacket.getPayloadByteLength();
     } else {
       LOG.error("No connection to receiver[{}]", receiverId);
     }

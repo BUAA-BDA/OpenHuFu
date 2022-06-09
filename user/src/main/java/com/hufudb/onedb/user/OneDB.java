@@ -1,5 +1,7 @@
 package com.hufudb.onedb.user;
 
+import com.google.common.collect.ImmutableList;
+import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.sql.rel.OneDBTable;
 import com.hufudb.onedb.core.sql.schema.OneDBSchemaManager;
 import com.hufudb.onedb.core.sql.schema.OneDBSchemaFactory;
@@ -104,11 +106,13 @@ public class OneDB {
   }
 
   public boolean addOwner(String endpoint) {
-    return schema.addOwner(endpoint, null) != null;
+    schema.addOwner(endpoint, null);
+    return true;
   }
 
   public boolean addOwner(String endpoint, String certPath) {
-    return schema.addOwner(endpoint, certPath) != null;
+    schema.addOwner(endpoint, certPath);
+    return true;
   }
 
   public void removeOwner(String endpoint) {
@@ -116,7 +120,12 @@ public class OneDB {
   }
 
   public List<TableSchema> getOwnerTableSchema(String endpoint) {
-    return schema.getOwnerClient(endpoint).getAllLocalTable();
+    OwnerClient client = schema.getOwnerClient(endpoint);
+    if (client  == null) {
+      return ImmutableList.of();
+    } else {
+      return client.getAllLocalTable();
+    }
   }
 
   // for table

@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executors;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.hufudb.onedb.rpc.Party;
@@ -30,7 +29,6 @@ public class OneDBRpcManager implements RpcManager {
     this.rpcMap = rpcMapBuilder.build();
   }
 
-  @VisibleForTesting
   public OneDBRpcManager(List<Party> parties, List<Channel> channels) {
     assert parties.size() == channels.size();
     this.parties = ImmutableSet.copyOf(parties);

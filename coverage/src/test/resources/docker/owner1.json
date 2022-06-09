@@ -1,0 +1,176 @@
+{
+  "id": 0,
+  "port": 6789,
+  "hostname": "localhost",
+  "adapterconfig": {
+    "datasource": "postgresql",
+    "url": "jdbc:postgresql://postgres1:5432/postgres",
+    "catalog": "postgres",
+    "user": "postgres",
+    "passwd": "onedb"
+  },
+  "tables": [
+    {
+      "actualName": "student",
+      "publishedName": "student1",
+      "publishedColumns": [],
+      "actualColumns": []
+    },
+    {
+      "actualName": "student",
+      "publishedName": "student2",
+      "publishedColumns": [
+        {
+          "name": "name",
+          "type": "STRING",
+          "modifier": "public"
+        },
+        {
+          "name": "score",
+          "type": "INT",
+          "modifier": "public"
+        },
+        {
+          "name": "age",
+          "type": "INT",
+          "modifier": "hidden"
+        },
+        {
+          "name": "dept_name",
+          "type": "STRING",
+          "modifier": "hidden"
+        }
+      ],
+      "actualColumns": [0, 2, 1, 3]
+    },
+    {
+      "actualName": "student",
+      "publishedName": "student3",
+      "publishedColumns": [
+        {
+          "name": "name",
+          "type": "STRING",
+          "modifier": "public"
+        },
+        {
+          "name": "score",
+          "type": "INT",
+          "modifier": "public"
+        },
+        {
+          "name": "age",
+          "type": "INT",
+          "modifier": "hidden"
+        },
+        {
+          "name": "dept_name",
+          "type": "STRING",
+          "modifier": "hidden"
+        }
+      ],
+      "actualColumns": [0, 2, 1, 3]
+    },
+    {
+      "actualName": "student",
+      "publishedName": "st_pro_1",
+      "publishedColumns": [
+        {
+          "name": "name",
+          "type": "STRING",
+          "modifier": "protected"
+        },
+        {
+          "name": "score",
+          "type": "INT",
+          "modifier": "protected"
+        },
+        {
+          "name": "age",
+          "type": "INT",
+          "modifier": "protected"
+        },
+        {
+          "name": "dept_name",
+          "type": "STRING",
+          "modifier": "protected"
+        }
+      ],
+      "actualColumns": [0, 1, 2, 3]
+    },
+    {
+      "actualName": "student",
+      "publishedName": "st_pro_3",
+      "publishedColumns": [
+        {
+          "name": "name",
+          "type": "STRING",
+          "modifier": "protected"
+        },
+        {
+          "name": "score",
+          "type": "INT",
+          "modifier": "protected"
+        },
+        {
+          "name": "age",
+          "type": "INT",
+          "modifier": "protected"
+        },
+        {
+          "name": "dept_name",
+          "type": "STRING",
+          "modifier": "protected"
+        }
+      ],
+      "actualColumns": [0, 1, 2, 3]
+    },
+    {
+      "actualName": "region",
+      "publishedName": "region",
+      "publishedColumns": [],
+      "actualColumns": []
+    },
+    {
+      "actualName": "nation",
+      "publishedName": "nation",
+      "publishedColumns": [],
+      "actualColumns": []
+    },
+    {
+      "actualName": "partsupp",
+      "publishedName": "partsupp",
+      "publishedColumns": [],
+      "actualColumns": []
+    },
+    {
+      "actualName": "customer",
+      "publishedName": "customer",
+      "publishedColumns": [],
+      "actualColumns": []
+    },
+    {
+      "actualName": "lineitem",
+      "publishedName": "lineitem",
+      "publishedColumns": [],
+      "actualColumns": []
+    },
+    {
+      "actualName": "orders",
+      "publishedName": "orders",
+      "publishedColumns": [],
+      "actualColumns": []
+    },
+    {
+      "actualName": "part",
+      "publishedName": "part",
+      "publishedColumns": [],
+      "actualColumns": []
+    },
+    {
+      "actualName": "supplier",
+      "publishedName": "supplier",
+      "publishedColumns": [],
+      "actualColumns": []
+    }
+  ]
+}

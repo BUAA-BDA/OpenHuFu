@@ -52,13 +52,12 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
     this.tableInfo = new OneDBTableSchema(tableName, schema);
   }
 
-  static Table create(OneDBSchemaManager schemaManager, String tableName, Schema schema,
-      RelProtoDataType protoRowType) {
-    return new OneDBTable(tableName, schemaManager, schema, protoRowType);
-  }
-
   public static Table create(OneDBSchemaManager schemaManager, GlobalTableConfig tableMeta) {
     final String tableName = tableMeta.tableName;
+    if (schemaManager.hasTable(tableName)) {
+      LOG.warn("Table {} already exists", tableName);
+      return null;
+    }
     OneDBTable table = null;
     List<Pair<OwnerClient, TableSchema>> localInfos = new ArrayList<>();
     for (LocalTableConfig fedMeta : tableMeta.localTables) {

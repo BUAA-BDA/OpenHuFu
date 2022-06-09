@@ -7,18 +7,23 @@ import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.user.OneDB;
 import org.junit.Before;
 import org.junit.Test;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.net.URL;
 import java.sql.ResultSet;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class OneDBTest {
 
   static OneDB oneDB;
+  static int oneDBTableNumber;
 
   @Before
   public void setUp() {
@@ -28,8 +33,9 @@ public class OneDBTest {
     List<String> endpoints = ImmutableList.of("owner1:12345", "owner2:12345", "owner3:12345");
     endpoints.forEach(e -> {
       assert resource != null;
-      oneDB.addOwner(e, resource.getPath());
+      assertTrue(oneDB.addOwner(e, resource.getPath()));
     });
+    // Note: if add new OneDBTable, change the oneDBTableNumber below
     oneDB.createOneDBTable(new GlobalTableConfig("region",
             Stream.of(endpoints.get(0)).map(e -> new LocalTableConfig(e, "region"))
                     .collect(Collectors.toList())));
@@ -54,6 +60,27 @@ public class OneDBTest {
     oneDB.createOneDBTable(new GlobalTableConfig("supplier",
             endpoints.stream().map(e -> new LocalTableConfig(e, "supplier"))
                     .collect(Collectors.toList())));
+    oneDBTableNumber = 8;
+  }
+
+  @Test
+  public void testOwnerOperations() {
+    Set<String> endpoints = oneDB.getEndpoints();
+    assertTrue(endpoints.contains("owner1:12345"));
+    assertTrue(endpoints.contains("owner2:12345"));
+    assertTrue(endpoints.contains("owner3:12345"));
+
+    assertTrue(oneDB.getOwnerTableSchema("owner1:12345").size() > 0);
+    assertEquals(oneDBTableNumber, oneDB.getAllOneDBTableSchema().size());
+    
+    assertTrue("Error when add a existing owner", oneDB.addOwner("owner1:12345"));
+    oneDB.removeOwner("owner1:12345");
+
+    assertFalse("Error when add a existing global table", oneDB.createOneDBTable(new GlobalTableConfig("region", ImmutableList.of(new LocalTableConfig("owner1:12345", "region")))));
+    oneDB.dropOneDBTable("region");
+    assertEquals(ImmutableList.of(), oneDB.getOwnerTableSchema("region"));
+    assertNull(oneDB.getOneDBTableSchema("region"));
+    oneDB.close();
   }
 
   @Test

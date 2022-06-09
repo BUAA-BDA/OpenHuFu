@@ -131,11 +131,6 @@ public class PublicKeyOT extends RpcProtocolExecutor {
     return decryptSecrets(rpc.receive(expectHeader), meta);
   }
 
-  // Sender: the party who has n secrets
-  boolean isSender(DataPacketHeader initHeader) {
-    return initHeader.getSenderId() == rpc.ownParty().getPartyId();
-  }
-
   @Override
   public List<byte[]> run(long taskId, List<Integer> parties, List<byte[]> inputData,
       Object... args) {
@@ -168,23 +163,12 @@ public class PublicKeyOT extends RpcProtocolExecutor {
     Elgamal key;
     List<byte[]> secrets;
 
-    OTMeta() {}
-
-    OTMeta(int b, Elgamal key) {
-      this.b = b;
-      this.key = key;
-    }
-
     OTMeta(long taskId, int ownId, int otherId, long extraInfo, List<byte[]> inputs) {
       this.taskId = taskId;
       this.ownId = ownId;
       this.otherId = otherId;
       this.extraInfo = extraInfo;
       this.secrets = inputs;
-    }
-
-    OTMeta(List<byte[]> secrets) {
-      this.secrets = secrets;
     }
   }
 }

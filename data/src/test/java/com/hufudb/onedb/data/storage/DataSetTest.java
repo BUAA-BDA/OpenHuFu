@@ -4,6 +4,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -78,7 +79,7 @@ public class DataSetTest {
     it = dBuilder.build().getIterator();
     compareProto(rows, it);
   }
-  
+
   @Test
   public void testProtoRowDataSet() {
     Schema schema = Schema.newBuilder()
@@ -112,6 +113,7 @@ public class DataSetTest {
       assertEquals(vit.get(0), pit.get(0));
       assertEquals((Number) vit.get(2), (int) pit.get(1));
     }
+    projectDataSet.close();
   }
 
   DataSetProto generateDataSet(Schema schema, int size) {
@@ -167,6 +169,7 @@ public class DataSetTest {
       count++;
     }
     assertEquals(46, count);
+    multi.close();
   }
 
   @Test
@@ -195,6 +198,7 @@ public class DataSetTest {
       assertTrue(it.next());
       assertEquals(it2.get(0), it.get(0));
     }
+    r.close();
   }
 
   @Test
@@ -215,6 +219,7 @@ public class DataSetTest {
       assertEquals(leftIt.get(0), it.get(0));
       assertEquals(rightIt.get(0), it.get(2));
     }
+    r.close();
   }
 
   ProtoDataSet generateUnsortedDataSet() {
@@ -261,6 +266,8 @@ public class DataSetTest {
     assertTrue(it2.next());
     assertEquals(1.4, (double) it2.get(1), 0.001);
     assertFalse(it2.next());
+    d1.close();
+    d2.close();
   }
 
   @Test
@@ -292,5 +299,56 @@ public class DataSetTest {
     assertTrue(itl4.next());
     assertEquals(3, itl4.get(0));
     assertFalse(itl4.next());
+    l1.close();
+    l2.close();
+    l3.close();
+    l4.close();
+  }
+
+  DataSet generateMockDataSet() {
+    Schema schema = Schema.newBuilder()
+    .add("A", ColumnType.BOOLEAN, Modifier.HIDDEN)
+    .add("B", ColumnType.BYTE, Modifier.PUBLIC)
+    .add("C", ColumnType.INT, Modifier.PROTECTED)
+    .add("D", ColumnType.LONG, Modifier.PRIVATE)
+    .add("E", ColumnType.FLOAT, Modifier.PROTECTED)
+    .add("F", ColumnType.DOUBLE, Modifier.PRIVATE)
+    .add("G", ColumnType.STRING, Modifier.PUBLIC)
+    .add("H", ColumnType.BLOB, Modifier.PUBLIC).build();
+    Random random = new Random(System.currentTimeMillis());
+    ProtoDataSet.Builder dBuilder = ProtoDataSet.newBuilder(schema);
+    for (int i = 0; i < 3; ++i) {
+      ArrayRow.Builder builder = ArrayRow.newBuilder(8);
+      builder.set(0, random.nextBoolean());
+      builder.set(1, (byte) random.nextInt());
+      builder.set(2, random.nextInt());
+      builder.set(3, random.nextLong());
+      builder.set(4, random.nextFloat());
+      builder.set(5, random.nextDouble());
+      builder.set(6, RandomStringUtils.randomAlphabetic(20));
+      builder.set(7, RandomStringUtils.randomAscii(20).getBytes());
+      dBuilder.addRow(builder.build());
+    }
+    return dBuilder.build();
+  }
+
+  @Test
+  public void testResultDataSet() throws SQLException {
+    DataSet source = generateMockDataSet();
+    DataSetIterator exp = source.getIterator();
+    MockResultSet mock = new MockResultSet(source);
+    ResultDataSet result = new ResultDataSet(source.getSchema(), mock);
+    DataSetIterator it = result.getIterator();
+    assertEquals(source.getSchema(), result.getSchema());
+    while (exp.next()) {
+      assertTrue(it.next());
+      assertEquals(exp.size(), it.size());
+      for (int i = 0; i < 7; ++i) {
+        assertEquals(exp.get(i), it.get(i));
+      }
+      assertArrayEquals((byte[]) exp.get(7), (byte[]) it.get(7));
+    }
+    assertFalse(it.next());
+    result.close();
   }
 }

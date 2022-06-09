@@ -24,7 +24,7 @@ public class LibraryLoader {
           return file.getName().endsWith(".jar");
         }
       });
-    List<URL> libURLs = new ArrayList<>(libJars.length);
+    List<URL> libURLs = new ArrayList<>();
     for (File libJar : libJars) {
       try {
         libURLs.add(libJar.toURI().toURL());

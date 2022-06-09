@@ -2,10 +2,9 @@ package com.hufudb.onedb.mpc.codec;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 public class OneDBCodec {
   static byte TRUE = 1;
@@ -15,15 +14,15 @@ public class OneDBCodec {
   }
 
   public static byte[] encodeInt(int value) {
-    return ByteBuffer.allocate(Integer.BYTES).putInt(value).array();
+    return ByteBuffer.allocate(Integer.BYTES).order(ByteOrder.LITTLE_ENDIAN).putInt(value).array();
   }
 
   public static int decodeInt(byte[] value) {
-    return ByteBuffer.wrap(value).getInt();
+    return ByteBuffer.wrap(value).order(ByteOrder.LITTLE_ENDIAN).getInt();
   }
 
   public static byte[] encodeLong(long value) {
-    return ByteBuffer.allocate(Integer.BYTES).putLong(value).array();
+    return ByteBuffer.allocate(Long.BYTES).order(ByteOrder.LITTLE_ENDIAN).putLong(value).array();
   }
 
   public static byte[] encodeString(String str) {
@@ -31,7 +30,7 @@ public class OneDBCodec {
   }
 
   public static long decodeLong(byte[] value) {
-    return ByteBuffer.wrap(value).getLong();
+    return ByteBuffer.wrap(value).order(ByteOrder.LITTLE_ENDIAN).getLong();
   }
 
   public static byte[] encodeBoolean(boolean value) {
@@ -48,10 +47,9 @@ public class OneDBCodec {
   }
 
   // a = a ^ b
-  public static void xor(byte[] a, byte[] b) {
-    assert a.length == b.length;
-    for (int i = 0; i < a.length; ++i) {
-      a[i] = (byte) (a[i] ^ b[i]);
+  public static void xor(byte[] a, byte[] b, byte[] res) {
+    for (int i = 0; i < res.length; ++i) {
+      res[i] = (byte) ((i >= a.length ? 0 : a[i]) ^ (i >= b.length ? 0 : b[i]));
     }
   }
 

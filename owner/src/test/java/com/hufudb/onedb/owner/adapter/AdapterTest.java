@@ -18,6 +18,9 @@ import com.hufudb.onedb.data.storage.utils.ColumnTypeWrapper;
 import com.hufudb.onedb.data.storage.utils.ModifierWrapper;
 import com.hufudb.onedb.expression.ExpressionFactory;
 import com.hufudb.onedb.plan.LeafPlan;
+import com.hufudb.onedb.proto.OneDBData.ColumnType;
+import com.hufudb.onedb.proto.OneDBData.Modifier;
+import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
 
 @RunWith(JUnit4.class)
 public class AdapterTest {
@@ -71,9 +74,44 @@ public class AdapterTest {
     DataSetIterator it = result.getIterator();
     int count = 0;
     while (it.next()) {
+      assertEquals(4, it.size());
       count++;
     }
-    assertEquals(3, count);
+    assertTrue(count > 0);
+    result.close();
+    // test query select * from student1 where score >= 90;
+    plan.setWhereExps(ImmutableList.of(ExpressionFactory.createBinaryOperator(OperatorType.GE,
+        ColumnType.BOOLEAN, ExpressionFactory.createInputRef(2, ColumnType.INT, Modifier.PUBLIC),
+        ExpressionFactory.createLiteral(ColumnType.INT, 90))));
+    result = adapter.query(plan);
+    it = result.getIterator();
+    while (it.next()) {
+      assertTrue((int) it.get(2) >= 90);
+    }
+    // test query select dept_name, score from student1 where score >= 90;
+    plan.setSelectExps(
+        ImmutableList.of(ExpressionFactory.createInputRef(3, ColumnType.STRING, Modifier.PUBLIC),
+            ExpressionFactory.createInputRef(2, ColumnType.INT, Modifier.PUBLIC)));
+    result = adapter.query(plan);
+    it = result.getIterator();
+    while (it.next()) {
+      assertTrue((int) it.get(1) >= 90);
+    }
+    result.close();
+    // test query select dept_name, AVG(score) from student1 where score >= 90;
+    plan.setAggExps(ImmutableList.of(
+        ExpressionFactory.createAggFunc(ColumnType.STRING,
+        Modifier.PUBLIC, 0,
+        ImmutableList.of(ExpressionFactory.createInputRef(0, ColumnType.STRING, Modifier.PUBLIC))),
+        ExpressionFactory.createAggFunc(ColumnType.INT, Modifier.PUBLIC, 2, ImmutableList.of(ExpressionFactory.createInputRef(1, ColumnType.INT, Modifier.PUBLIC)))));
+    plan.setGroups(ImmutableList.of(0));
+    result = adapter.query(plan);
+    it = result.getIterator();
+    while (it.next()) {
+      assertTrue((int) it.get(1) >= 90);
+    }
+    result.close();
     // todo: test more query plan
+    adapter.shutdown();
   }
 }

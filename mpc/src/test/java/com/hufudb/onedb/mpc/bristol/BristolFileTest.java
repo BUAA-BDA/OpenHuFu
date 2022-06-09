@@ -8,6 +8,14 @@ import org.junit.Test;
 public class BristolFileTest {
 
   @Test
+  public void testGate() {
+    Gate gate1 = new Gate(0, 32, 33, GateType.AND);
+    assertEquals(gate1.toString(), "2 1 0 32 33 AND");
+    Gate gate2 = new Gate(0, 33, GateType.NOT);
+    assertEquals(gate2.toString(), "1 1 0 33 INV");
+  }
+
+  @Test
   public void testCircuit() {
     try {
       BristolFile adder32 = CircuitType.ADD_32.getBristol();
