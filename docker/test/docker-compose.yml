@@ -9,6 +9,7 @@ services:
     command: mvn clean verify
     environment:
       - ONEDB_ROOT=/usr/src/mymvn/release
+      - LD_LIBRARY_PATH=/usr/src/mymvn/release/lib
     volumes:
       - $HOME/.m2:/root/.m2
       - $PWD/../..:/usr/src/mymvn

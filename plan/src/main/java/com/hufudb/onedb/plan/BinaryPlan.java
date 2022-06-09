@@ -40,27 +40,8 @@ public class BinaryPlan extends BasePlan {
   }
 
   @Override
-  public void setChildren(List<Plan> children) {
-    assert children.size() == 2;
-    left = children.get(0);
-    right = children.get(1);
-  }
-
-  @Override
   public List<Plan> getChildren() {
     return ImmutableList.of(left, right);
-  }
-
-  @Override
-  public void updateChild(Plan newChild, Plan oldChild) {
-    if (oldChild == left) {
-      left = newChild;
-    } else if (oldChild == right) {
-      right = newChild;
-    } else {
-      LOG.error("fail to update child for binary plan");
-      throw new RuntimeException("fail to update child for binary plan");
-    }
   }
 
   @Override

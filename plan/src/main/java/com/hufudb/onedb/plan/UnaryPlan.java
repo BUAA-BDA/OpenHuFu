@@ -32,13 +32,13 @@ public class UnaryPlan extends BasePlan {
   int offset;
   TaskInfo taskInfo;
 
-  public UnaryPlan() {
+  public UnaryPlan(Plan child) {
     super();
+    this.child = child;
   }
 
   public static UnaryPlan fromProto(QueryPlanProto proto) {
-    UnaryPlan plan = new UnaryPlan();
-    plan.setChildren(ImmutableList.of(Plan.fromProto(proto.getChildren(0))));
+    UnaryPlan plan = new UnaryPlan(Plan.fromProto(proto.getChildren(0)));
     plan.setAggExps(proto.getAggExpList());
     plan.setSelectExps(proto.getSelectExpList());
     plan.setGroups(proto.getGroupList());
@@ -52,18 +52,6 @@ public class UnaryPlan extends BasePlan {
   @Override
   public List<Plan> getChildren() {
     return ImmutableList.of(child);
-  }
-
-  @Override
-  public void setChildren(List<Plan> children) {
-    assert children.size() == 1;
-    this.child = children.get(0);
-  }
-
-  @Override
-  public void updateChild(Plan newChild, Plan oldChild) {
-    assert oldChild == child;
-    child = newChild;
   }
 
   @Override

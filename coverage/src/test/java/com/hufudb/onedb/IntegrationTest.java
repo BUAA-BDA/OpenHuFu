@@ -485,6 +485,13 @@ public class IntegrationTest {
     compareRows(expect, toRows(result));
     result.close();
 
+    result = user.executeQuery("select COUNT(*) from student_pro_share");
+    expect = toRows(ImmutableList.of(
+      ImmutableList.of(6)
+    ));
+    compareRows(expect, toRows(result));
+    result.close();
+
     // todo: add more test
   }
 }

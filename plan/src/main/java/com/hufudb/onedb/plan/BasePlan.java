@@ -21,18 +21,6 @@ public abstract class BasePlan implements Plan {
   }
 
   @Override
-  public void setChildren(List<Plan> children) {
-    LOG.error("not support setChildren");
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public void updateChild(Plan newChild, Plan oldChild) {
-    LOG.error("not support updateChild");
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
   public String getTableName() {
     LOG.error("not support getTableName");
     throw new UnsupportedOperationException();
