@@ -10,7 +10,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import com.google.common.annotations.VisibleForTesting;
 import com.hufudb.onedb.rpc.Party;
 import com.hufudb.onedb.rpc.Rpc;
 import com.hufudb.onedb.rpc.grpc.concurrent.ConcurrentBuffer;

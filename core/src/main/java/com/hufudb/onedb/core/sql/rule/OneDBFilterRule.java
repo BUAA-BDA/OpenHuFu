@@ -3,15 +3,12 @@ package com.hufudb.onedb.core.sql.rule;
 import com.hufudb.onedb.core.sql.rel.OneDBFilter;
 import com.hufudb.onedb.core.sql.rel.OneDBRel;
 import com.hufudb.onedb.core.sql.rel.OneDBTableScan;
-import java.util.List;
 import org.apache.calcite.plan.Convention;
 import org.apache.calcite.plan.RelOptRuleCall;
-import org.apache.calcite.plan.RelOptUtil;
 import org.apache.calcite.plan.RelRule;
 import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.logical.LogicalFilter;
-import org.apache.calcite.rex.RexNode;
 import org.immutables.value.Value;
 
 public class OneDBFilterRule extends RelRule<OneDBFilterRule.OneDBFilterRuleConfig> {
