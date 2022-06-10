@@ -1,4 +1,4 @@
-package com.hufudb.onedb.rpc.grpc.concurrent;
+package com.hufudb.onedb.rpc.concurrent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +21,9 @@ public class ConcurrentBuffer<K, V> {
   private final Condition condition;
   private int wpoint;
 
+  /**
+   * create a buffer with 1 << offset slot
+   */
   public ConcurrentBuffer(int offset) {
     this.buff = new Object[1 << offset];
     this.searchIndex = new HashMap<>();
@@ -38,14 +41,14 @@ public class ConcurrentBuffer<K, V> {
     if (buff[wpoint] != null) {
       LOG.warn("Buffer full");
       lock.writeLock().unlock();
-      return true;
+      return false;
     } else {
       buff[wpoint] = value;
       searchIndex.put(key, wpoint);
       wpoint = (wpoint + 1) & mask;
       condition.signalAll();
       lock.writeLock().unlock();
-      return false;
+      return true;
     }
   }
 

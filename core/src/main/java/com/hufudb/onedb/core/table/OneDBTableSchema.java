@@ -40,15 +40,17 @@ public class OneDBTableSchema {
     this.tableList.add(Pair.of(client, localName));
   }
 
-  public void addLocalTable(OwnerClient client, String localName) {
+  public boolean addLocalTable(OwnerClient client, String localName) {
     Schema schema = client.getTableSchema(localName);
-    if (schema.equals(this.schema)) {
+    if (this.schema.equals(schema)) {
       lock.writeLock().lock();
       tableList.add(Pair.of(client, localName));
       lock.writeLock().unlock();
+      return true;
     } else {
       LOG.warn("Table {} schema {} mismatch with global table {} schema {}", localName, schema,
           name, this.schema);
+      return false;
     }
   }
 
@@ -163,6 +165,10 @@ public class OneDBTableSchema {
     return getTableList().stream()
         .map(p -> new LocalTableConfig(p.getLeft().getEndpoint(), p.getRight()))
         .collect(Collectors.toList());
+  }
+
+  public int localTableNumber() {
+    return getTableList().size();
   }
 
   @Override

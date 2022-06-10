@@ -67,6 +67,10 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
         continue;
       }
       Schema schema = client.getTableSchema(fedMeta.localName);
+      if (schema.equals(Schema.EMPTY)) {
+        LOG.warn("Table {} not exists in {}", fedMeta.localName, fedMeta.endpoint);
+        continue;
+      }
       LOG.info("Table {} schema {} from {}", fedMeta.localName, schema.toString(),
           fedMeta.endpoint);
       localInfos.add(Pair.of(client, TableSchema.of(fedMeta.localName, schema)));

@@ -1,7 +1,6 @@
 package com.hufudb.onedb;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.io.Reader;
@@ -12,12 +11,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -25,7 +23,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.hufudb.onedb.core.table.GlobalTableConfig;
-import com.hufudb.onedb.core.table.LocalTableConfig;
 import com.hufudb.onedb.data.storage.ArrayRow;
 import com.hufudb.onedb.data.storage.DataSet;
 import com.hufudb.onedb.data.storage.DataSetIterator;
@@ -33,12 +30,9 @@ import com.hufudb.onedb.expression.ExpressionFactory;
 import com.hufudb.onedb.owner.OwnerServer;
 import com.hufudb.onedb.plan.LeafPlan;
 import com.hufudb.onedb.user.OneDB;
-import io.grpc.testing.GrpcCleanupRule;
 
 @RunWith(JUnit4.class)
-public class IntegrationTest {
-  @Rule
-  public final GrpcCleanupRule grpcCleanup = new GrpcCleanupRule();
+public class IntegrationQueryTest {
 
   static List<OwnerServer> owners;
   static OneDB user;
@@ -55,7 +49,7 @@ public class IntegrationTest {
     for (OwnerServer owner : owners) {
       user.addOwner(owner.getEndpoint());
     }
-    URL userConfig = IntegrationTest.class.getClassLoader().getResource("user.json");
+    URL userConfig = IntegrationQueryTest.class.getClassLoader().getResource("user.json");
     Reader reader = Files.newBufferedReader(Paths.get(userConfig.getPath()));
     List<GlobalTableConfig> userTableConfig =
         new Gson().fromJson(reader, new TypeToken<ArrayList<GlobalTableConfig>>() {}.getType());
@@ -75,7 +69,7 @@ public class IntegrationTest {
     rootContext = Executors.newFixedThreadPool(configs.size());
     owners = new ArrayList<>();
     for (String config : configs) {
-      URL ownerConfig = IntegrationTest.class.getClassLoader().getResource(config);
+      URL ownerConfig = IntegrationQueryTest.class.getClassLoader().getResource(config);
       OwnerServer owner = OwnerServer.create(ownerConfig.getPath());
       Future<?> future = rootContext.submit(new Runnable() {
         @Override
@@ -90,25 +84,6 @@ public class IntegrationTest {
       future.get();
       owners.add(owner);
     }
-    // test onedb owner operation
-    initUser();
-    Set<String> endpoints = user.getEndpoints();
-    for (OwnerServer owner : owners) {
-      assertTrue(endpoints.contains(owner.getEndpoint()));
-    }
-    OwnerServer owner1 = owners.get(0);
-    assertTrue(user.getOwnerTableSchema(owner1.getEndpoint()).size() > 0);
-    assertEquals(globalTableNum, user.getAllOneDBTableSchema().size());
-    assertTrue("Error when add a existing owner", user.addOwner(owner1.getEndpoint()));
-    user.removeOwner(owner1.getEndpoint());
-    assertFalse("Error when add a existing global table",
-        user.createOneDBTable(new GlobalTableConfig("region",
-            ImmutableList.of(new LocalTableConfig(owner1.getEndpoint(), "region")))));
-    user.dropOneDBTable("region");
-    assertEquals(ImmutableList.of(), user.getOwnerTableSchema("region"));
-    assertNull(user.getOneDBTableSchema("region"));
-    user.close();
-    // init user
     initUser();
   }
 
@@ -198,8 +173,8 @@ public class IntegrationTest {
 
   static void compareRows(List<ArrayRow> expect, List<ArrayRow> actual) {
     assertEquals(expect.size(), actual.size());
-    expect.sort(IntegrationTest::compare);
-    actual.sort(IntegrationTest::compare);
+    expect.sort(IntegrationQueryTest::compare);
+    actual.sort(IntegrationQueryTest::compare);
     for (int i = 0; i < expect.size(); ++i) {
       assertTrue(equals(expect.get(i), actual.get(i)));
     }
@@ -409,6 +384,70 @@ public class IntegrationTest {
     compareRows(expect, toRows(result));
     result.close();
 
+    result = user.executeQuery("select name, score from student_pub_share where score < 70");
+    expect = toRows(ImmutableList.of(
+      ImmutableList.of("jack", 60)
+    ));
+    compareRows(expect, toRows(result));
+    result.close();
+
+    result = user.executeQuery("select name, score from student_pub_share where score = 100");
+    expect = toRows(ImmutableList.of(
+      ImmutableList.of("john", 100)
+    ));
+    compareRows(expect, toRows(result));
+    result.close();
+    // todo: add more test
+  }
+
+  @Test
+  public void calcTest() throws SQLException {
+    ResultSet result = user.executeQuery("select name, score + 10 from student_pub_s1");
+    List<ArrayRow> expect = toRows(ImmutableList.of(
+      ImmutableList.of("tom", 100),
+      ImmutableList.of("anna", 99),
+      ImmutableList.of("Snow", 109)
+    ));
+    compareRows(expect, toRows(result));
+    result.close();
+
+    result = user.executeQuery("select name, -age from student_pub_s1");
+    expect = toRows(ImmutableList.of(
+      ImmutableList.of("tom", -21),
+      ImmutableList.of("anna", -20),
+      ImmutableList.of("Snow", -20)
+    ));
+    compareRows(expect, toRows(result));
+    result.close();
+
+    result = user.executeQuery("select name, case when score < 70 then score + 10 when score <= 80 then score + 5 else score end from student_pub_s3");
+    expect = toRows(ImmutableList.of(
+      ImmutableList.of("john", 100),
+      ImmutableList.of("jack", 70),
+      ImmutableList.of("Brand", 85)
+    ));
+    compareRows(expect, toRows(result));
+    result.close();
+    // todo: add more test
+  }
+
+  @Test
+  public void joinTest() throws SQLException {
+    ResultSet result = user.executeQuery("select student_pub_s1.name, student_pub_s2.name from student_pub_s1, student_pub_s2 where student_pub_s1.age > student_pub_s2.age");
+    List<ArrayRow> expect = toRows(ImmutableList.of(
+      ImmutableList.of("tom", "peter")
+    ));
+    compareRows(expect, toRows(result));
+    result.close();
+
+    result = user.executeQuery("select student_pub_s1.name, student_pub_s2.name from student_pub_s1, student_pub_s2 where student_pub_s1.dept_name = student_pub_s2.dept_name");
+    expect = toRows(ImmutableList.of(
+      ImmutableList.of("tom", "peter"),
+      ImmutableList.of("anna", "Brown"),
+      ImmutableList.of("Snow", "Brown")
+    ));
+    compareRows(expect, toRows(result));
+    result.close();
     // todo: add more test
   }
 
@@ -491,7 +530,14 @@ public class IntegrationTest {
     ));
     compareRows(expect, toRows(result));
     result.close();
-
     // todo: add more test
+  }
+
+  @AfterClass
+  public static void shutdown() throws Exception {
+    user.close();
+    for (OwnerServer owner : owners) {
+      owner.stop();
+    }
   }
 }

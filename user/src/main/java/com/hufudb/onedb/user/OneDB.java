@@ -144,4 +144,12 @@ public class OneDB {
   public void dropOneDBTable(String tableName) {
     schema.dropTable(tableName);
   }
+
+  public boolean addLocalTable(String oneDBTableName, String endpoint, String localTableName) {
+    return schema.addLocalTable(oneDBTableName, endpoint, localTableName);
+  }
+
+  public void dropLocalTable(String oneDBTableName, String endpoint, String localTableName) {
+    schema.dropLocalTable(oneDBTableName, endpoint, localTableName);
+  }
 }
