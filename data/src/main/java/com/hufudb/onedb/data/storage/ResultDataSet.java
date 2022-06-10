@@ -38,6 +38,10 @@ public class ResultDataSet implements DataSet {
     }
   }
 
+  public interface Getter<T> {
+    T get() throws SQLException;
+  }
+
   class ResultIterator implements DataSetIterator {
     List<Getter> getters;
 
@@ -49,31 +53,19 @@ public class ResultDataSet implements DataSet {
         switch(col.getType()) {
           case BLOB:
             builder.add(() -> {
-              try {
-                return result.getBytes(idx);
-              } catch (SQLException e) {
-                throw new RuntimeException("Error in resultDataSet");
-              }
+              return result.getBytes(idx);
             });
             break;
           case BOOLEAN:
             builder.add(() -> {
-              try {
-                return result.getBoolean(idx);
-              } catch (SQLException e) {
-                throw new RuntimeException("Error in resultDataSet");
-              }
+              return result.getBoolean(idx);
             });
             break;
           case BYTE:
           case SHORT:
           case INT:
             builder.add(() -> {
-              try {
-                return result.getInt(idx);
-              } catch (SQLException e) {
-                throw new RuntimeException("Error in resultDataSet");
-              }
+              return result.getInt(idx);
             });
             break;
           case DATE:
@@ -81,38 +73,22 @@ public class ResultDataSet implements DataSet {
           case TIMESTAMP:
           case LONG:
             builder.add(() -> {
-              try {
-                return result.getLong(idx);
-              } catch (SQLException e) {
-                throw new RuntimeException("Error in resultDataSet");
-              }
+              return result.getLong(idx);
             });
             break;
           case STRING:
             builder.add(() -> {
-              try {
-                return result.getString(idx);
-              } catch (SQLException e) {
-                throw new RuntimeException("Error in resultDataSet");
-              }
+              return result.getString(idx);
             });
             break;
           case DOUBLE:
             builder.add(() -> {
-              try {
-                return result.getDouble(idx);
-              } catch (SQLException e) {
-                throw new RuntimeException("Error in resultDataSet");
-              }
+              return result.getDouble(idx);
             });
             break;
           case FLOAT:
             builder.add(() -> {
-              try {
-                return result.getFloat(idx);
-              } catch (SQLException e) {
-                throw new RuntimeException("Error in resultDataSet");
-              }
+              return result.getFloat(idx);
             });
             break;
           default:
@@ -137,7 +113,7 @@ public class ResultDataSet implements DataSet {
     public Object get(int columnIndex) {
       try {
         return getters.get(columnIndex).get();
-      } catch (RuntimeException e) {
+      } catch (Exception e) {
         LOG.error("Error in get of ResultDataSet: {}", e.getMessage());
         return null;
       }

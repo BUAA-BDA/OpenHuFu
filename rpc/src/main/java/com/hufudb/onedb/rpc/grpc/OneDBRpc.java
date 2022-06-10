@@ -12,7 +12,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import com.hufudb.onedb.rpc.Party;
 import com.hufudb.onedb.rpc.Rpc;
-import com.hufudb.onedb.rpc.grpc.concurrent.ConcurrentBuffer;
+import com.hufudb.onedb.rpc.concurrent.ConcurrentBuffer;
 import com.hufudb.onedb.rpc.grpc.pipe.PipeClient;
 import com.hufudb.onedb.rpc.grpc.pipe.PipeService;
 import com.hufudb.onedb.rpc.utils.DataPacket;
@@ -117,7 +117,10 @@ public class OneDBRpc implements Rpc {
   public void send(DataPacket dataPacket) {
     int receiverId = dataPacket.getHeader().getReceiverId();
     int senderId = dataPacket.getHeader().getSenderId();
-    assert senderId == own.getPartyId();
+    if (senderId != own.getPartyId()) {
+      LOG.error("Packet with wrong senderId[{}]", senderId);
+      return;
+    }
     lock.readLock().lock();
     PipeClient client = clientMap.get(receiverId);
     lock.readLock().unlock();

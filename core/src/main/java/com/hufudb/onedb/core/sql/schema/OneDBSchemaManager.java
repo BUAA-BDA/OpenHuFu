@@ -143,7 +143,11 @@ public class OneDBSchemaManager extends AbstractSchema {
   public void removeOwner(String endpoint) {
     OwnerClient client = ownerMap.remove(endpoint);
     for (Table table : tableMap.values()) {
-      ((OneDBTable) table).getTableSchema().removeOwner(client);
+      OneDBTable onedbTable = (OneDBTable) table;
+      onedbTable.getTableSchema().removeOwner(client);
+      if (onedbTable.getTableSchema().localTableNumber() == 0) {
+        dropTable(onedbTable.getTableName());
+      }
     }
   }
 
@@ -156,12 +160,13 @@ public class OneDBSchemaManager extends AbstractSchema {
     tableMap.remove(tableName);
   }
 
-  public void addLocalTable(String tableName, String endpoint, String localTableName) {
+  public boolean addLocalTable(String tableName, String endpoint, String localTableName) {
     OneDBTableSchema table = getTableSchema(tableName);
     OwnerClient client = getOwnerClient(endpoint);
     if (table != null && client != null) {
-      table.addLocalTable(client, localTableName);
+      return table.addLocalTable(client, localTableName);
     }
+    return false;
   }
 
   public void dropLocalTable(String tableName, String endpoint) {
@@ -169,6 +174,14 @@ public class OneDBSchemaManager extends AbstractSchema {
     OwnerClient client = getOwnerClient(endpoint);
     if (table != null && client != null) {
       table.dropLocalTable(client);
+    }
+  }
+
+  public void dropLocalTable(String tableName, String endpoint, String localTableName) {
+    OneDBTableSchema table = getTableSchema(tableName);
+    OwnerClient client = getOwnerClient(endpoint);
+    if (table != null && client != null) {
+      table.dropLocalTable(client, localTableName);
     }
   }
 

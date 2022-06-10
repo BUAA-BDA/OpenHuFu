@@ -56,8 +56,7 @@ public class BasicRewriter implements Rewriter {
         // return leaf directly if no aggergate, limit or sort
         return leaf;
       }
-      UnaryPlan unary = new UnaryPlan();
-      unary.setChildren(ImmutableList.of(leaf));
+      UnaryPlan unary = new UnaryPlan(leaf);
       if (hasAgg) {
         rewriteAggregations(unary, leaf);
       } else {

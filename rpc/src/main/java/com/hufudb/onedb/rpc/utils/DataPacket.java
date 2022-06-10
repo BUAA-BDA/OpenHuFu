@@ -55,11 +55,6 @@ public final class DataPacket {
             .collect(Collectors.toList()));
   }
 
-  public static DataPacket emptyPacket(int senderId, int receiverId) {
-    return DataPacket.fromByteArrayList(new DataPacketHeader(0, 0, 0, senderId, receiverId),
-        ImmutableList.of());
-  }
-
   @Override
   public int hashCode() {
     return new HashCodeBuilder().append(header)

@@ -4,7 +4,7 @@ import java.util.Map;
 import com.hufudb.onedb.proto.PipeGrpc;
 import com.hufudb.onedb.proto.DataPacket.DataPacketProto;
 import com.hufudb.onedb.proto.DataPacket.ResponseProto;
-import com.hufudb.onedb.rpc.grpc.concurrent.ConcurrentBuffer;
+import com.hufudb.onedb.rpc.concurrent.ConcurrentBuffer;
 import com.hufudb.onedb.rpc.utils.DataPacket;
 import com.hufudb.onedb.rpc.utils.DataPacketHeader;
 import io.grpc.stub.StreamObserver;
@@ -36,8 +36,8 @@ public class PipeService extends PipeGrpc.PipeImplBase {
       resp = ResponseProto.newBuilder().setStatus(1)
           .setMsg(String.format("No buffer for Party[%d]", senderId)).build();
     } else {
-      boolean err = buffer.put(packet.getHeader(), packet);
-      if (err) {
+      boolean ok = buffer.put(packet.getHeader(), packet);
+      if (!ok) {
         resp = ResponseProto.newBuilder().setStatus(1)
             .setMsg(String.format("Buffer of Party[%d] is full", senderId)).build();
       }

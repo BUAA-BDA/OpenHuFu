@@ -34,10 +34,9 @@ public class OneDBAggregate extends Aggregate implements OneDBRel {
     List<Integer> groups = new ArrayList<>(getGroupSet().asList());
     List<Expression> aggs = CalciteConverter.convert(groups, aggCalls, implementor.getCurrentOutput());
     if (!implementor.getAggExps().isEmpty()) {
-      UnaryPlan plan = new UnaryPlan();
+      UnaryPlan plan = new UnaryPlan(implementor.getCurrentPlan());
       plan.setSelectExps(ExpressionFactory.createInputRef(implementor.getAggExps()));
       plan.setAggExps(aggs);
-      plan.setChildren(ImmutableList.of(implementor.getCurrentPlan()));
       implementor.setCurrentPlan(plan);
     } else {
       implementor.setAggExps(aggs);

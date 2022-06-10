@@ -7,19 +7,16 @@ import com.hufudb.onedb.core.implementor.UserSideImplementor;
 import com.hufudb.onedb.core.rewriter.BasicRewriter;
 import com.hufudb.onedb.core.sql.schema.OneDBSchemaManager;
 import com.hufudb.onedb.core.table.OneDBTableSchema;
-import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.data.storage.DataSet;
 import com.hufudb.onedb.data.storage.Row;
 import com.hufudb.onedb.plan.Plan;
 import com.hufudb.onedb.plan.QueryPlanPool;
 import com.hufudb.onedb.rewriter.Rewriter;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.calcite.linq4j.Enumerator;
-import org.apache.calcite.schema.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.commons.lang3.tuple.Pair;
@@ -61,57 +58,8 @@ public class OneDBClient {
     return threadPool;
   }
 
-  public boolean hasOwner(String endpoint) {
-    return schemaManager.hasOwner(endpoint);
-  }
-
-  public OwnerClient getOwnerClient(String endpoint) {
-    return schemaManager.getOwnerClient(endpoint);
-  }
-
-  public Set<String> getEndpoints() {
-    return schemaManager.getEndpoints();
-  }
-
-  // add global table through zk
-  public void addTable2Schema(String tableName, Table table) {
-    schemaManager.addTable(tableName, table);
-  }
-
-  // drop global table
-  public void dropTable(String tableName) {
-    schemaManager.dropTable(tableName);
-  }
-
   public OneDBTableSchema getTableSchema(String tableName) {
     return schemaManager.getTableSchema(tableName);
-  }
-
-  public boolean hasTable(String tableName) {
-    return schemaManager.hasTable(tableName);
-  }
-
-  // for local table
-  public void removeLocalTable(String globalTableName, String endpoint, String localTableName) {
-    OneDBTableSchema table = getTableSchema(globalTableName);
-    if (table == null) {
-      LOG.error("Gloabl table {} not exists", globalTableName);
-      return;
-    }
-    OwnerClient client = getOwnerClient(endpoint);
-    if (client == null) {
-      LOG.error("Endpoint {} not exists", endpoint);
-    }
-    table.dropLocalTable(client, localTableName);
-  }
-
-  public void dropLocalTable(String tableName, String endpoint) {
-    schemaManager.dropLocalTable(tableName, endpoint);
-  }
-
-  public Schema getSchema(String tableName) {
-    OneDBTableSchema table = getTableSchema(tableName);
-    return table != null ? table.getSchema() : null;
   }
 
   public List<Pair<OwnerClient, String>> getTableClients(String tableName) {

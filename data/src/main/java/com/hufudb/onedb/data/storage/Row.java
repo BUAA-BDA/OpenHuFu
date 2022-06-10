@@ -16,8 +16,4 @@ public interface Row {
     }
     return true;
   }
-
-  public interface Getter<T> {
-    T get();
-  }
 }

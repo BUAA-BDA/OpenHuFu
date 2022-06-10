@@ -29,10 +29,6 @@ public interface Plan {
 
   List<Plan> getChildren();
 
-  void setChildren(List<Plan> children);
-
-  void updateChild(Plan newChild, Plan oldChild);
-
   String getTableName();
 
   void setTableName(String name);

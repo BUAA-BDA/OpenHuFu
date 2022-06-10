@@ -80,7 +80,8 @@ public class OneDBRpcManagerTest {
     DataPacket packet1 = generateDataPacket(1, 0);
     DataPacket packet00 = generateDataPacket(0, 0);
     DataPacket packet11 = generateDataPacket(1, 1);
-    DataPacket fakePacket = generateDataPacket(1, 2);
+    DataPacket fakePacket1 = generateDataPacket(1, 2);
+    DataPacket fakePacket2 = generateDataPacket(2, 1);
     rpc0.send(packet0);
     rpc1.send(packet1);
     DataPacketHeader headerfrom0 = packet0.getHeader();
@@ -97,7 +98,8 @@ public class OneDBRpcManagerTest {
     assertTrue("rpc0 receive wrong message", r1.equals(packet0));
     assertTrue("rpc0 receive wrong message", r00.equals(packet00));
     assertTrue("rpc0 receive wrong message", r11.equals(packet11));
-    rpc1.send(fakePacket);
+    rpc1.send(fakePacket1);
+    rpc0.send(fakePacket2);
     assertEquals(2, rpc0.getSendDataPacketNum(false));
     assertEquals(2, rpc1.getSendDataPacketNum(true));
     assertEquals(40, rpc0.getPayloadByteLength(false));
@@ -106,6 +108,6 @@ public class OneDBRpcManagerTest {
     rpc1.removeParty(owner0);
     rpc0.disconnect();
     rpc1.disconnect();
-    Thread.sleep(1000);
+    rpc0.disconnect();
   }
 }

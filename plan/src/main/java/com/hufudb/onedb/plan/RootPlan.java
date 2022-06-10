@@ -66,17 +66,6 @@ public class RootPlan extends BasePlan {
   }
 
   @Override
-  public void setChildren(List<Plan> children) {
-    assert children.size() == 1;
-    child = children.get(0);
-  }
-
-  @Override
-  public void updateChild(Plan newChild, Plan oldChild) {
-    child = newChild;
-  }
-
-  @Override
   public DataSet implement(PlanImplementor implementor) {
     return implementor.implement(child);
   }

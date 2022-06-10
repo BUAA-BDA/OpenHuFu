@@ -74,18 +74,22 @@ public class OwnerConfigFile {
         LibraryLoader.loadProtocolLibrary(libDir.toString());
     ImmutableMap.Builder<ProtocolType, ProtocolExecutor> libs = ImmutableMap.builder();
     for (LibraryConfig config : this.libraryconfigs) {
-      switch (config.name.toLowerCase()) {
-        case "aby":
-          if (factories.containsKey(ProtocolType.ABY)) {
-            OwnerInfo own = OwnerInfo.newBuilder()
-                .setEndpoint(String.format("%s:%d", hostname, config.port)).setId(id).build();
-            libs.put(ProtocolType.ABY,
-                factories.get(ProtocolType.ABY).create(own, ProtocolType.ABY));
-          } else {
-            LOG.error("Library ABY not found");
-          }
-        default:
-          LOG.error("Not support library {}", config.name);
+      try {
+        switch (config.name.toLowerCase()) {
+          case "aby":
+            if (factories.containsKey(ProtocolType.ABY)) {
+              OwnerInfo own = OwnerInfo.newBuilder()
+                  .setEndpoint(String.format("%s:%d", hostname, config.port)).setId(id).build();
+              libs.put(ProtocolType.ABY,
+                  factories.get(ProtocolType.ABY).create(own, ProtocolType.ABY));
+            } else {
+              LOG.error("Library ABY not found");
+            }
+          default:
+            LOG.error("Not support library {}", config.name);
+        }
+      } catch (UnsatisfiedLinkError e) {
+        LOG.error("Fail to load library {}: {}", config.name, e.getMessage());
       }
     }
     return libs.build();
