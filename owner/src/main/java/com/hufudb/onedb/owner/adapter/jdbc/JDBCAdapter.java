@@ -12,7 +12,6 @@ import com.hufudb.onedb.data.storage.EmptyDataSet;
 import com.hufudb.onedb.data.storage.ResultDataSet;
 import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.data.schema.SchemaManager;
-import com.hufudb.onedb.proto.OneDBData.Modifier;
 import com.hufudb.onedb.proto.OneDBPlan.PlanType;
 import com.hufudb.onedb.data.schema.TableSchema;
 import com.hufudb.onedb.owner.adapter.Adapter;
@@ -96,8 +95,7 @@ public abstract class JDBCAdapter implements Adapter {
       TableSchemaBuilder.setTableName(tableName);
       while (rc.next()) {
         String columnName = rc.getString("COLUMN_NAME");
-        TableSchemaBuilder.add(columnName, converter.convert(rc.getString("TYPE_NAME")),
-            Modifier.PUBLIC);
+        TableSchemaBuilder.add(columnName, converter.convert(rc.getString("TYPE_NAME")));
       }
       rc.close();
       return TableSchemaBuilder.build();
