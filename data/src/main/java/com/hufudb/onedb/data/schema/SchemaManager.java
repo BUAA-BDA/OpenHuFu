@@ -71,6 +71,16 @@ public class SchemaManager {
     }
   }
 
+  public Schema getActualSchema(String publishedTableName) {
+    PublishedTableSchema schema = publishedTableSchemaMap.get(publishedTableName);
+    if (schema == null) {
+      LOG.warn("Published table [{}] not found", publishedTableName);
+      return Schema.EMPTY;
+    } else {
+      return schema.getActualSchema();
+    }
+  }
+
   public void clearPublishedTable() {
     publishedTableSchemaMap.clear();
   }

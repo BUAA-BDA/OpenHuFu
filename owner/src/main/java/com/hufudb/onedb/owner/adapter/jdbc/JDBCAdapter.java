@@ -108,12 +108,12 @@ public abstract class JDBCAdapter implements Adapter {
   protected String generateSQL(Plan plan) {
     assert plan.getPlanType().equals(PlanType.LEAF);
     String actualTableName = schemaManager.getActualTableName(plan.getTableName());
-    Schema tableSchema = schemaManager.getPublishedSchema(plan.getTableName());
-    LOG.info("{}: {}", actualTableName, tableSchema);
+    Schema tableSchema = schemaManager.getActualSchema(plan.getTableName());
+    LOG.info("Query {}: {}", actualTableName, tableSchema);
     final List<String> filters = JDBCTranslator.translateExps(tableSchema, plan.getWhereExps());
     final List<String> selects = JDBCTranslator.translateExps(tableSchema, plan.getSelectExps());
     final List<String> groups =
-    plan.getGroups().stream().map(ref -> selects.get(ref)).collect(Collectors.toList());
+        plan.getGroups().stream().map(ref -> selects.get(ref)).collect(Collectors.toList());
     // order by
     List<String> order = JDBCTranslator.translateOrders(selects, plan.getOrders());
     StringBuilder sql = new StringBuilder();
@@ -137,7 +137,6 @@ public abstract class JDBCAdapter implements Adapter {
     if (plan.getFetch() != 0) {
       sql.append(" LIMIT ").append(plan.getFetch() + plan.getOffset());
     }
-    LOG.info(sql.toString());
     return sql.toString();
   }
 

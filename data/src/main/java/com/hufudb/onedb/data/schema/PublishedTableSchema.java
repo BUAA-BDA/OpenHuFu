@@ -18,9 +18,10 @@ public class PublishedTableSchema {
       String publishedTableName,
       List<ColumnDesc> publishedColumns,
       List<Integer> mappings) {
-    this.actualSchema = tableSchema;
+    // this.actualSchema = tableSchema;
     if (publishedColumns.isEmpty()) {
       this.fakeSchema = TableSchema.of(publishedTableName, tableSchema.getSchema());
+      this.actualSchema = TableSchema.of(tableSchema.getName(), tableSchema.getSchema());
       ImmutableList.Builder<Integer> mapBuilder =
           ImmutableList.builderWithExpectedSize(tableSchema.size());
       for (int i = 0; i < tableSchema.size(); ++i) {
@@ -30,15 +31,18 @@ public class PublishedTableSchema {
     } else {
       // todo: check unique of mapping
       assert mappings.size() == publishedColumns.size();
-      ImmutableList.Builder<ColumnDesc> columnBuilder = ImmutableList.builder();
+      ImmutableList.Builder<ColumnDesc> publishedBuilder = ImmutableList.builder();
+      ImmutableList.Builder<ColumnDesc> actualBuilder = ImmutableList.builder();
       ImmutableList.Builder<Integer> mapBuilder = ImmutableList.builder();
       for (int i = 0; i < publishedColumns.size(); ++i) {
         if (!publishedColumns.get(i).getModifier().equals(Modifier.HIDDEN)) {
-          columnBuilder.add(publishedColumns.get(i));
+          publishedBuilder.add(publishedColumns.get(i));
           mapBuilder.add(mappings.get(i));
+          actualBuilder.add(tableSchema.getSchema().getColumnDesc(mappings.get(i)));
         }
       }
-      this.fakeSchema = TableSchema.of(publishedTableName, columnBuilder.build());
+      this.fakeSchema = TableSchema.of(publishedTableName, publishedBuilder.build());
+      this.actualSchema = TableSchema.of(tableSchema.getName(), actualBuilder.build());
       this.mappings = ImmutableList.copyOf(mapBuilder.build());
     }
   }
@@ -49,6 +53,10 @@ public class PublishedTableSchema {
 
   public String getActualTableName() {
     return actualSchema.getName();
+  }
+
+  public Schema getActualSchema() {
+    return actualSchema.getSchema();
   }
 
   public String getPublishedTableName() {
