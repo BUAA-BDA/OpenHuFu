@@ -54,7 +54,7 @@ public class Interpreter {
       }
       final Schema sourceSchema = source.getSchema();
       final Schema outSchema = ExpressionUtils.createSchema(exps);
-      List<Mapper> maps = exps.stream().map(exp -> new InterpretivMapper(sourceSchema, exp))
+      List<Mapper> maps = exps.stream().map(exp -> new InterpretiveMapper(sourceSchema, exp))
           .collect(Collectors.toList());
       return MapDataSet.create(outSchema, maps, source);
     }
@@ -96,11 +96,11 @@ public class Interpreter {
     }
   }
 
-  public static class InterpretivMapper implements Mapper {
+  public static class InterpretiveMapper implements Mapper {
     final Schema schema;
     final Expression exp;
 
-    public InterpretivMapper(Schema schema, Expression exp) {
+    public InterpretiveMapper(Schema schema, Expression exp) {
       this.schema = schema;
       this.exp = exp;
     }

@@ -52,12 +52,12 @@ public class SchemaManager {
   }
 
   public String getActualTableName(String publishedTableName) {
-    PublishedTableSchema info = publishedTableSchemaMap.get(publishedTableName);
-    if (info == null) {
+    PublishedTableSchema schema = publishedTableSchemaMap.get(publishedTableName);
+    if (schema == null) {
       LOG.error("Not found published table {}", publishedTableName);
       return "";
     } else {
-      return info.getActualTableName();
+      return schema.getActualTableName();
     }
   }
 
@@ -78,6 +78,16 @@ public class SchemaManager {
       return Schema.EMPTY;
     } else {
       return schema.getActualSchema();
+    }
+  }
+
+  public List<Integer> getPublishedSchemaMapping(String publishedTableName) {
+    PublishedTableSchema schema = publishedTableSchemaMap.get(publishedTableName);
+    if (schema == null) {
+      LOG.warn("Published table [{}] not found", publishedTableName);
+      return ImmutableList.of();
+    } else {
+      return schema.getMappings();
     }
   }
 

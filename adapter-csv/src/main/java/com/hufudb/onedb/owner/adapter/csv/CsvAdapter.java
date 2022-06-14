@@ -7,13 +7,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-import com.google.common.collect.ImmutableMap;
 import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.data.schema.SchemaManager;
+import com.hufudb.onedb.data.schema.TableSchema;
 import com.hufudb.onedb.data.storage.DataSet;
 import com.hufudb.onedb.data.storage.EmptyDataSet;
+import com.hufudb.onedb.data.storage.LimitDataSet;
+import com.hufudb.onedb.data.storage.SortedDataSet;
 import com.hufudb.onedb.interpreter.Interpreter;
 import com.hufudb.onedb.owner.adapter.Adapter;
 import org.slf4j.Logger;
@@ -25,11 +28,12 @@ import org.slf4j.LoggerFactory;
 public class CsvAdapter implements Adapter {
   protected final static Logger LOG = LoggerFactory.getLogger(CsvAdapter.class);
 
-  SchemaManager schemaManager;
-  Map<String, CsvDataSet> tables;
+  final SchemaManager schemaManager;
+  final Map<String, CsvTable> tables;
 
   public CsvAdapter(String csvDir) {
     tables = new HashMap<>();
+    schemaManager = new SchemaManager();
     try {
       loadTables(csvDir);
     } catch (IOException e) {
@@ -44,7 +48,9 @@ public class CsvAdapter implements Adapter {
             try {
               String fileName = file.getFileName().toString();
               String tableName = fileName.substring(0, fileName.length() - 4);
-              tables.put(tableName, new CsvDataSet(file));
+              CsvTable table = new CsvTable(tableName, file);
+              tables.put(tableName, table);
+              schemaManager.addLocalTable(TableSchema.of(tableName, table.getSchema()));
             } catch (IOException e) {
               e.printStackTrace();
             }
@@ -74,10 +80,7 @@ public class CsvAdapter implements Adapter {
 
   @Override
   public void shutdown() {
-    for (CsvDataSet dataSet : tables.values()) {
-      dataSet.close();
-    }
-    tables = ImmutableMap.of();
+    tables.clear();
   }
 
   DataSet queryInternal(LeafPlan plan) {
@@ -88,12 +91,28 @@ public class CsvAdapter implements Adapter {
       return EmptyDataSet.INSTANCE;
     }
     Schema schema = schemaManager.getPublishedSchema(publishedTableName);
-    CsvDataSet target = tables.get(actualTableName);
+    List<Integer> mappings = schemaManager.getPublishedSchemaMapping(publishedTableName);
+    CsvTable target = tables.get(actualTableName);
     if (target == null) {
       LOG.error("CSV table {} not found", actualTableName);
       return EmptyDataSet.INSTANCE;
     }
-    DataSet res = Interpreter.map(target, plan.getSelectExps());
+    DataSet res = target.scanWithSchema(schema, mappings);
+    if (!plan.getSelectExps().isEmpty()) {
+      res = Interpreter.map(res, plan.getSelectExps());
+    }
+    if (!plan.getWhereExps().isEmpty()) {
+      res = Interpreter.filter(res, plan.getWhereExps());
+    }
+    if (!plan.getAggExps().isEmpty()) {
+      res = Interpreter.aggregate(res, plan.getGroups(), plan.getAggExps());
+    }
+    if (!plan.getOrders().isEmpty()) {
+      res = SortedDataSet.sort(res, plan.getOrders());
+    }
+    if (plan.getFetch() != 0 || plan.getOffset() != 0) {
+      res = LimitDataSet.limit(res, plan.getOffset(), plan.getFetch());
+    }
     return res;
   }
 }

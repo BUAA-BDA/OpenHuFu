@@ -164,12 +164,12 @@ public class AdapterTest {
     }
     assertTrue(count > 0);
     result.close();
-    // test query select dept_name, AVG(score) from student1 where score >= 90;
+    // test query select dept_name, AVG(score) from student1 where score >= 90 group by dept_name;
     plan.setAggExps(ImmutableList.of(
         ExpressionFactory.createAggFunc(ColumnType.STRING,
         Modifier.PUBLIC, 0,
         ImmutableList.of(ExpressionFactory.createInputRef(0, ColumnType.STRING, Modifier.PUBLIC))),
-        ExpressionFactory.createAggFunc(ColumnType.INT, Modifier.PUBLIC, 2, ImmutableList.of(ExpressionFactory.createInputRef(1, ColumnType.INT, Modifier.PUBLIC)))));
+        ExpressionFactory.createAggFunc(ColumnType.INT, Modifier.PUBLIC, 2, ImmutableList.of(ExpressionFactory.createInputRef(0, ColumnType.INT, Modifier.PUBLIC)))));
     plan.setGroups(ImmutableList.of(0));
     result = adapter.query(plan);
     it = result.getIterator();
