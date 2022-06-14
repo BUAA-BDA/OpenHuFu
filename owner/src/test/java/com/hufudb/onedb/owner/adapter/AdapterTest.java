@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import java.nio.file.Paths;
 import java.util.List;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.data.schema.SchemaManager;
@@ -26,8 +27,15 @@ import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
 public class AdapterTest {
 
   static List<PojoPublishedTableSchema> publishedSchemas;
+  static Adapter adapter;
+  static SchemaManager manager;
 
-  static {
+  @BeforeClass
+  public static void setUp() {
+    boolean useDocker = true;
+    if (System.getenv("ONEDB_TEST_LOCAL") != null) {
+      useDocker = false;
+    }
     PojoPublishedTableSchema t1 = new PojoPublishedTableSchema();
     t1.setActualName("student");
     t1.setPublishedName("student1");
@@ -37,35 +45,36 @@ public class AdapterTest {
     t2.setActualName("student");
     t2.setPublishedName("student2");
     t2.setPublishedColumns(ImmutableList.of(
-        new PojoColumnDesc("name", ColumnTypeWrapper.STRING, ModifierWrapper.PUBLIC),
-        new PojoColumnDesc("score", ColumnTypeWrapper.INT, ModifierWrapper.PUBLIC),
-        new PojoColumnDesc("age", ColumnTypeWrapper.INT, ModifierWrapper.HIDDEN),
-        new PojoColumnDesc("dept_name", ColumnTypeWrapper.STRING, ModifierWrapper.HIDDEN)));
-    t2.setActualColumns(ImmutableList.of(0, 2, 1, 3));
+        new PojoColumnDesc("DeptName", ColumnTypeWrapper.STRING, ModifierWrapper.PUBLIC),
+        new PojoColumnDesc("Score", ColumnTypeWrapper.INT, ModifierWrapper.PUBLIC),
+        new PojoColumnDesc("Name", ColumnTypeWrapper.STRING, ModifierWrapper.PUBLIC),
+        new PojoColumnDesc("Age", ColumnTypeWrapper.INT, ModifierWrapper.HIDDEN)
+    ));
+    t2.setActualColumns(ImmutableList.of(3, 2, 0, 1));
     publishedSchemas = ImmutableList.of(t1, t2);
-  }
-
-  Adapter loadAdapter() {
     AdapterConfig adapterConfig = new AdapterConfig();
     adapterConfig.datasource = "postgresql";
-    adapterConfig.url = "jdbc:postgresql://postgres1:5432/postgres";
+    if (useDocker) {
+      adapterConfig.url = "jdbc:postgresql://postgres1:5432/postgres";
+    } else {
+      adapterConfig.url = "jdbc:postgresql://localhost:13101/postgres";
+    }
     adapterConfig.catalog = "postgres";
     adapterConfig.user = "postgres";
     adapterConfig.passwd = "onedb";
     String onedbRoot = System.getenv("ONEDB_ROOT");
     assertNotNull("ONEDB_ROOT env variable is not set", onedbRoot);
     String adapterDir = Paths.get(onedbRoot, "adapter").toString();
-    return AdapterFactory.loadAdapter(adapterConfig, adapterDir);
-  }
-
-  @Test
-  public void testAdapter() {
-    Adapter adapter = loadAdapter();
-    // test schema manager
-    SchemaManager manager = adapter.getSchemaManager();
+    adapter = AdapterFactory.loadAdapter(adapterConfig, adapterDir);
+    manager = adapter.getSchemaManager();
     for (PojoPublishedTableSchema schema : publishedSchemas) {
       assertTrue(manager.addPublishedTable(schema));
     }
+  }
+
+
+  @Test
+  public void testAdapterBasic() {
     // test query select * from student1;
     LeafPlan plan = new LeafPlan();
     plan.setTableName("student1");
@@ -112,6 +121,61 @@ public class AdapterTest {
     }
     result.close();
     // todo: test more query plan
-    adapter.shutdown();
+  }
+
+  @Test
+  public void testAdapterWithSchemaMapping() {
+    // student2: [dept_name, score, name]
+    // test query select * from student2;
+    LeafPlan plan = new LeafPlan();
+    plan.setTableName("student2");
+    plan.setSelectExps(ExpressionFactory.createInputRef(manager.getPublishedSchema("student2")));
+    DataSet result = adapter.query(plan);
+    DataSetIterator it = result.getIterator();
+    int count = 0;
+    while (it.next()) {
+      assertEquals(3, it.size());
+      count++;
+    }
+    assertTrue(count > 0);
+    // test query select * from student2 where score >= 90;
+    plan.setWhereExps(ImmutableList.of(ExpressionFactory.createBinaryOperator(OperatorType.GE,
+        ColumnType.BOOLEAN, ExpressionFactory.createInputRef(1, ColumnType.INT, Modifier.PUBLIC),
+        ExpressionFactory.createLiteral(ColumnType.INT, 90))));
+    result = adapter.query(plan);
+    it = result.getIterator();
+    count = 0;
+    while (it.next()) {
+      count++;
+      assertTrue((int) it.get(1) >= 90);
+    }
+    assertTrue(count > 0);
+    result.close();
+    // test query select dept_name, score from student1 where score >= 90;
+    plan.setSelectExps(
+        ImmutableList.of(ExpressionFactory.createInputRef(0, ColumnType.STRING, Modifier.PUBLIC),
+            ExpressionFactory.createInputRef(1, ColumnType.INT, Modifier.PUBLIC)));
+    result = adapter.query(plan);
+    it = result.getIterator();
+    count = 0;
+    while (it.next()) {
+      count++;
+      assertTrue((int) it.get(1) >= 90);
+    }
+    assertTrue(count > 0);
+    result.close();
+    // test query select dept_name, AVG(score) from student1 where score >= 90 group by dept_name;
+    plan.setAggExps(ImmutableList.of(
+        ExpressionFactory.createAggFunc(ColumnType.STRING,
+        Modifier.PUBLIC, 0,
+        ImmutableList.of(ExpressionFactory.createInputRef(0, ColumnType.STRING, Modifier.PUBLIC))),
+        ExpressionFactory.createAggFunc(ColumnType.INT, Modifier.PUBLIC, 2, ImmutableList.of(ExpressionFactory.createInputRef(0, ColumnType.INT, Modifier.PUBLIC)))));
+    plan.setGroups(ImmutableList.of(0));
+    result = adapter.query(plan);
+    it = result.getIterator();
+    while (it.next()) {
+      assertTrue((int) it.get(1) >= 90);
+    }
+    result.close();
   }
 }

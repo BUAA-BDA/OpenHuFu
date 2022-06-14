@@ -22,6 +22,7 @@
     <module>user</module>
     <module>adapter-postgresql</module>
     <module>adapter-mysql</module>
+    <module>adapter-csv</module>
     <module>benchmark</module>
     <module>backend</module>
     <module>coverage</module>

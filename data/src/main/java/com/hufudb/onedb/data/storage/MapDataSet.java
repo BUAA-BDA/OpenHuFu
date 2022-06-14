@@ -19,7 +19,6 @@ public class MapDataSet implements DataSet {
   }
 
   public static MapDataSet create(Schema schema, List<Mapper> mappings, DataSet source) {
-    assert schema.size() == mappings.size();
     return new MapDataSet(schema, mappings, source);
   }
 

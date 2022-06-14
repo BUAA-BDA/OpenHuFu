@@ -13,6 +13,10 @@ public class AdapterLoaderTest {
 
   @Test
   public void loadAdapter() {
+    boolean useDocker = true;
+    if (System.getenv("ONEDB_TEST_LOCAL") != null) {
+      useDocker = false;
+    }
     String onedbRoot = System.getenv("ONEDB_ROOT");
     Path adapterDir = Paths.get(onedbRoot, "adapter");
     System.err.println(adapterDir.toString());
@@ -20,7 +24,11 @@ public class AdapterLoaderTest {
     AdapterFactory factory = factoryMap.get("postgresql");
     AdapterConfig config = new AdapterConfig();
     config.catalog = "postgres";
-    config.url = "jdbc:postgresql://postgres1:5432/postgres";
+    if (useDocker) {
+      config.url = "jdbc:postgresql://postgres1:5432/postgres";
+    } else {
+      config.url = "jdbc:postgresql://localhost:13101/postgres";
+    }
     config.user = "postgres";
     config.passwd = "onedb";
     Adapter adapter = factory.create(config);
