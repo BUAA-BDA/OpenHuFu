@@ -58,6 +58,25 @@ services:
     ports:
       - 12347:12345
 
+  owner4:
+    image: maven:3.8-openjdk-11
+    container_name: owner4
+    working_dir: /usr/src/mymvn
+    restart: "no"
+    command: nohup java -jar ./bin/onedb_owner_server.jar -c ./config/server4.json > ./log/owner4.log &
+    environment:
+      - ONEDB_ROOT=/usr/src/mymvn
+    volumes:
+      - $PWD/../../../../release/bin:/usr/src/mymvn/bin
+      - $PWD/../../../../release/adapter:/usr/src/mymvn/adapter
+      - $PWD/config:/usr/src/mymvn/config
+      - $PWD/log:/usr/src/mymvn/log
+      - $PWD/data:/usr/src/mymvn/data
+    networks:
+      - public_net
+    ports:
+      - 12348:12345
+
 networks:
   owner_net_1:
     external: true

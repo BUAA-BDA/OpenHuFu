@@ -4,9 +4,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.net.URL;
+import java.util.List;
 import org.junit.Test;
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.data.schema.SchemaManager;
+import com.hufudb.onedb.data.schema.TableSchema;
 import com.hufudb.onedb.data.schema.utils.PojoColumnDesc;
 import com.hufudb.onedb.data.schema.utils.PojoPublishedTableSchema;
 import com.hufudb.onedb.data.storage.DataSet;
@@ -24,6 +26,20 @@ import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
 public class CsvAdapterTest {
 
   @Test
+  public void testLoadSingleFile() {
+    URL source = CsvAdapterTest.class.getClassLoader().getResource("data/test1.csv");
+    CsvAdapterFactory factory = new CsvAdapterFactory();
+    AdapterConfig config = new AdapterConfig();
+    config.url = source.getPath();
+    config.datasource = "csv";
+    Adapter adapter = factory.create(config);
+    SchemaManager manager = adapter.getSchemaManager();
+    List<TableSchema> schemas = manager.getAllLocalTable();
+    assertEquals(1, schemas.size());
+    assertEquals("test1", schemas.get(0).getName());
+  }
+
+  @Test
   public void testQuery() {
     URL source = CsvAdapterTest.class.getClassLoader().getResource("data");
     CsvAdapterFactory factory = new CsvAdapterFactory();
@@ -33,6 +49,7 @@ public class CsvAdapterTest {
     Adapter adapter = factory.create(config);
     // add published schema
     SchemaManager manager = adapter.getSchemaManager();
+    assertEquals(2, manager.getAllLocalTable().size());
     PojoPublishedTableSchema t1 = new PojoPublishedTableSchema();
     t1.setActualName("test2");
     t1.setPublishedName("student1");

@@ -10,6 +10,7 @@ then
   cp owner/target/*-with-dependencies.jar ./release/bin/onedb_owner_server.jar
   cp adapter-postgresql/target/*-with-dependencies.jar ./release/adapter/adapter_postgresql.jar
   cp adapter-mysql/target/*-with-dependencies.jar ./release/adapter/adapter_mysql.jar
+  cp adapter-csv/target/*-with-dependencies.jar ./release/adapter/adapter_csv.jar
   cp backend/target/backend*.jar ./release/bin/backend.jar
 else
   mvn install -T 0.5C -Dmaven.test.skip=true -pl $1
@@ -25,6 +26,9 @@ else
   elif [ $1 == "adapter-mysql" ]
   then
     cp adapter-mysql/target/*-with-dependencies.jar ./release/adapter/adapter-mysql.jar
+  elif [ $1 == "adapter-csv" ]
+  then
+    cp adapter-csv/target/*-with-dependencies.jar ./release/adapter/adapter-csv.jar
   elif [ $1 == "backend" ]
   then
     cp backend/target/backend*.jar ./release/bin/backend.jar

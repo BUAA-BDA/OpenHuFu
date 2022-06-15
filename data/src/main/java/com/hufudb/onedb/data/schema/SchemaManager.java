@@ -33,6 +33,7 @@ public class SchemaManager {
       return;
     }
     actualTableSchemaMap.put(table.getName(), table);
+    LOG.info("Found local table {}", table);
   }
 
   public boolean addPublishedTable(PojoPublishedTableSchema table) {

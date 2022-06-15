@@ -3,9 +3,6 @@
   "port": 12345,
   "theadnum": 4,
   "hostname": "owner1",
-  "privatekeypath": "./cert/owner1.key",
-  "certchainpath": "./cert/owner1.pem",
-  "trustcertpath": "./cert/ca.pem",
   "adapterconfig": {
     "datasource": "postgresql",
     "url": "jdbc:postgresql://postgres1:5432/postgres",
