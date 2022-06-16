@@ -193,9 +193,6 @@ public class GMW extends RpcProtocolExecutor {
    */
   @Override
   public Object run(long taskId, List<Integer> parties, Object... args) throws ProtocolException {
-    if (args.length < 2) {
-      throw new ProtocolException("GMW requires arguments List<byte[]> inputdata, int circuitId");
-    }
     assert parties.size() == 2;
     List<byte[]> inputData = (List<byte[]>) args[0];
     int circuitId = (int) args[1];

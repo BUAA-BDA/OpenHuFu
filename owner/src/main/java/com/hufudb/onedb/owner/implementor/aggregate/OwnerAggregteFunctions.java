@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.data.function.AggregateFunction;
 import com.hufudb.onedb.data.storage.Row;
 import com.hufudb.onedb.expression.AggFuncType;
+import com.hufudb.onedb.mpc.ProtocolException;
 import com.hufudb.onedb.mpc.bristol.CircuitType;
 import com.hufudb.onedb.mpc.codec.OneDBCodec;
 import com.hufudb.onedb.mpc.gmw.GMW;
@@ -15,8 +16,13 @@ import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
 import com.hufudb.onedb.proto.OneDBPlan.TaskInfo;
 import com.hufudb.onedb.rpc.Rpc;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OwnerAggregteFunctions {
+  static final Logger LOG = LoggerFactory.getLogger(OwnerAggregteFunctions.class);
+
+  
   public static AggregateFunction getAggregateFunc(Expression exp, Rpc rpc, ExecutorService threadPool, TaskInfo taskInfo) {
     if (exp.getOpType().equals(OperatorType.AGG_FUNC)) {
       switch (AggFuncType.of(exp.getI32())) {
@@ -57,14 +63,20 @@ public class OwnerAggregteFunctions {
 
     @Override
     public Comparable aggregate() {
-      List<byte[]> localShares = gmw.run(taskInfo.getTaskId(), taskInfo.getPartiesList(), ImmutableList.of(OneDBCodec.encodeInt(sum)), CircuitType.ADD_32.getId());
-      List<byte[]> remoteShares = boardcast.run(taskInfo.getTaskId(), ImmutableList.of(taskInfo.getParties(1)), localShares, taskInfo.getParties(0));
-      if (remoteShares.isEmpty()) {
+      try {
+        List<byte[]> localShares = (List<byte[]>) gmw.run(taskInfo.getTaskId(), taskInfo.getPartiesList(), ImmutableList.of(OneDBCodec.encodeInt(sum)), CircuitType.ADD_32.getId());
+        List<byte[]> remoteShares = (List<byte[]>) boardcast.run(taskInfo.getTaskId(), taskInfo.getPartiesList(), localShares);
+        if (remoteShares.isEmpty()) {
+          return null;
+        } else {
+          byte[] res = new byte[4];
+          OneDBCodec.xor(localShares.get(0), remoteShares.get(0), res);
+          return OneDBCodec.decodeInt(res);
+        }
+      } catch (ProtocolException e) {
+        LOG.error("Error when executing GMW: {}", e.getMessage());
+        e.printStackTrace();
         return null;
-      } else {
-        byte[] res = new byte[4];
-        OneDBCodec.xor(localShares.get(0), remoteShares.get(0), res);
-        return OneDBCodec.decodeInt(res);
       }
     }
 

@@ -12,6 +12,7 @@ import com.hufudb.onedb.data.storage.MaterializedDataSet;
 import com.hufudb.onedb.data.storage.ProtoDataSet;
 import com.hufudb.onedb.data.storage.ProtoRowDataSet;
 import com.hufudb.onedb.data.storage.VerticalDataSet;
+import com.hufudb.onedb.mpc.ProtocolException;
 import com.hufudb.onedb.mpc.codec.HashFunction;
 import com.hufudb.onedb.mpc.codec.OneDBCodec;
 import com.hufudb.onedb.mpc.psi.HashPSI;
@@ -50,7 +51,7 @@ public class HashEqualJoin {
     }
   }
 
-  public static DataSet join(DataSet in, JoinCondition joinCond, boolean isLeft, Rpc rpc, TaskInfo taskInfo) {
+  public static DataSet join(DataSet in, JoinCondition joinCond, boolean isLeft, Rpc rpc, TaskInfo taskInfo) throws ProtocolException {
     if (joinCond.hasCondition()) {
       LOG.error("HashEqualJoin not support theta join");
       throw new UnsupportedOperationException("HashEqualJoin not support theta join");
@@ -82,7 +83,7 @@ public class HashEqualJoin {
       long endTime = System.currentTimeMillis();
       LOG.info("Right encode use {} ms", endTime - startTime);
     }
-    List<byte[]> res = psi.run(taskInfo.getTaskId(), parties, joinKey, HashFunction.SHA256.getId());
+    List<byte[]> res = (List<byte[]>) psi.run(taskInfo.getTaskId(), parties, joinKey, HashFunction.SHA256.getId());
     LOG.debug("Get {} rows in HashPSI", res.size());
     if (res.size() == 0) {
       return EmptyDataSet.INSTANCE;
@@ -100,16 +101,16 @@ public class HashEqualJoin {
   }
 
   static DataSet senderProcedure(MaterializedDataSet in, long taskId, int senderId, int receiverId,
-      Stream stream) {
+      Stream stream) throws ProtocolException {
     List<byte[]> inputs = encode(in);
-    stream.run(taskId, ImmutableList.of(receiverId), inputs, senderId);
+    stream.run(taskId, ImmutableList.of(senderId, receiverId), inputs);
     return EmptyDataSet.INSTANCE;
   }
 
   static DataSet receiverProcedure(MaterializedDataSet localDataSet, long taskId, int senderId, int receiverId,
-      Stream stream) {
-    List<byte[]> result =
-        stream.run(taskId, ImmutableList.of(receiverId), ImmutableList.of(), senderId);
+      Stream stream) throws ProtocolException {
+    List<byte[]> result = (List<byte[]>)
+        stream.run(taskId, ImmutableList.of(senderId, receiverId), ImmutableList.of());
     MaterializedDataSet remoteDataSet = decode(result);
     if (remoteDataSet.rowCount() == 0) {
       return EmptyDataSet.INSTANCE;

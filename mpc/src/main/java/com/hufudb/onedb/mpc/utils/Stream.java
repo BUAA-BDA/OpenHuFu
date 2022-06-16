@@ -67,7 +67,7 @@ public class Stream extends RpcProtocolExecutor {
     int i = 0;
     while (true) {
       DataPacketHeader expect =
-          new DataPacketHeader(taskId, getProtocolTypeId(), i, senderId, ownId);
+          new DataPacketHeader(taskId, getProtocolTypeId(), i, extraInfo, senderId, ownId);
       DataPacket unit = rpc.receive(expect);
       if (unit == null) {
         LOG.error("Stream transfor failed in {}", rpc.ownParty());
@@ -91,18 +91,15 @@ public class Stream extends RpcProtocolExecutor {
   public Object run(long taskId, List<Integer> parties, Object... args) throws ProtocolException {
     int senderId = parties.get(0);
     long extraInfo = 0;
+    if (args.length < 1) {
+      throw new ProtocolException("Boardcast requires args List<> inputdata");
+    }
+    if (args.length > 1) {
+      extraInfo = ((Number) args[1]).longValue();
+    }
     if (senderId == ownId) {
-      if (args.length < 1) {
-        throw new ProtocolException("Boardcast requires args List<byte[]> for sender");
-      }
-      if (args.length > 1) {
-        extraInfo = ((Number) args[1]).longValue();
-      }
       return senderProcedure(taskId, parties.subList(1, parties.size()), (List<byte[]>) args[0], extraInfo);
     } else {
-      if (args.length > 0) {
-        extraInfo = ((Number) args[0]).longValue();
-      }
       return receiverProcedure(taskId, senderId, extraInfo);
     }
   }
