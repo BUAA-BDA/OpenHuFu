@@ -67,23 +67,23 @@ public class GMWTest {
       GMW gmwSender = new GMW(rpc0, otSender, threadPool0);
       GMW gmwReceiver = new GMW(rpc1, otReceiver, threadPool1);
       ExecutorService service = Executors.newFixedThreadPool(2);
-      Future<List<byte[]>> senFuture = service.submit(
-        new Callable<List<byte[]>>() {
+      Future<Object> senFuture = service.submit(
+        new Callable<Object>() {
           @Override
-          public List<byte[]> call() throws Exception {
+          public Object call() throws Exception {
             return gmwSender.run(0, ImmutableList.of(0, 1), encodeValue(a), CircuitType.ADD_32.getId());
           }
         }
       );
-      Future<List<byte[]>> recFuture = service.submit(
-        new Callable<List<byte[]>>() {
+      Future<Object> recFuture = service.submit(
+        new Callable<Object>() {
         @Override
-        public List<byte[]> call() throws Exception {
+        public Object call() throws Exception {
           return gmwReceiver.run(0, ImmutableList.of(0, 1), encodeValue(b), CircuitType.ADD_32.getId());
         }
       });
-      byte[] senRes = senFuture.get().get(0);
-      byte[] recRes = recFuture.get().get(0);
+      byte[] senRes = ((List<byte[]>) senFuture.get()).get(0);
+      byte[] recRes = ((List<byte[]>) recFuture.get()).get(0);
       byte[] res = new byte[4];
       OneDBCodec.xor(senRes, recRes, res);
       int actual = OneDBCodec.decodeInt(res);

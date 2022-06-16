@@ -88,15 +88,15 @@ public class HashPSITest {
     ExecutorService service = Executors.newFixedThreadPool(2);
     int taskId = 0;
     int hashType = func.getId();
-    Future<List<byte[]>> psiRes0 = service.submit(new Callable<List<byte[]>>() {
+    Future<Object> psiRes0 = service.submit(new Callable<Object>() {
       @Override
-      public List<byte[]> call() throws Exception {
+      public Object call() throws Exception {
         return psi0.run(taskId, ImmutableList.of(senderId, receiverId), data0, hashType);
       }
     });
-    Future<List<byte[]>> psiRes1 = service.submit(new Callable<List<byte[]>>() {
+    Future<Object> psiRes1 = service.submit(new Callable<Object>() {
       @Override
-      public List<byte[]> call() throws Exception {
+      public Object call() throws Exception {
         return psi1.run(taskId, ImmutableList.of(senderId, receiverId), data1, hashType);
       }
     });
@@ -112,8 +112,8 @@ public class HashPSITest {
         }
       }
     }
-    List<byte[]> actual0 = psiRes0.get();
-    List<byte[]> actual1 = psiRes1.get();
+    List<byte[]> actual0 = (List<byte[]>) psiRes0.get();
+    List<byte[]> actual1 = (List<byte[]>) psiRes1.get();
     assertEquals(expect0.size(), actual0.size());
     assertEquals(expect1.size(), actual1.size());
     for (int i = 0; i < expect0.size(); ++i) {

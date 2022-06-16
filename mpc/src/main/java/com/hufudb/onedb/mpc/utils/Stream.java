@@ -4,16 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.hufudb.onedb.mpc.ProtocolException;
 import com.hufudb.onedb.mpc.ProtocolType;
 import com.hufudb.onedb.mpc.RpcProtocolExecutor;
 import com.hufudb.onedb.rpc.Rpc;
 import com.hufudb.onedb.rpc.utils.DataPacket;
 import com.hufudb.onedb.rpc.utils.DataPacketHeader;
 
-/*
+/**
  * boardcast large data to all receiver, divide the data into small pieces and tranfer in stream
- * params:
- *   taskId, receiver parties, data to send (empty for receiver), senderId
  */
 public class Stream extends RpcProtocolExecutor {
   static final long DEFAULT_MAX_SIZE = 4 * 1024 * 1023;
@@ -31,22 +30,23 @@ public class Stream extends RpcProtocolExecutor {
     MAX_SIZE = size;
   }
 
-  void send(long taskId, int packetId, List<Integer> receivers, List<byte[]> input) {
+  void send(long taskId, int packetId, List<Integer> receivers, List<byte[]> input, long extraInfo) {
     // todo: concurrent opt
-    for (Integer receiverId :receivers) {
-      DataPacketHeader header = new DataPacketHeader(taskId, getProtocolTypeId(), packetId, ownId, receiverId);
+    for (Integer receiverId : receivers) {
+      DataPacketHeader header =
+          new DataPacketHeader(taskId, getProtocolTypeId(), packetId, extraInfo, ownId, receiverId);
       rpc.send(DataPacket.fromByteArrayList(header, input));
     }
   }
 
-  List<byte[]> senderProcedure(long taskId, List<Integer> receivers, List<byte[]> inputData) {
+  List<byte[]> senderProcedure(long taskId, List<Integer> receivers, List<byte[]> inputData, long extraInfo) {
     long size = 0;
     int packetId = 0;
     int last = 0;
     for (int i = 0; i < inputData.size(); ++i) {
       byte[] ele = inputData.get(i);
       if (size + ele.length > MAX_SIZE) {
-        send(taskId, packetId, receivers, inputData.subList(last, i));
+        send(taskId, packetId, receivers, inputData.subList(last, i), extraInfo);
         size = ele.length;
         last = i;
         packetId++;
@@ -55,18 +55,19 @@ public class Stream extends RpcProtocolExecutor {
       }
     }
     if (size != 0) {
-      send(taskId, packetId, receivers, inputData.subList(last, inputData.size()));
+      send(taskId, packetId, receivers, inputData.subList(last, inputData.size()), extraInfo);
     }
     // send an empty packet to stop the stream
-    send(taskId, packetId + 1, receivers, ImmutableList.of());
+    send(taskId, packetId + 1, receivers, ImmutableList.of(), extraInfo);
     return ImmutableList.of();
   }
 
-  List<byte[]> receiverProcedure(long taskId, int senderId) {
+  List<byte[]> receiverProcedure(long taskId, int senderId, long extraInfo) {
     List<byte[]> result = new ArrayList<>();
     int i = 0;
     while (true) {
-      DataPacketHeader expect = new DataPacketHeader(taskId, getProtocolTypeId(), i, senderId, ownId);
+      DataPacketHeader expect =
+          new DataPacketHeader(taskId, getProtocolTypeId(), i, senderId, ownId);
       DataPacket unit = rpc.receive(expect);
       if (unit == null) {
         LOG.error("Stream transfor failed in {}", rpc.ownParty());
@@ -80,15 +81,29 @@ public class Stream extends RpcProtocolExecutor {
     return result;
   }
 
-  // todo: add extraInfo to distinguish different request under the same task
+  /**
+   * @param parties [senderId, receiverIds...]
+   * @param args[0] inputdata
+   * @param args[1] extraInfo
+   * @throws ProtocolException
+   */
   @Override
-  public List<byte[]> run(long taskId, List<Integer> parties, List<byte[]> inputData,
-      Object... args) {
-    int senderId = (int) args[0];
+  public Object run(long taskId, List<Integer> parties, Object... args) throws ProtocolException {
+    int senderId = parties.get(0);
+    long extraInfo = 0;
     if (senderId == ownId) {
-      return senderProcedure(taskId, parties, inputData);
+      if (args.length < 1) {
+        throw new ProtocolException("Boardcast requires args List<byte[]> for sender");
+      }
+      if (args.length > 1) {
+        extraInfo = ((Number) args[1]).longValue();
+      }
+      return senderProcedure(taskId, parties.subList(1, parties.size()), (List<byte[]>) args[0], extraInfo);
     } else {
-      return receiverProcedure(taskId, senderId);
+      if (args.length > 0) {
+        extraInfo = ((Number) args[0]).longValue();
+      }
+      return receiverProcedure(taskId, senderId, extraInfo);
     }
   }
 }

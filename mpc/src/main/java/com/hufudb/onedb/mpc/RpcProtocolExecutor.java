@@ -1,6 +1,5 @@
 package com.hufudb.onedb.mpc;
 
-import java.util.List;
 import com.hufudb.onedb.mpc.random.BasicRandom;
 import com.hufudb.onedb.mpc.random.OneDBRandom;
 import com.hufudb.onedb.rpc.Rpc;
@@ -29,7 +28,5 @@ public abstract class RpcProtocolExecutor implements ProtocolExecutor {
     public int getOwnId() {
       return ownId;
     }
-  
-    public abstract List<byte[]> run(long taskId, List<Integer> parties, List<byte[]> inputData, Object... args);
   }
   
