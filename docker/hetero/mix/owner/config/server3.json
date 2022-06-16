@@ -1,11 +1,8 @@
 {
   "id": 2,
-  "port": 12347,
+  "port": 12345,
   "theadnum": 4,
   "hostname": "owner3",
-  "privatekeypath": "./cert/owner3.key",
-  "certchainpath": "./cert/owner3.pem",
-  "trustcertpath": "./cert/ca.pem",
   "adapterconfig": {
     "datasource": "mysql",
     "url": "jdbc:mysql://mysql3:3306/mydb",

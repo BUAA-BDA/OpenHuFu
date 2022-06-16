@@ -2,6 +2,7 @@ package com.hufudb.onedb.owner.adapter.csv;
 
 import com.hufudb.onedb.plan.LeafPlan;
 import com.hufudb.onedb.plan.Plan;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -42,19 +43,28 @@ public class CsvAdapter implements Adapter {
   }
 
   void loadTables(String csvDir) throws IOException {
-    try (Stream<Path> stream = Files.list(Paths.get(csvDir))) {
-      stream.filter(file -> !Files.isDirectory(file))
-          .filter(file -> file.toString().endsWith(".csv")).forEach(file -> {
-            try {
-              String fileName = file.getFileName().toString();
-              String tableName = fileName.substring(0, fileName.length() - 4);
-              CsvTable table = new CsvTable(tableName, file);
-              tables.put(tableName, table);
-              schemaManager.addLocalTable(TableSchema.of(tableName, table.getSchema()));
-            } catch (IOException e) {
-              e.printStackTrace();
-            }
-          });
+    File base = new File(csvDir);
+    if (base.isDirectory()) {
+      try (Stream<Path> stream = Files.list(base.toPath())) {
+        stream.filter(file -> !Files.isDirectory(file))
+            .filter(file -> file.toString().endsWith(".csv")).forEach(file -> {
+              try {
+                String fileName = file.getFileName().toString();
+                String tableName = fileName.substring(0, fileName.length() - 4);
+                CsvTable table = new CsvTable(tableName, file);
+                tables.put(tableName, table);
+                schemaManager.addLocalTable(TableSchema.of(tableName, table.getSchema()));
+              } catch (IOException e) {
+                e.printStackTrace();
+              }
+            });
+      }
+    } else if (base.getName().endsWith(".csv")) {
+      String fileName = base.getName();
+      String tableName = fileName.substring(0, fileName.length() - 4);
+      CsvTable table = new CsvTable(tableName, base.toPath());
+      tables.put(tableName, table);
+      schemaManager.addLocalTable(TableSchema.of(tableName, table.getSchema()));
     }
   }
 

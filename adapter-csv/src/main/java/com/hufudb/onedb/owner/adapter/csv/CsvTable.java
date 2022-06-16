@@ -19,10 +19,10 @@ public class CsvTable {
   final CSVFormat csvFormat;
   final String tableName;
   final Schema schema;
-  
 
   CsvTable(String tableName, Path path) throws IOException {
-    this.csvFormat = CSVFormat.RFC4180.builder().setHeader().setSkipHeaderRecord(true).setIgnoreSurroundingSpaces(true).setNullString("").build();
+    this.csvFormat = CSVFormat.RFC4180.builder().setHeader().setSkipHeaderRecord(true)
+        .setIgnoreSurroundingSpaces(true).setNullString("").build();
     Schema.Builder builder = Schema.newBuilder();
     this.dataPath = path;
     this.tableName = tableName;
@@ -43,37 +43,25 @@ public class CsvTable {
       final ColumnType outType = publishedSchema.getType(i);
       switch (outType) {
         case BOOLEAN:
-          mappers.add(
-            row -> Boolean.valueOf((String) row.get(actualColumnIdx))
-          );
+          mappers.add(row -> Boolean.valueOf((String) row.get(actualColumnIdx)));
           break;
         case BYTE:
         case SHORT:
         case INT:
-          mappers.add(
-            row -> Integer.valueOf((String) row.get(actualColumnIdx))
-          );
+          mappers.add(row -> Integer.valueOf((String) row.get(actualColumnIdx)));
           break;
         case LONG:
         case TIMESTAMP:
-          mappers.add(
-            row -> Long.valueOf((String) row.get(actualColumnIdx))
-          );
+          mappers.add(row -> Long.valueOf((String) row.get(actualColumnIdx)));
           break;
         case FLOAT:
-          mappers.add(
-            row -> Float.valueOf((String) row.get(actualColumnIdx))
-          );
+          mappers.add(row -> Float.valueOf((String) row.get(actualColumnIdx)));
           break;
         case DOUBLE:
-          mappers.add(
-            row -> Double.valueOf((String) row.get(actualColumnIdx))
-          );
+          mappers.add(row -> Double.valueOf((String) row.get(actualColumnIdx)));
           break;
         case STRING:
-          mappers.add(
-            row -> row.get(actualColumnIdx)
-          );
+          mappers.add(row -> row.get(actualColumnIdx));
           break;
         default:
           throw new RuntimeException("Unsupport type for csv adapter");
