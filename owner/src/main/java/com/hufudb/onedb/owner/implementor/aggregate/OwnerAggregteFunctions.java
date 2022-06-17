@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 public class OwnerAggregteFunctions {
   static final Logger LOG = LoggerFactory.getLogger(OwnerAggregteFunctions.class);
 
-  
   public static AggregateFunction getAggregateFunc(Expression exp, Rpc rpc, ExecutorService threadPool, TaskInfo taskInfo) {
     if (exp.getOpType().equals(OperatorType.AGG_FUNC)) {
       switch (AggFuncType.of(exp.getI32())) {
