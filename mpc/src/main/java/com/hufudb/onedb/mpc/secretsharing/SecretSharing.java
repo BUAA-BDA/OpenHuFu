@@ -180,6 +180,7 @@ public class SecretSharing extends RpcProtocolExecutor {
    * @param args[0] ColumnType of the input value
    * @param args[1] input value
    * @param args[2] OperatorType
+   * @return result of ColumnType for the first party, 0 for other parties
    */
   @Override
   public Object run(long taskId, List<Integer> parties, Object... args) throws ProtocolException {
