@@ -42,7 +42,6 @@ public class OwnerAggregteFunctions {
             throw new UnsupportedOperationException("Unsupported aggregate function");
         }
       }
-
     } else {
       throw new UnsupportedOperationException("Just support single aggregate function");
     }
@@ -54,6 +53,7 @@ public class OwnerAggregteFunctions {
     final SecretSharing ss;
     final ColumnType type;
     final TaskInfo taskInfo;
+    final boolean hasOutput;
 
     SecretSharingSum(int inputRef, SecretSharing ss, ColumnType type, TaskInfo taskInfo) {
       this.sum = 0;
@@ -61,6 +61,7 @@ public class OwnerAggregteFunctions {
       this.ss = ss;
       this.type = type;
       this.taskInfo = taskInfo;
+      this.hasOutput = ss.getOwnId() == taskInfo.getPartiesList().get(0);
     }
 
     SecretSharingSum(Expression agg, Rpc rpc, ColumnType type, ExecutorService threadPool, TaskInfo taskInfo) {
@@ -76,27 +77,26 @@ public class OwnerAggregteFunctions {
     @Override
     public Comparable aggregate() {
       try {
-        Object res = ss.run(taskInfo.getTaskId(), taskInfo.getPartiesList(), sum, type);
-        if (ss.getOwnId() != taskInfo.getPartiesList().get(0)) {
+        Object res = ss.run(taskInfo.getTaskId(), taskInfo.getPartiesList(), type, sum, OperatorType.PLUS);
+        if (!hasOutput) {
           return null;
-        } else {
-          switch (type) {
-            case DOUBLE:
-              return ((Number) res).doubleValue();
-            case FLOAT:
-              return ((Number) res).floatValue();
-            case BYTE:
-            case SHORT:
-            case INT:
-              return ((Number) res).intValue();
-            case LONG:
-              return ((Number) res).longValue();
-            default:
-              throw new UnsupportedOperationException("Unsupported type for secretsharing sum");
-          }
+        }
+        switch (type) {
+          case DOUBLE:
+            return ((Number) res).doubleValue();
+          case FLOAT:
+            return ((Number) res).floatValue();
+          case BYTE:
+          case SHORT:
+          case INT:
+            return ((Number) res).intValue();
+          case LONG:
+            return ((Number) res).longValue();
+          default:
+            throw new UnsupportedOperationException("Unsupported type for secretsharing sum");
         }
       } catch (ProtocolException e) {
-        LOG.error("Error when executing GMW: {}", e.getMessage());
+        LOG.error("Error when executing secretsharing: {}", e.getMessage());
         e.printStackTrace();
         return null;
       }
@@ -137,7 +137,9 @@ public class OwnerAggregteFunctions {
     public Comparable aggregate() {
       try {
         List<byte[]> localShares = (List<byte[]>) gmw.run(taskInfo.getTaskId(), taskInfo.getPartiesList(), ImmutableList.of(OneDBCodec.encodeInt(sum)), CircuitType.ADD_32.getId());
-        List<byte[]> remoteShares = (List<byte[]>) boardcast.run(taskInfo.getTaskId(), taskInfo.getPartiesList(), localShares);
+        int receiver = taskInfo.getParties(0);
+        int sender = taskInfo.getParties(1);
+        List<byte[]> remoteShares = (List<byte[]>) boardcast.run(taskInfo.getTaskId(), ImmutableList.of(sender, receiver), localShares);
         if (remoteShares.isEmpty()) {
           return null;
         } else {

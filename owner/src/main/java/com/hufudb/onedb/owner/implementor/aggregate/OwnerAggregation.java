@@ -29,17 +29,14 @@ public class OwnerAggregation {
       LOG.warn("Not support 'group by' clause");
       throw new UnsupportedOperationException("Not support 'group by' clause");
     }
-    if (taskInfo.getPartiesList().size() != 2) {
-      LOG.warn("Just support 2 parties in aggregation");
-      throw new UnsupportedOperationException("Just support 2 parties in aggregation");
-    }
     for (Expression exp : aggs) {
       aggFunctions.add(OwnerAggregteFunctions.getAggregateFunc(exp, rpc, threadPool, taskInfo));
       aggTypes.add(exp.getOutType());
     }
     Schema outSchema = ExpressionUtils.createSchema(aggs);
     DataSet result = ArrayDataSet.materialize(AggDataSet.create(outSchema, new SingleAggregator(outSchema, aggFunctions), input));
-    if (taskInfo.getParties(1) == rpc.ownParty().getPartyId()) {
+    // todo: 
+    if (taskInfo.getParties(0) == rpc.ownParty().getPartyId()) {
       return result;
     } else {
       return EmptyDataSet.INSTANCE;
