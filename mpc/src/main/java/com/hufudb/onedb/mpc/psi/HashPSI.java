@@ -5,6 +5,7 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import com.hufudb.onedb.mpc.ProtocolException;
 import com.hufudb.onedb.mpc.ProtocolType;
 import com.hufudb.onedb.mpc.RpcProtocolExecutor;
 import com.hufudb.onedb.mpc.codec.HashFunction;
@@ -171,10 +172,15 @@ public class HashPSI extends RpcProtocolExecutor {
     }
   }
 
+  /**
+   * @param args[0] List<byte[]> inputdata
+   * @param args[1] int hashType
+   */
   @Override
-  public List<byte[]> run(long taskId, List<Integer> parties, List<byte[]> inputData,
-      Object... args) {
-    int hashType = (Integer) args[0];
+  public Object run(long taskId, List<Integer> parties, Object... args) throws ProtocolException {
+    // todo: check this
+    List<byte[]> inputData = (List<byte[]>) args[0];
+    int hashType = (Integer) args[1];
     Pair<Integer, Integer> senderReceiver = getSenderReceiver(taskId, hashType, parties, inputData);
     int sender = senderReceiver.getLeft();
     int receiver = senderReceiver.getRight();
@@ -191,4 +197,25 @@ public class HashPSI extends RpcProtocolExecutor {
       throw new RuntimeException("Fail to determine who is sender/receiver in HashPSI");
     }
   }
+
+  // @Override
+  // public List<byte[]> run(long taskId, List<Integer> parties, List<byte[]> inputData,
+  //     Object... args) {
+  //   int hashType = (Integer) args[0];
+  //   Pair<Integer, Integer> senderReceiver = getSenderReceiver(taskId, hashType, parties, inputData);
+  //   int sender = senderReceiver.getLeft();
+  //   int receiver = senderReceiver.getRight();
+  //   HashFunction hashFunc = HashFunction.of(hashType);
+  //   LOG.debug("Use {} in HashPSI", hashFunc);
+  //   if (sender == rpc.ownParty().getPartyId()) {
+  //     LOG.debug("{} is the sender of HashPSI", rpc.ownParty());
+  //     return senderProcedure(inputData, taskId, receiver, hashFunc);
+  //   } else if (receiver == rpc.ownParty().getPartyId()) {
+  //     LOG.debug("{} is the receiver of HashPSI", rpc.ownParty());
+  //     return receiverProcedure(inputData, taskId, sender, hashFunc);
+  //   } else {
+  //     LOG.error("Fail to determine who is sender/receiver in HashPSI");
+  //     throw new RuntimeException("Fail to determine who is sender/receiver in HashPSI");
+  //   }
+  // }
 }

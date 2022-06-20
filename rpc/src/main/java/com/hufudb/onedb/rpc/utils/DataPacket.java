@@ -3,7 +3,6 @@ package com.hufudb.onedb.rpc.utils;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.stream.Collectors;
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.ByteString;
 import com.hufudb.onedb.proto.DataPacket.DataPacketProto;
 import com.hufudb.onedb.proto.DataPacket.PayloadProto;

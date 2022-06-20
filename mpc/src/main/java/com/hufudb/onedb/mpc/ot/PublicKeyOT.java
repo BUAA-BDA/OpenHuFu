@@ -1,14 +1,12 @@
 package com.hufudb.onedb.mpc.ot;
 
-import com.google.common.collect.ImmutableList;
+import com.hufudb.onedb.mpc.ProtocolException;
 import com.hufudb.onedb.mpc.ProtocolType;
 import com.hufudb.onedb.mpc.RpcProtocolExecutor;
-import com.hufudb.onedb.mpc.codec.OneDBCodec;
 import com.hufudb.onedb.mpc.elgamal.Elgamal;
 import com.hufudb.onedb.rpc.Rpc;
 import com.hufudb.onedb.rpc.utils.DataPacket;
 import com.hufudb.onedb.rpc.utils.DataPacketHeader;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,46 +38,35 @@ public class PublicKeyOT extends RpcProtocolExecutor {
   }
 
   // step 1, run on R
-  DataPacketHeader generateKeys(OTMeta meta) {
-    int m = OneDBCodec.decodeInt(meta.secrets.get(0));
-    int n = 1 << m;
-    int mask = n - 1;
-    int b = OneDBCodec.decodeInt(meta.secrets.get(1)) & mask;
-    LOG.debug("{} generate [{}] public keys, a private key for [{}]", rpc.ownParty(), n, b);
+  Elgamal generateKeys(long taskId, int senderId, int sel, int exp, long extraInfo) {
+    int n = 1 << exp;
+    LOG.debug("{} generate [{}] public keys, a private key for [{}]", rpc.ownParty(), n, sel);
     List<byte[]> payloads = new ArrayList<>();
     Elgamal privateKey = Elgamal.create(true);
     payloads.add(privateKey.getPByteArray());
     payloads.add(privateKey.getGByteArray());
     try {
       for (int i = 0; i < n; ++i) {
-          if (i == b) {
-            payloads.add(privateKey.getPublicKey());
-          } else {
-            payloads.add(privateKey.generatePseudoPublicKey());
-          }
-
+        if (i == sel) {
+          payloads.add(privateKey.getPublicKey());
+        } else {
+          payloads.add(privateKey.generatePseudoPublicKey());
+        }
       }
     } catch (Exception e) {
       LOG.error("Error when generating key pair: {}", e.getMessage());
       return null;
     }
-    meta.b = b;
-    meta.key = privateKey;
-    DataPacketHeader outHeader = new DataPacketHeader(meta.taskId, ProtocolType.PK_OT.getId(), 1,
-        meta.extraInfo, meta.ownId, meta.otherId);
+    DataPacketHeader outHeader =
+        new DataPacketHeader(taskId, ProtocolType.PK_OT.getId(), 1, extraInfo, ownId, senderId);
     rpc.send(DataPacket.fromByteArrayList(outHeader, payloads));
     LOG.debug("{} send {}", rpc.ownParty(), outHeader);
-    // waiting for receving a packet with below header
-    DataPacketHeader expect = new DataPacketHeader(meta.taskId, ProtocolType.PK_OT.getId(), 2,
-        meta.extraInfo, meta.otherId, meta.ownId);
-    LOG.debug("{} wait for packet {}", rpc.ownParty(), expect);
-    return expect;
+    return privateKey;
   }
 
   // step 2, run on S
-  DataPacketHeader encryptSecrets(DataPacket packet, OTMeta meta) {
+  DataPacketHeader encryptSecrets(DataPacket packet, List<?> secrets, long extraInfo) {
     DataPacketHeader header = packet.getHeader();
-    List<byte[]> secrets = meta.secrets;
     List<byte[]> publicKeyBytes = packet.getPayload();
     int n = publicKeyBytes.size() - 2;
     List<byte[]> encryptedSecrets = new ArrayList<>();
@@ -87,8 +74,9 @@ public class PublicKeyOT extends RpcProtocolExecutor {
         header.getSenderId());
     try {
       for (int i = 0; i < n; ++i) {
-        Elgamal elgamal = Elgamal.create(publicKeyBytes.get(0), publicKeyBytes.get(1), publicKeyBytes.get(i + 2));
-        encryptedSecrets.add(elgamal.encrypt(secrets.get(i)));
+        Elgamal elgamal =
+            Elgamal.create(publicKeyBytes.get(0), publicKeyBytes.get(1), publicKeyBytes.get(i + 2));
+        encryptedSecrets.add(elgamal.encrypt((byte[]) secrets.get(i)));
       }
     } catch (Exception e) {
       LOG.error("Error when encrypting: {}", e.getMessage());
@@ -96,79 +84,75 @@ public class PublicKeyOT extends RpcProtocolExecutor {
       return null;
     }
     DataPacketHeader outHeader = new DataPacketHeader(header.getTaskId(), header.getPtoId(), 2,
-        meta.extraInfo, header.getReceiverId(), header.getSenderId());
+        extraInfo, header.getReceiverId(), header.getSenderId());
     rpc.send(DataPacket.fromByteArrayList(outHeader, encryptedSecrets));
     LOG.debug("{} send {}", rpc.ownParty(), outHeader);
     return null;
   }
 
   // step3, run on R
-  List<byte[]> decryptSecrets(DataPacket packet, OTMeta meta) {
-    Elgamal key = meta.key;
-    int b = meta.b;
-    byte[] target = packet.getPayload().get(b);
+  byte[] decryptSecrets(DataPacket packet, Elgamal privateKey, int sel) throws ProtocolException {
+    Elgamal key = privateKey;
+    byte[] target = packet.getPayload().get(sel);
     byte[] decryptedBytes = null;
-    LOG.debug("{} decrypt secret [{}]", rpc.ownParty(), b);
+    LOG.debug("{} decrypt secret [{}]", rpc.ownParty(), sel);
     try {
       decryptedBytes = key.decrypt(target);
     } catch (Exception e) {
       LOG.error("Error when decrypting: {}", e.getMessage());
+      throw new ProtocolException("Decryption error at receiver of PublicKyeOT", e);
     }
-    return ImmutableList.of(decryptedBytes);
+    return decryptedBytes;
   }
 
-  List<byte[]> senderProcedure(OTMeta meta) {
+  /**
+   * @param args List<byte[]> inputdata (required), Long extraInfo (optional)
+   * @return
+   */
+  Object senderProcedure(long taskId, int receivedId, List<byte[]> inputData, long extraInfo) throws ProtocolException {
     LOG.debug("{} is sender of OT", rpc.ownParty());
-    DataPacketHeader expect = new DataPacketHeader(meta.taskId, ProtocolType.PK_OT.getId(), 1,
-        meta.extraInfo, meta.otherId, meta.ownId);
-    encryptSecrets(rpc.receive(expect), meta);
-    return ImmutableList.of();
+    DataPacketHeader expect =
+        new DataPacketHeader(taskId, ProtocolType.PK_OT.getId(), 1, extraInfo, receivedId, ownId);
+    encryptSecrets(rpc.receive(expect), inputData, extraInfo);
+    return null;
   }
 
-  List<byte[]> receiverProcedure(OTMeta meta) {
+  byte[] receiverProcedure(long taskId, int senderId, int sel, int exp, long extraInfo) throws ProtocolException {
     LOG.debug("{} is receiver of OT", rpc.ownParty());
-    DataPacketHeader expectHeader = generateKeys(meta);
-    return decryptSecrets(rpc.receive(expectHeader), meta);
+    sel = sel & ((1 << exp) - 1);
+    Elgamal privatekey = generateKeys(taskId, senderId, sel, exp, extraInfo);
+    DataPacketHeader expect =
+        new DataPacketHeader(taskId, ProtocolType.PK_OT.getId(), 2, extraInfo, senderId, ownId);
+    LOG.debug("{} wait for packet {}", rpc.ownParty(), expect);
+    return decryptSecrets(rpc.receive(expect), privatekey, sel);
   }
 
+  /**
+   * @param parties {senderId, receiverId}
+   * @param args[0] List<byte[]> inputdata for sender (required), or int sel for receiver (required)
+   * @param args[1] long extraInfo for sender (optional), or int exp for receiver (required)
+   * @param args[2] long extraInfo for receiver (optional)
+   * @return null for sender, byte[] for receiver
+   */
   @Override
-  public List<byte[]> run(long taskId, List<Integer> parties, List<byte[]> inputData,
-      Object... args) {
-    // DataPacketHeader header = initPacket.getHeader();
-
-    // assert header.getPtoId() == type.getId();
-    int senderId = (Integer) args[0];
-    int receiverId = (Integer) args[1];
-    long extraInfo = 0L;
-    if (args.length == 3) {
-      extraInfo = (Long) args[2];
+  public Object run(long taskId, List<Integer> parties, Object... args) throws ProtocolException {
+    if (args.length < 1) {
+      LOG.error("PublickeyOT requires args List<byte[]> for sender and int receiver");
+      return null;
     }
-    int ownId = rpc.ownParty().getPartyId();
+    int senderId = parties.get(0);
+    int receiverId = parties.get(1);
+    long extraInfo = 0;
     if (senderId == ownId) {
-      return senderProcedure(new OTMeta(taskId, ownId, receiverId, extraInfo, inputData));
-    } else if (receiverId == ownId) {
-      return receiverProcedure(new OTMeta(taskId, ownId, senderId, extraInfo, inputData));
+      if (args.length > 1) {
+        extraInfo = (long) args[1];
+      }
+      return senderProcedure(taskId, receiverId, (List<byte[]>) args[0], extraInfo);
     } else {
-      LOG.error("{} is not participant of Publickey OT", rpc.ownParty());
-      throw new RuntimeException("Not participant of PK_OT");
-    }
-  }
-
-  static class OTMeta {
-    long taskId;
-    int b;
-    int ownId;
-    int otherId;
-    long extraInfo;
-    Elgamal key;
-    List<byte[]> secrets;
-
-    OTMeta(long taskId, int ownId, int otherId, long extraInfo, List<byte[]> inputs) {
-      this.taskId = taskId;
-      this.ownId = ownId;
-      this.otherId = otherId;
-      this.extraInfo = extraInfo;
-      this.secrets = inputs;
+      if (args.length > 2) {
+        extraInfo = (long) args[2];
+      }
+      return receiverProcedure(taskId, senderId, (int) args[0],(int) args[1], extraInfo);
     }
   }
 }

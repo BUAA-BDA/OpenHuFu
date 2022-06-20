@@ -13,5 +13,11 @@ public interface ProtocolExecutor {
 
   int getOwnId();
 
-  abstract List<byte[]> run(long taskId, List<Integer> parties, List<byte[]> inputData, Object... args);
+  /**
+   * @param taskId
+   * @param parties: all parties involved in this protocol
+   * @param args
+   * @return
+   */
+  Object run(long taskId, List<Integer> parties, Object... args) throws ProtocolException;
 }

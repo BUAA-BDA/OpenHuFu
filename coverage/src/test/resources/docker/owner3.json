@@ -17,6 +17,33 @@
       "actualColumns": []
     },
     {
+      "actualName": "student",
+      "publishedName": "st_pro_3",
+      "publishedColumns": [
+        {
+          "name": "name",
+          "type": "STRING",
+          "modifier": "protected"
+        },
+        {
+          "name": "score",
+          "type": "INT",
+          "modifier": "protected"
+        },
+        {
+          "name": "age",
+          "type": "INT",
+          "modifier": "protected"
+        },
+        {
+          "name": "dept_name",
+          "type": "STRING",
+          "modifier": "protected"
+        }
+      ],
+      "actualColumns": [0, 2, 1, 3]
+    },
+    {
       "actualName": "partsupp",
       "publishedName": "partsupp",
       "publishedColumns": [],

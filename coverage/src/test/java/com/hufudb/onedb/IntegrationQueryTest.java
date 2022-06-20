@@ -517,19 +517,27 @@ public class IntegrationQueryTest {
 
   @Test
   public void protectedSumTest() throws SQLException {
-    ResultSet result = user.executeQuery("select SUM(score) from student_pro_share");
+    ResultSet result = user.executeQuery("select SUM(score) from student_pro_share2");
     List<ArrayRow> expect = toRows(ImmutableList.of(
       ImmutableList.of(519)
     ));
     compareRows(expect, toRows(result));
     result.close();
 
-    result = user.executeQuery("select COUNT(*) from student_pro_share");
+    result = user.executeQuery("select COUNT(*) from student_pro_share2");
     expect = toRows(ImmutableList.of(
       ImmutableList.of(6)
     ));
     compareRows(expect, toRows(result));
     result.close();
+
+    result = user.executeQuery("select COUNT(*) from student_pro_share3");
+    expect = toRows(ImmutableList.of(ImmutableList.of(9)));
+    compareRows(expect, toRows(result));
+
+    result = user.executeQuery("select SUM(score) from student_pro_share3");
+    expect = toRows(ImmutableList.of(ImmutableList.of(759)));
+    compareRows(expect, toRows(result));
     // todo: add more test
   }
 

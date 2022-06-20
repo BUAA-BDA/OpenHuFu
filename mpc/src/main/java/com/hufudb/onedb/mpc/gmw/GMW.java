@@ -6,6 +6,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import com.google.common.collect.ImmutableList;
+import com.hufudb.onedb.mpc.ProtocolException;
 import com.hufudb.onedb.mpc.ProtocolType;
 import com.hufudb.onedb.mpc.RpcProtocolExecutor;
 import com.hufudb.onedb.mpc.bristol.BristolFile;
@@ -94,8 +95,7 @@ public class GMW extends RpcProtocolExecutor {
     } else {
       meta.initIn1(shares, in1);
     }
-    LOG.debug("{} get shares from Party [{}]", rpc.ownParty(),
-        packet.getHeader().getSenderId());
+    LOG.debug("{} get shares from Party [{}]", rpc.ownParty(), packet.getHeader().getSenderId());
   }
 
   Callable<Boolean> evaluateAnd(GMWMeta meta, int in1, int in2, int out) {
@@ -114,13 +114,14 @@ public class GMW extends RpcProtocolExecutor {
               .encodeBoolean(rb ^ ((wireSet.get(in1) ^ true) & (wireSet.get(in2) ^ false))));
           builder.add(OneDBCodec
               .encodeBoolean(rb ^ ((wireSet.get(in1) ^ true) & (wireSet.get(in2) ^ true))));
-          otExecutor.run(meta.taskId, ImmutableList.of(), builder.build(), meta.ownId, meta.otherId, (long) out);
+          otExecutor.run(meta.taskId, ImmutableList.of(meta.ownId, meta.otherId), builder.build(),
+              (long) out);
           wireSet.set(out, rb);
         } else {
           int sel = (wireSet.get(in1) ? 2 : 0) + (wireSet.get(in2) ? 1 : 0);
-          List<byte[]> result = otExecutor.run(meta.taskId, ImmutableList.of(), ImmutableList.of(OneDBCodec.encodeInt(2), OneDBCodec.encodeInt(sel)), meta.otherId, meta.ownId, (long) out);
-          byte[] res = result.get(0);
-          wireSet.set(out, OneDBCodec.decodeBoolean(res));
+          byte[] result = (byte[]) otExecutor.run(meta.taskId,
+              ImmutableList.of(meta.otherId, meta.ownId), sel, 2, (long) out);
+          wireSet.set(out, OneDBCodec.decodeBoolean(result));
         }
         return true;
       }
@@ -185,11 +186,16 @@ public class GMW extends RpcProtocolExecutor {
     }
   }
 
+  /**
+   * @param args[0] List<byte[]> inputdata
+   * @param args[1] int circuitId
+   * @throws ProtocolException
+   */
   @Override
-  public List<byte[]> run(long taskId, List<Integer> parties, List<byte[]> inputData,
-      Object... args) {
+  public Object run(long taskId, List<Integer> parties, Object... args) throws ProtocolException {
     assert parties.size() == 2;
-    int circuitId = (Integer) args[0];
+    List<byte[]> inputData = (List<byte[]>) args[0];
+    int circuitId = (int) args[1];
     CircuitType type = CircuitType.of(circuitId);
     LOG.debug("Load bristol of circuit {}", type);
     int otherId = getOther(parties);

@@ -62,7 +62,7 @@
     ]
   },
   {
-    "tableName": "student_pro_share",
+    "tableName": "student_pro_share2",
     "localTables": [
       {
         "endpoint": "localhost:6789",
@@ -70,6 +70,23 @@
       },
       {
         "endpoint": "localhost:6790",
+        "localName": "st_pro_3"
+      }
+    ]
+  },
+  {
+    "tableName": "student_pro_share3",
+    "localTables": [
+      {
+        "endpoint": "localhost:6789",
+        "localName": "st_pro_3"
+      },
+      {
+        "endpoint": "localhost:6790",
+        "localName": "st_pro_3"
+      },
+      {
+        "endpoint": "localhost:6791",
         "localName": "st_pro_3"
       }
     ]

@@ -25,12 +25,24 @@ public class OneDBCodec {
     return ByteBuffer.allocate(Long.BYTES).order(ByteOrder.LITTLE_ENDIAN).putLong(value).array();
   }
 
-  public static byte[] encodeString(String str) {
-    return str.getBytes();
-  }
-
   public static long decodeLong(byte[] value) {
     return ByteBuffer.wrap(value).order(ByteOrder.LITTLE_ENDIAN).getLong();
+  }
+
+  public static byte[] encodeFloat(float value) {
+    return ByteBuffer.allocate(Float.BYTES).order(ByteOrder.LITTLE_ENDIAN).putFloat(value).array();
+  }
+
+  public static float decodeFloat(byte[] value) {
+    return ByteBuffer.wrap(value).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+  }
+
+  public static byte[] encodeDouble(double value) {
+    return ByteBuffer.allocate(Double.BYTES).order(ByteOrder.LITTLE_ENDIAN).putDouble(value).array();
+  }
+
+  public static double decodeDouble(byte[] value) {
+    return ByteBuffer.wrap(value).order(ByteOrder.LITTLE_ENDIAN).getDouble();
   }
 
   public static byte[] encodeBoolean(boolean value) {
@@ -40,6 +52,10 @@ public class OneDBCodec {
 
   public static boolean decodeBoolean(byte[] value) {
     return value[0] == TRUE;
+  }
+
+  public static byte[] encodeString(String str) {
+    return str.getBytes();
   }
 
   public static String decodeString(byte[] value) {

@@ -31,6 +31,14 @@ public class PublicKeyOTTest {
   @Rule
   public final GrpcCleanupRule grpcCleanup = new GrpcCleanupRule();
 
+  OneDBRpcManager manager;
+  OneDBRpc rpc0;
+  OneDBRpc rpc1;
+  Server server0;
+  Server server1;
+  PublicKeyOT otSender;
+  PublicKeyOT otReceiver;
+
   public static OneDBRandom rand = new BasicRandom();
 
   public List<byte[]> encode4Sender(List<String> secrets) {
@@ -39,6 +47,10 @@ public class PublicKeyOTTest {
 
   public List<byte[]> encode4Receiver(int select) {
     return ImmutableList.of(OneDBCodec.encodeInt(2), OneDBCodec.encodeInt(select));
+  }
+
+  public void testcase() throws Exception {
+    
   }
 
   @Test
@@ -55,39 +67,41 @@ public class PublicKeyOTTest {
         grpcCleanup.register(InProcessChannelBuilder.forName(ownerName0).directExecutor().build()),
         grpcCleanup.register(InProcessChannelBuilder.forName(ownerName1).directExecutor().build())
       );
-      OneDBRpcManager manager = new OneDBRpcManager(parties, channels);
-      OneDBRpc rpc0 = (OneDBRpc) manager.getRpc(0);
-      OneDBRpc rpc1 = (OneDBRpc) manager.getRpc(1);
-      Server server0 = InProcessServerBuilder.forName(ownerName0).directExecutor().addService(rpc0.getgRpcService()).build().start();
-      Server server1 = InProcessServerBuilder.forName(ownerName1).directExecutor().addService(rpc1.getgRpcService()).build().start();
+      manager = new OneDBRpcManager(parties, channels);
+      rpc0 = (OneDBRpc) manager.getRpc(0);
+      rpc1 = (OneDBRpc) manager.getRpc(1);
+      server0 = InProcessServerBuilder.forName(ownerName0).directExecutor().addService(rpc0.getgRpcService()).build().start();
+      server1 = InProcessServerBuilder.forName(ownerName1).directExecutor().addService(rpc1.getgRpcService()).build().start();
       grpcCleanup.register(server0);
       grpcCleanup.register(server1);
       rpc0.connect();
       rpc1.connect();
-      PublicKeyOT otSender = new PublicKeyOT(rpc0);
-      PublicKeyOT otReceiver = new PublicKeyOT(rpc1);
+      otSender = new PublicKeyOT(rpc0);
+      otReceiver = new PublicKeyOT(rpc1);
       List<String> secrets = Arrays.asList("Alice", "Bob", "Jerry", "Tom");
-      int tid = rand.nextInt(secrets.size());
-      String expect = secrets.get(tid);
-      ExecutorService service = Executors.newFixedThreadPool(2);
-      Future<List<byte[]>> senderRes = service.submit(
-        new Callable<List<byte[]>>() {
-          @Override
-          public List<byte[]> call() throws Exception {
-            return otSender.run(0, ImmutableList.of(0, 1), encode4Sender(secrets), 0, 1);
+      for (int i = 0; i < 10; ++i) {
+        int tid = rand.nextInt(secrets.size());
+        String expect = secrets.get(tid);
+        ExecutorService service = Executors.newFixedThreadPool(2);
+        Future<Object> senderRes = service.submit(
+          new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+              return otSender.run(0, ImmutableList.of(0, 1), encode4Sender(secrets));
+            }
           }
-        }
-      );
-      Future<List<byte[]>> receiverRes = service.submit(
-        new Callable<List<byte[]>>() {
-        @Override
-        public List<byte[]> call() throws Exception {
-          return otReceiver.run(0, ImmutableList.of(0, 1), encode4Receiver(tid), 0, 1);
-        }
-      });
-      List<byte[]> result = receiverRes.get();
-      String actual = new String(result.get(0));
-      assertEquals(expect, actual);
+        );
+        Future<Object> receiverRes = service.submit(
+          new Callable<Object>() {
+          @Override
+          public Object call() throws Exception {
+            return otReceiver.run(0, ImmutableList.of(0, 1), tid, 2);
+          }
+        });
+        byte[] result = (byte[]) receiverRes.get();
+        String actual = new String(result);
+        assertEquals(expect, actual);
+      }
       rpc0.disconnect();
       rpc1.disconnect();
     } catch (Exception e) {

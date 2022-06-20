@@ -1,0 +1,39 @@
+{
+  "id": 4,
+  "port": 12345,
+  "theadnum": 4,
+  "hostname": "owner4",
+  "adapterconfig": {
+    "datasource": "csv",
+    "url": "./data"
+  },
+  "tables": [
+    {
+      "actualName": "student",
+      "publishedName": "student1",
+      "publishedColumns": [
+        {
+          "name": "name",
+          "type": "STRING",
+          "modifier": "public"
+        },
+        {
+          "name": "score",
+          "type": "INT",
+          "modifier": "public"
+        },
+        {
+          "name": "age",
+          "type": "INT",
+          "modifier": "hidden"
+        },
+        {
+          "name": "dept_name",
+          "type": "STRING",
+          "modifier": "hidden"
+        }
+      ],
+      "actualColumns": [0,1,2,3]
+    }
+  ]
+}

@@ -91,20 +91,33 @@ public class UtilTest {
       throws Exception {
     ExecutorService service = Executors.newFixedThreadPool(2);
     long taskId = 0;
-    Future<List<byte[]>> res0 = service.submit(new Callable<List<byte[]>>() {
+    Future<Object> res0 = service.submit(new Callable<Object>() {
       @Override
-      public List<byte[]> call() throws Exception {
-        return s0.run(taskId, ImmutableList.of(s1.getOwnId()), payloads, s0.getOwnId());
+      public Object call() throws Exception {
+        if (senderId == s0.getOwnId()) {
+          return s0.run(taskId, ImmutableList.of(senderId, receiverId), payloads, 1);
+        } else {
+          return s0.run(taskId, ImmutableList.of(senderId, receiverId), ImmutableList.of(), 1);
+        }
       }
     });
-    Future<List<byte[]>> res1 = service.submit(new Callable<List<byte[]>>() {
+    Future<Object> res1 = service.submit(new Callable<Object>() {
       @Override
-      public List<byte[]> call() throws Exception {
-        return s1.run(taskId, ImmutableList.of(s1.getOwnId()), ImmutableList.of(), s0.getOwnId());
+      public Object call() throws Exception {
+        if (senderId == s1.getOwnId()) {
+          return s1.run(taskId, ImmutableList.of(senderId, receiverId), payloads, 1);
+        } else {
+          return s1.run(taskId, ImmutableList.of(senderId, receiverId), ImmutableList.of(), 1);
+        }
       }
     });
 
-    List<byte[]> actual = res1.get();
+    List<byte[]> actual;
+    if (senderId == s0.getOwnId()) {
+      actual = (List<byte[]>) res1.get();
+    } else {
+      actual = (List<byte[]>) res0.get();
+    }
     assertEquals(payloads.size(), actual.size());
     for (int i = 0; i < payloads.size(); ++i) {
       assertArrayEquals(payloads.get(i), actual.get(i));
@@ -115,20 +128,32 @@ public class UtilTest {
       throws Exception {
     ExecutorService service = Executors.newFixedThreadPool(2);
     long taskId = 0;
-    Future<List<byte[]>> res0 = service.submit(new Callable<List<byte[]>>() {
+    Future<Object> res0 = service.submit(new Callable<Object>() {
       @Override
-      public List<byte[]> call() throws Exception {
-        return b0.run(taskId, ImmutableList.of(b1.getOwnId()), payloads, b0.getOwnId(), 1);
+      public Object call() throws Exception {
+        if (senderId == b0.getOwnId()) {
+          return b0.run(taskId, ImmutableList.of(senderId, receiverId), payloads, 1);
+        } else {
+          return b0.run(taskId, ImmutableList.of(senderId, receiverId), ImmutableList.of(), 1);
+        }
       }
     });
-    Future<List<byte[]>> res1 = service.submit(new Callable<List<byte[]>>() {
+    Future<Object> res1 = service.submit(new Callable<Object>() {
       @Override
-      public List<byte[]> call() throws Exception {
-        return b1.run(taskId, ImmutableList.of(b1.getOwnId()), ImmutableList.of(), b0.getOwnId(), 1);
+      public Object call() throws Exception {
+        if (senderId == b1.getOwnId()) {
+          return b1.run(taskId, ImmutableList.of(senderId, receiverId),  payloads, 1);
+        } else {
+          return b1.run(taskId, ImmutableList.of(senderId, receiverId), ImmutableList.of(), 1);
+        }
       }
     });
-
-    List<byte[]> actual = res1.get();
+    List<byte[]> actual;
+    if (senderId == b0.getOwnId()) {
+      actual = (List<byte[]>) res1.get();
+    } else {
+      actual = (List<byte[]>) res0.get();
+    }
     assertEquals(payloads.size(), actual.size());
     for (int i = 0; i < payloads.size(); ++i) {
       assertArrayEquals(payloads.get(i), actual.get(i));
@@ -152,6 +177,5 @@ public class UtilTest {
     runBoardcast(generateRandomBytes(10, 10), new Boardcast(rpc0), new Boardcast(rpc1), 0, 1);
     runBoardcast(generateRandomBytes(10, 10), new Boardcast(rpc0), new Boardcast(rpc1), 1, 0);
     runBoardcast(generateRandomBytes(10, 10), new Boardcast(rpc0), new Boardcast(rpc1), 1, 0);
-
   }
 }

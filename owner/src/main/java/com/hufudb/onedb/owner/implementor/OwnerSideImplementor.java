@@ -6,6 +6,7 @@ import com.hufudb.onedb.data.storage.DataSet;
 import com.hufudb.onedb.data.storage.EmptyDataSet;
 import com.hufudb.onedb.implementor.PlanImplementor;
 import com.hufudb.onedb.interpreter.Interpreter;
+import com.hufudb.onedb.mpc.ProtocolException;
 import com.hufudb.onedb.owner.adapter.Adapter;
 import com.hufudb.onedb.owner.implementor.aggregate.OwnerAggregation;
 import com.hufudb.onedb.owner.implementor.join.HashEqualJoin;
@@ -51,12 +52,17 @@ public class OwnerSideImplementor implements PlanImplementor {
       LOG.error("Not support two side on a single owner yet");
       throw new UnsupportedOperationException("Not support two side on a single owner yet");
     }
-    DataSet result =
-        HashEqualJoin.join(in, binary.getJoinCond(), isLeft, rpc, binary.getTaskInfo());
-    if (!binary.getSelectExps().isEmpty()) {
-      result = Interpreter.map(result, binary.getSelectExps());
+    try {
+      DataSet result =
+      HashEqualJoin.join(in, binary.getJoinCond(), isLeft, rpc, binary.getTaskInfo());
+      if (!binary.getSelectExps().isEmpty()) {
+        result = Interpreter.map(result, binary.getSelectExps());
+      }
+      return result;
+    } catch (ProtocolException e) {
+      LOG.error("Error in HashPSIJoin: {}", e.getMessage());
+      return EmptyDataSet.INSTANCE;
     }
-    return result;
   }
 
   @Override
