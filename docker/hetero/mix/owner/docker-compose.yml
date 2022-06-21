@@ -34,7 +34,6 @@ services:
       - $PWD/config:/usr/src/mymvn/config
       - $PWD/log:/usr/src/mymvn/log
     networks:
-      - owner_net_2
       - public_net
     ports:
       - 12346:12345
