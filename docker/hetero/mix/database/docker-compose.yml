@@ -14,18 +14,8 @@ services:
     networks:
       - owner_net_1
 
-  postgres2:
-    image: postgres
-    restart: "no"
-    container_name: postgres2
-    ports:
-      - 13102:5432
-    environment:
-      POSTGRES_PASSWORD: onedb
-    volumes:
-      - $PWD/config/db2.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:
-      - owner_net_2
+  # sqlite2:
+  # sqlite use db2.db file directly
 
   mysql3:
     image: mysql
@@ -42,12 +32,12 @@ services:
     networks:
       - owner_net_3
 
+  # csv4:
+  # csv use .csv file directly
+
 networks:
   owner_net_1:
     name: owner_net_1
-    driver: bridge
-  owner_net_2:
-    name: owner_net_2
     driver: bridge
   owner_net_3:
     name: owner_net_3

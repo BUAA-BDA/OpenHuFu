@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -93,6 +92,15 @@ public class CsvAdapter implements Adapter {
     tables.clear();
   }
 
+  Schema getOutSchema(String publishedTableName) {
+    Schema schema = schemaManager.getPublishedSchema(publishedTableName);
+    Schema.Builder builder = Schema.newBuilder();
+    for (int i = 0; i < schema.size(); ++i) {
+      builder.add("", schema.getType(i), schema.getModifier(i));
+    }
+    return builder.build();
+  }
+
   DataSet queryInternal(LeafPlan plan) {
     String publishedTableName = plan.getTableName();
     String actualTableName = schemaManager.getActualTableName(publishedTableName);
@@ -100,7 +108,7 @@ public class CsvAdapter implements Adapter {
       LOG.error("Published table {} not found", publishedTableName);
       return EmptyDataSet.INSTANCE;
     }
-    Schema schema = schemaManager.getPublishedSchema(publishedTableName);
+    Schema schema = getOutSchema(publishedTableName);
     List<Integer> mappings = schemaManager.getPublishedSchemaMapping(publishedTableName);
     CsvTable target = tables.get(actualTableName);
     if (target == null) {

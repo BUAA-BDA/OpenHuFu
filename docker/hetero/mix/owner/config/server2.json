@@ -4,11 +4,11 @@
   "theadnum": 4,
   "hostname": "owner2",
   "adapterconfig": {
-    "datasource": "postgresql",
-    "url": "jdbc:postgresql://postgres2:5432/postgres",
-    "catalog": "postgres",
-    "user": "postgres",
-    "passwd": "onedb"
+    "datasource": "sqlite",
+    "url": "jdbc:sqlite:/usr/src/mymvn/config/db2.db",
+    "catalog": "db2",
+    "user": "admin",
+    "passwd": "admin"
   },
   "tables": [
     {

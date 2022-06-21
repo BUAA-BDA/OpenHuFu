@@ -10,6 +10,7 @@ then
   cp owner/target/*-with-dependencies.jar ./release/bin/onedb_owner_server.jar
   cp adapter-postgresql/target/*-with-dependencies.jar ./release/adapter/adapter_postgresql.jar
   cp adapter-mysql/target/*-with-dependencies.jar ./release/adapter/adapter_mysql.jar
+  cp adapter-sqlite/target/*-with-dependencies.jar ./release/adapter/adapter_sqlite.jar
   cp adapter-csv/target/*-with-dependencies.jar ./release/adapter/adapter_csv.jar
   cp backend/target/backend*.jar ./release/bin/backend.jar
 else
@@ -22,13 +23,16 @@ else
     cp owner/target/*-with-dependencies.jar ./release/bin/onedb_owner_server.jar
   elif [ $1 == "adapter-postgresql" ]
   then
-    cp adapter-postgresql/target/*-with-dependencies.jar ./release/adapter/adapter-postgresql.jar
+    cp adapter-postgresql/target/*-with-dependencies.jar ./release/adapter/adapter_postgresql.jar
   elif [ $1 == "adapter-mysql" ]
   then
-    cp adapter-mysql/target/*-with-dependencies.jar ./release/adapter/adapter-mysql.jar
+    cp adapter-mysql/target/*-with-dependencies.jar ./release/adapter/adapter_mysql.jar
+  elif [ $1 == "adapter-sqlite" ]
+  then
+    cp adapter-sqlite/target/*-with-dependencies.jar ./release/adapter/adapter_sqlite.jar
   elif [ $1 == "adapter-csv" ]
   then
-    cp adapter-csv/target/*-with-dependencies.jar ./release/adapter/adapter-csv.jar
+    cp adapter-csv/target/*-with-dependencies.jar ./release/adapter/adapter_csv.jar
   elif [ $1 == "backend" ]
   then
     cp backend/target/backend*.jar ./release/bin/backend.jar

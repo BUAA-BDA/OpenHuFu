@@ -12,6 +12,7 @@ public class SchemaManagerTest {
   public void schemaManagerTest() {
     SchemaManager manager = new SchemaManager();
     TableSchema.Builder builder1 = TableSchema.newBuilder();
+    TableSchema.Builder builderExpect = TableSchema.newBuilder();
     builder1
     .setTableName("T1")
     .add("A", ColumnType.BOOLEAN, Modifier.PUBLIC)
@@ -21,6 +22,15 @@ public class SchemaManagerTest {
     .add("E", ColumnType.LONG)
     .add("F", ColumnType.STRING)
     .add("G", ColumnType.BLOB);
+    builderExpect.setTableName("PT1")
+    .add("A", ColumnType.BOOLEAN, Modifier.PUBLIC)
+    .add("B", ColumnType.FLOAT, Modifier.PUBLIC)
+    .add("C", ColumnType.DOUBLE, Modifier.PUBLIC)
+    .add("D", ColumnType.INT, Modifier.PUBLIC)
+    .add("E", ColumnType.LONG, Modifier.PUBLIC)
+    .add("F", ColumnType.STRING, Modifier.PUBLIC)
+    .add("G", ColumnType.BLOB, Modifier.PUBLIC);
+    TableSchema expectSchema = builderExpect.build();
     try {
       builder1.add("A", ColumnType.SHORT);
       assertFalse("error when adding an existing column", true);
@@ -37,7 +47,7 @@ public class SchemaManagerTest {
     assertEquals(1, manager.getAllLocalTable().size());
     PublishedTableSchema pt1 = PublishedTableSchema.create(t1, "PT1");
     assertEquals(7, pt1.getMappings().size());
-    assertEquals(t1.getSchema(), pt1.getPublishedSchema());
+    assertEquals(expectSchema.getSchema(), pt1.getPublishedSchema());
     assertTrue(manager.addPublishedTable(pt1));
     assertFalse(manager.addPublishedTable(pt1));
     assertEquals("T1", manager.getActualTableName("PT1"));

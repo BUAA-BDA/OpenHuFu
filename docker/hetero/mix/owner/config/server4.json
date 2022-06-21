@@ -18,19 +18,19 @@
           "modifier": "public"
         },
         {
+          "name": "age",
+          "type": "INT",
+          "modifier": "public"
+        },
+        {
           "name": "score",
           "type": "INT",
           "modifier": "public"
         },
         {
-          "name": "age",
-          "type": "INT",
-          "modifier": "hidden"
-        },
-        {
           "name": "dept_name",
           "type": "STRING",
-          "modifier": "hidden"
+          "modifier": "public"
         }
       ],
       "actualColumns": [0,1,2,3]

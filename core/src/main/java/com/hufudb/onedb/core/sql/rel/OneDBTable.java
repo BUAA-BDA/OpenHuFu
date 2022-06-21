@@ -123,7 +123,7 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
         if (table.getSchema().equals(schema)) {
           table.addOwner(client, localName);
         } else {
-          LOG.warn("schema in {} mismatc with origin[{}]", endpoint, table.getSchema());
+          LOG.warn("schema in {} mismatch with origin[{}]", endpoint, table.getSchema());
         }
       }
     }

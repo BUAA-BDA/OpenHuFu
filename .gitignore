@@ -1,5 +1,29 @@
 # Compiled class file
 *.class
+target
+
+# STS #
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# IntelliJ IDEA #
+.idea
+*.iws
+*.iml
+*.ipr
+
+# NetBeans #
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
 
 # Log file
 *.log
@@ -38,10 +62,14 @@ yarn-error.log*
 pnpm-debug.log*
 
 # Editor directories and files
-.idea
-.vscode
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# python
+
+python/dist/
+python/pyonedb.egg-info/
+python/*.egg-info/

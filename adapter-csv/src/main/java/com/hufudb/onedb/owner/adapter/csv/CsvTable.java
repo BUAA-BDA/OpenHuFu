@@ -36,11 +36,11 @@ public class CsvTable {
     return schema;
   }
 
-  DataSet scanWithSchema(Schema publishedSchema, List<Integer> mapping) {
+  DataSet scanWithSchema(Schema outSchema, List<Integer> mapping) {
     List<Mapper> mappers = new ArrayList<>();
     for (int i = 0; i < mapping.size(); ++i) {
       final int actualColumnIdx = mapping.get(i);
-      final ColumnType outType = publishedSchema.getType(i);
+      final ColumnType outType = outSchema.getType(i);
       switch (outType) {
         case BOOLEAN:
           mappers.add(row -> Boolean.valueOf((String) row.get(actualColumnIdx)));
@@ -69,7 +69,7 @@ public class CsvTable {
     }
     try {
       CSVParser csvParser = CSVParser.parse(dataPath, StandardCharsets.UTF_8, csvFormat);
-      return MapDataSet.create(publishedSchema, mappers, new CsvDataSet(csvParser, schema));
+      return MapDataSet.create(outSchema, mappers, new CsvDataSet(csvParser, schema));
     } catch (IOException e) {
       return EmptyDataSet.INSTANCE;
     }
