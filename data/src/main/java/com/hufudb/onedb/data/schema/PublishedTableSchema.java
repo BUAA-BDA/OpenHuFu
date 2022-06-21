@@ -18,15 +18,16 @@ public class PublishedTableSchema {
       String publishedTableName,
       List<ColumnDesc> publishedColumns,
       List<Integer> mappings) {
-    // this.actualSchema = tableSchema;
     if (publishedColumns.isEmpty()) {
-      this.fakeSchema = TableSchema.of(publishedTableName, tableSchema.getSchema());
+      Schema.Builder fakeSchemaBuilder = Schema.newBuilder();
       this.actualSchema = TableSchema.of(tableSchema.getName(), tableSchema.getSchema());
       ImmutableList.Builder<Integer> mapBuilder =
           ImmutableList.builderWithExpectedSize(tableSchema.size());
       for (int i = 0; i < tableSchema.size(); ++i) {
         mapBuilder.add(i);
+        fakeSchemaBuilder.add(actualSchema.getSchema().getName(i), actualSchema.getSchema().getType(i), Modifier.PUBLIC);
       }
+      this.fakeSchema = TableSchema.of(publishedTableName, fakeSchemaBuilder.build());
       this.mappings = mapBuilder.build();
     } else {
       // todo: check unique of mapping

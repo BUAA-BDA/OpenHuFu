@@ -94,6 +94,7 @@ public class MultiSourceDataSet implements DataSet {
       } else if (nextProto()) {
         ProtoDataSet dataSet = ProtoDataSet.create(getProto());
         if (!dataSet.getSchema().equals(schema)) {
+          LOG.error("Unmatch schema in mutlisource dataset: expect [{}], get[{}]", dataSet.getSchema(), schema);
           throw new RuntimeException("Unmatch schema in mutlisource dataset");
         }
         it = dataSet.getIterator();
