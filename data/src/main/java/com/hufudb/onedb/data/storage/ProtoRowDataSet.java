@@ -47,7 +47,13 @@ public class ProtoRowDataSet implements MaterializedDataSet {
 
   @Override
   public Object get(int rowIndex, int columnIndex) {
-    return getters.get(columnIndex).get(rows.getRows(rowIndex));
+    final RowProto row = rows.getRows(rowIndex);
+    ByteString isNull = row.getIsnull();
+    if ((isNull.byteAt(columnIndex >> 3) & (1 << (columnIndex & 0x7))) != 0) {
+      return null;
+    } else {
+      return getters.get(columnIndex).get(row);
+    }
   }
 
   public List<byte[]> toBytes() {
@@ -124,7 +130,7 @@ public class ProtoRowDataSet implements MaterializedDataSet {
           nullBuilder.add(true);
         } else {
           nullBuilder.add(false);
-          setters.get(i).set(rowBuilder, it.get(references.get(i)));
+          setters.get(i).set(rowBuilder, v);
         }
       }
       rowBuilder.setIsnull(ByteString.copyFrom(nullBuilder.buildByteArray()));
@@ -157,7 +163,13 @@ public class ProtoRowDataSet implements MaterializedDataSet {
 
     @Override
     public Object get(int columnIndex) {
-      return getters.get(columnIndex).get(rows.getRows(pointer));
+      final RowProto row = rows.getRows(pointer);
+      ByteString isNull = row.getIsnull();
+      if ((isNull.byteAt(columnIndex >> 3) & (1 << (columnIndex & 0x7))) != 0) {
+        return null;
+      } else {
+        return getters.get(columnIndex).get(row);
+      }
     }
 
     @Override

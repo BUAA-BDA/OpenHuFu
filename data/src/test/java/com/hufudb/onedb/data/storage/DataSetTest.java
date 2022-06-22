@@ -3,6 +3,7 @@ package com.hufudb.onedb.data.storage;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -24,17 +25,41 @@ import org.junit.Test;
 
 public class DataSetTest {
 
-  List<Row> generateRandomRowProto(int size) {
+  List<Row> generateRandomRowProto(int size, boolean hasNull) {
     List<Row> rows = new ArrayList<>();
     Random random = new Random(System.currentTimeMillis());
     for (int i = 0; i < size; ++i) {
       ArrayRow.Builder builder = ArrayRow.newBuilder(6);
-      builder.set(0, random.nextBoolean());
-      builder.set(1, (byte) random.nextInt());
-      builder.set(2, random.nextInt());
-      builder.set(3, random.nextLong());
-      builder.set(4, RandomStringUtils.randomAlphabetic(20));
-      builder.set(5, RandomStringUtils.randomAscii(20).getBytes());
+      if (hasNull && random.nextBoolean()) {
+        builder.set(0, null);
+      } else {
+        builder.set(0, random.nextBoolean());
+      }
+      if (hasNull && random.nextBoolean()) {
+        builder.set(1, null);
+      } else {
+        builder.set(1, (byte) random.nextInt());
+      }
+      if (hasNull && random.nextBoolean()) {
+        builder.set(2, null);
+      } else {
+        builder.set(2, random.nextInt());
+      }
+      if (hasNull && random.nextBoolean()) {
+        builder.set(3, null);
+      } else {
+        builder.set(3, random.nextLong());
+      }
+      if (hasNull && random.nextBoolean()) {
+        builder.set(4, null);
+      } else {
+        builder.set(4, RandomStringUtils.randomAlphabetic(20));
+      }
+      if (hasNull && random.nextBoolean()) {
+        builder.set(5, null);
+      } else {
+        builder.set(5, RandomStringUtils.randomAscii(20).getBytes());
+      }
       rows.add(builder.build());
     }
     return rows;
@@ -63,14 +88,14 @@ public class DataSetTest {
     assertEquals(ColumnType.BYTE, schema.getType(1));
     assertEquals(Modifier.PROTECTED, schema.getModifier(2));
     ProtoDataSet.Builder dBuilder = ProtoDataSet.newBuilder(schema);
-    List<Row> rows = generateRandomRowProto(10);
+    List<Row> rows = generateRandomRowProto(10, false);
     for (Row row : rows) {
       dBuilder.addRow(row);
     }
     DataSetIterator it = dBuilder.build().getIterator();
     compareProto(rows, it);
     dBuilder.clear();
-    rows = generateRandomRowProto(10);
+    rows = generateRandomRowProto(10, false);
     for (Row row : rows) {
       dBuilder.addRow(row);
     }
@@ -85,7 +110,7 @@ public class DataSetTest {
         .add("D", ColumnType.LONG, Modifier.PRIVATE).add("E", ColumnType.STRING, Modifier.PUBLIC)
         .add("F", ColumnType.BLOB, Modifier.PUBLIC).build();
     ProtoDataSet.Builder dBuilder = ProtoDataSet.newBuilder(schema);
-    List<Row> rows = generateRandomRowProto(10);
+    List<Row> rows = generateRandomRowProto(10, true);
     for (Row row : rows) {
       dBuilder.addRow(row);
     }
@@ -100,13 +125,41 @@ public class DataSetTest {
     DataSetIterator pit = projectDataSet.getIterator();
     while (vit.next() && rit.next() && pit.next()) {
       assertEquals(vit.get(0), rit.get(0));
-      assertEquals(((Number) vit.get(1)).intValue(), (int) rit.get(1));
-      assertEquals((Number) vit.get(2), (int) rit.get(2));
-      assertEquals((long) vit.get(3), (long) rit.get(3));
-      assertEquals((String) vit.get(4), (String) rit.get(4));
-      assertArrayEquals((byte[]) vit.get(5), (byte[]) rit.get(5));
-      assertEquals(vit.get(0), pit.get(0));
-      assertEquals((Number) vit.get(2), (int) pit.get(1));
+      if (vit.get(1) == null) {
+        assertNull(rit.get(1));
+      } else {
+        assertEquals(((Number) vit.get(1)).intValue(), (int) rit.get(1));
+      }
+      if (vit.get(2) == null) {
+        assertNull(rit.get(2));
+      } else {
+        assertEquals((Number) vit.get(2), (int) rit.get(2));
+      }
+      if (vit.get(3) == null) {
+        assertNull(rit.get(3));
+      } else {
+        assertEquals((long) vit.get(3), (long) rit.get(3));
+      }
+      if (vit.get(4) == null) {
+        assertNull(rit.get(4));
+      } else {
+        assertEquals((String) vit.get(4), (String) rit.get(4));
+      }
+      if (vit.get(5) == null) {
+        assertNull(rit.get(5));
+      } else {
+        assertArrayEquals((byte[]) vit.get(5), (byte[]) rit.get(5));
+      }
+      if (vit.get(0) == null) {
+        assertNull(pit.get(0));
+      } else {
+        assertEquals(vit.get(0), pit.get(0));
+      }
+      if (vit.get(2) == null) {
+        assertNull(pit.get(1));
+      } else {
+        assertEquals((Number) vit.get(2), (int) pit.get(1));
+      }
     }
     projectDataSet.close();
   }
