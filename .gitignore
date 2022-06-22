@@ -23,7 +23,6 @@ target
 /dist/
 /nbdist/
 /.nb-gradle/
-build/
 
 # Log file
 *.log
