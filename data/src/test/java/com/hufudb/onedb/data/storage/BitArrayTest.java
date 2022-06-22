@@ -25,6 +25,9 @@ public class BitArrayTest {
     for (int i = 0; i < SIZE; ++i) {
       assertEquals(expect.get(i), bits.get(i));
     }
+    builder.clear();
+    BitArray empty = builder.build();
+    assertEquals(0, empty.size());
   }
 
   @Test

@@ -4,6 +4,7 @@ import com.hufudb.onedb.proto.OneDBData.ColumnType;
 
 public interface Column {
   Object getObject(int rowNum);
+  boolean isNull(int rowNum);
   ColumnType getType();
   int size();
 

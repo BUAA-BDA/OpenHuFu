@@ -22,6 +22,11 @@ public class ArrayRow implements Row, Serializable {
   }
 
   @Override
+  public boolean isNull(int columnIndex) {
+    return values[columnIndex] == null;
+  }
+
+  @Override
   public int size() {
     return values.length;
   }

@@ -2,7 +2,6 @@ package com.hufudb.onedb.data.storage;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.google.protobuf.ByteString;
 
 public class BitArray {
   final private int capacity;
@@ -92,7 +91,6 @@ public class BitArray {
   }
 
   public static class Builder {
-    ByteString byteString;
     List<Byte> bytes;
     byte cur;
     int count;
@@ -112,6 +110,12 @@ public class BitArray {
         bytes.add(cur);
         cur = 0;
       }
+    }
+
+    public void clear() {
+      bytes.clear();
+      cur = 0;
+      count = 0;
     }
 
     public BitArray build() {

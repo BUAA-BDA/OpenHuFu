@@ -83,19 +83,19 @@ public class ProtoRowDataSet implements MaterializedDataSet {
         case FLOAT:
           getterBuilder.add((row) -> row.getCells(i).getF32Cel());
           setterBuilder.add(
-              (row, value) -> row.setCells(i, CellProto.newBuilder().setF32Cel((float) value)));
+              (row, value) -> row.setCells(i, CellProto.newBuilder().setF32Cel(((Number) value).floatValue())));
           break;
         case DOUBLE:
           getterBuilder.add((row) -> row.getCells(i).getF64Cel());
           setterBuilder.add(
-              (row, value) -> row.setCells(i, CellProto.newBuilder().setF64Cel((double) value)));
+              (row, value) -> row.setCells(i, CellProto.newBuilder().setF64Cel(((Number) value).doubleValue())));
           break;
         case BYTE:
         case SHORT:
         case INT:
           getterBuilder.add((row) -> row.getCells(i).getI32Cel());
           setterBuilder
-              .add((row, value) -> row.setCells(i, CellProto.newBuilder().setI32Cel((int) value)));
+              .add((row, value) -> row.setCells(i, CellProto.newBuilder().setI32Cel(((Number) value).intValue())));
           break;
         case LONG:
         case DATE:
@@ -103,7 +103,7 @@ public class ProtoRowDataSet implements MaterializedDataSet {
         case TIMESTAMP:
           getterBuilder.add((row) -> row.getCells(i).getI64Cel());
           setterBuilder
-              .add((row, value) -> row.setCells(i, CellProto.newBuilder().setI64Cel((long) value)));
+              .add((row, value) -> row.setCells(i, CellProto.newBuilder().setI64Cel(((Number) value).longValue())));
           break;
         default:
           throw new UnsupportedOperationException("Unsupported type for proto row dataset");
@@ -118,7 +118,12 @@ public class ProtoRowDataSet implements MaterializedDataSet {
     }
     while (it.next()) {
       for (int i = 0; i < columnNum; ++i) {
-        setters.get(i).set(rowBuilder, it.get(references.get(i)));
+        Object v = it.get(references.get(i));
+        if (v == null) {
+
+        } else {
+          setters.get(i).set(rowBuilder, it.get(references.get(i)));
+        }
       }
       rows.addRows(rowBuilder.build());
     }
