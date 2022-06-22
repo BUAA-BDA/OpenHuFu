@@ -69,14 +69,15 @@ message BytesColumn {
 }
 
 message ColumnProto {
+  bytes isnull = 1;
   oneof col {
-    I32Column i32col = 1;
-    I64Column i64col = 2;
-    F32Column f32col = 3;
-    F64Column f64col = 4;
-    BoolColumn boolcol = 5;
-    StringColumn strcol = 6;
-    BytesColumn bytescol = 7;
+    I32Column i32col = 2;
+    I64Column i64col = 3;
+    F32Column f32col = 4;
+    F64Column f64col = 5;
+    BoolColumn boolcol = 6;
+    StringColumn strcol = 7;
+    BytesColumn bytescol = 8;
   }
 }
 
@@ -93,7 +94,8 @@ message CellProto {
 }
 
 message RowProto {
-  repeated CellProto cells = 1;
+  bytes isnull = 1;
+  repeated CellProto cells = 2;
 }
 
 message RowsProto {

@@ -1,17 +1,24 @@
-package com.hufudb.onedb.mpc.utils;
+package com.hufudb.onedb.data.storage;
+
+import java.util.ArrayList;
+import java.util.List;
+import com.google.protobuf.ByteString;
 
 public class BitArray {
   final private int capacity;
   private byte[] bits;
 
-  public BitArray(byte[] bits) {
-    this.capacity = bits.length * Byte.SIZE;
+  BitArray(int capacity, byte[] bits) {
+    this.capacity = capacity;
     this.bits = bits;
   }
 
+  public BitArray(byte[] bits) {
+    this(bits.length * Byte.SIZE, bits);
+  }
+
   public BitArray(int capacity) {
-    this.capacity = capacity;
-    bits = new byte[(capacity + 7) >> 3];
+    this(capacity, new byte[(capacity + 7) >> 3]);
   }
 
   public static BitArray valueOf(byte[] bits) {
@@ -40,6 +47,10 @@ public class BitArray {
 
   public int size() {
     return capacity;
+  }
+
+  public static Builder builder() {
+    return new Builder();
   }
 
   /**
@@ -78,5 +89,41 @@ public class BitArray {
       buffer.append(get(i) ? '1' : '0');
     }
     return buffer.toString();
+  }
+
+  public static class Builder {
+    ByteString byteString;
+    List<Byte> bytes;
+    byte cur;
+    int count;
+
+    Builder() {
+      bytes = new ArrayList<>();
+      cur = 0;
+      count = 0;
+    }
+
+    public void add(boolean value) {
+      if (value) {
+        cur |= 1 << (count & 0x7);
+      }
+      count++;
+      if ((count & 0x7) == 0) {
+        bytes.add(cur);
+        cur = 0;
+      }
+    }
+
+    public BitArray build() {
+      if ((count & 0x7) != 0) {
+        bytes.add(cur);
+      }
+      final int len = bytes.size();
+      byte[] array = new byte[len];
+      for (int i = 0; i < len; ++i) {
+        array[i] = bytes.get(i);
+      }
+      return new BitArray(count, array);
+    }
   }
 }

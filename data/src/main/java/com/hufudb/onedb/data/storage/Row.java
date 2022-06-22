@@ -2,6 +2,7 @@ package com.hufudb.onedb.data.storage;
 
 public interface Row {
   Object get(int columnIndex);
+  // boolean isNull(int columnIndex);
   int size();
 
   public static boolean equals(Row r1, Row r2) {

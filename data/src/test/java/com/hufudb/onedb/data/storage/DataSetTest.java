@@ -54,12 +54,9 @@ public class DataSetTest {
 
   @Test
   public void testProtoDataSet() {
-    Schema schema = Schema.newBuilder()
-        .add("A", ColumnType.BOOLEAN, Modifier.HIDDEN)
-        .add("B", ColumnType.BYTE, Modifier.PUBLIC)
-        .add("C", ColumnType.INT, Modifier.PROTECTED)
-        .add("D", ColumnType.LONG, Modifier.PRIVATE)
-        .add("E", ColumnType.STRING, Modifier.PUBLIC)
+    Schema schema = Schema.newBuilder().add("A", ColumnType.BOOLEAN, Modifier.HIDDEN)
+        .add("B", ColumnType.BYTE, Modifier.PUBLIC).add("C", ColumnType.INT, Modifier.PROTECTED)
+        .add("D", ColumnType.LONG, Modifier.PRIVATE).add("E", ColumnType.STRING, Modifier.PUBLIC)
         .add("F", ColumnType.BLOB, Modifier.PUBLIC).build();
     assertEquals("A", schema.getName(0));
     assertEquals(ColumnType.BYTE, schema.getType(1));
@@ -82,12 +79,9 @@ public class DataSetTest {
 
   @Test
   public void testProtoRowDataSet() {
-    Schema schema = Schema.newBuilder()
-        .add("A", ColumnType.BOOLEAN, Modifier.HIDDEN)
-        .add("B", ColumnType.BYTE, Modifier.PUBLIC)
-        .add("C", ColumnType.INT, Modifier.PROTECTED)
-        .add("D", ColumnType.LONG, Modifier.PRIVATE)
-        .add("E", ColumnType.STRING, Modifier.PUBLIC)
+    Schema schema = Schema.newBuilder().add("A", ColumnType.BOOLEAN, Modifier.HIDDEN)
+        .add("B", ColumnType.BYTE, Modifier.PUBLIC).add("C", ColumnType.INT, Modifier.PROTECTED)
+        .add("D", ColumnType.LONG, Modifier.PRIVATE).add("E", ColumnType.STRING, Modifier.PUBLIC)
         .add("F", ColumnType.BLOB, Modifier.PUBLIC).build();
     ProtoDataSet.Builder dBuilder = ProtoDataSet.newBuilder(schema);
     List<Row> rows = generateRandomRowProto(10);
@@ -130,53 +124,54 @@ public class DataSetTest {
 
   @Test
   public void testMultiSourceDataSet() {
-    final Schema schema = Schema.newBuilder()
-      .add("A", ColumnType.INT, Modifier.PUBLIC)
-      .add("B", ColumnType.LONG, Modifier.PUBLIC).build();
-    MultiSourceDataSet multi = new MultiSourceDataSet(schema, 2);
-    ExecutorService threadPool = Executors.newFixedThreadPool(2);
-    final Producer p1 = multi.newProducer();
-    final Producer p2 = multi.newProducer();
-    threadPool.submit(new Runnable() {
-      @Override
-      public void run() {
-        p1.add(generateDataSet(schema, 10));
-        try {
-          Thread.sleep(100);
-        } catch (Exception e) {
-          e.printStackTrace();
+    for (int i = 0; i < 20; ++i) {
+      final Schema schema = Schema.newBuilder().add("A", ColumnType.INT, Modifier.PUBLIC)
+          .add("B", ColumnType.LONG, Modifier.PUBLIC).build();
+      MultiSourceDataSet multi = new MultiSourceDataSet(schema, 2, 1000);
+      ExecutorService threadPool = Executors.newFixedThreadPool(2);
+      final Producer p1 = multi.newProducer();
+      final Producer p2 = multi.newProducer();
+      final Random random = new Random();
+      threadPool.submit(new Runnable() {
+        @Override
+        public void run() {
+          p1.add(generateDataSet(schema, 10));
+          try {
+            Thread.sleep(random.nextInt(100));
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+          p1.add(generateDataSet(schema, 12));
+          p1.finish();
         }
-        p1.add(generateDataSet(schema, 12));
-        p1.finish();
-      }
-    });
-    threadPool.submit(new Runnable() {
-      @Override
-      public void run() {
-        p2.add(generateDataSet(schema, 11));
-        try {
-          Thread.sleep(100);
-        } catch (Exception e) {
-          e.printStackTrace();
+      });
+      threadPool.submit(new Runnable() {
+        @Override
+        public void run() {
+          p2.add(generateDataSet(schema, 11));
+          try {
+            Thread.sleep(random.nextInt(100));
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+          p2.add(generateDataSet(schema, 13));
+          p2.finish();
         }
-        p2.add(generateDataSet(schema, 13));
-        p2.finish();
+      });
+      DataSetIterator it = multi.getIterator();
+      int count = 0;
+      while (it.next()) {
+        count++;
       }
-    });
-    DataSetIterator it = multi.getIterator();
-    int count = 0;
-    while(it.next()) {
-      count++;
+      assertEquals(46, count);
+      multi.close();
     }
-    assertEquals(46, count);
-    multi.close();
   }
 
   @Test
   public void testHorizontalDataSet() {
-    final Schema schema = Schema.newBuilder()
-    .add("A", ColumnType.INT, Modifier.PUBLIC)
-    .add("B", ColumnType.LONG, Modifier.PUBLIC).build();
+    final Schema schema = Schema.newBuilder().add("A", ColumnType.INT, Modifier.PUBLIC)
+        .add("B", ColumnType.LONG, Modifier.PUBLIC).build();
     ProtoDataSet d0 = ProtoDataSet.create(generateDataSet(schema, 3));
     ProtoDataSet d1 = ProtoDataSet.create(generateDataSet(schema, 2));
     ProtoDataSet d2 = ProtoDataSet.create(generateDataSet(schema, 5));
@@ -186,15 +181,15 @@ public class DataSetTest {
     DataSetIterator it0 = d0.getIterator();
     DataSetIterator it1 = d1.getIterator();
     DataSetIterator it2 = d2.getIterator();
-    while(it0.next()) {
+    while (it0.next()) {
       assertTrue(it.next());
       assertEquals(it0.get(0), it.get(0));
     }
-    while(it1.next()) {
+    while (it1.next()) {
       assertTrue(it.next());
       assertEquals(it1.get(0), it.get(0));
     }
-    while(it2.next()) {
+    while (it2.next()) {
       assertTrue(it.next());
       assertEquals(it2.get(0), it.get(0));
     }
@@ -203,9 +198,8 @@ public class DataSetTest {
 
   @Test
   public void testVerticalDataSet() {
-    final Schema schema = Schema.newBuilder()
-    .add("A", ColumnType.INT, Modifier.PUBLIC)
-    .add("B", ColumnType.LONG, Modifier.PUBLIC).build();
+    final Schema schema = Schema.newBuilder().add("A", ColumnType.INT, Modifier.PUBLIC)
+        .add("B", ColumnType.LONG, Modifier.PUBLIC).build();
     ProtoDataSet left = ProtoDataSet.create(generateDataSet(schema, 2));
     ProtoDataSet right = ProtoDataSet.create(generateDataSet(schema, 2));
     VerticalDataSet r = VerticalDataSet.create(left, right);
@@ -213,7 +207,7 @@ public class DataSetTest {
     DataSetIterator it = r.getIterator();
     DataSetIterator leftIt = left.getIterator();
     DataSetIterator rightIt = right.getIterator();
-    while(it.next()) {
+    while (it.next()) {
       leftIt.next();
       rightIt.next();
       assertEquals(leftIt.get(0), it.get(0));
@@ -224,7 +218,7 @@ public class DataSetTest {
 
   ProtoDataSet generateUnsortedDataSet() {
     final Schema schema = Schema.newBuilder().add("A", ColumnType.INT, Modifier.PUBLIC)
-            .add("B", ColumnType.DOUBLE, Modifier.PUBLIC).build();
+        .add("B", ColumnType.DOUBLE, Modifier.PUBLIC).build();
     ProtoDataSet.Builder dBuilder = ProtoDataSet.newBuilder(schema);
     ArrayRow.Builder builder = ArrayRow.newBuilder(2);
     builder.reset();
@@ -250,7 +244,7 @@ public class DataSetTest {
     DataSet source = generateUnsortedDataSet();
     DataSet d1 = SortedDataSet.sort(source, ImmutableList.of(c1));
     DataSetIterator it1 = d1.getIterator();
-    assertTrue(it1.next()); 
+    assertTrue(it1.next());
     assertEquals(2, it1.get(0));
     assertTrue(it1.next());
     assertEquals(3, it1.get(0));
@@ -259,7 +253,7 @@ public class DataSetTest {
     assertFalse(it1.next());
     DataSet d2 = SortedDataSet.sort(source, ImmutableList.of(c2));
     DataSetIterator it2 = d2.getIterator();
-    assertTrue(it2.next()); 
+    assertTrue(it2.next());
     assertEquals(5.3, (double) it2.get(1), 0.001);
     assertTrue(it2.next());
     assertEquals(4.2, (double) it2.get(1), 0.001);
@@ -306,15 +300,11 @@ public class DataSetTest {
   }
 
   DataSet generateMockDataSet() {
-    Schema schema = Schema.newBuilder()
-    .add("A", ColumnType.BOOLEAN, Modifier.HIDDEN)
-    .add("B", ColumnType.BYTE, Modifier.PUBLIC)
-    .add("C", ColumnType.INT, Modifier.PROTECTED)
-    .add("D", ColumnType.LONG, Modifier.PRIVATE)
-    .add("E", ColumnType.FLOAT, Modifier.PROTECTED)
-    .add("F", ColumnType.DOUBLE, Modifier.PRIVATE)
-    .add("G", ColumnType.STRING, Modifier.PUBLIC)
-    .add("H", ColumnType.BLOB, Modifier.PUBLIC).build();
+    Schema schema = Schema.newBuilder().add("A", ColumnType.BOOLEAN, Modifier.HIDDEN)
+        .add("B", ColumnType.BYTE, Modifier.PUBLIC).add("C", ColumnType.INT, Modifier.PROTECTED)
+        .add("D", ColumnType.LONG, Modifier.PRIVATE).add("E", ColumnType.FLOAT, Modifier.PROTECTED)
+        .add("F", ColumnType.DOUBLE, Modifier.PRIVATE).add("G", ColumnType.STRING, Modifier.PUBLIC)
+        .add("H", ColumnType.BLOB, Modifier.PUBLIC).build();
     Random random = new Random(System.currentTimeMillis());
     ProtoDataSet.Builder dBuilder = ProtoDataSet.newBuilder(schema);
     for (int i = 0; i < 3; ++i) {

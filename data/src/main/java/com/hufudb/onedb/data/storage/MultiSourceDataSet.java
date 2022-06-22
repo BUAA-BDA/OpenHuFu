@@ -1,9 +1,8 @@
 package com.hufudb.onedb.data.storage;
 
 import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -16,19 +15,25 @@ import com.hufudb.onedb.proto.OneDBData.DataSetProto;
  * productors used {@link #add(DataSetProto) add} to add dataset
  */
 public class MultiSourceDataSet implements DataSet {
-  final static int TIME_OUT = 1000000;
+  final static long TIME_OUT = 1000000;
   final Schema schema;
   final Queue<DataSetProto> queue;
-  final AtomicInteger productorNum;
+  int productorNum;
+  final long timeout;
   final Lock lock;
   final Condition cond;
 
-  public MultiSourceDataSet(Schema schema, int productorNum) {
+  MultiSourceDataSet(Schema schema, int productorNum, long timeout) {
     this.schema = schema;
-    this.queue = new ConcurrentLinkedDeque<>();
-    this.productorNum = new AtomicInteger(productorNum);
+    this.queue = new LinkedBlockingDeque<>();
+    this.productorNum = productorNum;
+    this.timeout = timeout;
     this.lock = new ReentrantLock();
     this.cond = lock.newCondition();
+  }
+
+  public MultiSourceDataSet(Schema schema, int productorNum) {
+    this(schema, productorNum, TIME_OUT);
   }
 
   public Producer newProducer() {
@@ -51,32 +56,39 @@ public class MultiSourceDataSet implements DataSet {
   }
 
   private boolean nextProto() {
+    lock.lock();
     if (!queue.isEmpty()) {
+      lock.unlock();
       return true;
-    } else if (productorNum.get() == 0) {
+    } else if (productorNum == 0) {
       // all productors has complete
+      lock.unlock();
       return false;
     } else {
       // wait for productor
       try {
-        lock.lock();
-        cond.await(TIME_OUT, TimeUnit.MILLISECONDS);
-        lock.unlock();
+        cond.await(timeout, TimeUnit.MILLISECONDS);
       } catch (Exception e) {
         LOG.error("Next failed in mutlisource dataset");
         e.printStackTrace();
+        lock.unlock();
         return false;
       }
       if (queue.isEmpty()) {
         LOG.error("Consumer time out");
+        lock.unlock();
         return false;
       }
+      lock.unlock();
       return nextProto();
     }
   }
 
   private DataSetProto getProto() {
-    return queue.poll();
+    lock.lock();
+    DataSetProto dataset = queue.poll();
+    lock.unlock();
+    return dataset;
   }
 
   class Iterator implements DataSetIterator {
@@ -121,7 +133,9 @@ public class MultiSourceDataSet implements DataSet {
     }
 
     public void finish() {
-      productorNum.decrementAndGet();
+      lock.lock();
+      productorNum -= 1;
+      lock.unlock();
     }
   }
 }
