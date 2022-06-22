@@ -119,6 +119,11 @@ public class BitArray {
     }
 
     public BitArray build() {
+      byte[] array = buildByteArray();
+      return new BitArray(count, array);
+    }
+
+    public byte[] buildByteArray() {
       if ((count & 0x7) != 0) {
         bytes.add(cur);
       }
@@ -127,7 +132,7 @@ public class BitArray {
       for (int i = 0; i < len; ++i) {
         array[i] = bytes.get(i);
       }
-      return new BitArray(count, array);
+      return array;
     }
   }
 }

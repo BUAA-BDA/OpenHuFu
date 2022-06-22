@@ -230,6 +230,7 @@ public class ProtoColumn implements Column {
       default:
         throw new UnsupportedOperationException("Unsupported column type");
       }
+      columnBuilder.setIsnull(ByteString.copyFrom(nullBuilder.buildByteArray()));
       return columnBuilder.build();
     }
 

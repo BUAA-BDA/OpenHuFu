@@ -6,6 +6,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
@@ -299,32 +300,73 @@ public class DataSetTest {
     l4.close();
   }
 
-  DataSet generateMockDataSet() {
+  private List<ArrayRow> generateArrayRows(boolean hasNull, int rowNum) {
+    Random random = new Random();
+    List<ArrayRow> rows = new ArrayList<>();
+    for (int i = 0; i < rowNum; ++i) {
+      ArrayRow.Builder builder = ArrayRow.newBuilder(8);
+      if (hasNull && random.nextBoolean()) {
+        builder.set(0, null);
+      } else {
+        builder.set(0, random.nextBoolean());
+      }
+      if (hasNull && random.nextBoolean()) {
+        builder.set(1, null);
+      } else {
+        builder.set(1, (byte) random.nextInt());
+      }
+      if (hasNull && random.nextBoolean()) {
+        builder.set(2, null);
+      } else {
+        builder.set(2, random.nextInt());
+      }
+      if (hasNull && random.nextBoolean()) {
+        builder.set(3, null);
+      } else {
+        builder.set(3, random.nextLong());
+      }
+      if (hasNull && random.nextBoolean()) {
+        builder.set(4, null);
+      } else {
+        builder.set(4, random.nextFloat());
+      }
+      if (hasNull && random.nextBoolean()) {
+        builder.set(5, null);
+      } else {
+        builder.set(5, random.nextDouble());
+      }
+      if (hasNull && random.nextBoolean()) {
+        builder.set(6, null);
+      } else {
+        builder.set(6, RandomStringUtils.randomAlphabetic(20));
+      }
+      if (hasNull && random.nextBoolean()) {
+        builder.set(7, null);
+      } else {
+        builder.set(7, RandomStringUtils.randomAscii(20).getBytes());
+      }
+      rows.add(builder.build());
+    }
+    return rows;
+  }
+
+  private DataSet generateMockDataSet(boolean hasNull) {
     Schema schema = Schema.newBuilder().add("A", ColumnType.BOOLEAN, Modifier.HIDDEN)
         .add("B", ColumnType.BYTE, Modifier.PUBLIC).add("C", ColumnType.INT, Modifier.PROTECTED)
         .add("D", ColumnType.LONG, Modifier.PRIVATE).add("E", ColumnType.FLOAT, Modifier.PROTECTED)
         .add("F", ColumnType.DOUBLE, Modifier.PRIVATE).add("G", ColumnType.STRING, Modifier.PUBLIC)
         .add("H", ColumnType.BLOB, Modifier.PUBLIC).build();
-    Random random = new Random(System.currentTimeMillis());
     ProtoDataSet.Builder dBuilder = ProtoDataSet.newBuilder(schema);
-    for (int i = 0; i < 3; ++i) {
-      ArrayRow.Builder builder = ArrayRow.newBuilder(8);
-      builder.set(0, random.nextBoolean());
-      builder.set(1, (byte) random.nextInt());
-      builder.set(2, random.nextInt());
-      builder.set(3, random.nextLong());
-      builder.set(4, random.nextFloat());
-      builder.set(5, random.nextDouble());
-      builder.set(6, RandomStringUtils.randomAlphabetic(20));
-      builder.set(7, RandomStringUtils.randomAscii(20).getBytes());
-      dBuilder.addRow(builder.build());
+    List<ArrayRow> rows = generateArrayRows(hasNull, 3);
+    for (ArrayRow row : rows) {
+      dBuilder.addRow(row);
     }
     return dBuilder.build();
   }
 
   @Test
   public void testResultDataSet() throws SQLException {
-    DataSet source = generateMockDataSet();
+    DataSet source = generateMockDataSet(false);
     DataSetIterator exp = source.getIterator();
     MockResultSet mock = new MockResultSet(source);
     ResultDataSet result = new ResultDataSet(source.getSchema(), mock);
@@ -340,5 +382,54 @@ public class DataSetTest {
     }
     assertFalse(it.next());
     result.close();
+  }
+
+  private static boolean equals(Row row1, Row row2) {
+    if (row1.size() != row2.size()) {
+      return false;
+    }
+    for (int i = 0; i < row1.size(); ++i) {
+      Object o1 = row1.get(i);
+      Object o2 = row2.get(i);
+      if (o1 == null) {
+        return o2 == null;
+      } else if (o1 instanceof Long || o1 instanceof Integer || o1 instanceof Short || o1 instanceof Byte) {
+        if (((Number) o1).longValue() != ((Number) o2).longValue()) {
+          return false;
+        }
+      } else if (o1 instanceof Float || o1 instanceof Double) {
+        if (((Number) o1).doubleValue() != ((Number) o2).doubleValue()) {
+          return false;
+        }
+      } else if (o1 instanceof byte[]) {
+        return Arrays.equals((byte[]) o1, (byte[]) o2);
+      } else if (!o1.equals(o2)){
+        return false;
+      }
+    }
+    return true;
+  }
+
+  @Test
+  public void testDataSetWithNull() {
+    List<ArrayRow> rows = generateArrayRows(true, 20);
+    Schema schema = Schema.newBuilder().add("A", ColumnType.BOOLEAN, Modifier.HIDDEN)
+        .add("B", ColumnType.BYTE, Modifier.PUBLIC).add("C", ColumnType.INT, Modifier.PROTECTED)
+        .add("D", ColumnType.LONG, Modifier.PRIVATE).add("E", ColumnType.FLOAT, Modifier.PROTECTED)
+        .add("F", ColumnType.DOUBLE, Modifier.PRIVATE).add("G", ColumnType.STRING, Modifier.PUBLIC)
+        .add("H", ColumnType.BLOB, Modifier.PUBLIC).build();
+    ProtoDataSet.Builder dBuilder = ProtoDataSet.newBuilder(schema);
+    for (ArrayRow row : rows) {
+      dBuilder.addRow(row);
+    }
+    MaterializedDataSet dataset = dBuilder.build();
+    assertEquals(rows.size(), dataset.rowCount());
+    DataSetIterator it = dataset.getIterator();
+    int k = 0;
+    while (it.next()) {
+      assertEquals(schema.size(), it.size());
+      assertTrue(equals(rows.get(k), it));
+      ++k;
+    }
   }
 }

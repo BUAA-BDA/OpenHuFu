@@ -117,14 +117,17 @@ public class ProtoRowDataSet implements MaterializedDataSet {
       rowBuilder.addCells(CellProto.newBuilder());
     }
     while (it.next()) {
+      BitArray.Builder nullBuilder = BitArray.builder();
       for (int i = 0; i < columnNum; ++i) {
         Object v = it.get(references.get(i));
         if (v == null) {
-
+          nullBuilder.add(true);
         } else {
+          nullBuilder.add(false);
           setters.get(i).set(rowBuilder, it.get(references.get(i)));
         }
       }
+      rowBuilder.setIsnull(ByteString.copyFrom(nullBuilder.buildByteArray()));
       rows.addRows(rowBuilder.build());
     }
     return new ProtoRowDataSet(Schema.fromColumnDesc(descs), rows.build(), getterBuilder.build());
