@@ -102,6 +102,9 @@ public class AggregateFunctions {
     @Override
     public void add(Row ele) {
       Object e = ele.get(inputRef);
+      if (e == null) {
+        return;
+      }
       if (distinct) {
         if (distinctSet.contains(e)) {
           return;
@@ -159,7 +162,9 @@ public class AggregateFunctions {
         }
         distinctSet.add(r);
       }
-      count++;
+      if (inputSize == 0 || (ele.get(inputRefs.get(0)) != null)) {
+        count++;
+      }
     }
 
     @Override
@@ -199,6 +204,9 @@ public class AggregateFunctions {
     @Override
     public void add(Row ele) {
       Object e = ele.get(inputRef);
+      if (e == null) {
+        return;
+      }
       if (distinct) {
         if (distinctSet.contains(e)) {
           return;
@@ -246,6 +254,9 @@ public class AggregateFunctions {
     @Override
     public void add(Row ele) {
       Comparable c = (Comparable) ele.get(inputRef);
+      if (c == null) {
+        return;
+      }
       if (maxValue.compareTo(c) < 0) {
         maxValue = c;
       }
@@ -286,6 +297,9 @@ public class AggregateFunctions {
     @Override
     public void add(Row ele) {
       Comparable c = (Comparable) ele.get(inputRef);
+      if (c == null) {
+        return;
+      }
       if (minValue.compareTo(c) > 0) {
         minValue = c;
       }

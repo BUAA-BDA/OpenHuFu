@@ -447,9 +447,15 @@ public class InterpreterTest {
   }
 
   /**
-   * Left: 3 | 4.2 | Alice 5 | 6.3 | Bob 7 | 8.4 | Tom
+   * Left:
+   * 3 | 4.2 | Alice
+   * 5 | 6.3 | Bob
+   * 7 | 8.4 | Tom
    * 
-   * Right: 5 | 3.1 | Snow 2 | 6.3 | Alice 9 | 8.5 | Bob
+   * Right:
+   * 5 | 3.1 | Snow
+   * 2 | 6.3 | Alice
+   * 9 | 8.5 | Bob
    */
   @Test
   public void testEqualJoinDataSet() {
@@ -609,8 +615,6 @@ public class InterpreterTest {
   @Test
   public void testGroupAggregate() {
     DataSet dataset = generatetestAggregateSourceDataSet();
-    // Expression ref0 = ExpressionFactory.createInputRef(0, ColumnType.INT,
-    // Modifier.PUBLIC);
     Expression ref1 = ExpressionFactory.createInputRef(1, ColumnType.DOUBLE, Modifier.PUBLIC);
     Expression agg1 = ExpressionFactory.createAggFunc(ColumnType.DOUBLE, Modifier.PUBLIC,
         AggFuncType.AVG.getId(), ImmutableList.of(ref1));
@@ -624,5 +628,90 @@ public class InterpreterTest {
       count++;
     }
     assertEquals(3, count);
+  }
+
+  DataSet generateDataSetWithNull() {
+    final Schema schema = Schema.newBuilder().add("A", ColumnType.INT, Modifier.PUBLIC)
+        .add("B", ColumnType.FLOAT, Modifier.PUBLIC)
+        .add("C", ColumnType.BOOLEAN, Modifier.PUBLIC).build();
+    ProtoDataSet.Builder dBuilder = ProtoDataSet.newBuilder(schema);
+    ArrayRow.Builder builder = ArrayRow.newBuilder(3);
+    builder.reset();
+    builder.set(0, null);
+    builder.set(1, 4.2F);
+    builder.set(2, true);
+    dBuilder.addRow(builder.build());
+    builder.reset();
+    builder.set(0, 5);
+    builder.set(1, null);
+    builder.set(2, false);
+    dBuilder.addRow(builder.build());
+    builder.reset();
+    builder.set(0, 7);
+    builder.set(1, 8.4F);
+    builder.set(2, null);
+    dBuilder.addRow(builder.build());
+    builder.reset();
+    return dBuilder.build();
+  }
+
+  @Test
+  public void testNull() {
+    DataSet source = generateDataSetWithNull();
+    Expression ref0 = ExpressionFactory.createInputRef(0, ColumnType.INT, Modifier.PUBLIC);
+    Expression ref1 = ExpressionFactory.createInputRef(1, ColumnType.FLOAT, Modifier.PUBLIC);
+    Expression ref2 = ExpressionFactory.createInputRef(2, ColumnType.BOOLEAN, Modifier.PUBLIC);
+    Expression cmp = ExpressionFactory.createBinaryOperator(OperatorType.LE, ColumnType.BOOLEAN, ref0, ref1);
+    Expression and = ExpressionFactory.createBinaryOperator(OperatorType.AND, ColumnType.BOOLEAN, cmp, ref2);
+    Expression or = ExpressionFactory.createBinaryOperator(OperatorType.OR, ColumnType.BOOLEAN, cmp, ref2);
+    Expression not = ExpressionFactory.createUnaryOperator(OperatorType.NOT, ColumnType.BOOLEAN, ref2);
+    Expression notNull = ExpressionFactory.createUnaryOperator(OperatorType.IS_NOT_NULL, ColumnType.BOOLEAN, ref1);
+    Expression isNull = ExpressionFactory.createUnaryOperator(OperatorType.IS_NULL, ColumnType.BOOLEAN, ref2);
+    Expression add = ExpressionFactory.createBinaryOperator(OperatorType.PLUS, ColumnType.FLOAT, ref0, ref1);
+    DataSet res = Interpreter.map(source, ImmutableList.of(and, or, not, notNull, isNull, add));
+    DataSetIterator it = res.getIterator();
+    assertTrue(it.next());
+    assertEquals(null, it.get(0));
+    assertEquals(true, it.get(1));
+    assertEquals(false, it.get(2));
+    assertEquals(true, it.get(3));
+    assertEquals(false, it.get(4));
+    assertEquals(null, it.get(5));
+    assertTrue(it.next());
+    assertEquals(false, it.get(0));
+    assertEquals(null, it.get(1));
+    assertEquals(true, it.get(2));
+    assertEquals(false, it.get(3));
+    assertEquals(false, it.get(4));
+    assertEquals(null, it.get(5));
+    assertTrue(it.next());
+    assertEquals(null, it.get(0));
+    assertEquals(true, it.get(1));
+    assertEquals(null, it.get(2));
+    assertEquals(true, it.get(3));
+    assertEquals(true, it.get(4));
+    assertEquals(15.4F, (float) it.get(5), 0.01F);
+    assertFalse(it.next());
+    Expression CNT = ExpressionFactory.createAggFunc(ColumnType.INT, Modifier.PUBLIC,
+        AggFuncType.COUNT.getId(), ImmutableList.of());
+    Expression CNT_NOT_NULL = ExpressionFactory.createAggFunc(ColumnType.INT, Modifier.PUBLIC,
+        AggFuncType.COUNT.getId(), ImmutableList.of(ref0));
+    Expression SUM = ExpressionFactory.createAggFunc(ColumnType.INT, Modifier.PUBLIC,
+        AggFuncType.SUM.getId(), ImmutableList.of(ref0));
+    Expression AVG = ExpressionFactory.createAggFunc(ColumnType.FLOAT, Modifier.PUBLIC,
+        AggFuncType.AVG.getId(), ImmutableList.of(ref1));
+    Expression MIN = ExpressionFactory.createAggFunc(ColumnType.INT, Modifier.PUBLIC,
+        AggFuncType.MIN.getId(), ImmutableList.of(ref0));
+    Expression MAX = ExpressionFactory.createAggFunc(ColumnType.FLOAT, Modifier.PUBLIC,
+        AggFuncType.MAX.getId(), ImmutableList.of(ref1));
+    DataSet agg = Interpreter.aggregate(source, ImmutableList.of(), ImmutableList.of(CNT, CNT_NOT_NULL, SUM, AVG, MIN, MAX));
+    DataSetIterator aggit = agg.getIterator();
+    assertTrue(aggit.next());
+    assertEquals(3, aggit.get(0));
+    assertEquals(2, aggit.get(1));
+    assertEquals(12, aggit.get(2));
+    assertEquals(6.3F, (float) aggit.get(3), 0.01F);
+    assertEquals(5, aggit.get(4));
+    assertEquals(8.4F, (float) aggit.get(5), 0.01F);
   }
 }
