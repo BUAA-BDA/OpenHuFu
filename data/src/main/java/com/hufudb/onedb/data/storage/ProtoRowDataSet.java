@@ -47,7 +47,13 @@ public class ProtoRowDataSet implements MaterializedDataSet {
 
   @Override
   public Object get(int rowIndex, int columnIndex) {
-    return getters.get(columnIndex).get(rows.getRows(rowIndex));
+    final RowProto row = rows.getRows(rowIndex);
+    ByteString isNull = row.getIsnull();
+    if ((isNull.byteAt(columnIndex >> 3) & (1 << (columnIndex & 0x7))) != 0) {
+      return null;
+    } else {
+      return getters.get(columnIndex).get(row);
+    }
   }
 
   public List<byte[]> toBytes() {
@@ -83,19 +89,19 @@ public class ProtoRowDataSet implements MaterializedDataSet {
         case FLOAT:
           getterBuilder.add((row) -> row.getCells(i).getF32Cel());
           setterBuilder.add(
-              (row, value) -> row.setCells(i, CellProto.newBuilder().setF32Cel((float) value)));
+              (row, value) -> row.setCells(i, CellProto.newBuilder().setF32Cel(((Number) value).floatValue())));
           break;
         case DOUBLE:
           getterBuilder.add((row) -> row.getCells(i).getF64Cel());
           setterBuilder.add(
-              (row, value) -> row.setCells(i, CellProto.newBuilder().setF64Cel((double) value)));
+              (row, value) -> row.setCells(i, CellProto.newBuilder().setF64Cel(((Number) value).doubleValue())));
           break;
         case BYTE:
         case SHORT:
         case INT:
           getterBuilder.add((row) -> row.getCells(i).getI32Cel());
           setterBuilder
-              .add((row, value) -> row.setCells(i, CellProto.newBuilder().setI32Cel((int) value)));
+              .add((row, value) -> row.setCells(i, CellProto.newBuilder().setI32Cel(((Number) value).intValue())));
           break;
         case LONG:
         case DATE:
@@ -103,7 +109,7 @@ public class ProtoRowDataSet implements MaterializedDataSet {
         case TIMESTAMP:
           getterBuilder.add((row) -> row.getCells(i).getI64Cel());
           setterBuilder
-              .add((row, value) -> row.setCells(i, CellProto.newBuilder().setI64Cel((long) value)));
+              .add((row, value) -> row.setCells(i, CellProto.newBuilder().setI64Cel(((Number) value).longValue())));
           break;
         default:
           throw new UnsupportedOperationException("Unsupported type for proto row dataset");
@@ -117,9 +123,17 @@ public class ProtoRowDataSet implements MaterializedDataSet {
       rowBuilder.addCells(CellProto.newBuilder());
     }
     while (it.next()) {
+      BitArray.Builder nullBuilder = BitArray.builder();
       for (int i = 0; i < columnNum; ++i) {
-        setters.get(i).set(rowBuilder, it.get(references.get(i)));
+        Object v = it.get(references.get(i));
+        if (v == null) {
+          nullBuilder.add(true);
+        } else {
+          nullBuilder.add(false);
+          setters.get(i).set(rowBuilder, v);
+        }
       }
+      rowBuilder.setIsnull(ByteString.copyFrom(nullBuilder.buildByteArray()));
       rows.addRows(rowBuilder.build());
     }
     return new ProtoRowDataSet(Schema.fromColumnDesc(descs), rows.build(), getterBuilder.build());
@@ -149,7 +163,13 @@ public class ProtoRowDataSet implements MaterializedDataSet {
 
     @Override
     public Object get(int columnIndex) {
-      return getters.get(columnIndex).get(rows.getRows(pointer));
+      final RowProto row = rows.getRows(pointer);
+      ByteString isNull = row.getIsnull();
+      if ((isNull.byteAt(columnIndex >> 3) & (1 << (columnIndex & 0x7))) != 0) {
+        return null;
+      } else {
+        return getters.get(columnIndex).get(row);
+      }
     }
 
     @Override

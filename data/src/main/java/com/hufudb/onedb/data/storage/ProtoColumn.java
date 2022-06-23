@@ -18,6 +18,7 @@ public class ProtoColumn implements Column {
   final ColumnType type;
   final ColumnProto column;
   final CellGetter getter;
+  final BitArray isNulls;
   final int size;
 
   ProtoColumn(ColumnType type, ColumnProto column) {
@@ -55,11 +56,21 @@ public class ProtoColumn implements Column {
       default:
         throw new UnsupportedOperationException("Unsupported type for column");
     }
+    this.isNulls = new BitArray(this.size, column.getIsnull().toByteArray());
   }
 
   @Override
   public Object getObject(int rowNum) {
-    return getter.get(rowNum);
+    if (isNull(rowNum)) {
+      return null;
+    } else {
+      return getter.get(rowNum);
+    }
+  }
+
+  @Override
+  public boolean isNull(int rowNum) {
+    return isNulls.get(rowNum);
   }
 
   @Override
@@ -78,7 +89,8 @@ public class ProtoColumn implements Column {
 
   public static class Builder {
     final ColumnType type;
-    final ColumnProto.Builder builder;
+    final ColumnProto.Builder columnBuilder;
+    final BitArray.Builder nullBuilder;
     final CellAppender appender;
     I32Column.Builder i32Builder;
     I64Column.Builder i64Builder;
@@ -90,7 +102,8 @@ public class ProtoColumn implements Column {
 
     Builder(ColumnType type) {
       this.type = type;
-      this.builder = ColumnProto.newBuilder();
+      this.columnBuilder = ColumnProto.newBuilder();
+      this.nullBuilder = BitArray.builder();
       switch (type) {
         case BOOLEAN:
           boolBuilder = BoolColumn.newBuilder();
@@ -131,10 +144,29 @@ public class ProtoColumn implements Column {
     }
 
     void add(Object val) {
-      appender.append(val);
+      if (val != null) {
+        nullBuilder.add(false);
+        appender.append(val);
+      } else {
+        nullBuilder.add(true);
+        switch (type) {
+          case BOOLEAN:
+            appender.append(false);
+            break;
+          case STRING:
+            appender.append("");
+            break;
+          case BLOB:
+            appender.append(new byte[0]);
+            break;
+          default:
+            appender.append(0);
+        }
+      }
     }
 
     void clear() {
+      nullBuilder.clear();
       switch(type) {
         case BOOLEAN:
         boolBuilder.clear();
@@ -170,35 +202,36 @@ public class ProtoColumn implements Column {
     ColumnProto buildProto() {
       switch(type) {
         case BOOLEAN:
-        builder.setBoolcol(boolBuilder.build());
+        columnBuilder.setBoolcol(boolBuilder.build());
         break;
       case BLOB:
-        builder.setBytescol(bytesBuilder.build());
+        columnBuilder.setBytescol(bytesBuilder.build());
         break;
       case STRING:
-        builder.setStrcol(strBuilder.build());
+        columnBuilder.setStrcol(strBuilder.build());
         break;
       case FLOAT:
-        builder.setF32Col(f32Builder.build());
+        columnBuilder.setF32Col(f32Builder.build());
         break;
       case DOUBLE:
-        builder.setF64Col(f64Builder.build());
+        columnBuilder.setF64Col(f64Builder.build());
         break;
       case BYTE:
       case SHORT:
       case INT:
-        builder.setI32Col(i32Builder.build());
+        columnBuilder.setI32Col(i32Builder.build());
         break;
       case LONG:
       case DATE:
       case TIME:
       case TIMESTAMP:
-        builder.setI64Col(i64Builder.build());
+        columnBuilder.setI64Col(i64Builder.build());
         break;
       default:
         throw new UnsupportedOperationException("Unsupported column type");
       }
-      return builder.build();
+      columnBuilder.setIsnull(ByteString.copyFrom(nullBuilder.buildByteArray()));
+      return columnBuilder.build();
     }
 
     ProtoColumn build() {

@@ -123,6 +123,7 @@ public class Interpreter {
     final Schema right;
 
     InterpretiveMatcher(JoinCondition joinCond, Schema left, Schema right) {
+      // todo: support left/right/outer join
       this.leftKeys = joinCond.getLeftKeyList();
       this.rightKeys = joinCond.getRightKeyList();
       this.condition = joinCond.getCondition();
@@ -227,25 +228,25 @@ public class Interpreter {
     switch (type) {
       case AND: {
         Object left = implement(row, inputs.get(0));
-        if (left == null) {
-          return null;
-        } else if (left.equals(false)) {
+        if (Boolean.FALSE.equals(left)) {
           return false;
         }
         Object right = implement(row, inputs.get(1));
-        if (right == null) {
+        if (Boolean.FALSE.equals(right)) {
+          return false;
+        } else if (left == null || right == null) {
           return null;
         } else {
-          return right.equals(true);
+          return true;
         }
       }
       case OR: {
         Object left = implement(row, inputs.get(0));
-        if (left.equals(true)) {
+        if (Boolean.TRUE.equals(left)) {
           return true;
         }
         Object right = implement(row, inputs.get(1));
-        if (right.equals(true)) {
+        if (Boolean.TRUE.equals(right)) {
           return true;
         } else if (left == null || right == null) {
           return null;

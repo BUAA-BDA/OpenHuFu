@@ -1,10 +1,35 @@
-package com.hufudb.onedb.mpc.utils;
+package com.hufudb.onedb.data.storage;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import org.junit.Test;
 
 public class BitArrayTest {
+  @Test
+  public void bitArrayBuilderTest() {
+    BitArray.Builder builder = BitArray.builder();
+    List<Boolean> expect = new ArrayList<>();
+    Random random = new Random();
+    final int SIZE = 201;
+    for (int i = 0; i < SIZE; ++i) {
+      boolean v = random.nextBoolean();
+      expect.add(v);
+      builder.add(v);
+    }
+    BitArray bits = builder.build();
+    assertEquals(expect.size(), bits.size());
+    for (int i = 0; i < SIZE; ++i) {
+      assertEquals(expect.get(i), bits.get(i));
+    }
+    builder.clear();
+    BitArray empty = builder.build();
+    assertEquals(0, empty.size());
+  }
+
   @Test
   public void bitArrayTest() {
     BitArray b = new BitArray(33);
