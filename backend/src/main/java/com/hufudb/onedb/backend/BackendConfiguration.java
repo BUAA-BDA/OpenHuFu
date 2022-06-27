@@ -33,57 +33,58 @@ import org.springframework.context.annotation.Configuration;
 public class BackendConfiguration {
   private static final Logger LOG = LoggerFactory.getLogger(BackendConfiguration.class);
 
-  @Value("${owner.id}")
+  @Value("${owner.id:0}")
   private int id;
 
-  @Value("${owner.port}")
+  @Value("${owner.port:0}")
   private int port;
 
-  @Value("${owner.threadnum}")
+  @Value("${owner.threadnum:4}")
   private int threadnum;
 
-  @Value("${owner.hostname}")
+  @Value("${owner.hostname:localhost}")
   private String hostname;
 
-  @Value("${owner.privatekeypath}")
+  @Value("${owner.privatekeypath:@null}")
   private String privatekeypath;
 
-  @Value("${owner.certchainpath}")
+  @Value("${owner.certchainpath:@null}")
   private String certchainpath;
 
-  @Value("${owner.trustcertpath}")
+  @Value("${owner.trustcertpath:@null}")
   private String trustcertpath;
 
-  @Value("${owner.schema.path}")
+  @Value("${owner.schema.path:@null}")
   private String ownerSchemaConfigPath;
 
-  @Value("${owner.adapter.type}")
+  @Value("${owner.adapter.type:@null}")
   private String type;
 
-  @Value("${owner.adapter.url}")
+  @Value("${owner.adapter.url:@null}")
   private String url;
 
-  @Value("${owner.adapter.catalog}")
+  @Value("${owner.adapter.catalog:@null}")
   private String catalog;
 
-  @Value("${owner.adapter.user}")
+  @Value("${owner.adapter.user:@null}")
   private String user;
 
-  @Value("${owner.adapter.passwd}")
+  @Value("${owner.adapter.passwd:@null}")
   private String passwd;
 
-  @Value("${user.endpoint}")
+  @Value("${user.endpoints:@null}")
   private List<String> endpoints;
 
-  @Value("${user.trustcertpath}")
+  @Value("${user.trustcertpaths:@null}")
   private List<String> trustcertpaths;
 
-  @Value("${user.schema.path}")
+  @Value("${user.schema.path:@null}")
   private String userSchemaConfigPath;
 
   private List<GlobalTableConfig> userTableConfig;
 
   @Bean
+  @ConditionalOnProperty(name = {"owner.enable"}, havingValue = "true")
   OwnerConfig generateOwnerConfig() {
     OwnerConfigFile ownerConfigFile = new OwnerConfigFile(id, port, threadnum, hostname,
         privatekeypath, certchainpath, trustcertpath);
@@ -137,6 +138,7 @@ public class BackendConfiguration {
       }
     } catch (IOException | JsonSyntaxException e) {
       LOG.warn("fail to load global table config");
+      e.printStackTrace();
     }
   }
 

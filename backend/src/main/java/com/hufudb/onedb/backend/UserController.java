@@ -25,7 +25,7 @@ public class UserController {
   private static final Logger LOG = LoggerFactory.getLogger(UserController.class);
   private final OneDB onedb;
 
-  @Value("${owner.enable}")
+  @Value("${owner.enable:false}")
   private boolean hasOwner;
 
   UserController(OneDB service) {
