@@ -45,7 +45,7 @@ public class OwnerClient {
     LOG.info("Connect to {} with TLS", endpoint);
   }
 
-  public OwnerClient(Channel channel, String endpoint) {
+  public OwnerClient(Channel channel, String endpoint) throws StatusRuntimeException {
     this.blockingStub = ServiceGrpc.newBlockingStub(channel);
     this.endpoint = endpoint;
     this.party = getOwnerInfo();
@@ -61,7 +61,7 @@ public class OwnerClient {
       return OneDBOwnerInfo.fromProto(proto);
     } catch (StatusRuntimeException e) {
       LOG.error("RPC failed in getOwnerInfo: {}", e.getStatus());
-      return null;
+      throw new RuntimeException("Fail to connect to owner " + endpoint);
     }
   }
 
