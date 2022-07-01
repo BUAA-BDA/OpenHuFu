@@ -1,0 +1,53 @@
+{
+  "id": 1,
+  "port": 12345,
+  "hostname": "owner2",
+  "privatekeypath": "./cert/owner2.key",
+  "certchainpath": "./cert/owner2.pem",
+  "trustcertpath": "./cert/ca.pem",
+  "adapterconfig": {
+    "datasource": "postgresql",
+    "url": "jdbc:postgresql://tpch2:5432/postgres",
+    "catalog": "postgres",
+    "user": "postgres",
+    "passwd": "onedb"
+  },
+  "tables": [
+    {
+      "actualName": "partsupp",
+      "publishedName": "partsupp",
+      "publishedColumns": [],
+      "actualColumns": []
+    },
+    {
+      "actualName": "customer",
+      "publishedName": "customer",
+      "publishedColumns": [],
+      "actualColumns": []
+    },
+    {
+      "actualName": "lineitem",
+      "publishedName": "lineitem",
+      "publishedColumns": [],
+      "actualColumns": []
+    },
+    {
+      "actualName": "orders",
+      "publishedName": "orders",
+      "publishedColumns": [],
+      "actualColumns": []
+    },
+    {
+      "actualName": "part",
+      "publishedName": "part",
+      "publishedColumns": [],
+      "actualColumns": []
+    },
+    {
+      "actualName": "supplier",
+      "publishedName": "supplier",
+      "publishedColumns": [],
+      "actualColumns": []
+    }
+  ]
+}

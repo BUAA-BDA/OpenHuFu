@@ -1,0 +1,55 @@
+version: '3.3'
+
+services:
+  tpch1:
+    image: postgres
+    restart: "no"
+    container_name: tpch1
+    ports:
+      - 12301:5432
+    environment:
+      POSTGRES_PASSWORD: onedb
+    volumes:
+      - $PWD/data/db1:/data
+      - $PWD/config/db1.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - owner_tpch_1
+
+  tpch2:
+    image: postgres
+    restart: "no"
+    container_name: tpch2
+    ports:
+      - 12302:5432
+    environment:
+      POSTGRES_PASSWORD: onedb
+    volumes:
+      - $PWD/data/db2:/data
+      - $PWD/config/db2.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - owner_tpch_2
+
+  tpch3:
+    image: postgres
+    restart: "no"
+    container_name: tpch3
+    ports:
+      - 12303:5432
+    environment:
+      POSTGRES_PASSWORD: onedb
+    volumes:
+      - $PWD/data/db3:/data
+      - $PWD/config/db3.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - owner_tpch_3
+
+networks:
+  owner_tpch_1:
+    driver: bridge
+    name: owner_tpch_1
+  owner_tpch_2:
+    driver: bridge
+    name: owner_tpch_2
+  owner_tpch_3:
+    driver: bridge
+    name: owner_tpch_3

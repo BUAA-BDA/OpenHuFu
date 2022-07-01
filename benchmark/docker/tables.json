@@ -1,0 +1,122 @@
+[
+  {
+    "tableName": "region",
+    "localTables": [
+      {
+        "endpoint": "localhost:12101",
+        "localName": "region"
+      }
+    ]
+  },
+  {
+    "tableName": "nation",
+    "localTables": [
+      {
+        "endpoint": "localhost:12101",
+        "localName": "nation"
+      }
+    ]
+  },
+  {
+    "tableName": "partsupp",
+    "localTables": [
+      {
+        "endpoint": "localhost:12101",
+        "localName": "partsupp"
+      },
+      {
+        "endpoint": "localhost:12102",
+        "localName": "partsupp"
+      },
+      {
+        "endpoint": "localhost:12103",
+        "localName": "partsupp"
+      }
+    ]
+  },
+  {
+    "tableName": "customer",
+    "localTables": [
+      {
+        "endpoint": "localhost:12101",
+        "localName": "customer"
+      },
+      {
+        "endpoint": "localhost:12102",
+        "localName": "customer"
+      },
+      {
+        "endpoint": "localhost:12103",
+        "localName": "customer"
+      }
+    ]
+  },
+  {
+    "tableName": "lineitem",
+    "localTables": [
+      {
+        "endpoint": "localhost:12101",
+        "localName": "lineitem"
+      },
+      {
+        "endpoint": "localhost:12102",
+        "localName": "lineitem"
+      },
+      {
+        "endpoint": "localhost:12103",
+        "localName": "lineitem"
+      }
+    ]
+  },
+  {
+    "tableName": "orders",
+    "localTables": [
+      {
+        "endpoint": "localhost:12101",
+        "localName": "orders"
+      },
+      {
+        "endpoint": "localhost:12102",
+        "localName": "orders"
+      },
+      {
+        "endpoint": "localhost:12103",
+        "localName": "orders"
+      }
+    ]
+  },
+  {
+    "tableName": "part",
+    "localTables": [
+      {
+        "endpoint": "localhost:12101",
+        "localName": "part"
+      },
+      {
+        "endpoint": "localhost:12102",
+        "localName": "part"
+      },
+      {
+        "endpoint": "localhost:12103",
+        "localName": "part"
+      }
+    ]
+  },
+  {
+    "tableName": "supplier",
+    "localTables": [
+      {
+        "endpoint": "localhost:12101",
+        "localName": "supplier"
+      },
+      {
+        "endpoint": "localhost:12102",
+        "localName": "supplier"
+      },
+      {
+        "endpoint": "localhost:12103",
+        "localName": "supplier"
+      }
+    ]
+  }
+]
