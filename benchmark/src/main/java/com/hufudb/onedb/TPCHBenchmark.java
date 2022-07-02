@@ -37,14 +37,11 @@ import com.hufudb.onedb.user.OneDB;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Warmup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,13 +58,20 @@ import org.slf4j.LoggerFactory;
 @State(Scope.Benchmark)
 public class TPCHBenchmark {
   private static final Logger LOG = LoggerFactory.getLogger(TPCHBenchmark.class);
+  private static final OneDBState state = new OneDBState();
 
-  @State(Scope.Benchmark)
   public static class OneDBState {
     private OneDB cmd;
     boolean distribute = false;
 
-    @Setup(Level.Trial)
+    OneDBState() {
+      try {
+        setUp();
+      } catch (IOException e) {
+        throw new RuntimeException("Fail to setup");
+      }
+    }
+
     public void setUp() throws IOException {
       if (System.getenv("ONEDB_DISTRIBUTE") != null) {
         distribute = true;
@@ -94,7 +98,6 @@ public class TPCHBenchmark {
       LOG.info("Init finish");
     }
 
-    @TearDown(Level.Trial)
     public void TearDown() {
       cmd.close();
       LOG.info("Close OneDB User Client");
@@ -106,11 +109,11 @@ public class TPCHBenchmark {
   @Fork(0)
   @Warmup(iterations = 2)
   @Measurement(iterations = 5)
-  public void testAggregate(OneDBState state) {
+  public void testAggregate() {
     ResultSet resultSet = state.cmd.executeQuery("select l_shipmode, "
         + "l_extendedprice * (1 - l_discount) * (1 + l_tax), "
         + "l_extendedprice * (1 - l_discount) * (1 + l_tax), " + "l_quantity " + "from lineitem "
-        + "where  l_shipdate <= 755366400 and l_extendedprice * l_tax >= 230");
+        + "where l_extendedprice * l_tax >= 230");
     try {
       while (resultSet.next()) {
       }
@@ -124,7 +127,7 @@ public class TPCHBenchmark {
   @Fork(0)
   @Warmup(iterations = 2)
   @Measurement(iterations = 5)
-  public void testGroupBy(OneDBState state) {
+  public void testGroupBy() {
     ResultSet resultSet =
         state.cmd.executeQuery("select  l_returnflag,  l_linestatus,  sum(l_quantity) as sum_qty, "
             + " sum(l_extendedprice) as sum_base_price, "
@@ -145,7 +148,7 @@ public class TPCHBenchmark {
   @Fork(0)
   @Warmup(iterations = 2)
   @Measurement(iterations = 5)
-  public void testSortLimit(OneDBState state) {
+  public void testSortLimit() {
     ResultSet resultSet =
         state.cmd.executeQuery("select l_orderkey, l_extendedprice " +
         "from  lineitem " +
@@ -165,15 +168,18 @@ public class TPCHBenchmark {
   @Fork(0)
   @Warmup(iterations = 2)
   @Measurement(iterations = 5)
-  public void testJoin(OneDBState state) {
+  public void testMultiJoin() {
     ResultSet resultSet =
         state.cmd.executeQuery("select  c_name,  c_custkey,  o_orderkey,  " +
-        "o_orderdate,  o_totalprice " +
+        "o_totalprice " +
         "from  customer,  orders,  lineitem " +
         "where  c_custkey = o_custkey  and o_orderkey = l_orderkey");
+    int count = 0;
     try {
       while (resultSet.next()) {
+        count++;
       }
+      LOG.info("multiway join get {} rows", count);
     } catch (SQLException e) {
       e.printStackTrace();
     }
