@@ -1,5 +1,5 @@
 [
-  "localhost:12101",
-  "localhost:12102",
-  "localhost:12103"
+  "tpchowner1:12345",
+  "tpchowner2:12345",
+  "tpchowner3:12345"
 ]

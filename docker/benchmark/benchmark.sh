@@ -8,9 +8,13 @@ then
     docker-compose up -d
     cd ../owner
     docker-compose up -d
+    cd ../user
+    docker-compose up -d
   elif [ $1 == "stop" ]
   then
-    cd owner
+    cd user
+    docker-compose down
+    cd ../owner
     docker-compose down
     cd ../database
     docker-compose down

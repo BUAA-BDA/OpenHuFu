@@ -1,12 +1,12 @@
 version: '3.3'
 
 services:
-  tpch_party1:
+  tpchowner1:
     image: maven:3.8-openjdk-11
-    container_name: tpch_party1
+    container_name: tpchowner1
     working_dir: /usr/src/mymvn
     restart: "no"
-    command: nohup java -jar ./bin/onedb_owner_server.jar -c ./config/server1.json > ./log/tpch_party1.log &
+    command: nohup java -jar ./bin/onedb_owner_server.jar -c ./config/server1.json > ./log/tpchowner1.log &
     environment:
       - ONEDB_ROOT=/usr/src/mymvn
     volumes:
@@ -21,12 +21,12 @@ services:
     ports:
       - 12101:12345
 
-  tpch_party2:
+  tpchowner2:
     image: maven:3.8-openjdk-11
-    container_name: tpch_party2
+    container_name: tpchowner2
     working_dir: /usr/src/mymvn
     restart: "no"
-    command: nohup java -jar ./bin/onedb_owner_server.jar -c ./config/server2.json > ./log/tpch_party2.log &
+    command: nohup java -jar ./bin/onedb_owner_server.jar -c ./config/server2.json > ./log/tpchowner2.log &
     environment:
       - ONEDB_ROOT=/usr/src/mymvn
     volumes:
@@ -41,12 +41,12 @@ services:
     ports:
       - 12102:12345
 
-  tpch_party3:
+  tpchowner3:
     image: maven:3.8-openjdk-11
-    container_name: tpch_party3
+    container_name: tpchowner3
     working_dir: /usr/src/mymvn
     restart: "no"
-    command: nohup java -jar ./bin/onedb_owner_server.jar -c ./config/server3.json > ./log/tpch_party3.log &
+    command: nohup java -jar ./bin/onedb_owner_server.jar -c ./config/server3.json > ./log/tpchowner3.log &
     environment:
       - ONEDB_ROOT=/usr/src/mymvn
     volumes:

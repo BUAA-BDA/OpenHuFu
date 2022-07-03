@@ -3,7 +3,7 @@
     "tableName": "region",
     "localTables": [
       {
-        "endpoint": "localhost:12101",
+        "endpoint": "tpchowner1:12345",
         "localName": "region"
       }
     ]
@@ -12,7 +12,7 @@
     "tableName": "nation",
     "localTables": [
       {
-        "endpoint": "localhost:12101",
+        "endpoint": "tpchowner1:12345",
         "localName": "nation"
       }
     ]
@@ -21,15 +21,15 @@
     "tableName": "partsupp",
     "localTables": [
       {
-        "endpoint": "localhost:12101",
+        "endpoint": "tpchowner1:12345",
         "localName": "partsupp"
       },
       {
-        "endpoint": "localhost:12102",
+        "endpoint": "tpchowner2:12345",
         "localName": "partsupp"
       },
       {
-        "endpoint": "localhost:12103",
+        "endpoint": "tpchowner3:12345",
         "localName": "partsupp"
       }
     ]
@@ -38,15 +38,15 @@
     "tableName": "customer",
     "localTables": [
       {
-        "endpoint": "localhost:12101",
+        "endpoint": "tpchowner1:12345",
         "localName": "customer"
       },
       {
-        "endpoint": "localhost:12102",
+        "endpoint": "tpchowner2:12345",
         "localName": "customer"
       },
       {
-        "endpoint": "localhost:12103",
+        "endpoint": "tpchowner3:12345",
         "localName": "customer"
       }
     ]
@@ -55,15 +55,15 @@
     "tableName": "lineitem",
     "localTables": [
       {
-        "endpoint": "localhost:12101",
+        "endpoint": "tpchowner1:12345",
         "localName": "lineitem"
       },
       {
-        "endpoint": "localhost:12102",
+        "endpoint": "tpchowner2:12345",
         "localName": "lineitem"
       },
       {
-        "endpoint": "localhost:12103",
+        "endpoint": "tpchowner3:12345",
         "localName": "lineitem"
       }
     ]
@@ -72,15 +72,15 @@
     "tableName": "orders",
     "localTables": [
       {
-        "endpoint": "localhost:12101",
+        "endpoint": "tpchowner1:12345",
         "localName": "orders"
       },
       {
-        "endpoint": "localhost:12102",
+        "endpoint": "tpchowner2:12345",
         "localName": "orders"
       },
       {
-        "endpoint": "localhost:12103",
+        "endpoint": "tpchowner3:12345",
         "localName": "orders"
       }
     ]
@@ -89,15 +89,15 @@
     "tableName": "part",
     "localTables": [
       {
-        "endpoint": "localhost:12101",
+        "endpoint": "tpchowner1:12345",
         "localName": "part"
       },
       {
-        "endpoint": "localhost:12102",
+        "endpoint": "tpchowner2:12345",
         "localName": "part"
       },
       {
-        "endpoint": "localhost:12103",
+        "endpoint": "tpchowner3:12345",
         "localName": "part"
       }
     ]
@@ -106,16 +106,34 @@
     "tableName": "supplier",
     "localTables": [
       {
-        "endpoint": "localhost:12101",
+        "endpoint": "tpchowner1:12345",
         "localName": "supplier"
       },
       {
-        "endpoint": "localhost:12102",
+        "endpoint": "tpchowner2:12345",
         "localName": "supplier"
       },
       {
-        "endpoint": "localhost:12103",
+        "endpoint": "tpchowner3:12345",
         "localName": "supplier"
+      }
+    ]
+  },
+  {
+    "tableName": "supplier_p",
+    "localTables": [
+      {
+        "endpoint": "tpchowner1:12345",
+        "localName": "supplier"
+      }
+    ]
+  },
+  {
+    "tableName": "partsupp_p",
+    "localTables": [
+      {
+        "endpoint": "tpchowner2:12345",
+        "localName": "partsupp_p"
       }
     ]
   }

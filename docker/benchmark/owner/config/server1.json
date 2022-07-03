@@ -60,6 +60,43 @@
       "publishedName": "supplier",
       "publishedColumns": [],
       "actualColumns": []
+    },
+    {
+      "actualName": "supplier",
+      "publishedName": "supplier_p",
+      "publishedColumns": [
+        {
+          "name": "s_suppkey",
+          "type": "INT",
+          "modifier": "protected"
+        },
+        {
+          "name": "s_name",
+          "type": "STRING",
+          "modifier": "protected"
+        },
+        {
+          "name": "s_address",
+          "type": "STRING",
+          "modifier": "protected"
+        },
+        {
+          "name": "s_nationkey",
+          "type": "INT",
+          "modifier": "protected"
+        },
+        {
+          "name": "s_phone",
+          "type": "STRING",
+          "modifier": "protected"
+        },
+        {
+          "name": "s_comment",
+          "type": "STRING",
+          "modifier": "protected"
+        }
+      ],
+      "actualColumns": [0, 1, 2, 3, 4, 5, 6]
     }
   ]
 }

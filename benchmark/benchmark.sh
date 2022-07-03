@@ -1,2 +1,2 @@
-nohup java -jar target/benchmarks.jar TPCHBenchmark -rf json 2>&1 &
+java -jar target/benchmarks.jar TPCHBenchmark -rf json
 echo $! > pid

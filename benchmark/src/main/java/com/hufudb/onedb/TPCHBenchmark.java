@@ -179,7 +179,48 @@ public class TPCHBenchmark {
       while (resultSet.next()) {
         count++;
       }
-      LOG.info("multiway join get {} rows", count);
+      LOG.debug("multiway join get {} rows", count);
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Benchmark
+  @Fork(0)
+  @Warmup(iterations = 2)
+  @Measurement(iterations = 5)
+  public void testEqualJoin() {
+    ResultSet resultSet =
+        state.cmd.executeQuery("select  c_name,  o_orderkey,  " +
+        "o_totalprice " +
+        "from  customer,  orders " +
+        "where  c_custkey = o_custkey");
+    int count = 0;
+    try {
+      while (resultSet.next()) {
+        count++;
+      }
+      LOG.debug("equal join get {} rows", count);
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Benchmark
+  @Fork(0)
+  @Warmup(iterations = 2)
+  @Measurement(iterations = 5)
+  public void testhashPSIJoin() {
+    ResultSet resultSet =
+        state.cmd.executeQuery("select  s_name,  s_phone,  ps_supplycost " +
+        "from  supplier_p,  partsupp_p " +
+        "where  s_suppkey = ps_suppkey");
+    int count = 0;
+    try {
+      while (resultSet.next()) {
+        count++;
+      }
+      LOG.debug("equal join get {} rows", count);
     } catch (SQLException e) {
       e.printStackTrace();
     }

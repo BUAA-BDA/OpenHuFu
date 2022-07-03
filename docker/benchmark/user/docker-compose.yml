@@ -1,0 +1,17 @@
+version: '3.3'
+
+services:
+  benchmark:
+    image: maven:3.8-openjdk-11
+    container_name: benchmark
+    working_dir: /usr/src/benchmark
+    restart: "no"
+    command: bash benchmark.sh
+    volumes:
+      - $PWD/../../../benchmark:/usr/src/benchmark
+    networks:
+      - public_tpch
+
+networks:
+  public_tpch:
+    external: true
