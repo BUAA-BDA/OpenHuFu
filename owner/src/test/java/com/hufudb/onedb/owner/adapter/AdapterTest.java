@@ -1,11 +1,15 @@
 package com.hufudb.onedb.owner.adapter;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import java.nio.file.Paths;
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.List;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -16,6 +20,7 @@ import com.hufudb.onedb.data.schema.utils.PojoPublishedTableSchema;
 import com.hufudb.onedb.data.storage.DataSet;
 import com.hufudb.onedb.data.storage.DataSetIterator;
 import com.hufudb.onedb.data.storage.utils.ColumnTypeWrapper;
+import com.hufudb.onedb.data.storage.utils.DateUtils;
 import com.hufudb.onedb.data.storage.utils.ModifierWrapper;
 import com.hufudb.onedb.expression.ExpressionFactory;
 import com.hufudb.onedb.plan.LeafPlan;
@@ -193,13 +198,19 @@ public class AdapterTest {
     plan.setSelectExps(ExpressionFactory.createInputRef(manager.getPublishedSchema("taxi")));
     DataSet result = adapter.query(plan);
     DataSetIterator it = result.getIterator();
-    int count = 0;
-    while (it.next()) {
-      assertNotNull(it.get(1));
-      assertNotNull(it.get(2));
-      assertNotNull(it.get(3));
-      count++;
-    }
-    assertEquals(3, count);
+    DateUtils utils = new DateUtils();
+    assertTrue(it.next());
+    assertEquals(Date.valueOf("2018-09-01"), utils.intToDate((int) it.get(1)));
+    assertEquals(Time.valueOf("09:05:10"), utils.intToTime((int) it.get(2)));
+    assertEquals(Timestamp.valueOf("2018-09-10 09:05:10"), utils.longToTimestamp((long) it.get(3)));
+    assertTrue(it.next());
+    assertEquals(Date.valueOf("2018-06-01"), utils.intToDate((int) it.get(1)));
+    assertEquals(Time.valueOf("10:14:45"), utils.intToTime((int) it.get(2)));
+    assertEquals(Timestamp.valueOf("2018-06-01 10:14:45"), utils.longToTimestamp((long) it.get(3)));
+    assertTrue(it.next());
+    assertEquals(Date.valueOf("2019-01-30"), utils.intToDate((int) it.get(1)));
+    assertEquals(Time.valueOf("21:31:20"), utils.intToTime((int) it.get(2)));
+    assertEquals(Timestamp.valueOf("2019-01-30 21:31:20"), utils.longToTimestamp((long) it.get(3)));
+    assertFalse(it.next());
   }
 }
