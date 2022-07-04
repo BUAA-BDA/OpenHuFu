@@ -6,15 +6,14 @@ then
   then
     cd database
     docker-compose up -d
-	echo "wait for database initialization"
-	sleep 5
+    echo "wait for database initialization"
+    sleep 5
     cd ../owner
     docker-compose up -d
-    cd ../user
+    cd ..
     docker-compose up -d
   elif [ $1 == "stop" ]
   then
-    cd user
     docker-compose down
     cd ../owner
     docker-compose down
