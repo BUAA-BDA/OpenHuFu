@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.data.schema.Schema;
+import com.hufudb.onedb.data.storage.utils.DateUtils;
 import com.hufudb.onedb.proto.OneDBData.ColumnDesc;
 
 /**
@@ -13,10 +14,13 @@ import com.hufudb.onedb.proto.OneDBData.ColumnDesc;
 public class ResultDataSet implements DataSet {
   final Schema schema;
   final ResultSet result;
+  final DateUtils dateUtils;
+
 
   public ResultDataSet(Schema schema, ResultSet result) {
     this.schema = schema;
     this.result = result;
+    this.dateUtils = new DateUtils();
   }
 
   @Override
@@ -69,8 +73,20 @@ public class ResultDataSet implements DataSet {
             });
             break;
           case DATE:
+            builder.add(() -> {
+              return dateUtils.dateToInt(result.getDate(idx));
+            });
+            break;
           case TIME:
+            builder.add(() -> {
+              return dateUtils.timeToInt(result.getTime(idx));
+            });
+            break;
           case TIMESTAMP:
+            builder.add(() -> {
+              return dateUtils.timestampToLong(result.getTimestamp(idx));
+            });
+            break;
           case LONG:
             builder.add(() -> {
               return result.getLong(idx);

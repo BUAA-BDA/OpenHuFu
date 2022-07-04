@@ -15,7 +15,7 @@ then
   elif [ $1 == "stop" ]
   then
     docker-compose down
-    cd ../owner
+    cd owner
     docker-compose down
     cd ../database
     docker-compose down

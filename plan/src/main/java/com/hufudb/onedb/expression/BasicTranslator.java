@@ -71,11 +71,11 @@ public class BasicTranslator implements Translator {
         return String.valueOf(literal.getB());
       case BYTE:
       case SHORT:
+      case DATE:
+      case TIME:
       case INT:
         return String.valueOf(literal.getI32());
       case LONG:
-      case DATE:
-      case TIME:
       case TIMESTAMP:
         return String.valueOf(literal.getI64());
       case FLOAT:

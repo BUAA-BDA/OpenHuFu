@@ -5,6 +5,14 @@ create table student (
     score int,
     dept_name varchar
 );
+
+create table taxi (
+    license varchar,
+    cur_date date,
+    cur_time time,
+    time_stamp timestamp
+);
+
 CREATE TABLE NATION  ( N_NATIONKEY  INTEGER NOT NULL,
                             N_NAME       CHAR(25) NOT NULL,
                             N_REGIONKEY  INTEGER NOT NULL,
@@ -75,6 +83,8 @@ CREATE TABLE LINEITEM ( L_ORDERKEY    INTEGER NOT NULL,
                              L_COMMENT      VARCHAR(44) NOT NULL);
 
 insert into student values('tom', 21, 90, 'computer'),('anna', 20, 89, 'software'),('Snow', 20, 99, 'software');
+
+insert into taxi values('10000', '2018-09-01', '09:05:10', '2018-09-10 09:05:10'),('10001', '2018-06-01', '10:14:45', '2018-06-01 10:14:45'), ('10002', '2019-01-30', '21:31:20', '2019-01-30 21:31:20');
 
 copy region from '/data/region_1.tbl' with delimiter as '|' NULL '';
 copy nation from '/data/nation_1.tbl' with delimiter as '|' NULL '';

@@ -128,12 +128,12 @@ public class ProtoColumn implements Column {
         case BYTE:
         case SHORT:
         case INT:
+        case DATE:
+        case TIME:
           i32Builder = I32Column.newBuilder();
           appender = (val) -> i32Builder.addCell(((Number) val).intValue());
           break;
         case LONG:
-        case DATE:
-        case TIME:
         case TIMESTAMP:
           i64Builder = I64Column.newBuilder();
           appender = (val) -> i64Builder.addCell(((Number) val).longValue());
@@ -186,11 +186,11 @@ public class ProtoColumn implements Column {
       case BYTE:
       case SHORT:
       case INT:
+      case DATE:
+      case TIME:
         i32Builder.clear();
         break;
       case LONG:
-      case DATE:
-      case TIME:
       case TIMESTAMP:
         i64Builder.clear();
         break;
@@ -218,12 +218,12 @@ public class ProtoColumn implements Column {
         break;
       case BYTE:
       case SHORT:
+      case DATE:
+      case TIME:
       case INT:
         columnBuilder.setI32Col(i32Builder.build());
         break;
       case LONG:
-      case DATE:
-      case TIME:
       case TIMESTAMP:
         columnBuilder.setI64Col(i64Builder.build());
         break;

@@ -48,8 +48,7 @@ public class AdapterTest {
         new PojoColumnDesc("DeptName", ColumnTypeWrapper.STRING, ModifierWrapper.PUBLIC),
         new PojoColumnDesc("Score", ColumnTypeWrapper.INT, ModifierWrapper.PUBLIC),
         new PojoColumnDesc("Name", ColumnTypeWrapper.STRING, ModifierWrapper.PUBLIC),
-        new PojoColumnDesc("Age", ColumnTypeWrapper.INT, ModifierWrapper.HIDDEN)
-    ));
+        new PojoColumnDesc("Age", ColumnTypeWrapper.INT, ModifierWrapper.HIDDEN)));
     t2.setActualColumns(ImmutableList.of(3, 2, 0, 1));
     publishedSchemas = ImmutableList.of(t1, t2);
     AdapterConfig adapterConfig = new AdapterConfig();
@@ -70,6 +69,12 @@ public class AdapterTest {
     for (PojoPublishedTableSchema schema : publishedSchemas) {
       assertTrue(manager.addPublishedTable(schema));
     }
+    PojoPublishedTableSchema t3 = new PojoPublishedTableSchema();
+    t3.setActualName("taxi");
+    t3.setPublishedName("taxi");
+    t3.setPublishedColumns(ImmutableList.of());
+    t3.setActualColumns(ImmutableList.of());
+    assertTrue(manager.addPublishedTable(t3));
   }
 
 
@@ -109,10 +114,11 @@ public class AdapterTest {
     result.close();
     // test query select dept_name, AVG(score) from student1 where score >= 90;
     plan.setAggExps(ImmutableList.of(
-        ExpressionFactory.createAggFunc(ColumnType.STRING,
-        Modifier.PUBLIC, 0,
-        ImmutableList.of(ExpressionFactory.createInputRef(0, ColumnType.STRING, Modifier.PUBLIC))),
-        ExpressionFactory.createAggFunc(ColumnType.INT, Modifier.PUBLIC, 2, ImmutableList.of(ExpressionFactory.createInputRef(1, ColumnType.INT, Modifier.PUBLIC)))));
+        ExpressionFactory.createAggFunc(ColumnType.STRING, Modifier.PUBLIC, 0,
+            ImmutableList
+                .of(ExpressionFactory.createInputRef(0, ColumnType.STRING, Modifier.PUBLIC))),
+        ExpressionFactory.createAggFunc(ColumnType.INT, Modifier.PUBLIC, 2, ImmutableList
+            .of(ExpressionFactory.createInputRef(1, ColumnType.INT, Modifier.PUBLIC)))));
     plan.setGroups(ImmutableList.of(0));
     result = adapter.query(plan);
     it = result.getIterator();
@@ -166,10 +172,11 @@ public class AdapterTest {
     result.close();
     // test query select dept_name, AVG(score) from student1 where score >= 90 group by dept_name;
     plan.setAggExps(ImmutableList.of(
-        ExpressionFactory.createAggFunc(ColumnType.STRING,
-        Modifier.PUBLIC, 0,
-        ImmutableList.of(ExpressionFactory.createInputRef(0, ColumnType.STRING, Modifier.PUBLIC))),
-        ExpressionFactory.createAggFunc(ColumnType.INT, Modifier.PUBLIC, 2, ImmutableList.of(ExpressionFactory.createInputRef(0, ColumnType.INT, Modifier.PUBLIC)))));
+        ExpressionFactory.createAggFunc(ColumnType.STRING, Modifier.PUBLIC, 0,
+            ImmutableList
+                .of(ExpressionFactory.createInputRef(0, ColumnType.STRING, Modifier.PUBLIC))),
+        ExpressionFactory.createAggFunc(ColumnType.INT, Modifier.PUBLIC, 2, ImmutableList
+            .of(ExpressionFactory.createInputRef(0, ColumnType.INT, Modifier.PUBLIC)))));
     plan.setGroups(ImmutableList.of(0));
     result = adapter.query(plan);
     it = result.getIterator();
@@ -177,5 +184,22 @@ public class AdapterTest {
       assertTrue((int) it.get(1) >= 90);
     }
     result.close();
+  }
+  
+  @Test
+  public void testDateTypes() {
+    LeafPlan plan = new LeafPlan();
+    plan.setTableName("taxi");
+    plan.setSelectExps(ExpressionFactory.createInputRef(manager.getPublishedSchema("taxi")));
+    DataSet result = adapter.query(plan);
+    DataSetIterator it = result.getIterator();
+    int count = 0;
+    while (it.next()) {
+      assertNotNull(it.get(1));
+      assertNotNull(it.get(2));
+      assertNotNull(it.get(3));
+      count++;
+    }
+    assertEquals(3, count);
   }
 }
