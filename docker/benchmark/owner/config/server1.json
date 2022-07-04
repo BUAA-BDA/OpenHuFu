@@ -1,7 +1,7 @@
 {
   "id": 0,
   "port": 12345,
-  "hostname": "owner1",
+  "hostname": "tpchowner1",
   "privatekeypath": "./cert/owner1.key",
   "certchainpath": "./cert/owner1.pem",
   "trustcertpath": "./cert/ca.pem",

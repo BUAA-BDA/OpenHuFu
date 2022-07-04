@@ -6,6 +6,8 @@ then
   then
     cd database
     docker-compose up -d
+	echo "wait for database initialization"
+	sleep 5
     cd ../owner
     docker-compose up -d
     cd ../user

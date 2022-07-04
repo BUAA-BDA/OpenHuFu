@@ -89,15 +89,7 @@
     "tableName": "part",
     "localTables": [
       {
-        "endpoint": "tpchowner1:12345",
-        "localName": "part"
-      },
-      {
         "endpoint": "tpchowner2:12345",
-        "localName": "part"
-      },
-      {
-        "endpoint": "tpchowner3:12345",
         "localName": "part"
       }
     ]
@@ -107,14 +99,6 @@
     "localTables": [
       {
         "endpoint": "tpchowner1:12345",
-        "localName": "supplier"
-      },
-      {
-        "endpoint": "tpchowner2:12345",
-        "localName": "supplier"
-      },
-      {
-        "endpoint": "tpchowner3:12345",
         "localName": "supplier"
       }
     ]

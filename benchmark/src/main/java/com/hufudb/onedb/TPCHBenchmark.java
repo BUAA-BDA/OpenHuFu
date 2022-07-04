@@ -191,10 +191,9 @@ public class TPCHBenchmark {
   @Measurement(iterations = 5)
   public void testEqualJoin() {
     ResultSet resultSet =
-        state.cmd.executeQuery("select  c_name,  o_orderkey,  " +
-        "o_totalprice " +
-        "from  customer,  orders " +
-        "where  c_custkey = o_custkey");
+        state.cmd.executeQuery("select  s_name,  s_phone,  ps_supplycost " +
+        "from  supplier_p,  partsupp_p " +
+        "where  s_suppkey = ps_suppkey");
     int count = 0;
     try {
       while (resultSet.next()) {
