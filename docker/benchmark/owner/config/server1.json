@@ -1,0 +1,102 @@
+{
+  "id": 0,
+  "port": 12345,
+  "hostname": "tpchowner1",
+  "privatekeypath": "./cert/owner1.key",
+  "certchainpath": "./cert/owner1.pem",
+  "trustcertpath": "./cert/ca.pem",
+  "adapterconfig": {
+    "datasource": "postgresql",
+    "url": "jdbc:postgresql://tpch1:5432/postgres",
+    "catalog": "postgres",
+    "user": "postgres",
+    "passwd": "onedb"
+  },
+  "tables": [
+    {
+      "actualName": "region",
+      "publishedName": "region",
+      "publishedColumns": [],
+      "actualColumns": []
+    },
+    {
+      "actualName": "nation",
+      "publishedName": "nation",
+      "publishedColumns": [],
+      "actualColumns": []
+    },
+    {
+      "actualName": "partsupp",
+      "publishedName": "partsupp",
+      "publishedColumns": [],
+      "actualColumns": []
+    },
+    {
+      "actualName": "customer",
+      "publishedName": "customer",
+      "publishedColumns": [],
+      "actualColumns": []
+    },
+    {
+      "actualName": "lineitem",
+      "publishedName": "lineitem",
+      "publishedColumns": [],
+      "actualColumns": []
+    },
+    {
+      "actualName": "orders",
+      "publishedName": "orders",
+      "publishedColumns": [],
+      "actualColumns": []
+    },
+    {
+      "actualName": "part",
+      "publishedName": "part",
+      "publishedColumns": [],
+      "actualColumns": []
+    },
+    {
+      "actualName": "supplier",
+      "publishedName": "supplier",
+      "publishedColumns": [],
+      "actualColumns": []
+    },
+    {
+      "actualName": "supplier",
+      "publishedName": "supplier_p",
+      "publishedColumns": [
+        {
+          "name": "s_suppkey",
+          "type": "INT",
+          "modifier": "protected"
+        },
+        {
+          "name": "s_name",
+          "type": "STRING",
+          "modifier": "protected"
+        },
+        {
+          "name": "s_address",
+          "type": "STRING",
+          "modifier": "protected"
+        },
+        {
+          "name": "s_nationkey",
+          "type": "INT",
+          "modifier": "protected"
+        },
+        {
+          "name": "s_phone",
+          "type": "STRING",
+          "modifier": "protected"
+        },
+        {
+          "name": "s_comment",
+          "type": "STRING",
+          "modifier": "protected"
+        }
+      ],
+      "actualColumns": [0, 1, 2, 3, 4, 5, 6]
+    }
+  ]
+}
