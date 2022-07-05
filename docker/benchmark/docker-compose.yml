@@ -1,16 +1,14 @@
 version: '3.3'
 
 services:
-  tpch_user:
+  benchmark:
     image: maven:3.8-openjdk-11
     container_name: benchmark
     working_dir: /usr/src/benchmark
     restart: "no"
-    command: java -jar ./bin/onedb_user_client.jar -m ./config/client.json
+    command: bash benchmark.sh
     volumes:
-      - $PWD/../../../release/bin:/usr/src/benchmark/bin
-      - $PWD/config:/usr/src/benchmark/config
-      - $PWD/log:/usr/src/benchmark/log
+      - $PWD/../../benchmark:/usr/src/benchmark
     networks:
       - public_tpch
 

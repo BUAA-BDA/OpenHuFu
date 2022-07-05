@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 import org.apache.calcite.jdbc.CalciteConnection;
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.commons.cli.CommandLine;
@@ -34,11 +36,18 @@ public class OneDB {
   private OneDBSchemaManager schema;
   private Connection connection;
 
+  private static String getSystemTimeZone() {
+    TimeZone timeZone = TimeZone.getDefault();
+    long hours = TimeUnit.MILLISECONDS.toHours(timeZone.getRawOffset());
+    return hours >= 0 ? String.format("gmt+%d", hours) : String.format("gmt%d", hours);
+  }
+
   public OneDB() {
     try {
       Class.forName("com.hufudb.onedb.user.jdbc.OneDBDriver");
       Properties props = new Properties();
       props.setProperty("lex", "JAVA");
+      props.setProperty("timeZone", getSystemTimeZone());
       props.setProperty("caseSensitive", "false");
       connection = DriverManager.getConnection("jdbc:onedb:", props);
       calciteConnection = connection.unwrap(CalciteConnection.class);
@@ -56,7 +65,7 @@ public class OneDB {
 
   public static void main(String[] args) {
     final Options options = new Options();
-    final Option model = new Option("m", "model", true, "model of fed");
+    final Option model = new Option("m", "model", true, "model of federation");
     model.setRequired(true);
     options.addOption(model);
     final CommandLineParser parser = new DefaultParser();
@@ -67,7 +76,7 @@ public class OneDB {
       final String m = cmd.getOptionValue("model", "model.json");
       List<String> dbargs = new ArrayList<>();
       dbargs.add("-u");
-      dbargs.add("jdbc:onedb:model=" + m + ";lex=JAVA;caseSensitive=false;");
+      dbargs.add(String.format("jdbc:onedb:model=%s;lex=JAVA;caseSensitive=false;timeZone='%s'", m, getSystemTimeZone()));
       dbargs.add("-n");
       dbargs.add("admin");
       dbargs.add("-p");

@@ -21,6 +21,12 @@
       "actualColumns": []
     },
     {
+      "actualName": "taxi",
+      "publishedName": "taxi",
+      "publishedColumns": [],
+      "actualColumns": []
+    },
+    {
       "actualName": "student",
       "publishedName": "student2",
       "publishedColumns": [

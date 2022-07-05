@@ -98,14 +98,14 @@ public class ProtoRowDataSet implements MaterializedDataSet {
           break;
         case BYTE:
         case SHORT:
+        case DATE:
+        case TIME:
         case INT:
           getterBuilder.add((row) -> row.getCells(i).getI32Cel());
           setterBuilder
               .add((row, value) -> row.setCells(i, CellProto.newBuilder().setI32Cel(((Number) value).intValue())));
           break;
         case LONG:
-        case DATE:
-        case TIME:
         case TIMESTAMP:
           getterBuilder.add((row) -> row.getCells(i).getI64Cel());
           setterBuilder

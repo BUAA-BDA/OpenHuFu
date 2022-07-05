@@ -6,6 +6,13 @@ create table student (
     dept_name varchar
 );
 
+create table taxi (
+    license varchar,
+    cur_date date,
+    cur_time time,
+    time_stamp timestamp
+);
+
 CREATE TABLE PART  ( P_PARTKEY     INTEGER NOT NULL,
                      P_NAME        VARCHAR(55) NOT NULL,
                      P_MFGR        CHAR(25) NOT NULL,
@@ -66,6 +73,9 @@ CREATE TABLE LINEITEM ( L_ORDERKEY    INTEGER NOT NULL,
                         L_SHIPMODE     CHAR(10) NOT NULL,
                         L_COMMENT      VARCHAR(44) NOT NULL);
 insert into student values('peter', 20, 71, 'computer'),('mary', 22, 82, 'math'),('Brown', 21, 88, 'software');
+
+
+insert into taxi values('10003', '2020-04-21', '15:45:09', '2020-04-21 15:45:09'),('10004', '2019-11-28', '11:20:43', '2019-11-28 11:20:43'), ('10005', '2019-10-15', '16:51:32', '2019-10-15 16:51:32');
 
 copy partsupp from '/data/partsupp_2.tbl' with delimiter as '|' NULL '';
 copy customer from '/data/customer_2.tbl' with delimiter as '|' NULL '';

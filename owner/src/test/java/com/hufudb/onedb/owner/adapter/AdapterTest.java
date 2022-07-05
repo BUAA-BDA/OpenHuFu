@@ -1,11 +1,15 @@
 package com.hufudb.onedb.owner.adapter;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import java.nio.file.Paths;
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.List;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -16,6 +20,7 @@ import com.hufudb.onedb.data.schema.utils.PojoPublishedTableSchema;
 import com.hufudb.onedb.data.storage.DataSet;
 import com.hufudb.onedb.data.storage.DataSetIterator;
 import com.hufudb.onedb.data.storage.utils.ColumnTypeWrapper;
+import com.hufudb.onedb.data.storage.utils.DateUtils;
 import com.hufudb.onedb.data.storage.utils.ModifierWrapper;
 import com.hufudb.onedb.expression.ExpressionFactory;
 import com.hufudb.onedb.plan.LeafPlan;
@@ -48,8 +53,7 @@ public class AdapterTest {
         new PojoColumnDesc("DeptName", ColumnTypeWrapper.STRING, ModifierWrapper.PUBLIC),
         new PojoColumnDesc("Score", ColumnTypeWrapper.INT, ModifierWrapper.PUBLIC),
         new PojoColumnDesc("Name", ColumnTypeWrapper.STRING, ModifierWrapper.PUBLIC),
-        new PojoColumnDesc("Age", ColumnTypeWrapper.INT, ModifierWrapper.HIDDEN)
-    ));
+        new PojoColumnDesc("Age", ColumnTypeWrapper.INT, ModifierWrapper.HIDDEN)));
     t2.setActualColumns(ImmutableList.of(3, 2, 0, 1));
     publishedSchemas = ImmutableList.of(t1, t2);
     AdapterConfig adapterConfig = new AdapterConfig();
@@ -70,6 +74,12 @@ public class AdapterTest {
     for (PojoPublishedTableSchema schema : publishedSchemas) {
       assertTrue(manager.addPublishedTable(schema));
     }
+    PojoPublishedTableSchema t3 = new PojoPublishedTableSchema();
+    t3.setActualName("taxi");
+    t3.setPublishedName("taxi");
+    t3.setPublishedColumns(ImmutableList.of());
+    t3.setActualColumns(ImmutableList.of());
+    assertTrue(manager.addPublishedTable(t3));
   }
 
 
@@ -109,10 +119,11 @@ public class AdapterTest {
     result.close();
     // test query select dept_name, AVG(score) from student1 where score >= 90;
     plan.setAggExps(ImmutableList.of(
-        ExpressionFactory.createAggFunc(ColumnType.STRING,
-        Modifier.PUBLIC, 0,
-        ImmutableList.of(ExpressionFactory.createInputRef(0, ColumnType.STRING, Modifier.PUBLIC))),
-        ExpressionFactory.createAggFunc(ColumnType.INT, Modifier.PUBLIC, 2, ImmutableList.of(ExpressionFactory.createInputRef(1, ColumnType.INT, Modifier.PUBLIC)))));
+        ExpressionFactory.createAggFunc(ColumnType.STRING, Modifier.PUBLIC, 0,
+            ImmutableList
+                .of(ExpressionFactory.createInputRef(0, ColumnType.STRING, Modifier.PUBLIC))),
+        ExpressionFactory.createAggFunc(ColumnType.INT, Modifier.PUBLIC, 2, ImmutableList
+            .of(ExpressionFactory.createInputRef(1, ColumnType.INT, Modifier.PUBLIC)))));
     plan.setGroups(ImmutableList.of(0));
     result = adapter.query(plan);
     it = result.getIterator();
@@ -166,10 +177,11 @@ public class AdapterTest {
     result.close();
     // test query select dept_name, AVG(score) from student1 where score >= 90 group by dept_name;
     plan.setAggExps(ImmutableList.of(
-        ExpressionFactory.createAggFunc(ColumnType.STRING,
-        Modifier.PUBLIC, 0,
-        ImmutableList.of(ExpressionFactory.createInputRef(0, ColumnType.STRING, Modifier.PUBLIC))),
-        ExpressionFactory.createAggFunc(ColumnType.INT, Modifier.PUBLIC, 2, ImmutableList.of(ExpressionFactory.createInputRef(0, ColumnType.INT, Modifier.PUBLIC)))));
+        ExpressionFactory.createAggFunc(ColumnType.STRING, Modifier.PUBLIC, 0,
+            ImmutableList
+                .of(ExpressionFactory.createInputRef(0, ColumnType.STRING, Modifier.PUBLIC))),
+        ExpressionFactory.createAggFunc(ColumnType.INT, Modifier.PUBLIC, 2, ImmutableList
+            .of(ExpressionFactory.createInputRef(0, ColumnType.INT, Modifier.PUBLIC)))));
     plan.setGroups(ImmutableList.of(0));
     result = adapter.query(plan);
     it = result.getIterator();
@@ -177,5 +189,27 @@ public class AdapterTest {
       assertTrue((int) it.get(1) >= 90);
     }
     result.close();
+  }
+  
+  @Test
+  public void testDateTypes() {
+    LeafPlan plan = new LeafPlan();
+    plan.setTableName("taxi");
+    plan.setSelectExps(ExpressionFactory.createInputRef(manager.getPublishedSchema("taxi")));
+    DataSet result = adapter.query(plan);
+    DataSetIterator it = result.getIterator();
+    assertTrue(it.next());
+    assertEquals(Date.valueOf("2018-09-01").toString(), it.get(1).toString());
+    assertEquals(Time.valueOf("09:05:10").toString(), it.get(2).toString());
+    assertEquals(Timestamp.valueOf("2018-09-01 09:05:10").toString(), it.get(3).toString());
+    assertTrue(it.next());
+    assertEquals(Date.valueOf("2018-06-01").toString(), it.get(1).toString());
+    assertEquals(Time.valueOf("10:14:45").toString(), it.get(2).toString());
+    assertEquals(Timestamp.valueOf("2018-06-01 10:14:45").toString(), it.get(3).toString());
+    assertTrue(it.next());
+    assertEquals(Date.valueOf("2019-01-30").toString(), it.get(1).toString());
+    assertEquals(Time.valueOf("21:31:20").toString(), it.get(2).toString());
+    assertEquals(Timestamp.valueOf("2019-01-30 21:31:20").toString(), it.get(3).toString());
+    assertFalse(it.next());
   }
 }

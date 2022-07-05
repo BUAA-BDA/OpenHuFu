@@ -38,11 +38,11 @@ public class ExpressionUtils {
         return lit.getF64();
       case BYTE:
       case SHORT:
+      case DATE:
+      case TIME:
       case INT:
         return lit.getI32();
       case LONG:
-      case DATE:
-      case TIME:
       case TIMESTAMP:
         return lit.getI64();
       default:

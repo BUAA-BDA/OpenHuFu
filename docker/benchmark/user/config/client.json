@@ -1,0 +1,201 @@
+{
+  "version": "1.0",
+  "defaultSchema": "onedb",
+  "schemas": [
+    {
+      "name": "onedb",
+      "type": "custom",
+      "factory": "com.hufudb.onedb.core.sql.schema.OneDBSchemaFactory",
+      "operand": {
+        "owners": [
+          {
+            "endpoint": "tpchowner1:12345",
+            "trustcertpath": "./cert/ca.pem"
+          },
+          {
+            "endpoint": "tpchowner2:12345",
+            "trustcertpath": "./cert/ca.pem"
+          },
+          {
+            "endpoint": "tpchowner3:12345",
+            "trustcertpath": "./cert/ca.pem"
+          }
+        ]
+      },
+      "tables": [
+        {
+          "name": "region",
+          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
+          "operand": {
+            "feds": [
+              {
+                "endpoint": "tpchowner1:12345",
+                "name": "region"
+              }
+            ]
+          }
+        },
+        {
+          "name": "nation",
+          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
+          "operand": {
+            "feds": [
+              {
+                "endpoint": "tpchowner1:12345",
+                "name": "nation"
+              }
+            ]
+          }
+        },
+        {
+          "name": "partsupp",
+          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
+          "operand": {
+            "feds": [
+              {
+                "endpoint": "tpchowner1:12345",
+                "name": "partsupp"
+              },
+              {
+                "endpoint": "tpchowner2:12345",
+                "name": "partsupp"
+              },
+              {
+                "endpoint": "tpchowner3:12345",
+                "name": "partsupp"
+              }
+            ]
+          }
+        },
+        {
+          "name": "customer",
+          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
+          "operand": {
+            "feds": [
+              {
+                "endpoint": "tpchowner1:12345",
+                "name": "customer"
+              },
+              {
+                "endpoint": "tpchowner2:12345",
+                "name": "customer"
+              },
+              {
+                "endpoint": "tpchowner3:12345",
+                "name": "customer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "lineitem",
+          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
+          "operand": {
+            "feds": [
+              {
+                "endpoint": "tpchowner1:12345",
+                "name": "lineitem"
+              },
+              {
+                "endpoint": "tpchowner2:12345",
+                "name": "lineitem"
+              },
+              {
+                "endpoint": "tpchowner3:12345",
+                "name": "lineitem"
+              }
+            ]
+          }
+        },
+        {
+          "name": "orders",
+          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
+          "operand": {
+            "feds": [
+              {
+                "endpoint": "tpchowner1:12345",
+                "name": "orders"
+              },
+              {
+                "endpoint": "tpchowner2:12345",
+                "name": "orders"
+              },
+              {
+                "endpoint": "tpchowner3:12345",
+                "name": "orders"
+              }
+            ]
+          }
+        },
+        {
+          "name": "part",
+          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
+          "operand": {
+            "feds": [
+              {
+                "endpoint": "tpchowner1:12345",
+                "name": "part"
+              },
+              {
+                "endpoint": "tpchowner2:12345",
+                "name": "part"
+              },
+              {
+                "endpoint": "tpchowner3:12345",
+                "name": "part"
+              }
+            ]
+          }
+        },
+        {
+          "name": "supplier",
+          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
+          "operand": {
+            "feds": [
+              {
+                "endpoint": "tpchowner1:12345",
+                "name": "supplier"
+              }
+            ]
+          }
+        },
+        {
+          "name": "partsupp",
+          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
+          "operand": {
+            "feds": [
+              {
+                "endpoint": "tpchowner2:12345",
+                "name": "partsupp"
+              }
+            ]
+          }
+        },
+        {
+          "name": "supplier_p",
+          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
+          "operand": {
+            "feds": [
+              {
+                "endpoint": "tpchowner1:12345",
+                "name": "supplier_p"
+              }
+            ]
+          }
+        },
+        {
+          "name": "partsupp_p",
+          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
+          "operand": {
+            "feds": [
+              {
+                "endpoint": "tpchowner2:12345",
+                "name": "partsupp_p"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
