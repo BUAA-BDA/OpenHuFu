@@ -11,23 +11,36 @@ import java.util.Calendar;
  */
 public class DateUtils {
   final Calendar calendar = Calendar.getInstance();
+  final static int DAY_MASK = 0x1F;
+  final static int DAY_OFFSET = 5;
+  final static int MONTH_MASK = 0xF;
+  final static int MONTH_OFFSET = 4;
   final static long MSFORDAY = 86400000L;
-  final static long MSFORHOUR = 3600000L;
   public DateUtils() {}
 
   /**
    * convert date into integer
+   *
+   * year (23 bit) | month (4 bit) | day (5 bit)
    */
   public int dateToInt(Date date) {
     calendar.setTime(date);
-    return (int) (date.getTime() / MSFORHOUR);
+    int year = calendar.get(Calendar.YEAR);
+    int month = calendar.get(Calendar.MONTH);
+    int day = calendar.get(Calendar.DAY_OF_MONTH);
+    return (year << 9) | (month << 5) | day;
   }
 
   /**
    * convert int to date
    */
   public Date intToDate(int dint) {
-    return new Date(dint * MSFORHOUR);
+    int day = dint & DAY_MASK;
+    dint = dint >> DAY_OFFSET;
+    int month = dint & MONTH_MASK;
+    dint = dint >> MONTH_OFFSET;
+    calendar.set(dint, month, day);
+    return new Date(calendar.getTimeInMillis());
   }
 
   /**

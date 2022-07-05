@@ -45,7 +45,11 @@ public class ProtoColumn implements Column {
         this.size = column.getI32Col().getCellCount();
         break;
       case I64COL:
-        this.getter = (rowNum) -> column.getI64Col().getCell(rowNum);
+        if (type == ColumnType.TIMESTAMP) {
+          this.getter =  (rowNum) -> dateUtils.longToTimestamp(column.getI64Col().getCell(rowNum));
+        } else {
+          this.getter = (rowNum) -> column.getI64Col().getCell(rowNum);
+        }
         this.size = column.getI64Col().getCellCount();
         break;
       case F32COL:
@@ -150,23 +154,11 @@ public class ProtoColumn implements Column {
           break;
         case DATE:
           i32Builder = I32Column.newBuilder();
-          appender = (val) -> {
-            if (val instanceof Date) {
-              i32Builder.addCell(dateUtils.dateToInt((Date) val));
-            } else {
-              i32Builder.addCell(((Number) val).intValue());
-            }
-          };
+          appender = (val) -> i32Builder.addCell(dateUtils.dateToInt((Date) val));
           break;
         case TIME:
           i32Builder = I32Column.newBuilder();
-          appender = (val) -> {
-            if (val instanceof Time) {
-              i32Builder.addCell(dateUtils.timeToInt((Time) val));
-            } else {
-              i32Builder.addCell(((Number) val).intValue());
-            }
-          };
+          appender = (val) -> i32Builder.addCell(dateUtils.timeToInt((Time) val));
           break;
         case LONG:
           i64Builder = I64Column.newBuilder();
@@ -174,13 +166,7 @@ public class ProtoColumn implements Column {
           break;
         case TIMESTAMP:
           i64Builder = I64Column.newBuilder();
-          appender = (val) -> {
-            if (val instanceof Timestamp) {
-              i64Builder.addCell(dateUtils.timestampToLong((Timestamp) val));
-            } else {
-              i64Builder.addCell(((Number) val).longValue());
-            }
-          };
+          appender = (val) -> i64Builder.addCell(dateUtils.timestampToLong((Timestamp) val)) ;
           break;
         default:
           throw new UnsupportedOperationException("Unsupported column type");

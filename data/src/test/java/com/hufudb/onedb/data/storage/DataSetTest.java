@@ -5,7 +5,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import java.sql.Date;
 import java.sql.SQLException;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -484,5 +487,25 @@ public class DataSetTest {
       assertTrue(equals(rows.get(k), it));
       ++k;
     }
+  }
+
+  @Test
+  public void testDataSetWithDate() {
+    Schema schema = Schema.newBuilder().add("A", ColumnType.DATE, Modifier.PUBLIC).add("B", ColumnType.TIME, Modifier.PUBLIC).add("C", ColumnType.TIMESTAMP, Modifier.PUBLIC).build();
+    ProtoDataSet.Builder dBuilder = ProtoDataSet.newBuilder(schema);
+    ArrayRow.Builder rBuilder = ArrayRow.newBuilder(3);
+    Date date = new Date(System.currentTimeMillis());
+    Time time = new Time(System.currentTimeMillis());
+    Timestamp ts = new Timestamp(System.currentTimeMillis());
+    rBuilder.set(0, date);
+    rBuilder.set(1, time);
+    rBuilder.set(2, ts);
+    dBuilder.addRow(rBuilder.build());
+    ProtoDataSet dataset = dBuilder.build();
+    DataSetIterator it = dataset.getIterator();
+    assertTrue(it.next());
+    assertEquals(date.toString(), it.get(0).toString());
+    assertEquals(time.toString(), it.get(1).toString());
+    assertEquals(ts.toString(), it.get(2).toString());
   }
 }
