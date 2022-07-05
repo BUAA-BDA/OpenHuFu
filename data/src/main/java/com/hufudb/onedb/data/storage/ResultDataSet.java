@@ -74,17 +74,17 @@ public class ResultDataSet implements DataSet {
             break;
           case DATE:
             builder.add(() -> {
-              return dateUtils.dateToInt(result.getDate(idx));
+              return result.getDate(idx);
             });
             break;
           case TIME:
             builder.add(() -> {
-              return dateUtils.timeToInt(result.getTime(idx));
+              return result.getTime(idx);
             });
             break;
           case TIMESTAMP:
             builder.add(() -> {
-              return dateUtils.timestampToLong(result.getTimestamp(idx));
+              return result.getTimestamp(idx);
             });
             break;
           case LONG:

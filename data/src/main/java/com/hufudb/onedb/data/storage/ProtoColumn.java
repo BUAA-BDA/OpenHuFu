@@ -1,6 +1,10 @@
 package com.hufudb.onedb.data.storage;
 
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
 import com.google.protobuf.ByteString;
+import com.hufudb.onedb.data.storage.utils.DateUtils;
 import com.hufudb.onedb.proto.OneDBData.BoolColumn;
 import com.hufudb.onedb.proto.OneDBData.BytesColumn;
 import com.hufudb.onedb.proto.OneDBData.ColumnProto;
@@ -19,14 +23,25 @@ public class ProtoColumn implements Column {
   final ColumnProto column;
   final CellGetter getter;
   final BitArray isNulls;
+  final DateUtils dateUtils;
   final int size;
 
   ProtoColumn(ColumnType type, ColumnProto column) {
     this.type = type;
     this.column = column;
+    this.dateUtils = new DateUtils();
     switch (column.getColCase()) {
       case I32COL:
-        this.getter = (rowNum) -> column.getI32Col().getCell(rowNum);
+        switch (type) {
+          case DATE:
+            this.getter = (rowNum) -> dateUtils.intToDate(column.getI32Col().getCell(rowNum));
+            break;
+          case TIME:
+            this.getter = (rowNum) -> dateUtils.intToTime(column.getI32Col().getCell(rowNum));
+            break;
+          default:
+            this.getter = (rowNum) -> column.getI32Col().getCell(rowNum);
+        }
         this.size = column.getI32Col().getCellCount();
         break;
       case I64COL:
@@ -92,6 +107,7 @@ public class ProtoColumn implements Column {
     final ColumnProto.Builder columnBuilder;
     final BitArray.Builder nullBuilder;
     final CellAppender appender;
+    final DateUtils dateUtils;
     I32Column.Builder i32Builder;
     I64Column.Builder i64Builder;
     F32Column.Builder f32Builder;
@@ -104,6 +120,7 @@ public class ProtoColumn implements Column {
       this.type = type;
       this.columnBuilder = ColumnProto.newBuilder();
       this.nullBuilder = BitArray.builder();
+      this.dateUtils = new DateUtils();
       switch (type) {
         case BOOLEAN:
           boolBuilder = BoolColumn.newBuilder();
@@ -128,15 +145,42 @@ public class ProtoColumn implements Column {
         case BYTE:
         case SHORT:
         case INT:
-        case DATE:
-        case TIME:
           i32Builder = I32Column.newBuilder();
           appender = (val) -> i32Builder.addCell(((Number) val).intValue());
           break;
+        case DATE:
+          i32Builder = I32Column.newBuilder();
+          appender = (val) -> {
+            if (val instanceof Date) {
+              i32Builder.addCell(dateUtils.dateToInt((Date) val));
+            } else {
+              i32Builder.addCell(((Number) val).intValue());
+            }
+          };
+          break;
+        case TIME:
+          i32Builder = I32Column.newBuilder();
+          appender = (val) -> {
+            if (val instanceof Time) {
+              i32Builder.addCell(dateUtils.timeToInt((Time) val));
+            } else {
+              i32Builder.addCell(((Number) val).intValue());
+            }
+          };
+          break;
         case LONG:
-        case TIMESTAMP:
           i64Builder = I64Column.newBuilder();
           appender = (val) -> i64Builder.addCell(((Number) val).longValue());
+          break;
+        case TIMESTAMP:
+          i64Builder = I64Column.newBuilder();
+          appender = (val) -> {
+            if (val instanceof Timestamp) {
+              i64Builder.addCell(dateUtils.timestampToLong((Timestamp) val));
+            } else {
+              i64Builder.addCell(((Number) val).longValue());
+            }
+          };
           break;
         default:
           throw new UnsupportedOperationException("Unsupported column type");

@@ -198,19 +198,18 @@ public class AdapterTest {
     plan.setSelectExps(ExpressionFactory.createInputRef(manager.getPublishedSchema("taxi")));
     DataSet result = adapter.query(plan);
     DataSetIterator it = result.getIterator();
-    DateUtils utils = new DateUtils();
     assertTrue(it.next());
-    assertEquals(Date.valueOf("2018-09-01").toString(), utils.intToDate((int) it.get(1)).toString());
-    assertEquals(Time.valueOf("09:05:10").toString(), utils.intToTime((int) it.get(2)).toString());
-    assertEquals(Timestamp.valueOf("2018-09-10 09:05:10").toString(), utils.longToTimestamp((long) it.get(3)).toString());
+    assertEquals(Date.valueOf("2018-09-01").toString(), it.get(1).toString());
+    assertEquals(Time.valueOf("09:05:10").toString(), it.get(2).toString());
+    assertEquals(Timestamp.valueOf("2018-09-01 09:05:10").toString(), it.get(3).toString());
     assertTrue(it.next());
-    assertEquals(Date.valueOf("2018-06-01").toString(), utils.intToDate((int) it.get(1)).toString());
-    assertEquals(Time.valueOf("10:14:45").toString(), utils.intToTime((int) it.get(2)).toString());
-    assertEquals(Timestamp.valueOf("2018-06-01 10:14:45").toString(), utils.longToTimestamp((long) it.get(3)).toString());
+    assertEquals(Date.valueOf("2018-06-01").toString(), it.get(1).toString());
+    assertEquals(Time.valueOf("10:14:45").toString(), it.get(2).toString());
+    assertEquals(Timestamp.valueOf("2018-06-01 10:14:45").toString(), it.get(3).toString());
     assertTrue(it.next());
-    assertEquals(Date.valueOf("2019-01-30").toString(), utils.intToDate((int) it.get(1)).toString());
-    assertEquals(Time.valueOf("21:31:20").toString(), utils.intToTime((int) it.get(2)).toString());
-    assertEquals(Timestamp.valueOf("2019-01-30 21:31:20").toString(), utils.longToTimestamp((long) it.get(3)).toString());
+    assertEquals(Date.valueOf("2019-01-30").toString(), it.get(1).toString());
+    assertEquals(Time.valueOf("21:31:20").toString(), it.get(2).toString());
+    assertEquals(Timestamp.valueOf("2019-01-30 21:31:20").toString(), it.get(3).toString());
     assertFalse(it.next());
   }
 }

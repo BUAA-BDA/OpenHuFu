@@ -16,15 +16,15 @@ public class DateUtilsTest {
 
     date = Date.valueOf("1970-01-01");
     dint = dateUtils.dateToInt(date);
-    assertEquals(date, dateUtils.intToDate(dint));
+    assertEquals(date.toString(), dateUtils.intToDate(dint).toString());
 
     date = Date.valueOf("1969-02-28");
     dint = dateUtils.dateToInt(date);
-    assertEquals(date, dateUtils.intToDate(dint));
+    assertEquals(date.toString(), dateUtils.intToDate(dint).toString());
 
     date = Date.valueOf("1900-12-28");
     dint = dateUtils.dateToInt(date);
-    assertEquals(date, dateUtils.intToDate(dint));
+    assertEquals(date.toString(), dateUtils.intToDate(dint).toString());
 
     Time time = Time.valueOf("00:05:29");
     int t = dateUtils.timeToInt(time);

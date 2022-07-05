@@ -106,6 +106,22 @@
               }
             ]
           }
+        },
+        {
+          "name": "taxi",
+          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
+          "operand": {
+            "feds": [
+              {
+                "endpoint": "localhost:12345",
+                "name": "taxi"
+              },
+              {
+                "endpoint": "localhost:12346",
+                "name": "taxi"
+              }
+            ]
+          }
         }
       ]
     }
