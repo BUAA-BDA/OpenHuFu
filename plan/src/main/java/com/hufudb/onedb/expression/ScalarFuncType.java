@@ -1,9 +1,12 @@
 package com.hufudb.onedb.expression;
 
 import com.google.common.collect.ImmutableMap;
+import com.hufudb.onedb.data.storage.Point;
 
 public enum ScalarFuncType {
-  ABS("ABS", 1, Number.class);
+  ABS("ABS", 1, Number.class),
+  DWithin("DWithin", 100, Point.class, Point.class, Double.class),
+  Distance("Distance", 101, Point.class, Point.class);
 
   private final static ImmutableMap<Integer, ScalarFuncType> MAP;
 

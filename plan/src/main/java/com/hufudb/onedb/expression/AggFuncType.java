@@ -9,7 +9,8 @@ public enum AggFuncType {
   MAX("MAX", 3),
   MIN("MIN", 4),
   SUM("SUM", 5),
-  UNSUPPORT("UNSUPPORT", 6);
+  KNN("KNN", 100),
+  UNSUPPORT("UNSUPPORT", 1000);
 
   private final static ImmutableMap<Integer, AggFuncType> MAP;
 
