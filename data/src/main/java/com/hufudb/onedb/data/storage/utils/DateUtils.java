@@ -32,6 +32,18 @@ public class DateUtils {
   }
 
   /**
+   * convert calendar into date integer
+   *
+   * year (23 bit) | month (4 bit) | day (5 bit)
+   */
+  public static int calendarToDateInt(Calendar calendar) {
+    int year = calendar.get(Calendar.YEAR);
+    int month = calendar.get(Calendar.MONTH);
+    int day = calendar.get(Calendar.DAY_OF_MONTH);
+    return (year << 9) | (month << 5) | day;
+  }
+
+  /**
    * convert int to date
    */
   public Date intToDate(int dint) {
@@ -51,6 +63,13 @@ public class DateUtils {
   }
 
   /**
+   * convert calendar into time integer
+   */
+  public static int calendarToTimeInt(Calendar calendar) {
+    return (int) (calendar.getTimeInMillis() % MSFORDAY);
+  }
+
+  /**
    * convert encoded int to time
    */
   public Time intToTime(int t) {
@@ -62,6 +81,13 @@ public class DateUtils {
    */
   public long timestampToLong(Timestamp ts) {
     return ts.getTime();
+  }
+
+  /**
+   * convert calendar into time integer
+   */
+  public static long calendarToTimestampLong(Calendar calendar) {
+    return calendar.getTimeInMillis();
   }
 
   /**
