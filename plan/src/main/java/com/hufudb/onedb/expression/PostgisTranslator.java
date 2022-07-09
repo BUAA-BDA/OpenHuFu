@@ -68,7 +68,8 @@ public class PostgisTranslator extends BasicTranslator {
             case MIN:
                 return String.format("MIN(%s)", inputStrs.get(inputRefs.get(0)));
             case KNN:
-                return String.format("KNN(%s)", inputStrs.get(inputRefs.get(0)));
+                throw new RuntimeException("KNN is not implemented in com.hufudb.onedb.expression.PostgistTranslator yet!");
+                // return String.format("KNN(%s)", inputStrs.get(inputRefs.get(0)));
             default:
                 throw new RuntimeException("can't translate aggFunc " + exp);
         }
