@@ -19,11 +19,11 @@ public class PostgisAdapterFactory implements AdapterFactory {
 
   @Override
   public Adapter create(AdapterConfig config) {
-    assert(config.datasource.equals("postgresql"));
+    assert(config.datasource.equals("postgis"));
     try {
       Connection connection = DriverManager.getConnection(config.url, config.user, config.passwd);
       Statement statement = connection.createStatement();
-      return new PostgresqlAdapter(config.catalog, connection, statement, new PostgresqlTypeConverter());
+      return new PostgisAdapter(config.catalog, connection, statement, new PostgisTypeConverter());
     } catch (Exception e) {
       e.printStackTrace();
       return null;
@@ -32,6 +32,6 @@ public class PostgisAdapterFactory implements AdapterFactory {
 
   @Override
   public String getType() {
-    return "postgresql";
+    return "postgis";
   }
 }

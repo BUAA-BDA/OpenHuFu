@@ -1,27 +1,51 @@
-package com.hufudb.onedb.data.storage;
+package com.hufudb.onedb.owner.adapter.postgis;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.data.schema.Schema;
-import com.hufudb.onedb.data.storage.ResultDataSet;
+import com.hufudb.onedb.data.storage.DataSet;
 import com.hufudb.onedb.data.storage.DataSetIterator;
 import com.hufudb.onedb.proto.OneDBData.ColumnDesc;
+import com.hufudb.onedb.data.storage.utils.DateUtils;
 import org.postgresql.util.PGobject;
 
 /**
  * Dataset which encapsulate a @java.sql.ResultSet
  */
-public class PostgisResultDataSet implements ResultDataSet {
+public class PostgisResultDataSet implements DataSet {
+  final Schema schema;
+  final ResultSet result;
+  final DateUtils dateUtils;
 
   public PostgisResultDataSet(Schema schema, ResultSet result) {
-    super(schema, result);
+    this.schema = schema;
+    this.result = result;
+    this.dateUtils = new DateUtils();
+  }
+
+  @Override
+  public Schema getSchema() {
+    return schema;
+  }
+
+  @Override
+  public void close() {
+    try {
+      result.close();
+    } catch (SQLException e) {
+      LOG.error("Fail to close ResultSet in PostgisResultDatSet: {}", e.getMessage());
+    }
   }
 
   @Override
   public DataSetIterator getIterator() {
     return new PostgisResultIterator();
+  }
+
+  public interface Getter<T> {
+    T get() throws SQLException;
   }
 
   class PostgisResultIterator implements DataSetIterator {
@@ -88,7 +112,7 @@ public class PostgisResultDataSet implements ResultDataSet {
             break;
           case POINT:
             builder.add(() -> {
-              return postgisUtils.fromPGPoint((PGobject)result.getObject(idx));
+              return postgisUtils.fromPGPoint(((PGobject)(result.getObject(idx))));
             });
             break;
           default:
@@ -97,6 +121,31 @@ public class PostgisResultDataSet implements ResultDataSet {
         ++i;
       }
       this.getters = builder.build();
+    }
+
+    @Override
+    public boolean next() {
+      try {
+        return result.next();
+      } catch (SQLException e) {
+        LOG.error("Erorr in hasNext of ResultDataSet: {}", e.getMessage());
+        return false;
+      }
+    }
+
+    @Override
+    public Object get(int columnIndex) {
+      try {
+        return getters.get(columnIndex).get();
+      } catch (Exception e) {
+        LOG.error("Error in get of ResultDataSet: {}", e.getMessage());
+        return null;
+      }
+    }
+
+    @Override
+    public int size() {
+      return schema.size();
     }
   }
 }

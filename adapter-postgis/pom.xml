@@ -7,9 +7,9 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
   <groupId>com.hufudb.onedb</groupId>
-  <artifactId>adapter-postgresql</artifactId>
+  <artifactId>adapter-postgis</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <name>adapter-postgresql</name>
+  <name>adapter-postgis</name>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>11</maven.compiler.source>

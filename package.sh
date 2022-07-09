@@ -2,7 +2,7 @@
 
 if [ $# -eq 0 ]
 then
-  mvn clean install -T 0.5C -Dmaven.test.skip=true
+  mvn clean install -T 0.5C -Dmaven.test.skip=true -X
   mkdir -p ./release/bin
   mkdir -p ./release/adapter
   mkdir -p ./release/lib
