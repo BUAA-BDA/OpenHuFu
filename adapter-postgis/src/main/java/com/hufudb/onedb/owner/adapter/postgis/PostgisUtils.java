@@ -5,7 +5,7 @@ import org.postgis.GeometryBuilder;
 import com.hufudb.onedb.data.storage.Point;
 
 public class PostgisUtils {
-    public PostgisUtils() {}
+  public PostgisUtils() {}
 
     /**
    * convert PostGIS Point to Pair in java
