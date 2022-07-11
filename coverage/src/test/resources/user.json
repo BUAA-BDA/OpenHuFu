@@ -17,6 +17,19 @@
     ]
   },
   {
+    "tableName": "time_table",
+    "localTables": [
+      {
+        "endpoint": "localhost:6789",
+        "localName": "taxi"
+      },
+      {
+        "endpoint": "localhost:6790",
+        "localName": "taxi"
+      }
+    ]
+  },
+  {
     "tableName": "student_pub_s1",
     "localTables": [
       {

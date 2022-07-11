@@ -4,6 +4,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.TimeZone;
 
 /**
  * Simple Date Utils without consideration of time zone
@@ -16,6 +17,8 @@ public class DateUtils {
   final static int MONTH_MASK = 0xF;
   final static int MONTH_OFFSET = 4;
   final static long MSFORDAY = 86400000L;
+  final static TimeZone timeZone = TimeZone.getDefault();
+
   public DateUtils() {}
 
   /**
@@ -63,10 +66,11 @@ public class DateUtils {
   }
 
   /**
+   * precondition: calendar in UTC timeZone
    * convert calendar into time integer
    */
   public static int calendarToTimeInt(Calendar calendar) {
-    return (int) (calendar.getTimeInMillis() % MSFORDAY);
+    return (int) ((calendar.getTimeInMillis() - (long) timeZone.getRawOffset()) % MSFORDAY);
   }
 
   /**
@@ -87,7 +91,7 @@ public class DateUtils {
    * convert calendar into time integer
    */
   public static long calendarToTimestampLong(Calendar calendar) {
-    return calendar.getTimeInMillis();
+    return calendar.getTimeInMillis() - (long) timeZone.getRawOffset();
   }
 
   /**
