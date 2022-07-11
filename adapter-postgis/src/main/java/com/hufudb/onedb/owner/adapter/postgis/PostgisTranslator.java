@@ -1,13 +1,11 @@
 package com.hufudb.onedb.owner.adapter.postgis;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 import com.hufudb.onedb.data.schema.Schema;
+import com.hufudb.onedb.expression.*;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBPlan.Expression;
-import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
-import com.hufudb.onedb.expression.*;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class PostgisTranslator extends BasicTranslator {
     public PostgisTranslator(List<String> inputStrs) {
@@ -65,7 +63,7 @@ public class PostgisTranslator extends BasicTranslator {
                 if (inputs.size() != 2) {
                     throw new RuntimeException("Distance need 2 arguments, but given " + inputs.size());
                 }
-                return String.format("%s <-> %s", inputs.get(0), inputs.get(1));
+                return String.format("ST_Distance(%s, %s)", inputs.get(0), inputs.get(1));
             default:
                 throw new RuntimeException("can't translate scalarFunc " + exp);
         }
