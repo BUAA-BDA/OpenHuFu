@@ -9,7 +9,7 @@ import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
 
 public class BasicTranslator implements Translator {
-  List<String> inputStrs;
+  public List<String> inputStrs;
 
   public BasicTranslator(List<String> inputStrs) {
     this.inputStrs = inputStrs;

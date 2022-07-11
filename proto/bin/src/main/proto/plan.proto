@@ -1,0 +1,111 @@
+syntax = "proto3";
+package onedb;
+import "data.proto";
+
+option java_package = "com.hufudb.onedb.proto";
+option java_outer_classname = "OneDBPlan";
+
+enum OperatorType {
+  NONE = 0;
+  REF = 1;
+  LITERAL = 2;
+  // for binary
+  PLUS = 3;
+  MINUS = 4;
+  TIMES = 5;
+  DIVIDE = 6;
+  MOD = 7;
+  GT = 8;
+  GE = 9;
+  LT = 10;
+  LE = 11;
+  EQ = 12;
+  NE = 13;
+  AND = 14;
+  OR = 15;
+  // for unary
+  AS = 16;
+  NOT = 17;
+  PLUS_PRE = 18;
+  MINUS_PRE = 19;
+  IS_NULL = 20;
+  IS_NOT_NULL = 21;
+  // for mutliple
+  CASE = 22;
+  // for set
+  INTERSECTION = 30;
+  UNION = 31;
+  // for functions
+  SCALAR_FUNC = 100;
+  AGG_FUNC = 101;
+}
+
+enum Direction {
+  ASC = 0;
+  DESC = 1;
+}
+
+enum JoinType {
+  INNER = 0;
+  LEFT = 1;
+  RIGHT = 2;
+  OUTER = 3;
+  SEMI = 4;
+}
+
+message Expression {
+  OperatorType opType = 1;
+  ColumnType outType = 2;
+  repeated Expression in = 3;
+  Modifier modifier = 4;
+  oneof value {
+    bool b = 5;
+    int32 i32 = 6;
+    int64 i64 = 7;
+    float f32 = 8;
+    double f64 = 9;
+    string str = 10;
+    bytes blob = 11;
+  }
+}
+
+message Collation {
+  int32 ref = 1;
+  Direction direction = 2;
+}
+
+message JoinCondition {
+  JoinType type = 1;
+  Modifier modifier = 2;
+  repeated int32 leftKey = 3;
+  repeated int32 rightKey = 4;
+  Expression condition = 5;
+}
+
+message TaskInfo {
+  int64 taskId = 1;
+  repeated int32 parties = 2;
+}
+
+enum PlanType {
+  ROOT = 0;
+  LEAF = 1;
+  UNARY = 2;
+  BINARY = 3;
+  EMPTY = 4;
+}
+
+message QueryPlanProto {
+  PlanType type = 1;
+  TaskInfo taskInfo = 2;
+  string tableName = 3;
+  repeated Expression selectExp = 4;
+  repeated Expression whereExp = 5;
+  repeated Expression aggExp = 6;
+  repeated int32 group = 7;
+  repeated Collation order = 8;
+  int32 fetch = 9;
+  int32 offset = 10;
+  JoinCondition joinInfo = 11;
+  repeated QueryPlanProto children = 12;
+}

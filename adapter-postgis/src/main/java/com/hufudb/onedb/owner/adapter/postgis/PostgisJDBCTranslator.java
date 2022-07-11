@@ -3,7 +3,6 @@ package com.hufudb.onedb.owner.adapter.postgis;
 import java.util.List;
 import java.util.stream.Collectors;
 import com.hufudb.onedb.data.schema.Schema;
-import com.hufudb.onedb.expression.PostgisTranslator;
 import com.hufudb.onedb.expression.Translator;
 import com.hufudb.onedb.proto.OneDBPlan.Collation;
 import com.hufudb.onedb.proto.OneDBPlan.Expression;

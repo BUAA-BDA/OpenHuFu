@@ -69,4 +69,8 @@ public class PostgisAdapter extends JDBCAdapter {
     }
     return sql.toString();
   }
+
+  public String testGenerateSQL(Plan p) {
+    return this.generateSQL(p);
+  }
 }

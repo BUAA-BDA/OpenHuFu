@@ -101,6 +101,8 @@ public class ExpressionFactory {
       case TIME:
       case TIMESTAMP:
         return builder.setI64(((Number) value).longValue()).build();
+      case POINT:
+        return builder.setStr((String) value.toString()).build();
       default:
         throw new UnsupportedOperationException("Unsupported literal type");
     }

@@ -1,4 +1,4 @@
-package com.hufudb.onedb.expression;
+package com.hufudb.onedb.owner.adapter.postgis;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,6 +7,7 @@ import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
+import com.hufudb.onedb.expression.*;
 
 public class PostgisTranslator extends BasicTranslator {
     public PostgisTranslator(List<String> inputStrs) {
@@ -16,6 +17,34 @@ public class PostgisTranslator extends BasicTranslator {
     public PostgisTranslator(Schema schema) {
         super(schema);
     }
+
+    @Override
+    protected String literal(Expression literal) {
+        ColumnType type = literal.getOutType();
+        switch (type) {
+          case BOOLEAN:
+            return String.valueOf(literal.getB());
+          case BYTE:
+          case SHORT:
+          case DATE:
+          case TIME:
+          case INT:
+            return String.valueOf(literal.getI32());
+          case LONG:
+          case TIMESTAMP:
+            return String.valueOf(literal.getI64());
+          case FLOAT:
+            return String.valueOf(literal.getF32());
+          case DOUBLE:
+            return String.valueOf(literal.getF64());
+          case STRING:
+            return String.format("'%s'", literal.getStr());
+          case POINT:
+            return String.format("ST_GeomFromText('%s', 4326)", literal.getStr());
+          default:
+            throw new RuntimeException("can't translate literal " + literal);
+        }
+      }
 
     @Override
     protected String scalarFunc(Expression exp) {
