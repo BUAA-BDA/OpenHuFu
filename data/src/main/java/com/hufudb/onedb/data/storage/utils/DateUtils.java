@@ -4,6 +4,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.TimeZone;
 
 /**
  * Simple Date Utils without consideration of time zone
@@ -16,6 +17,8 @@ public class DateUtils {
   final static int MONTH_MASK = 0xF;
   final static int MONTH_OFFSET = 4;
   final static long MSFORDAY = 86400000L;
+  final static TimeZone timeZone = TimeZone.getDefault();
+
   public DateUtils() {}
 
   /**
@@ -25,6 +28,18 @@ public class DateUtils {
    */
   public int dateToInt(Date date) {
     calendar.setTime(date);
+    int year = calendar.get(Calendar.YEAR);
+    int month = calendar.get(Calendar.MONTH);
+    int day = calendar.get(Calendar.DAY_OF_MONTH);
+    return (year << 9) | (month << 5) | day;
+  }
+
+  /**
+   * convert calendar into date integer
+   *
+   * year (23 bit) | month (4 bit) | day (5 bit)
+   */
+  public static int calendarToDateInt(Calendar calendar) {
     int year = calendar.get(Calendar.YEAR);
     int month = calendar.get(Calendar.MONTH);
     int day = calendar.get(Calendar.DAY_OF_MONTH);
@@ -51,6 +66,14 @@ public class DateUtils {
   }
 
   /**
+   * precondition: calendar in UTC timeZone
+   * convert calendar into time integer
+   */
+  public static int calendarToTimeInt(Calendar calendar) {
+    return (int) ((calendar.getTimeInMillis() - (long) timeZone.getRawOffset()) % MSFORDAY);
+  }
+
+  /**
    * convert encoded int to time
    */
   public Time intToTime(int t) {
@@ -62,6 +85,13 @@ public class DateUtils {
    */
   public long timestampToLong(Timestamp ts) {
     return ts.getTime();
+  }
+
+  /**
+   * convert calendar into time integer
+   */
+  public static long calendarToTimestampLong(Calendar calendar) {
+    return calendar.getTimeInMillis() - (long) timeZone.getRawOffset();
   }
 
   /**

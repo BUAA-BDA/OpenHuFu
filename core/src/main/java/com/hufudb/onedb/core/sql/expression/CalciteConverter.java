@@ -1,8 +1,10 @@
 package com.hufudb.onedb.core.sql.expression;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 import com.google.common.collect.BoundType;
 import com.google.common.collect.ImmutableList;
@@ -138,8 +140,15 @@ public class CalciteConverter {
 
   public static Expression convertLiteral(RexLiteral literal) {
     ColumnType type = TypeConverter.convert2OneDBType(literal.getTypeName());
-    Object value = literal.getValue2();
-    return ExpressionFactory.createLiteral(type, value);
+    switch (type) {
+      case DATE:
+      case TIME:
+      case TIMESTAMP:
+        // NOTE:  rely on calcite unstable api in RexLiteral.java, check this when calcite update
+        return ExpressionFactory.createLiteral(type, literal.getValueAs(Calendar.class));
+      default:
+        return ExpressionFactory.createLiteral(type, literal.getValue2());
+    }
   }
 
 
