@@ -1,28 +1,28 @@
 version: '3.3'
 
 services:
-  postgres1:
+  htpostgres1:
     image: postgres
     restart: "no"
-    container_name: postgres1
+    container_name: htpostgres1
     ports:
-      - 13101:5432
+      - 13110:5432
     environment:
       POSTGRES_PASSWORD: onedb
     volumes:
       - $PWD/config/db1.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
-      - owner_net_1
+      - ht_owner_net_1
 
   # sqlite2:
   # sqlite use db2.db file directly
 
-  mysql3:
+  htmysql3:
     image: mysql
     restart: "no"
-    container_name: mysql3
+    container_name: htmysql3
     ports:
-      - 13103:3306
+      - 13111:3306
     environment:
       MYSQL_ROOT_PASSWORD: onedb
       MYSQL_DATABASE: mydb
@@ -30,15 +30,20 @@ services:
     volumes:
       - $PWD/config/db3.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
-      - owner_net_3
+      - ht_owner_net_3
+    healthcheck:
+      test: "mysql --user=root --password=onedb --execute \"SHOW DATABASES;\""
+      timeout: 10s
+      interval: 5s
+      retries: 10
 
   # csv4:
   # csv use .csv file directly
 
 networks:
-  owner_net_1:
-    name: owner_net_1
+  ht_owner_net_1:
+    name: ht_owner_net_1
     driver: bridge
-  owner_net_3:
-    name: owner_net_3
+  ht_owner_net_3:
+    name: ht_owner_net_3
     driver: bridge

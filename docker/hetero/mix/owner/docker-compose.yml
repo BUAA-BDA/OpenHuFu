@@ -1,9 +1,9 @@
 version: '3.3'
 
 services:
-  owner1:
+  htowner1:
     image: maven:3.8-openjdk-11
-    container_name: owner1
+    container_name: htowner1
     working_dir: /usr/src/mymvn
     restart: "no"
     command: nohup java -jar ./bin/onedb_owner_server.jar -c ./config/server1.json > ./log/owner1.log &
@@ -15,14 +15,14 @@ services:
       - $PWD/config:/usr/src/mymvn/config
       - $PWD/log:/usr/src/mymvn/log
     networks:
-      - owner_net_1
-      - public_net
+      - ht_owner_net_1
+      - ht_public_net
     ports:
-      - 12345:12345
+      - 12350:12345
 
-  owner2:
+  htowner2:
     image: maven:3.8-openjdk-11
-    container_name: owner2
+    container_name: htowner2
     working_dir: /usr/src/mymvn
     restart: "no"
     command: nohup java -jar ./bin/onedb_owner_server.jar -c ./config/server2.json > ./log/owner2.log &
@@ -34,13 +34,13 @@ services:
       - $PWD/config:/usr/src/mymvn/config
       - $PWD/log:/usr/src/mymvn/log
     networks:
-      - public_net
+      - ht_public_net
     ports:
-      - 12346:12345
+      - 12351:12345
 
-  owner3:
+  htowner3:
     image: maven:3.8-openjdk-11
-    container_name: owner3
+    container_name: htowner3
     working_dir: /usr/src/mymvn
     restart: "no"
     command: nohup java -jar ./bin/onedb_owner_server.jar -c ./config/server3.json > ./log/owner3.log &
@@ -52,14 +52,14 @@ services:
       - $PWD/config:/usr/src/mymvn/config
       - $PWD/log:/usr/src/mymvn/log
     networks:
-      - owner_net_3
-      - public_net
+      - ht_owner_net_3
+      - ht_public_net
     ports:
-      - 12347:12345
+      - 12352:12345
 
-  owner4:
+  htowner4:
     image: maven:3.8-openjdk-11
-    container_name: owner4
+    container_name: htowner4
     working_dir: /usr/src/mymvn
     restart: "no"
     command: nohup java -jar ./bin/onedb_owner_server.jar -c ./config/server4.json > ./log/owner4.log &
@@ -72,17 +72,17 @@ services:
       - $PWD/log:/usr/src/mymvn/log
       - $PWD/data:/usr/src/mymvn/data
     networks:
-      - public_net
+      - ht_public_net
     ports:
-      - 12348:12345
+      - 12353:12345
+
+  # todo: more heterogeneous owners here
 
 networks:
-  owner_net_1:
+  ht_owner_net_1:
     external: true
-  owner_net_2:
+  ht_owner_net_3:
     external: true
-  owner_net_3:
-    external: true
-  public_net:
+  ht_public_net:
     driver: bridge
-    name: public_net
+    name: ht_public_net

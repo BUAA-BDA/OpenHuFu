@@ -2,7 +2,7 @@
   "id": 1,
   "port": 12345,
   "theadnum": 4,
-  "hostname": "owner2",
+  "hostname": "htowner2",
   "adapterconfig": {
     "datasource": "sqlite",
     "url": "jdbc:sqlite:/usr/src/mymvn/config/db2.db",

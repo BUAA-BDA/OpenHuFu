@@ -2,10 +2,10 @@
   "id": 0,
   "port": 12345,
   "theadnum": 4,
-  "hostname": "owner1",
+  "hostname": "htowner1",
   "adapterconfig": {
     "datasource": "postgresql",
-    "url": "jdbc:postgresql://postgres1:5432/postgres",
+    "url": "jdbc:postgresql://htpostgres1:5432/postgres",
     "catalog": "postgres",
     "user": "postgres",
     "passwd": "onedb"
