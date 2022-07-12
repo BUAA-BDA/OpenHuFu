@@ -8,9 +8,6 @@ else
   then
     cd database
     docker-compose up -d
-  elif [ $1 == "owner" ]
-  then
-    cd owner
     cnt=0
     until [ "`docker inspect -f {{.State.Health.Status}} htmysql3`" == "healthy" ]; do
       if [ $cnt -eq 20 ]
@@ -22,6 +19,9 @@ else
       ((cnt=cnt+5))
       echo "waiting for database init...($cnt s)"
     done;
+  elif [ $1 == "owner" ]
+  then
+    cd owner
     docker-compose up -d
   elif [ $1 == "user" ]
   then

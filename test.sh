@@ -29,6 +29,7 @@ setup() {
   ./setup.sh db
   cd ../../database
   docker-compose up -d
+  sleep 3
   cd ../owner
   mkdir -p cert
   cp -r ../cert/ci/* cert
@@ -41,6 +42,7 @@ setup_ci() {
   sh setup.sh db
   cd ../../database
   docker-compose up -d
+  sleep 3
   cd ../owner
   mkdir -p cert
   cp -r ../cert/ci/* cert
