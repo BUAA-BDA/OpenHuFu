@@ -1,7 +1,10 @@
 package com.hufudb.onedb.owner.adapter.postgis;
 
-import com.hufudb.onedb.data.schema.Schema;
-import com.hufudb.onedb.expression.*;
+import com.hufudb.onedb.data.storage.Point;
+import com.hufudb.onedb.expression.AggFuncType;
+import com.hufudb.onedb.expression.BasicTranslator;
+import com.hufudb.onedb.expression.ExpressionUtils;
+import com.hufudb.onedb.expression.ScalarFuncType;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import java.util.List;
@@ -18,28 +21,32 @@ public class PostgisTranslator extends BasicTranslator {
     ColumnType type = literal.getOutType();
     switch (type) {
       case BOOLEAN:
-      return String.valueOf(literal.getB());
+        return String.valueOf(literal.getB());
       case BYTE:
       case SHORT:
-      case DATE:
-      case TIME:
       case INT:
-      return String.valueOf(literal.getI32());
+        return String.valueOf(literal.getI32());
       case LONG:
+        return String.valueOf(literal.getI64());
+      case DATE:
+        return String.format("date '%s'", dateUtils.intToDate(literal.getI32()).toString());
+      case TIME:
+        return String.format("time '%s'", dateUtils.intToTime(literal.getI32()).toString());
       case TIMESTAMP:
-      return String.valueOf(literal.getI64());
+        return String.format("timestamp '%s'", dateUtils.longToTimestamp(literal.getI64()).toString());
       case FLOAT:
-      return String.valueOf(literal.getF32());
+        return String.valueOf(literal.getF32());
       case DOUBLE:
-      return String.valueOf(literal.getF64());
+        return String.valueOf(literal.getF64());
       case STRING:
-      return String.format("'%s'", literal.getStr());
+        return String.format("'%s'", literal.getStr());
       case POINT:
-      return String.format("ST_GeomFromText('%s', 4326)", literal.getStr());
+        // todo: decouple String format of Point from Postgis
+        return String.format("ST_GeomFromText('%s', 4326)", Point.fromBytes(literal.getBlob().toByteArray()).toString());
       default:
-      throw new RuntimeException("can't translate literal " + literal);
+        throw new RuntimeException("can't translate literal " + literal);
     }
-    }
+  }
 
   @Override
   protected String scalarFunc(Expression exp) {
@@ -51,12 +58,17 @@ public class PostgisTranslator extends BasicTranslator {
           throw new RuntimeException("ABS need 1 arguements, but given " + inputs.size());
         }
         return String.format("ABS(%s)", inputs.get(0));
-      case DWithin:
+      case POINT:
+        if (inputs.size() != 2) {
+          throw new RuntimeException("Point need 2 arguments, but given " + inputs.size());
+        }
+        return String.format("'SRID=4326;POINT(%s %s)'", inputs.get(0), inputs.get(1));
+      case DWITHIN:
         if (inputs.size() != 3) {
           throw new RuntimeException("DWithin need 3 arguments, but given " + inputs.size());
         }
         return String.format("ST_DWithin(%s, %s, %s)", inputs.get(0), inputs.get(1), inputs.get(2));
-      case Distance:
+      case DISTANCE:
         if (inputs.size() != 2) {
           throw new RuntimeException("Distance need 2 arguments, but given " + inputs.size());
         }

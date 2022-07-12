@@ -8,7 +8,7 @@ clean() {
   cd ../database
   docker-compose down
   cd ../hetero/mix
-  ./shutdown.sh all
+  ./shutdown.sh db
   cd ../../..
 }
 
@@ -33,9 +33,7 @@ setup() {
   mkdir -p cert
   cp -r ../cert/ci/* cert
   docker-compose up -d
-  cd ../hetero/mix
-  ./setup.sh owner
-  cd ../../..
+  cd ../..
 }
 
 setup_ci() {
@@ -47,9 +45,7 @@ setup_ci() {
   mkdir -p cert
   cp -r ../cert/ci/* cert
   docker-compose up -d
-  cd ../hetero/mix
-  sh setup.sh owner
-  cd ../../..
+  cd ../..
 }
 
 test_ci() {

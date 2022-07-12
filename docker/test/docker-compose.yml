@@ -17,6 +17,9 @@ services:
       - owner_pg_1
       - owner_pg_2
       - owner_pg_3
+      - ht_owner_net_1
+      - ht_owner_net_3
+      - ht_owner_net_5
       - public_net
 
 networks:
@@ -25,6 +28,12 @@ networks:
   owner_pg_2:
     external: true
   owner_pg_3:
+    external: true
+  ht_owner_net_1:
+    external: true
+  ht_owner_net_3:
+    external: true
+  ht_owner_net_5:
     external: true
   public_net:
     external: true

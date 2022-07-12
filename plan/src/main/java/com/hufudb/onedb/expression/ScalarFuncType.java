@@ -5,8 +5,9 @@ import com.hufudb.onedb.data.storage.Point;
 
 public enum ScalarFuncType {
   ABS("ABS", 1, Number.class),
-  DWithin("DWithin", 100, Point.class, Point.class, Double.class),
-  Distance("Distance", 101, Point.class, Point.class);
+  POINT("Point", 100, Double.class, Double.class),
+  DWITHIN("DWithin", 101, Point.class, Point.class, Double.class),
+  DISTANCE("Distance", 102, Point.class, Point.class);
 
   private final static ImmutableMap<Integer, ScalarFuncType> MAP;
 
@@ -35,7 +36,7 @@ public enum ScalarFuncType {
   public int getId() {
     return id;
   }
-  
+
   public static ScalarFuncType of(int id) {
     return MAP.get(id);
   }

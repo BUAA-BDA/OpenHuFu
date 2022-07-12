@@ -21,7 +21,6 @@ public class PostgisResultDataSet extends ResultDataSet {
   protected List<Getter> generateGetters() {
     ImmutableList.Builder<Getter> builder = ImmutableList.builder();
     int i = 1;
-    PostgisUtils postgisUtils = new PostgisUtils();
     for (ColumnDesc col : schema.getColumnDescs()) {
       final int idx = i;
       switch (col.getType()) {
@@ -79,7 +78,7 @@ public class PostgisResultDataSet extends ResultDataSet {
           break;
         case POINT:
           builder.add(() -> {
-            return postgisUtils.fromPGPoint(((PGobject) (result.getObject(idx))));
+            return PostgisUtils.fromPGPoint(((PGobject) (result.getObject(idx))));
           });
           break;
         default:
