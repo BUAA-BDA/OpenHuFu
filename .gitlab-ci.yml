@@ -24,7 +24,7 @@ test:
   dependencies:
     - build
   script:
-    - bash test.sh ci
+    - sh test.sh ci
   artifacts:
     when: always
     reports:
