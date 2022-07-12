@@ -72,3 +72,7 @@ pnpm-debug.log*
 python/dist/
 python/pyonedb.egg-info/
 python/*.egg-info/
+
+# template files
+proto/bin/
+docker/owner/cert/

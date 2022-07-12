@@ -12,9 +12,9 @@ import com.hufudb.onedb.proto.OneDBData.ColumnDesc;
  * Dataset which encapsulate a @java.sql.ResultSet
  */
 public class ResultDataSet implements DataSet {
-  final Schema schema;
-  final ResultSet result;
-  final DateUtils dateUtils;
+  final protected Schema schema;
+  final protected ResultSet result;
+  final protected DateUtils dateUtils;
 
 
   public ResultDataSet(Schema schema, ResultSet result) {
@@ -28,9 +28,75 @@ public class ResultDataSet implements DataSet {
     return schema;
   }
 
+  protected List<Getter> generateGetters() {
+    ImmutableList.Builder<Getter> builder = ImmutableList.builder();
+    int i = 1;
+    for (ColumnDesc col : schema.getColumnDescs()) {
+      final int idx = i;
+      switch(col.getType()) {
+        case BLOB:
+          builder.add(() -> {
+            return result.getBytes(idx);
+          });
+          break;
+        case BOOLEAN:
+          builder.add(() -> {
+            return result.getBoolean(idx);
+          });
+          break;
+        case BYTE:
+        case SHORT:
+        case INT:
+          builder.add(() -> {
+            return result.getInt(idx);
+          });
+          break;
+        case DATE:
+          builder.add(() -> {
+            return result.getDate(idx);
+          });
+          break;
+        case TIME:
+          builder.add(() -> {
+            return result.getTime(idx);
+          });
+          break;
+        case TIMESTAMP:
+          builder.add(() -> {
+            return result.getTimestamp(idx);
+          });
+          break;
+        case LONG:
+          builder.add(() -> {
+            return result.getLong(idx);
+          });
+          break;
+        case STRING:
+          builder.add(() -> {
+            return result.getString(idx);
+          });
+          break;
+        case DOUBLE:
+          builder.add(() -> {
+            return result.getDouble(idx);
+          });
+          break;
+        case FLOAT:
+          builder.add(() -> {
+            return result.getFloat(idx);
+          });
+          break;
+        default:
+          break;
+      }
+      ++i;
+    }
+    return builder.build();
+  }
+
   @Override
   public DataSetIterator getIterator() {
-    return new ResultIterator();
+    return new ResultIterator(generateGetters());
   }
 
   @Override
@@ -46,73 +112,11 @@ public class ResultDataSet implements DataSet {
     T get() throws SQLException;
   }
 
-  class ResultIterator implements DataSetIterator {
+  protected class ResultIterator implements DataSetIterator {
     List<Getter> getters;
 
-    ResultIterator() {
-      ImmutableList.Builder<Getter> builder = ImmutableList.builder();
-      int i = 1;
-      for (ColumnDesc col : schema.getColumnDescs()) {
-        final int idx = i;
-        switch(col.getType()) {
-          case BLOB:
-            builder.add(() -> {
-              return result.getBytes(idx);
-            });
-            break;
-          case BOOLEAN:
-            builder.add(() -> {
-              return result.getBoolean(idx);
-            });
-            break;
-          case BYTE:
-          case SHORT:
-          case INT:
-            builder.add(() -> {
-              return result.getInt(idx);
-            });
-            break;
-          case DATE:
-            builder.add(() -> {
-              return result.getDate(idx);
-            });
-            break;
-          case TIME:
-            builder.add(() -> {
-              return result.getTime(idx);
-            });
-            break;
-          case TIMESTAMP:
-            builder.add(() -> {
-              return result.getTimestamp(idx);
-            });
-            break;
-          case LONG:
-            builder.add(() -> {
-              return result.getLong(idx);
-            });
-            break;
-          case STRING:
-            builder.add(() -> {
-              return result.getString(idx);
-            });
-            break;
-          case DOUBLE:
-            builder.add(() -> {
-              return result.getDouble(idx);
-            });
-            break;
-          case FLOAT:
-            builder.add(() -> {
-              return result.getFloat(idx);
-            });
-            break;
-          default:
-            break;
-        }
-        ++i;
-      }
-      this.getters = builder.build();
+    protected ResultIterator(List<Getter> getters) {
+      this.getters = getters;
     }
 
     @Override

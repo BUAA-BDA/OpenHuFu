@@ -2,6 +2,7 @@ package com.hufudb.onedb.data.storage.utils;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.annotations.SerializedName;
+import com.hufudb.onedb.data.storage.Point;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 
 /**
@@ -33,7 +34,9 @@ public enum ColumnTypeWrapper {
   @SerializedName("STRING")
   STRING(ColumnType.STRING),
   @SerializedName("BLOB")
-  BLOB(ColumnType.BLOB);
+  BLOB(ColumnType.BLOB),
+  @SerializedName("POINT")
+  POINT(ColumnType.POINT);
 
   private final static ImmutableMap<Integer, ColumnTypeWrapper> MAP;
 

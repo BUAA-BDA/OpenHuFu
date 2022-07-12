@@ -46,7 +46,7 @@ public class ProtoColumn implements Column {
         break;
       case I64COL:
         if (type == ColumnType.TIMESTAMP) {
-          this.getter =  (rowNum) -> dateUtils.longToTimestamp(column.getI64Col().getCell(rowNum));
+          this.getter = (rowNum) -> dateUtils.longToTimestamp(column.getI64Col().getCell(rowNum));
         } else {
           this.getter = (rowNum) -> column.getI64Col().getCell(rowNum);
         }
@@ -69,7 +69,11 @@ public class ProtoColumn implements Column {
         this.size = column.getBoolcol().getCellCount();
         break;
       case BYTESCOL:
-        this.getter = (rowNum) -> column.getBytescol().getCell(rowNum).toByteArray();
+        if (type == ColumnType.POINT) {
+          this.getter = (rowNum) -> Point.fromBytes(column.getBytescol().getCell(rowNum).toByteArray());
+        } else {
+          this.getter = (rowNum) -> column.getBytescol().getCell(rowNum).toByteArray();
+        }
         this.size = column.getBytescol().getCellCount();
         break;
       default:
@@ -134,6 +138,10 @@ public class ProtoColumn implements Column {
           bytesBuilder = BytesColumn.newBuilder();
           appender = (val) -> bytesBuilder.addCell(ByteString.copyFrom((byte[]) val));
           break;
+        case POINT:
+          bytesBuilder = BytesColumn.newBuilder();
+          appender = (val) -> bytesBuilder.addCell(ByteString.copyFrom(((Point) val).toBytes()));
+          break;
         case STRING:
           strBuilder = StringColumn.newBuilder();
           appender = (val) -> strBuilder.addCell((String) val);
@@ -166,7 +174,7 @@ public class ProtoColumn implements Column {
           break;
         case TIMESTAMP:
           i64Builder = I64Column.newBuilder();
-          appender = (val) -> i64Builder.addCell(dateUtils.timestampToLong((Timestamp) val)) ;
+          appender = (val) -> i64Builder.addCell(dateUtils.timestampToLong((Timestamp) val));
           break;
         default:
           throw new UnsupportedOperationException("Unsupported column type");
@@ -197,68 +205,70 @@ public class ProtoColumn implements Column {
 
     void clear() {
       nullBuilder.clear();
-      switch(type) {
+      switch (type) {
         case BOOLEAN:
-        boolBuilder.clear();
-        break;
-      case BLOB:
-        bytesBuilder.clear();
-        break;
-      case STRING:
-        strBuilder.clear();
-        break;
-      case FLOAT:
-        f32Builder.clear();
-        break;
-      case DOUBLE:
-        f64Builder.clear();
-        break;
-      case BYTE:
-      case SHORT:
-      case INT:
-      case DATE:
-      case TIME:
-        i32Builder.clear();
-        break;
-      case LONG:
-      case TIMESTAMP:
-        i64Builder.clear();
-        break;
-      default:
-        throw new UnsupportedOperationException("Unsupported column type");
+          boolBuilder.clear();
+          break;
+        case BLOB:
+        case POINT:
+          bytesBuilder.clear();
+          break;
+        case STRING:
+          strBuilder.clear();
+          break;
+        case FLOAT:
+          f32Builder.clear();
+          break;
+        case DOUBLE:
+          f64Builder.clear();
+          break;
+        case BYTE:
+        case SHORT:
+        case INT:
+        case DATE:
+        case TIME:
+          i32Builder.clear();
+          break;
+        case LONG:
+        case TIMESTAMP:
+          i64Builder.clear();
+          break;
+        default:
+          throw new UnsupportedOperationException("Unsupported column type");
       }
     }
 
     ColumnProto buildProto() {
-      switch(type) {
+      switch (type) {
         case BOOLEAN:
-        columnBuilder.setBoolcol(boolBuilder.build());
-        break;
-      case BLOB:
-        columnBuilder.setBytescol(bytesBuilder.build());
-        break;
-      case STRING:
-        columnBuilder.setStrcol(strBuilder.build());
-        break;
-      case FLOAT:
-        columnBuilder.setF32Col(f32Builder.build());
-        break;
-      case DOUBLE:
-        columnBuilder.setF64Col(f64Builder.build());
-        break;
-      case BYTE:
-      case SHORT:
-      case DATE:
-      case TIME:
-      case INT:
-        columnBuilder.setI32Col(i32Builder.build());
-        break;
-      case LONG:
-      case TIMESTAMP:
-        columnBuilder.setI64Col(i64Builder.build());
-        break;
-      default:
-        throw new UnsupportedOperationException("Unsupported column type");
+          columnBuilder.setBoolcol(boolBuilder.build());
+          break;
+        case BLOB:
+        case POINT:
+          columnBuilder.setBytescol(bytesBuilder.build());
+          break;
+        case STRING:
+          columnBuilder.setStrcol(strBuilder.build());
+          break;
+        case FLOAT:
+          columnBuilder.setF32Col(f32Builder.build());
+          break;
+        case DOUBLE:
+          columnBuilder.setF64Col(f64Builder.build());
+          break;
+        case BYTE:
+        case SHORT:
+        case DATE:
+        case TIME:
+        case INT:
+          columnBuilder.setI32Col(i32Builder.build());
+          break;
+        case LONG:
+        case TIMESTAMP:
+          columnBuilder.setI64Col(i64Builder.build());
+          break;
+        default:
+          throw new UnsupportedOperationException("Unsupported column type");
       }
       columnBuilder.setIsnull(ByteString.copyFrom(nullBuilder.buildByteArray()));
       return columnBuilder.build();

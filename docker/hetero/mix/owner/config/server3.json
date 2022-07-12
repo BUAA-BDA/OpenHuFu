@@ -2,10 +2,10 @@
   "id": 2,
   "port": 12345,
   "theadnum": 4,
-  "hostname": "owner3",
+  "hostname": "htowner3",
   "adapterconfig": {
     "datasource": "mysql",
-    "url": "jdbc:mysql://mysql3:3306/mydb",
+    "url": "jdbc:mysql://htmysql3:3306/mydb",
     "catalog": "mydb",
     "user": "root",
     "passwd": "onedb"

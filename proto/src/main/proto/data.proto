@@ -20,6 +20,7 @@ enum ColumnType {
   DOUBLE = 10;
   STRING = 11;
   BLOB = 12;
+  POINT = 13;
 }
 
 enum Modifier {

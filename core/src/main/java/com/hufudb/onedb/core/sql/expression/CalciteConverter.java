@@ -410,6 +410,12 @@ public class CalciteConverter {
         case "ABS":
           func = ScalarFuncType.ABS;
           break;
+        case "DWithin":
+          func = ScalarFuncType.DWITHIN;
+          break;
+        case "Distance":
+          func = ScalarFuncType.DISTANCE;
+          break;
         default:
           throw new RuntimeException("can't translate " + call);
       }
