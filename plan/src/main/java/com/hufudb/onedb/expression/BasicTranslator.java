@@ -4,15 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableList;
+import com.hufudb.onedb.data.storage.utils.DateUtils;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
 
 public class BasicTranslator implements Translator {
-  public List<String> inputStrs;
+  protected List<String> inputStrs;
+  protected DateUtils dateUtils;
 
   public BasicTranslator() {
     this.inputStrs = ImmutableList.of();
+    this.dateUtils = new DateUtils();
   }
 
   public void setInput(List<String> inputs) {
@@ -71,12 +74,15 @@ public class BasicTranslator implements Translator {
         return String.valueOf(literal.getB());
       case BYTE:
       case SHORT:
-      case DATE:
-      case TIME:
       case INT:
         return String.valueOf(literal.getI32());
-      case LONG:
+      case DATE:
+        return String.format("date '%s'", dateUtils.intToDate(literal.getI32()).toString());
+      case TIME:
+        return String.format("time '%s'", dateUtils.intToTime(literal.getI32()).toString());
       case TIMESTAMP:
+        return String.format("timestamp '%s'", dateUtils.longToTimestamp(literal.getI64()).toString());
+      case LONG:
         return String.valueOf(literal.getI64());
       case FLOAT:
         return String.valueOf(literal.getF32());

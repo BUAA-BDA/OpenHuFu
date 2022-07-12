@@ -1,8 +1,10 @@
 package com.hufudb.onedb.expression;
 
+import java.util.Calendar;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.data.schema.Schema;
+import com.hufudb.onedb.data.storage.utils.DateUtils;
 import com.hufudb.onedb.data.storage.utils.ModifierWrapper;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBData.Modifier;
@@ -97,10 +99,13 @@ public class ExpressionFactory {
       case INT:
         return builder.setI32(((Number) value).intValue()).build();
       case LONG:
-      case DATE:
-      case TIME:
-      case TIMESTAMP:
         return builder.setI64(((Number) value).longValue()).build();
+      case DATE:
+        return builder.setI32(DateUtils.calendarToDateInt((Calendar) value)).build();
+      case TIME:
+        return builder.setI32(DateUtils.calendarToTimeInt((Calendar) value)).build();
+      case TIMESTAMP:
+        return builder.setI64(DateUtils.calendarToTimestampLong((Calendar) value)).build();
       case POINT:
         return builder.setStr((String) value.toString()).build();
       default:
