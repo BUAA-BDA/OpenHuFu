@@ -5,7 +5,6 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import com.google.protobuf.ByteString;
 import com.hufudb.onedb.data.storage.utils.DateUtils;
-import com.hufudb.onedb.data.storage.utils.PointUtils;
 import com.hufudb.onedb.proto.OneDBData.BoolColumn;
 import com.hufudb.onedb.proto.OneDBData.BytesColumn;
 import com.hufudb.onedb.proto.OneDBData.ColumnProto;
@@ -25,14 +24,12 @@ public class ProtoColumn implements Column {
   final CellGetter getter;
   final BitArray isNulls;
   final DateUtils dateUtils;
-  final PointUtils pointUtils;
   final int size;
 
   ProtoColumn(ColumnType type, ColumnProto column) {
     this.type = type;
     this.column = column;
     this.dateUtils = new DateUtils();
-    this.pointUtils = new PointUtils();
     switch (column.getColCase()) {
       case I32COL:
         switch (type) {
@@ -64,20 +61,19 @@ public class ProtoColumn implements Column {
         this.size = column.getF64Col().getCellCount();
         break;
       case STRCOL:
-        if (type == ColumnType.POINT) {
-          this.getter = (rowNum) -> pointUtils.strToPoint(column.getStrcol().getCell(rowNum));
-          this.size = column.getStrcol().getCellCount();
-        } else {
-          this.getter = (rowNum) -> column.getStrcol().getCell(rowNum);
-          this.size = column.getStrcol().getCellCount();
-        }
+        this.getter = (rowNum) -> column.getStrcol().getCell(rowNum);
+        this.size = column.getStrcol().getCellCount();
         break;
       case BOOLCOL:
         this.getter = (rowNum) -> column.getBoolcol().getCell(rowNum);
         this.size = column.getBoolcol().getCellCount();
         break;
       case BYTESCOL:
-        this.getter = (rowNum) -> column.getBytescol().getCell(rowNum).toByteArray();
+        if (type == ColumnType.POINT) {
+          this.getter = (rowNum) -> Point.fromBytes(column.getBytescol().getCell(rowNum).toByteArray());
+        } else {
+          this.getter = (rowNum) -> column.getBytescol().getCell(rowNum).toByteArray();
+        }
         this.size = column.getBytescol().getCellCount();
         break;
       default:
@@ -141,6 +137,10 @@ public class ProtoColumn implements Column {
         case BLOB:
           bytesBuilder = BytesColumn.newBuilder();
           appender = (val) -> bytesBuilder.addCell(ByteString.copyFrom((byte[]) val));
+          break;
+        case POINT:
+          bytesBuilder = BytesColumn.newBuilder();
+          appender = (val) -> bytesBuilder.addCell(ByteString.copyFrom(((Point) val).toBytes()));
           break;
         case STRING:
           strBuilder = StringColumn.newBuilder();
@@ -210,6 +210,7 @@ public class ProtoColumn implements Column {
           boolBuilder.clear();
           break;
         case BLOB:
+        case POINT:
           bytesBuilder.clear();
           break;
         case STRING:
@@ -243,6 +244,7 @@ public class ProtoColumn implements Column {
           columnBuilder.setBoolcol(boolBuilder.build());
           break;
         case BLOB:
+        case POINT:
           columnBuilder.setBytescol(bytesBuilder.build());
           break;
         case STRING:

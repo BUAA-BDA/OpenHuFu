@@ -2,7 +2,6 @@ package com.hufudb.onedb.owner.adapter.postgis;
 
 import com.hufudb.onedb.owner.adapter.AdapterTypeConverter;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
-import org.postgis.Point;
 
 public class PostgisTypeConverter implements AdapterTypeConverter {
   public ColumnType convert(String typeName) {

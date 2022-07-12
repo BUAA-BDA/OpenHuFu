@@ -508,4 +508,26 @@ public class DataSetTest {
     assertEquals(time.toString(), it.get(1).toString());
     assertEquals(ts.toString(), it.get(2).toString());
   }
+
+  @Test
+  public void testDataSetWithPoint() {
+    Schema schema = Schema.newBuilder().add("A", ColumnType.POINT, Modifier.PUBLIC).build();
+    Random random = new Random();
+    List<Point> ps = new ArrayList<>();
+    ProtoDataSet.Builder dBuilder = ProtoDataSet.newBuilder(schema);
+    for (int i = 0; i < 10; ++i) {
+      Point p = new Point(random.nextDouble(), random.nextDouble());
+      ArrayRow.Builder rBuilder = ArrayRow.newBuilder(1);
+      rBuilder.set(0, p);
+      dBuilder.addRow(rBuilder.build());
+      ps.add(p);
+    }
+    ProtoDataSet dataset = dBuilder.build();
+    DataSetIterator it = dataset.getIterator();
+    for (int i = 0; i < 10; ++i) {
+      assertTrue(it.next());
+      assertEquals(ps.get(i), it.get(0));
+    }
+    assertFalse(it.next());
+  }
 }

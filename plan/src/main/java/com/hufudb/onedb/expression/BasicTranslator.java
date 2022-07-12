@@ -3,7 +3,7 @@ package com.hufudb.onedb.expression;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import com.hufudb.onedb.data.schema.Schema;
+import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
@@ -11,12 +11,12 @@ import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
 public class BasicTranslator implements Translator {
   public List<String> inputStrs;
 
-  public BasicTranslator(List<String> inputStrs) {
-    this.inputStrs = inputStrs;
+  public BasicTranslator() {
+    this.inputStrs = ImmutableList.of();
   }
 
-  public BasicTranslator(Schema schema) {
-    this.inputStrs = schema.getColumnDescs().stream().map(col -> col.getName()).collect(Collectors.toList());
+  public void setInput(List<String> inputs) {
+    this.inputStrs = inputs;
   }
 
   public String translate(Expression exp) {
