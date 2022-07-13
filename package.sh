@@ -12,6 +12,7 @@ then
   cp adapter-mysql/target/*-with-dependencies.jar ./release/adapter/adapter_mysql.jar
   cp adapter-sqlite/target/*-with-dependencies.jar ./release/adapter/adapter_sqlite.jar
   cp adapter-csv/target/*-with-dependencies.jar ./release/adapter/adapter_csv.jar
+  cp adapter-json/target/*-with-dependencies.jar ./release/adapter/adapter_json.jar
   cp backend/target/backend*.jar ./release/bin/backend.jar
 else
   mvn install -T 0.5C -Dmaven.test.skip=true -pl $1

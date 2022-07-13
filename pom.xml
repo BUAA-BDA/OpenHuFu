@@ -27,6 +27,7 @@
     <module>benchmark</module>
     <module>backend</module>
     <module>coverage</module>
+    <module>adapter-json</module>
   </modules>
 
   <properties>
