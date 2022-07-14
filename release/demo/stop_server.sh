@@ -1,8 +1,8 @@
 #!/bin/bash
 stop() {
-  kill -9 $(cat ./log/pid_$1)
+  kill -9 $(cat ../log/pid_$1)
   echo "stop server $1"
-  rm ./log/pid_$1
+  rm ../log/pid_$1
 }
 
 if [ $# -eq 0 ]
