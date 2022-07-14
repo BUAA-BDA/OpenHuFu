@@ -2,9 +2,9 @@
 
 start() {
   echo "starting server $1..."
-  export ONEDB_ROOT=$PWD
-  nohup java -Dlog4j.configuration=file:"./config/log4j.properties" -jar ./bin/onedb_owner_server.jar -c ./config/server$1.json > ./log/$1.log 2>&1 &
-  echo $! >> ./log/pid_$1
+  export ONEDB_ROOT=$PWD/..
+  nohup java -Dlog4j.configuration=file:"../config/log4j.properties" -jar ../bin/onedb_owner_server.jar -c ../config/server$1.json > ../log/$1.log 2>&1 &
+  echo $! >> ../log/pid_$1
   echo "postgresql server $1 start"
 }
 
