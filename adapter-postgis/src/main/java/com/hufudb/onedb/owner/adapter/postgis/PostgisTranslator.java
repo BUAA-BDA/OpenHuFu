@@ -1,6 +1,7 @@
 package com.hufudb.onedb.owner.adapter.postgis;
 
 import com.hufudb.onedb.data.storage.Point;
+import com.hufudb.onedb.data.storage.utils.DateUtils;
 import com.hufudb.onedb.expression.AggFuncType;
 import com.hufudb.onedb.expression.BasicTranslator;
 import com.hufudb.onedb.expression.ExpressionUtils;
@@ -29,11 +30,11 @@ public class PostgisTranslator extends BasicTranslator {
       case LONG:
         return String.valueOf(literal.getI64());
       case DATE:
-        return String.format("date '%s'", dateUtils.intToDate(literal.getI32()).toString());
+        return String.format("date '%s'", DateUtils.intToDate(literal.getI32()).toString());
       case TIME:
-        return String.format("time '%s'", dateUtils.intToTime(literal.getI32()).toString());
+        return String.format("time '%s'", DateUtils.intToTime(literal.getI32()).toString());
       case TIMESTAMP:
-        return String.format("timestamp '%s'", dateUtils.longToTimestamp(literal.getI64()).toString());
+        return String.format("timestamp '%s'", DateUtils.longToTimestamp(literal.getI64()).toString());
       case FLOAT:
         return String.valueOf(literal.getF32());
       case DOUBLE:

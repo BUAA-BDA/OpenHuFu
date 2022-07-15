@@ -3,6 +3,9 @@ package com.hufudb.onedb.owner.adapter.csv;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.csv.CSVFormat;
@@ -43,22 +46,86 @@ public class CsvTable {
       final ColumnType outType = outSchema.getType(i);
       switch (outType) {
         case BOOLEAN:
-          mappers.add(row -> Boolean.valueOf((String) row.get(actualColumnIdx)));
+          mappers.add(row -> {
+            String input = (String) row.get(actualColumnIdx);
+            if (input == null) {
+              return null;
+            } else {
+              return Boolean.valueOf((String) row.get(actualColumnIdx));
+            }
+          });
           break;
         case BYTE:
         case SHORT:
         case INT:
-          mappers.add(row -> Integer.valueOf((String) row.get(actualColumnIdx)));
+          mappers.add(row -> {
+            String input = (String) row.get(actualColumnIdx);
+            if (input == null) {
+              return null;
+            } else {
+              return Integer.valueOf((String) row.get(actualColumnIdx));
+            }
+          });
           break;
         case LONG:
+          mappers.add(row -> {
+            String input = (String) row.get(actualColumnIdx);
+            if (input == null) {
+              return null;
+            } else {
+              return Long.valueOf((String) row.get(actualColumnIdx));
+            }
+          });
+          break;
+        case DATE:
+          mappers.add(row -> {
+            String input = (String) row.get(actualColumnIdx);
+            if (input == null) {
+              return null;
+            } else {
+              return Date.valueOf((String) row.get(actualColumnIdx));
+            }
+          });
+          break;
+        case TIME:
+          mappers.add(row -> {
+            String input = (String) row.get(actualColumnIdx);
+            if (input == null) {
+              return null;
+            } else {
+              return Time.valueOf((String) row.get(actualColumnIdx));
+            }
+          });
+          break;
         case TIMESTAMP:
-          mappers.add(row -> Long.valueOf((String) row.get(actualColumnIdx)));
+          mappers.add(row -> {
+            String input = (String) row.get(actualColumnIdx);
+            if (input == null) {
+              return null;
+            } else {
+              return Timestamp.valueOf((String) row.get(actualColumnIdx));
+            }
+          });
           break;
         case FLOAT:
-          mappers.add(row -> Float.valueOf((String) row.get(actualColumnIdx)));
+          mappers.add(row -> {
+            String input = (String) row.get(actualColumnIdx);
+            if (input == null) {
+              return null;
+            } else {
+              return Float.valueOf((String) row.get(actualColumnIdx));
+            }
+          });
           break;
         case DOUBLE:
-          mappers.add(row -> Double.valueOf((String) row.get(actualColumnIdx)));
+          mappers.add(row -> {
+            String input = (String) row.get(actualColumnIdx);
+            if (input == null) {
+              return null;
+            } else {
+              return Double.valueOf((String) row.get(actualColumnIdx));
+            }
+          });
           break;
         case STRING:
           mappers.add(row -> row.get(actualColumnIdx));

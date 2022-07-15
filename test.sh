@@ -56,7 +56,7 @@ test_ci() {
   if [ -e failed ]; then
     docker-compose logs;
     rm failed;
-    exist 1;
+    exit 1;
   fi
   cd ../..
 }
@@ -75,11 +75,12 @@ then
   clean
 elif [ $1 == "ci" ]
 then
-  clean_ci
   setup_ci
   test_ci
-  clean_ci
 elif [ $1 == "clean" ]
 then
   clean
+elif [ $1 == "clean_ci" ]
+then
+  clean_ci
 fi

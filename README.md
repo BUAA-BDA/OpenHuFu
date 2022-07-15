@@ -34,18 +34,21 @@
     - ca.pem: CA 根证书
     - owner[x].pem: CA 签发给 owner x 的证书
     - owner[x].key: owner x 证书对应的私钥
-- start_server.sh: Owner Side 示例启动脚本
-- start_client.sh: User Side 示例启动脚本
-- stop_server.sh: Owner Side 示例关闭脚本
-- backend.sh: Spring boot 示例启动脚本
-- init_env.sh: 本地示例初始化脚本
+- demo: 运行示例目录
+    - start_server.sh: Owner Side 示例启动脚本
+    - start_client.sh: User Side 示例启动脚本
+    - stop_server.sh: Owner Side 示例关闭脚本
+    - backend.sh: Spring boot 示例启动脚本
+    - init_env.sh: 本地示例初始化脚本
+- user.sh: 查询端运行脚本
+- owner.sh 数据拥有端运行脚本
 
 ## 运行
-`release` 文件夹下提供了一个本地运行的示例，运行该示例需要完成上述安装步骤并安装 docker >= 20.10, docker-compose >= 1.29
+`release/demo` 文件夹下提供了一个本地运行的示例，运行该示例需要完成上述安装步骤并安装 docker >= 20.10, docker-compose >= 1.29
 
 1. 初始化数据库环境并安装证书
 ```
-cd release
+cd release/demo
 ./init_env.sh
 ```
 2. 启动 owner side
