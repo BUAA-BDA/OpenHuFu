@@ -1,1 +1,1 @@
-docker-compose run user
+docker-compose run ht-user

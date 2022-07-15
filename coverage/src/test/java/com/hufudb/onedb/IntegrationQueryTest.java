@@ -7,8 +7,11 @@ import java.io.Reader;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -156,12 +159,20 @@ public class IntegrationQueryTest {
     for (int i = 0; i < row1.size(); ++i) {
       Object o1 = row1.get(i);
       Object o2 = row2.get(i);
-      if (o1 instanceof Long || o1 instanceof Integer) {
+      if (o1 == null || o2 == null) {
+        if (!(o1 == null && o2 == null)) {
+          return false;
+        }
+      } else if (o1 instanceof Long || o1 instanceof Integer) {
         if (((Number) o1).longValue() != ((Number) o2).longValue()) {
           return false;
         }
       } else if (o1 instanceof Float || o1 instanceof Double) {
         if (((Number) o1).doubleValue() != ((Number) o2).doubleValue()) {
+          return false;
+        }
+      } else if (o1 instanceof Date || o1 instanceof Time || o1 instanceof Timestamp) {
+        if (!o1.toString().equals(o2.toString())) {
           return false;
         }
       } else if (!o1.equals(o2)){
@@ -484,6 +495,34 @@ public class IntegrationQueryTest {
     result.close();
 
     // todo: add more test
+  }
+
+  @Test
+  public void dateTimeTest() throws SQLException {
+    ResultSet result = user.executeQuery("select license, time_stamp from time_table where time_stamp < timestamp '2020-04-21 15:30:00'");
+    List<ArrayRow> expect = toRows(ImmutableList.of(
+      ImmutableList.of("10004", Timestamp.valueOf("2019-11-28 11:20:43")),
+      ImmutableList.of("10005", Timestamp.valueOf("2019-10-15 16:51:32")),
+      ImmutableList.of("10000", Timestamp.valueOf("2018-09-01 09:05:10")),
+      ImmutableList.of("10001", Timestamp.valueOf("2018-06-01 10:14:45")),
+      ImmutableList.of("10002", Timestamp.valueOf("2019-01-30 21:31:20"))
+    ));
+    compareRows(expect, toRows(result));
+
+    result = user.executeQuery("select license, cur_time from time_table where cur_time < time '15:00:00.0'");
+    expect = toRows(ImmutableList.of(
+      ImmutableList.of("10000", Time.valueOf("09:05:10")),
+      ImmutableList.of("10001", Time.valueOf("10:14:45")),
+      ImmutableList.of("10004", Time.valueOf("11:20:43"))
+    ));
+    compareRows(expect, toRows(result));
+
+    result = user.executeQuery("select license, cur_date from time_table where cur_date < date '2019-01-01'");
+    expect = toRows(ImmutableList.of(
+      ImmutableList.of("10000", Date.valueOf("2018-09-01")),
+      ImmutableList.of("10001", Date.valueOf("2018-06-01"))
+    ));
+    compareRows(expect, toRows(result));
   }
 
   @Test

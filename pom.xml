@@ -21,6 +21,7 @@
     <module>owner</module>
     <module>user</module>
     <module>adapter-postgresql</module>
+    <module>adapter-postgis</module>
     <module>adapter-mysql</module>
     <module>adapter-sqlite</module>
     <module>adapter-csv</module>

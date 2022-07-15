@@ -23,36 +23,8 @@ test:
   needs: ["build"]
   dependencies:
     - build
-  before_script:
-    - cd docker/test
-    - docker-compose down
-    - cd ../owner
-    - docker-compose down
-    - cd ../database
-    - docker-compose down
-    - cd ../..
   script:
-    - cd docker/database
-    - docker-compose up -d
-    - sleep 5
-    - cd ../owner
-    - mkdir -p cert
-    - cp -r ../cert/ci/* cert
-    - docker-compose up -d
-    - cd ../test
-    - docker-compose up | grep "BUILD FAILURE" && touch failed
-    - if [ -e failed ]; then
-        docker-compose logs;
-        rm failed;
-        exist 1;
-      fi
-  after_script:
-    - cd docker/test
-    - docker-compose down
-    - cd ../owner
-    - docker-compose down
-    - cd ../database
-    - docker-compose down
+    - sh test.sh ci
   artifacts:
     when: always
     reports:

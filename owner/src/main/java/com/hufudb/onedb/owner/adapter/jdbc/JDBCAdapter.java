@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import com.hufudb.onedb.data.storage.DataSet;
 import com.hufudb.onedb.data.storage.EmptyDataSet;
 import com.hufudb.onedb.data.storage.ResultDataSet;
+import com.hufudb.onedb.expression.Translator;
 import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.data.schema.SchemaManager;
 import com.hufudb.onedb.proto.OneDBPlan.PlanType;
@@ -31,14 +32,16 @@ public abstract class JDBCAdapter implements Adapter {
   protected Statement statement;
   protected final AdapterTypeConverter converter;
   protected final SchemaManager schemaManager;
+  protected final JDBCTranslator translator;
 
   protected JDBCAdapter(String catalog, Connection connection, Statement statement,
-      AdapterTypeConverter converter) {
+      AdapterTypeConverter converter, Translator translator) {
     this.catalog = catalog;
     this.connection = connection;
     this.statement = statement;
     this.converter = converter;
     this.schemaManager = new SchemaManager();
+    this.translator = new JDBCTranslator(translator);
     loadAllTableSchema();
   }
 
@@ -110,16 +113,16 @@ public abstract class JDBCAdapter implements Adapter {
     String actualTableName = schemaManager.getActualTableName(plan.getTableName());
     Schema tableSchema = schemaManager.getActualSchema(plan.getTableName());
     LOG.info("Query {}: {}", actualTableName, tableSchema);
-    final List<String> filters = JDBCTranslator.translateExps(tableSchema, plan.getWhereExps());
-    final List<String> selects = JDBCTranslator.translateExps(tableSchema, plan.getSelectExps());
+    final List<String> filters = translator.translateExps(tableSchema, plan.getWhereExps());
+    final List<String> selects = translator.translateExps(tableSchema, plan.getSelectExps());
     final List<String> groups =
         plan.getGroups().stream().map(ref -> selects.get(ref)).collect(Collectors.toList());
     // order by
-    List<String> order = JDBCTranslator.translateOrders(selects, plan.getOrders());
+    List<String> order = translator.translateOrders(selects, plan.getOrders());
     StringBuilder sql = new StringBuilder();
     // select from clause
     if (!plan.getAggExps().isEmpty()) {
-      final List<String> aggs = JDBCTranslator.translateAgg(selects, plan.getAggExps());
+      final List<String> aggs = translator.translateAgg(selects, plan.getAggExps());
       sql.append(String.format("SELECT %s from %s", String.join(",", aggs), actualTableName));
     } else {
       sql.append(String.format("SELECT %s from %s", String.join(",", selects), actualTableName));
