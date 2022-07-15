@@ -116,11 +116,11 @@ public class CsvAdapter implements Adapter {
       return EmptyDataSet.INSTANCE;
     }
     DataSet res = target.scanWithSchema(schema, mappings);
-    if (!plan.getSelectExps().isEmpty()) {
-      res = Interpreter.map(res, plan.getSelectExps());
-    }
     if (!plan.getWhereExps().isEmpty()) {
       res = Interpreter.filter(res, plan.getWhereExps());
+    }
+    if (!plan.getSelectExps().isEmpty()) {
+      res = Interpreter.map(res, plan.getSelectExps());
     }
     if (!plan.getAggExps().isEmpty()) {
       res = Interpreter.aggregate(res, plan.getGroups(), plan.getAggExps());
