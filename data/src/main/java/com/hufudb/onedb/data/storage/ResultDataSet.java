@@ -5,7 +5,6 @@ import java.sql.SQLException;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.data.schema.Schema;
-import com.hufudb.onedb.data.storage.utils.DateUtils;
 import com.hufudb.onedb.proto.OneDBData.ColumnDesc;
 
 /**
@@ -14,13 +13,11 @@ import com.hufudb.onedb.proto.OneDBData.ColumnDesc;
 public class ResultDataSet implements DataSet {
   final protected Schema schema;
   final protected ResultSet result;
-  final protected DateUtils dateUtils;
 
 
   public ResultDataSet(Schema schema, ResultSet result) {
     this.schema = schema;
     this.result = result;
-    this.dateUtils = new DateUtils();
   }
 
   @Override

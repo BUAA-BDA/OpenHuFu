@@ -11,11 +11,9 @@ import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
 
 public class BasicTranslator implements Translator {
   protected List<String> inputStrs;
-  protected DateUtils dateUtils;
 
   public BasicTranslator() {
     this.inputStrs = ImmutableList.of();
-    this.dateUtils = new DateUtils();
   }
 
   public void setInput(List<String> inputs) {
@@ -77,11 +75,11 @@ public class BasicTranslator implements Translator {
       case INT:
         return String.valueOf(literal.getI32());
       case DATE:
-        return String.format("date '%s'", dateUtils.intToDate(literal.getI32()).toString());
+        return String.format("date '%s'", DateUtils.intToDate(literal.getI32()).toString());
       case TIME:
-        return String.format("time '%s'", dateUtils.intToTime(literal.getI32()).toString());
+        return String.format("time '%s'", DateUtils.intToTime(literal.getI32()).toString());
       case TIMESTAMP:
-        return String.format("timestamp '%s'", dateUtils.longToTimestamp(literal.getI64()).toString());
+        return String.format("timestamp '%s'", DateUtils.longToTimestamp(literal.getI64()).toString());
       case LONG:
         return String.valueOf(literal.getI64());
       case FLOAT:
