@@ -23,12 +23,9 @@ import java.util.ServiceLoader;
 public class JsonAdapterFactory implements AdapterFactory {
 
   private final static Logger LOG = LoggerFactory.getLogger(JsonAdapterFactory.class);
-  private final Map<String, JsonSrcFactory> jsonSrcFactoryMap;
+  private Map<String, JsonSrcFactory> jsonSrcFactoryMap = null;
 
   public JsonAdapterFactory() {
-    String oneDBRoot = System.getenv("ONEDB_ROOT");
-    Path jsonSrcDir = Paths.get(oneDBRoot, "adapter", "jsonSrc");
-    jsonSrcFactoryMap = loadAdapters(jsonSrcDir.toString());
   }
 
   private Map<String, JsonSrcFactory> loadAdapters(String jsonSrcDirectory) {
@@ -59,6 +56,11 @@ public class JsonAdapterFactory implements AdapterFactory {
 
   @Override
   public Adapter create(AdapterConfig config) {
+    if (jsonSrcFactoryMap == null) {
+      String oneDBRoot = System.getenv("ONEDB_ROOT");
+      Path jsonSrcDir = Paths.get(oneDBRoot, "adapter", "jsonSrc");
+      jsonSrcFactoryMap = loadAdapters(jsonSrcDir.toString());
+    }
     if (jsonSrcFactoryMap.containsKey(config.catalog)) {
       return new JsonAdapter(jsonSrcFactoryMap.get(config.catalog), config);
     } else if (config.catalog.equals("text")) {
