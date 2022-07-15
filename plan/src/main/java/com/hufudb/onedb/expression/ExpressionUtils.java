@@ -3,6 +3,7 @@ package com.hufudb.onedb.expression;
 import java.util.List;
 import java.util.stream.Collectors;
 import com.hufudb.onedb.data.schema.Schema;
+import com.hufudb.onedb.data.storage.utils.DateUtils;
 import com.hufudb.onedb.data.storage.utils.ModifierWrapper;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBPlan.Expression;
@@ -38,12 +39,15 @@ public class ExpressionUtils {
         return lit.getF64();
       case BYTE:
       case SHORT:
-      case DATE:
-      case TIME:
       case INT:
         return lit.getI32();
-      case LONG:
+      case DATE:
+        return DateUtils.intToDate(lit.getI32());
+      case TIME:
+        return DateUtils.intToTime(lit.getI32());
       case TIMESTAMP:
+        return DateUtils.longToTimestamp(lit.getI64());
+      case LONG:
         return lit.getI64();
       default:
         throw new UnsupportedOperationException("Unsupported literal type");

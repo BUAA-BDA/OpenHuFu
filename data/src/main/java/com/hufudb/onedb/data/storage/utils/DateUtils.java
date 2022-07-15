@@ -8,10 +8,8 @@ import java.util.TimeZone;
 
 /**
  * Simple Date Utils without consideration of time zone
- * todo: deal with time zone
  */
 public class DateUtils {
-  final Calendar calendar = Calendar.getInstance();
   final static int DAY_MASK = 0x1F;
   final static int DAY_OFFSET = 5;
   final static int MONTH_MASK = 0xF;
@@ -19,14 +17,15 @@ public class DateUtils {
   final static long MSFORDAY = 86400000L;
   final static TimeZone timeZone = TimeZone.getDefault();
 
-  public DateUtils() {}
+  private DateUtils() {}
 
   /**
    * convert date into integer
    *
    * year (23 bit) | month (4 bit) | day (5 bit)
    */
-  public int dateToInt(Date date) {
+  public static int dateToInt(Date date) {
+    Calendar calendar = Calendar.getInstance();
     calendar.setTime(date);
     int year = calendar.get(Calendar.YEAR);
     int month = calendar.get(Calendar.MONTH);
@@ -49,11 +48,13 @@ public class DateUtils {
   /**
    * convert int to date
    */
-  public Date intToDate(int dint) {
+  public static Date intToDate(int dint) {
     int day = dint & DAY_MASK;
     dint = dint >> DAY_OFFSET;
     int month = dint & MONTH_MASK;
     dint = dint >> MONTH_OFFSET;
+    Calendar calendar = Calendar.getInstance();
+    calendar.clear();
     calendar.set(dint, month, day);
     return new Date(calendar.getTimeInMillis());
   }
@@ -61,7 +62,7 @@ public class DateUtils {
   /**
    * convert time to int
    */
-  public int timeToInt(Time time) {
+  public static int timeToInt(Time time) {
     return (int) (time.getTime() % MSFORDAY);
   }
 
@@ -76,14 +77,14 @@ public class DateUtils {
   /**
    * convert encoded int to time
    */
-  public Time intToTime(int t) {
+  public static Time intToTime(int t) {
     return new Time((long) t);
   }
 
   /**
    * convert timestamp to long
    */
-  public long timestampToLong(Timestamp ts) {
+  public static long timestampToLong(Timestamp ts) {
     return ts.getTime();
   }
 
@@ -97,7 +98,7 @@ public class DateUtils {
   /**
    * convert long to timestamp
    */
-  public Timestamp longToTimestamp(long ts) {
+  public static Timestamp longToTimestamp(long ts) {
     return new Timestamp(ts);
   }
 }

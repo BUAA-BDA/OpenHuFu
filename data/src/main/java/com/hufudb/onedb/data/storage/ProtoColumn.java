@@ -23,21 +23,19 @@ public class ProtoColumn implements Column {
   final ColumnProto column;
   final CellGetter getter;
   final BitArray isNulls;
-  final DateUtils dateUtils;
   final int size;
 
   ProtoColumn(ColumnType type, ColumnProto column) {
     this.type = type;
     this.column = column;
-    this.dateUtils = new DateUtils();
     switch (column.getColCase()) {
       case I32COL:
         switch (type) {
           case DATE:
-            this.getter = (rowNum) -> dateUtils.intToDate(column.getI32Col().getCell(rowNum));
+            this.getter = (rowNum) -> DateUtils.intToDate(column.getI32Col().getCell(rowNum));
             break;
           case TIME:
-            this.getter = (rowNum) -> dateUtils.intToTime(column.getI32Col().getCell(rowNum));
+            this.getter = (rowNum) -> DateUtils.intToTime(column.getI32Col().getCell(rowNum));
             break;
           default:
             this.getter = (rowNum) -> column.getI32Col().getCell(rowNum);
@@ -46,7 +44,7 @@ public class ProtoColumn implements Column {
         break;
       case I64COL:
         if (type == ColumnType.TIMESTAMP) {
-          this.getter = (rowNum) -> dateUtils.longToTimestamp(column.getI64Col().getCell(rowNum));
+          this.getter = (rowNum) -> DateUtils.longToTimestamp(column.getI64Col().getCell(rowNum));
         } else {
           this.getter = (rowNum) -> column.getI64Col().getCell(rowNum);
         }
@@ -115,7 +113,6 @@ public class ProtoColumn implements Column {
     final ColumnProto.Builder columnBuilder;
     final BitArray.Builder nullBuilder;
     final CellAppender appender;
-    final DateUtils dateUtils;
     I32Column.Builder i32Builder;
     I64Column.Builder i64Builder;
     F32Column.Builder f32Builder;
@@ -128,7 +125,6 @@ public class ProtoColumn implements Column {
       this.type = type;
       this.columnBuilder = ColumnProto.newBuilder();
       this.nullBuilder = BitArray.builder();
-      this.dateUtils = new DateUtils();
       switch (type) {
         case BOOLEAN:
           boolBuilder = BoolColumn.newBuilder();
@@ -162,11 +158,11 @@ public class ProtoColumn implements Column {
           break;
         case DATE:
           i32Builder = I32Column.newBuilder();
-          appender = (val) -> i32Builder.addCell(dateUtils.dateToInt((Date) val));
+          appender = (val) -> i32Builder.addCell(DateUtils.dateToInt((Date) val));
           break;
         case TIME:
           i32Builder = I32Column.newBuilder();
-          appender = (val) -> i32Builder.addCell(dateUtils.timeToInt((Time) val));
+          appender = (val) -> i32Builder.addCell(DateUtils.timeToInt((Time) val));
           break;
         case LONG:
           i64Builder = I64Column.newBuilder();
@@ -174,7 +170,7 @@ public class ProtoColumn implements Column {
           break;
         case TIMESTAMP:
           i64Builder = I64Column.newBuilder();
-          appender = (val) -> i64Builder.addCell(dateUtils.timestampToLong((Timestamp) val));
+          appender = (val) -> i64Builder.addCell(DateUtils.timestampToLong((Timestamp) val));
           break;
         default:
           throw new UnsupportedOperationException("Unsupported column type");
