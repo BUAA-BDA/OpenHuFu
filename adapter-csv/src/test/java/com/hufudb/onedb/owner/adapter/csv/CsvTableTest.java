@@ -2,6 +2,7 @@ package com.hufudb.onedb.owner.adapter.csv;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.net.URL;
@@ -35,6 +36,11 @@ public class CsvTableTest {
     assertEquals("anna", it.get(1));
     assertTrue(it.next());
     assertEquals(69.1, ((Number) it.get(2)).doubleValue(), 0.001);
+    assertTrue(it.next());
+    assertNull(it.get(0));
+    assertNull(it.get(1));
+    assertNull(it.get(2));
+    assertNull(it.get(3));
     assertFalse(it.next());
     result.close();
   }

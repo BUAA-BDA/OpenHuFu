@@ -92,7 +92,7 @@ public class Interpreter {
 
     @Override
     public boolean filter(Row row) {
-      return (boolean) implement(row, condition);
+      return Boolean.TRUE == implement(row, condition);
     }
   }
 
