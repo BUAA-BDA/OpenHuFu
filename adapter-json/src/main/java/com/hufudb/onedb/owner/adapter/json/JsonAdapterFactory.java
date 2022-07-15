@@ -15,6 +15,7 @@ import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
@@ -34,6 +35,9 @@ public class JsonAdapterFactory implements AdapterFactory {
     LOG.info("Load jsonSrc from {}", jsonSrcDirectory);
     File[] jsonSrcs = new File(jsonSrcDirectory).listFiles(file -> file.getName().endsWith(".jar"));
     assert jsonSrcs != null;
+    if (jsonSrcs.length == 0) {
+      return new HashMap<>();
+    }
     List<URL> jsonSrcURLs = new ArrayList<>(jsonSrcs.length);
     for (File jsonSrc : jsonSrcs) {
       try {

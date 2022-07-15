@@ -8,6 +8,9 @@ import com.hufudb.onedb.data.storage.MapDataSet;
 import com.hufudb.onedb.owner.adapter.json.jsonsrc.JsonSrc;
 import com.hufudb.onedb.proto.OneDBData;
 
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,25 +38,33 @@ public class JsonTable {
       final OneDBData.ColumnType outType = outSchema.getType(i);
       switch (outType) {
         case BOOLEAN:
-          mappers.add(row -> Boolean.valueOf((String) row.get(actualColumnIdx)));
+          mappers.add(row -> (row.get(actualColumnIdx) == null ? null : Boolean.valueOf((String) row.get(actualColumnIdx))));
           break;
         case BYTE:
         case SHORT:
         case INT:
-          mappers.add(row -> Integer.valueOf((String) row.get(actualColumnIdx)));
+          mappers.add(row -> (row.get(actualColumnIdx) == null ? null : Integer.valueOf((String) row.get(actualColumnIdx))));
           break;
         case LONG:
+          mappers.add(row -> (row.get(actualColumnIdx) == null ? null : Long.valueOf((String) row.get(actualColumnIdx))));
+          break;
         case TIMESTAMP:
-          mappers.add(row -> Long.valueOf((String) row.get(actualColumnIdx)));
+          mappers.add(row -> (row.get(actualColumnIdx) == null ? null : Timestamp.valueOf((String) row.get(actualColumnIdx))));
+          break;
+        case DATE:
+          mappers.add(row -> (row.get(actualColumnIdx) == null ? null : Date.valueOf((String) row.get(actualColumnIdx))));
+          break;
+        case TIME:
+          mappers.add(row -> (row.get(actualColumnIdx) == null ? null : Time.valueOf((String) row.get(actualColumnIdx))));
           break;
         case FLOAT:
-          mappers.add(row -> Float.valueOf((String) row.get(actualColumnIdx)));
+          mappers.add(row -> (row.get(actualColumnIdx) == null ? null : Float.valueOf((String) row.get(actualColumnIdx))));
           break;
         case DOUBLE:
-          mappers.add(row -> Double.valueOf((String) row.get(actualColumnIdx)));
+          mappers.add(row -> (row.get(actualColumnIdx) == null ? null : Double.valueOf((String) row.get(actualColumnIdx))));
           break;
         case STRING:
-          mappers.add(row -> row.get(actualColumnIdx));
+          mappers.add(row -> (row.get(actualColumnIdx) == null ? null : row.get(actualColumnIdx)));
           break;
         default:
           throw new RuntimeException("Unsupported type for json adapter");
