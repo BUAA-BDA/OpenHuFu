@@ -77,7 +77,7 @@ public class CsvAdapterTest {
       assertEquals(4, it.size());
       count++;
     }
-    assertEquals(3, count);
+    assertEquals(4, count);
     result.close();
     // select Name, Weight * 2, Score from student2;
     plan.setSelectExps(
@@ -93,7 +93,7 @@ public class CsvAdapterTest {
       assertEquals(3, it.size());
       count++;
     }
-    assertEquals(3, count);
+    assertEquals(4, count);
     result.close();
     // select Name, Weight * 2, Score from student2 where Score >= 90;
     plan.setWhereExps(ImmutableList.of(ExpressionFactory.createBinaryOperator(OperatorType.GE,
