@@ -95,9 +95,21 @@ public class CsvAdapterTest {
     }
     assertEquals(4, count);
     result.close();
+    // select Name, Weight * 2, Score from student2 where DeptName = 'computer';
+    plan.setWhereExps(ImmutableList.of(ExpressionFactory.createBinaryOperator(OperatorType.EQ,
+        ColumnType.BOOLEAN, ExpressionFactory.createInputRef(0, ColumnType.INT, Modifier.PUBLIC),
+        ExpressionFactory.createLiteral(ColumnType.STRING, "computer"))));
+    result = adapter.query(plan);
+    it = result.getIterator();
+    count = 0;
+    while (it.next()) {
+      count++;
+    }
+    assertEquals(1, count);
+    result.close();
     // select Name, Weight * 2, Score from student2 where Score >= 90;
     plan.setWhereExps(ImmutableList.of(ExpressionFactory.createBinaryOperator(OperatorType.GE,
-        ColumnType.BOOLEAN, ExpressionFactory.createInputRef(2, ColumnType.INT, Modifier.PUBLIC),
+        ColumnType.BOOLEAN, ExpressionFactory.createInputRef(1, ColumnType.INT, Modifier.PUBLIC),
         ExpressionFactory.createLiteral(ColumnType.INT, 90))));
     result = adapter.query(plan);
     it = result.getIterator();
