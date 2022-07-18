@@ -1,127 +1,95 @@
 {
-  "version": "1.0",
-  "defaultSchema": "onedb",
-  "schemas": [
+  "owners": [
     {
-      "name": "onedb",
-      "type": "custom",
-      "factory": "com.hufudb.onedb.core.sql.schema.OneDBSchemaFactory",
-      "operand": {
-        "owners": [
-          {
-            "endpoint": "localhost:12345",
-            "trustcertpath": "./cert/ca.pem"
-          },
-          {
-            "endpoint": "localhost:12346",
-            "trustcertpath": "./cert/ca.pem"
-          },
-          {
-            "endpoint": "localhost:12347",
-            "trustcertpath": "./cert/ca.pem"
-          }
-        ]
-      },
-      "tables": [
+      "endpoint": "localhost:12345",
+      "trustCertPath": "./cert/ca.pem"
+    },
+    {
+      "endpoint": "localhost:12346",
+      "trustCertPath": "./cert/ca.pem"
+    },
+    {
+      "endpoint": "localhost:12347",
+      "trustCertPath": "./cert/ca.pem"
+    }
+  ],
+  "tables": [
+    {
+      "tableName": "student1",
+      "localTables": [
         {
-          "name": "student1",
-          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
-          "operand": {
-            "feds": [
-              {
-                "endpoint": "localhost:12345",
-                "name": "student1"
-              },
-              {
-                "endpoint": "localhost:12346",
-                "name": "student1"
-              },
-              {
-                "endpoint": "localhost:12347",
-                "name": "student1"
-              }
-            ]
-          }
+          "endpoint": "localhost:12345",
+          "localName": "student1"
         },
         {
-          "name": "st_pro_1",
-          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
-          "operand": {
-            "feds": [
-              {
-                "endpoint": "localhost:12345",
-                "name": "st_pro_1"
-              }
-            ]
-          }
+          "endpoint": "localhost:12346",
+          "localName": "student1"
         },
         {
-          "name": "st_pro_2",
-          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
-          "operand": {
-            "feds": [
-              {
-                "endpoint": "localhost:12346",
-                "name": "st_pro_2"
-              }
-            ]
-          }
+          "endpoint": "localhost:12347",
+          "localName": "student1"
+        }
+      ]
+    },
+    {
+      "tableName": "st_pro_1",
+      "localTables": [
+        {
+          "endpoint": "localhost:12345",
+          "localName": "st_pro_1"
+        }
+      ]
+    },
+    {
+      "tableName": "st_pro_2",
+      "localTables": [
+        {
+          "endpoint": "localhost:12346",
+          "localName": "st_pro_2"
+        }
+      ]
+    },
+    {
+      "tableName": "st_pro_3",
+      "localTables": [
+        {
+          "endpoint": "localhost:12345",
+          "localName": "st_pro_3"
         },
         {
-          "name": "st_pro_3",
-          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
-          "operand": {
-            "feds": [
-              {
-                "endpoint": "localhost:12345",
-                "name": "st_pro_3"
-              },
-              {
-                "endpoint": "localhost:12346",
-                "name": "st_pro_3"
-              }
-            ]
-          }
+          "endpoint": "localhost:12346",
+          "localName": "st_pro_3"
+        }
+      ]
+    },
+    {
+      "tableName": "student2",
+      "localTables": [
+        {
+          "endpoint": "localhost:12345",
+          "localName": "student2"
+        }
+      ]
+    },
+    {
+      "tableName": "student3",
+      "localTables": [
+        {
+          "endpoint": "localhost:12345",
+          "localName": "student3"
+        }
+      ]
+    },
+    {
+      "tableName": "taxi",
+      "localTables": [
+        {
+          "endpoint": "localhost:12345",
+          "localName": "taxi"
         },
         {
-          "name": "student2",
-          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
-          "operand": {
-            "feds": [
-              {
-                "endpoint": "localhost:12345",
-                "name": "student2"
-              }
-            ]
-          }
-        },
-        {
-          "name": "student3",
-          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
-          "operand": {
-            "feds": [
-              {
-                "endpoint": "localhost:12345",
-                "name": "student3"
-              }
-            ]
-          }
-        },
-        {
-          "name": "taxi",
-          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
-          "operand": {
-            "feds": [
-              {
-                "endpoint": "localhost:12345",
-                "name": "taxi"
-              },
-              {
-                "endpoint": "localhost:12346",
-                "name": "taxi"
-              }
-            ]
-          }
+          "endpoint": "localhost:12346",
+          "localName": "taxi"
         }
       ]
     }

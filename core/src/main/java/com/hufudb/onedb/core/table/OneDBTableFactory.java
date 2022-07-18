@@ -22,8 +22,8 @@ public class OneDBTableFactory implements TableFactory {
   public Table create(SchemaPlus schema, String tableName, Map operand, RelDataType rowType) {
     LOG.debug("create table {}", tableName);
     final OneDBSchemaManager schemaManager = schema.unwrap(OneDBSchemaManager.class);
-    if (operand.get("feds") == null) {
-      throw new RuntimeException("feds is null");
+    if (operand.get("components") == null) {
+      throw new RuntimeException("components is null");
     }
     final RelProtoDataType protoRowType = rowType != null ? RelDataTypeImpl.proto(rowType) : null;
     return OneDBTable.create(schemaManager, tableName, operand, protoRowType);

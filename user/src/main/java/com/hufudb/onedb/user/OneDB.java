@@ -10,6 +10,7 @@ import com.hufudb.onedb.core.table.GlobalTableConfig;
 import com.hufudb.onedb.data.schema.TableSchema;
 import com.hufudb.onedb.data.storage.DataSet;
 import com.hufudb.onedb.plan.Plan;
+import com.hufudb.onedb.user.utils.ModelGenerator;
 import com.hufudb.onedb.user.utils.OneDBLine;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -65,18 +66,18 @@ public class OneDB {
 
   public static void main(String[] args) {
     final Options options = new Options();
-    final Option model = new Option("m", "model", true, "model of federation");
-    model.setRequired(true);
-    options.addOption(model);
+    final Option config = new Option("c", "config", true, "user config file path");
+    config.setRequired(true);
+    options.addOption(config);
     final CommandLineParser parser = new DefaultParser();
     CommandLine cmd;
     try {
       Class.forName("com.hufudb.onedb.user.jdbc.OneDBDriver");
       cmd = parser.parse(options, args);
-      final String m = cmd.getOptionValue("model", "model.json");
+      final String configPath = cmd.getOptionValue("config", "config/user.json");
       List<String> dbargs = new ArrayList<>();
       dbargs.add("-u");
-      dbargs.add(String.format("jdbc:onedb:model=%s;lex=JAVA;caseSensitive=false;timeZone='%s'", m, getSystemTimeZone()));
+      dbargs.add(String.format("jdbc:onedb:model=%s;lex=JAVA;caseSensitive=false;timeZone='%s'", ModelGenerator.loadUserConfig(configPath), getSystemTimeZone()));
       dbargs.add("-n");
       dbargs.add("admin");
       dbargs.add("-p");
