@@ -115,27 +115,19 @@ onedb>!q
         - name: 对外发布的列名
         - type: 对外发布的类型（当前版本需要和本地类型保持一致）
         - modifier: 安全级别
-    - actualColumns: 对应列在被发布表中的顺序，例如本地表 [A, B, C]，通过设置 actualColumns 为[2, 1, 0]，即可将发布表中列顺序变为 [C, B, A]
+    - actualColumns: publishedColumns 对应在本地表中列的顺序，其中第 i 项的值代表该列对应本地表的列号。
     - columns 和 actualColumns 同时留空则表示直接使用本地表的模式信息，并且所有列的modifier为public
 
 
 ### UserSide
 
 配置文件样例位于 `release/conf/client_model.json`：
-- version: 该项请勿修改
-- defaultSchema: 该项请勿修改
-- schemas: 可用的全局表模式
-    - name: 该项请勿修改
-    - type: 该项请勿修改
-    - factory: 该项请勿修改
-    - operand: **需要配置的项**
-        - owners: 需要连接的参与方信息
-            - endpoint: ownerside 的 hostname:port
-            - trustcertpath: 该owner的ca证书路径
-    - tables: 全局表模式信息，**需要配置的项**
-        - name: 全局表名
-        - factory: 该项请勿修改
-        - operand: 全局到本地表映射信息
-            - feds: 全局表对应的本地表（可以有多个）
-                - endpoint: 本地表所在的owner的 endpoint
-                - name: 本地表的表名
+
+- owners: 需要连接的参与方信息
+    - endpoint: ownerside 的 hostname:port
+    - trustcertpath: 可信任的 CA 证书路径
+- tables: 全局表模式信息
+    - tablename: 全局表名
+    - localtables: 全局表对应的本地表（可以有多个）
+        - endpoint: 本地表所在 owner 的 endpoint
+        - localname: 本地表的表名

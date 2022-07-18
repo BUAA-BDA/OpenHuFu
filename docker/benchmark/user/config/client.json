@@ -1,199 +1,155 @@
 {
-  "version": "1.0",
-  "defaultSchema": "onedb",
-  "schemas": [
+  "owners": [
     {
-      "name": "onedb",
-      "type": "custom",
-      "factory": "com.hufudb.onedb.core.sql.schema.OneDBSchemaFactory",
-      "operand": {
-        "owners": [
-          {
-            "endpoint": "tpchowner1:12345",
-            "trustcertpath": "./cert/ca.pem"
-          },
-          {
-            "endpoint": "tpchowner2:12345",
-            "trustcertpath": "./cert/ca.pem"
-          },
-          {
-            "endpoint": "tpchowner3:12345",
-            "trustcertpath": "./cert/ca.pem"
-          }
-        ]
-      },
-      "tables": [
+      "endpoint": "tpchowner1:12345",
+      "trustcertpath": "./cert/ca.pem"
+    },
+    {
+      "endpoint": "tpchowner2:12345",
+      "trustcertpath": "./cert/ca.pem"
+    },
+    {
+      "endpoint": "tpchowner3:12345",
+      "trustcertpath": "./cert/ca.pem"
+    }
+  ],
+  "tables": [
+    {
+      "tablename": "region",
+      "localtables": [
         {
-          "name": "region",
-          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
-          "operand": {
-            "feds": [
-              {
-                "endpoint": "tpchowner1:12345",
-                "name": "region"
-              }
-            ]
-          }
+          "endpoint": "tpchowner1:12345",
+          "localname": "region"
+        }
+      ]
+    },
+    {
+      "tablename": "nation",
+      "localtables": [
+        {
+          "endpoint": "tpchowner1:12345",
+          "localname": "nation"
+        }
+      ]
+    },
+    {
+      "tablename": "partsupp",
+      "localtables": [
+        {
+          "endpoint": "tpchowner1:12345",
+          "localname": "partsupp"
         },
         {
-          "name": "nation",
-          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
-          "operand": {
-            "feds": [
-              {
-                "endpoint": "tpchowner1:12345",
-                "name": "nation"
-              }
-            ]
-          }
+          "endpoint": "tpchowner2:12345",
+          "localname": "partsupp"
         },
         {
-          "name": "partsupp",
-          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
-          "operand": {
-            "feds": [
-              {
-                "endpoint": "tpchowner1:12345",
-                "name": "partsupp"
-              },
-              {
-                "endpoint": "tpchowner2:12345",
-                "name": "partsupp"
-              },
-              {
-                "endpoint": "tpchowner3:12345",
-                "name": "partsupp"
-              }
-            ]
-          }
+          "endpoint": "tpchowner3:12345",
+          "localname": "partsupp"
+        }
+      ]
+    },
+    {
+      "tablename": "customer",
+      "localtables": [
+        {
+          "endpoint": "tpchowner1:12345",
+          "localname": "customer"
         },
         {
-          "name": "customer",
-          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
-          "operand": {
-            "feds": [
-              {
-                "endpoint": "tpchowner1:12345",
-                "name": "customer"
-              },
-              {
-                "endpoint": "tpchowner2:12345",
-                "name": "customer"
-              },
-              {
-                "endpoint": "tpchowner3:12345",
-                "name": "customer"
-              }
-            ]
-          }
+          "endpoint": "tpchowner2:12345",
+          "localname": "customer"
         },
         {
-          "name": "lineitem",
-          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
-          "operand": {
-            "feds": [
-              {
-                "endpoint": "tpchowner1:12345",
-                "name": "lineitem"
-              },
-              {
-                "endpoint": "tpchowner2:12345",
-                "name": "lineitem"
-              },
-              {
-                "endpoint": "tpchowner3:12345",
-                "name": "lineitem"
-              }
-            ]
-          }
+          "endpoint": "tpchowner3:12345",
+          "localname": "customer"
+        }
+      ]
+    },
+    {
+      "tablename": "lineitem",
+      "localtables": [
+        {
+          "endpoint": "tpchowner1:12345",
+          "localname": "lineitem"
         },
         {
-          "name": "orders",
-          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
-          "operand": {
-            "feds": [
-              {
-                "endpoint": "tpchowner1:12345",
-                "name": "orders"
-              },
-              {
-                "endpoint": "tpchowner2:12345",
-                "name": "orders"
-              },
-              {
-                "endpoint": "tpchowner3:12345",
-                "name": "orders"
-              }
-            ]
-          }
+          "endpoint": "tpchowner2:12345",
+          "localname": "lineitem"
         },
         {
-          "name": "part",
-          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
-          "operand": {
-            "feds": [
-              {
-                "endpoint": "tpchowner1:12345",
-                "name": "part"
-              },
-              {
-                "endpoint": "tpchowner2:12345",
-                "name": "part"
-              },
-              {
-                "endpoint": "tpchowner3:12345",
-                "name": "part"
-              }
-            ]
-          }
+          "endpoint": "tpchowner3:12345",
+          "localname": "lineitem"
+        }
+      ]
+    },
+    {
+      "tablename": "orders",
+      "localtables": [
+        {
+          "endpoint": "tpchowner1:12345",
+          "localname": "orders"
         },
         {
-          "name": "supplier",
-          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
-          "operand": {
-            "feds": [
-              {
-                "endpoint": "tpchowner1:12345",
-                "name": "supplier"
-              }
-            ]
-          }
+          "endpoint": "tpchowner2:12345",
+          "localname": "orders"
         },
         {
-          "name": "partsupp",
-          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
-          "operand": {
-            "feds": [
-              {
-                "endpoint": "tpchowner2:12345",
-                "name": "partsupp"
-              }
-            ]
-          }
+          "endpoint": "tpchowner3:12345",
+          "localname": "orders"
+        }
+      ]
+    },
+    {
+      "tablename": "part",
+      "localtables": [
+        {
+          "endpoint": "tpchowner1:12345",
+          "localname": "part"
         },
         {
-          "name": "supplier_p",
-          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
-          "operand": {
-            "feds": [
-              {
-                "endpoint": "tpchowner1:12345",
-                "name": "supplier_p"
-              }
-            ]
-          }
+          "endpoint": "tpchowner2:12345",
+          "localname": "part"
         },
         {
-          "name": "partsupp_p",
-          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
-          "operand": {
-            "feds": [
-              {
-                "endpoint": "tpchowner2:12345",
-                "name": "partsupp_p"
-              }
-            ]
-          }
+          "endpoint": "tpchowner3:12345",
+          "localname": "part"
+        }
+      ]
+    },
+    {
+      "tablename": "supplier",
+      "localtables": [
+        {
+          "endpoint": "tpchowner1:12345",
+          "localname": "supplier"
+        }
+      ]
+    },
+    {
+      "tablename": "partsupp",
+      "localtables": [
+        {
+          "endpoint": "tpchowner2:12345",
+          "localname": "partsupp"
+        }
+      ]
+    },
+    {
+      "tablename": "supplier_p",
+      "localtables": [
+        {
+          "endpoint": "tpchowner1:12345",
+          "localname": "supplier_p"
+        }
+      ]
+    },
+    {
+      "tablename": "partsupp_p",
+      "localtables": [
+        {
+          "endpoint": "tpchowner2:12345",
+          "localname": "partsupp_p"
         }
       ]
     }

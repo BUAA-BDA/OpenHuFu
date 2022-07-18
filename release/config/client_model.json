@@ -19,15 +19,15 @@
       "localTables": [
         {
           "endpoint": "localhost:12345",
-          "localName": "student1"
+          "localname": "student1"
         },
         {
           "endpoint": "localhost:12346",
-          "localName": "student1"
+          "localname": "student1"
         },
         {
           "endpoint": "localhost:12347",
-          "localName": "student1"
+          "localname": "student1"
         }
       ]
     },

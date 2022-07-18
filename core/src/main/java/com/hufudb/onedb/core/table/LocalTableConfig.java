@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName;
 public class LocalTableConfig {
   @SerializedName("endpoint")
   public String endpoint;
-  @SerializedName(value="localName", alternate = {"localname, local_name"})
+  @SerializedName(value = "localName", alternate = {"localname", "local_name"})
   public String localName;
 
   public LocalTableConfig() {}

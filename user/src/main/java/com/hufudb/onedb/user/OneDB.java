@@ -12,6 +12,7 @@ import com.hufudb.onedb.data.storage.DataSet;
 import com.hufudb.onedb.plan.Plan;
 import com.hufudb.onedb.user.utils.ModelGenerator;
 import com.hufudb.onedb.user.utils.OneDBLine;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -64,6 +65,17 @@ public class OneDB {
     }
   }
 
+  public static void setupCLI(String configPath) throws IOException {
+    List<String> dbargs = new ArrayList<>();
+    dbargs.add("-u");
+    dbargs.add(String.format("jdbc:onedb:model=%s;lex=JAVA;caseSensitive=false;timeZone='%s'", ModelGenerator.loadUserConfig(configPath), getSystemTimeZone()));
+    dbargs.add("-n");
+    dbargs.add("admin");
+    dbargs.add("-p");
+    dbargs.add("admin");
+    OneDBLine.start(dbargs.toArray(new String[6]), null, true);
+  }
+
   public static void main(String[] args) {
     final Options options = new Options();
     final Option config = new Option("c", "config", true, "user config file path");
@@ -75,14 +87,7 @@ public class OneDB {
       Class.forName("com.hufudb.onedb.user.jdbc.OneDBDriver");
       cmd = parser.parse(options, args);
       final String configPath = cmd.getOptionValue("config", "config/user.json");
-      List<String> dbargs = new ArrayList<>();
-      dbargs.add("-u");
-      dbargs.add(String.format("jdbc:onedb:model=%s;lex=JAVA;caseSensitive=false;timeZone='%s'", ModelGenerator.loadUserConfig(configPath), getSystemTimeZone()));
-      dbargs.add("-n");
-      dbargs.add("admin");
-      dbargs.add("-p");
-      dbargs.add("admin");
-      OneDBLine.start(dbargs.toArray(new String[6]), null, true);
+      setupCLI(configPath);
     } catch (Exception e) {
       e.printStackTrace();
     }
