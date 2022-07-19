@@ -53,7 +53,6 @@ public class PostgisAdapterTest {
     t1.setActualName("traffic");
     t1.setPublishedName("traffic");
     t1.setPublishedColumns(ImmutableList.of());
-    t1.setActualColumns(ImmutableList.of());
     publishedSchemas = ImmutableList.of(t1);
     for (PojoPublishedTableSchema schema : publishedSchemas) {
       assertTrue(manager.addPublishedTable(schema));

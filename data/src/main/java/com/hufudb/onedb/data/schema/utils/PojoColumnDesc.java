@@ -12,13 +12,15 @@ public class PojoColumnDesc {
   public String name;
   public ColumnTypeWrapper type;
   public ModifierWrapper modifier;
+  public int columnId;
 
   public PojoColumnDesc() {}
 
-  public PojoColumnDesc(String name, ColumnTypeWrapper type, ModifierWrapper modifier) {
+  public PojoColumnDesc(String name, ColumnTypeWrapper type, ModifierWrapper modifier, int columnId) {
     this.name = name;
     this.type = type;
     this.modifier = modifier;
+    this.columnId = columnId;
   }
 
   public ColumnType getType() {
@@ -27,6 +29,10 @@ public class PojoColumnDesc {
 
   public Modifier getModifier() {
     return modifier.get();
+  }
+
+  public int getColumnId() {
+    return columnId;
   }
 
   public static PojoColumnDesc fromColumnDesc(ColumnDesc col) {

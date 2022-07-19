@@ -44,16 +44,14 @@ public class AdapterTest {
     t1.setActualName("student");
     t1.setPublishedName("student1");
     t1.setPublishedColumns(ImmutableList.of());
-    t1.setActualColumns(ImmutableList.of());
     PojoPublishedTableSchema t2 = new PojoPublishedTableSchema();
     t2.setActualName("student");
     t2.setPublishedName("student2");
     t2.setPublishedColumns(ImmutableList.of(
-        new PojoColumnDesc("DeptName", ColumnTypeWrapper.STRING, ModifierWrapper.PUBLIC),
-        new PojoColumnDesc("Score", ColumnTypeWrapper.INT, ModifierWrapper.PUBLIC),
-        new PojoColumnDesc("Name", ColumnTypeWrapper.STRING, ModifierWrapper.PUBLIC),
-        new PojoColumnDesc("Age", ColumnTypeWrapper.INT, ModifierWrapper.HIDDEN)));
-    t2.setActualColumns(ImmutableList.of(3, 2, 0, 1));
+        new PojoColumnDesc("DeptName", ColumnTypeWrapper.STRING, ModifierWrapper.PUBLIC, 3),
+        new PojoColumnDesc("Score", ColumnTypeWrapper.INT, ModifierWrapper.PUBLIC, 2),
+        new PojoColumnDesc("Name", ColumnTypeWrapper.STRING, ModifierWrapper.PUBLIC, 0),
+        new PojoColumnDesc("Age", ColumnTypeWrapper.INT, ModifierWrapper.HIDDEN, 1)));
     publishedSchemas = ImmutableList.of(t1, t2);
     AdapterConfig adapterConfig = new AdapterConfig();
     adapterConfig.datasource = "postgresql";
@@ -77,7 +75,6 @@ public class AdapterTest {
     t3.setActualName("taxi");
     t3.setPublishedName("taxi");
     t3.setPublishedColumns(ImmutableList.of());
-    t3.setActualColumns(ImmutableList.of());
     assertTrue(manager.addPublishedTable(t3));
   }
 
