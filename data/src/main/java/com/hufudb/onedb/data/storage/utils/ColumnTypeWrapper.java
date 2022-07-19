@@ -2,7 +2,6 @@ package com.hufudb.onedb.data.storage.utils;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.annotations.SerializedName;
-import com.hufudb.onedb.data.storage.Point;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 
 /**

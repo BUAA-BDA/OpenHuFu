@@ -52,9 +52,4 @@ public class PojoGlobalTableSchema {
   public void setMappings(List<LocalTableConfig> mappings) {
     this.mappings = mappings;
   }
-
-  @Override
-  public String toString() {
-    return super.toString();
-  }
 }

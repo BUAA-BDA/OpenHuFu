@@ -8,7 +8,7 @@ start() {
     echo "use log4j properties from $2"
     log4j=$2
   fi
-  java -Dlog4j.configuration=file:"$log4j" -jar ./bin/onedb_user_client.jar -m $1
+  java -Dlog4j.configuration=file:"$log4j" -jar ./bin/onedb_user_client.jar -c $1
 }
 
 usage() {

@@ -1,74 +1,54 @@
 {
-    "version": "1.0",
-    "defaultSchema": "onedb",
-    "schemas": [
-      {
-        "name": "onedb",
-        "type": "custom",
-        "factory": "com.hufudb.onedb.core.sql.schema.OneDBSchemaFactory",
-        "operand": {
-          "owners": [
-            {
-              "endpoint": "owner1:12345",
-              "trustcertpath": "./cert/ca.pem"
-            },
-            {
-              "endpoint": "owner2:12345",
-              "trustcertpath": "./cert/ca.pem"
-            },
-            {
-              "endpoint": "owner3:12345",
-              "trustcertpath": "./cert/ca.pem"
-            }
-          ]
+  "owners": [
+    {
+      "endpoint": "owner1:12345",
+      "trustcertpath": "./cert/ca.pem"
+    },
+    {
+      "endpoint": "owner2:12345",
+      "trustcertpath": "./cert/ca.pem"
+    },
+    {
+      "endpoint": "owner3:12345",
+      "trustcertpath": "./cert/ca.pem"
+    }
+  ],
+  "tables": [
+    {
+      "tablename": "student1",
+      "localtables": [
+        {
+          "endpoint": "owner1:12345",
+          "localname": "student1"
         },
-        "tables": [
-          {
-            "name": "student1",
-            "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
-            "operand": {
-              "feds": [
-                {
-                  "endpoint": "owner1:12345",
-                  "name": "student1"
-                },
-                {
-                  "endpoint": "owner2:12345",
-                  "name": "student1"
-                },
-                {
-                  "endpoint": "owner3:12345",
-                  "name": "student1"
-                }
-              ]
-            }
-          },
-          {
-            "name": "student2",
-            "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
-            "operand": {
-              "feds": [
-                {
-                  "endpoint": "owner1:12345",
-                  "name": "student2"
-                }
-              ]
-            }
-          },
-          {
-            "name": "student3",
-            "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
-            "operand": {
-              "feds": [
-                {
-                  "endpoint": "owner1:12345",
-                  "name": "student3"
-                }
-              ]
-            }
-          }
-        ]
-      }
-    ]
-  }
-  
+        {
+          "endpoint": "owner2:12345",
+          "localname": "student1"
+        },
+        {
+          "endpoint": "owner3:12345",
+          "localname": "student1"
+        }
+      ]
+    },
+    {
+      "tablename": "student2",
+      "localtables": [
+        {
+          "endpoint": "owner1:12345",
+          "localname": "student2"
+        }
+      ]
+    },
+    {
+      "tablename": "student3",
+      "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
+      "localtables": [
+        {
+          "endpoint": "owner1:12345",
+          "localname": "student3"
+        }
+      ]
+    }
+  ]
+}

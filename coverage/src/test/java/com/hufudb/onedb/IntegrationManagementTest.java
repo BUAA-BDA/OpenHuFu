@@ -32,6 +32,7 @@ import com.hufudb.onedb.data.schema.utils.PojoPublishedTableSchema;
 import com.hufudb.onedb.owner.OwnerServer;
 import com.hufudb.onedb.owner.OwnerService;
 import com.hufudb.onedb.user.OneDB;
+import com.hufudb.onedb.user.utils.ModelGenerator;
 
 @RunWith(JUnit4.class)
 public class IntegrationManagementTest {
@@ -165,15 +166,8 @@ public class IntegrationManagementTest {
   public void jdbcTest() throws Exception {
     List<OwnerServer> owners = initAllOwner();
     Class.forName("com.hufudb.onedb.user.jdbc.OneDBDriver");
-    List<String> dbargs = new ArrayList<>();
-    String m = IntegrationManagementTest.class.getClassLoader().getResource("model.json").getPath();
-    dbargs.add("-u");
-    dbargs.add("jdbc:onedb:model=" + m + ";lex=JAVA;caseSensitive=false;");
-    dbargs.add("-n");
-    dbargs.add("admin");
-    dbargs.add("-p");
-    dbargs.add("admin");
-    Connection connection = DriverManager.getConnection("jdbc:onedb:model=" + m + ";lex=JAVA;caseSensitive=false;", "admin", "admin");
+    String configPath = IntegrationManagementTest.class.getClassLoader().getResource("model.json").getPath();
+    Connection connection = DriverManager.getConnection("jdbc:onedb:model=" + ModelGenerator.loadUserConfig(configPath) + ";lex=JAVA;caseSensitive=false;", "admin", "admin");
     Statement statement = connection.createStatement();
     ResultSet result = statement.executeQuery("select * from student");
     int count = 0;
