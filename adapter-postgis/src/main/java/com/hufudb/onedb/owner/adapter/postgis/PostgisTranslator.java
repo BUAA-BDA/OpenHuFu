@@ -72,7 +72,7 @@ public class PostgisTranslator extends BasicTranslator {
         if (inputs.size() != 2) {
           throw new RuntimeException("Distance need 2 arguments, but given " + inputs.size());
         }
-        return String.format("ST_Distance(%s, %s)", inputs.get(0), inputs.get(1));
+        return String.format("%s <-> %s", inputs.get(0), inputs.get(1));
       default:
         throw new RuntimeException("can't translate scalarFunc " + exp);
     }

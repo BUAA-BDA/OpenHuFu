@@ -416,6 +416,9 @@ public class CalciteConverter {
         case "Distance":
           func = ScalarFuncType.DISTANCE;
           break;
+        case "Point":
+          func = ScalarFuncType.POINT;
+          break;
         default:
           throw new RuntimeException("can't translate " + call);
       }
