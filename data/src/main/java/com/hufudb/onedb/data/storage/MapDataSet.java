@@ -5,6 +5,9 @@ import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.data.function.Mapper;
 
 /**
+ * 类似于虚表，持有一组Mapper用来定义其与实际表的映射关系
+ * 在访问该类对象时，可以透明化这层映射关系
+ * 
  * Dataset which map each row from source dataset into a new row
  */
 public class MapDataSet implements DataSet {

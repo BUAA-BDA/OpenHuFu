@@ -16,6 +16,12 @@ import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
 
 public class AggregateFunctions {
+
+  /**
+   * 将表达式对象转化为AggregateFunctions对象
+   * 
+   * convert Expression to AggregateFunction
+   */
   public static AggregateFunction<Row, Comparable> createAggregateFunction(Expression exp) {
     if (exp.getOpType().equals(OperatorType.AGG_FUNC)) {
       switch (AggFuncType.of(exp.getI32())) {

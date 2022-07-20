@@ -1,15 +1,18 @@
 package com.hufudb.onedb.expression;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import com.hufudb.onedb.data.function.AggregateFunction;
 import com.hufudb.onedb.data.function.Aggregator;
 import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.data.storage.ArrayRow;
 import com.hufudb.onedb.data.storage.Row;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
+/**
+ * 根据给定的groups值来管理着一组SingleAggregator对象
+ */
 public class GroupAggregator implements Aggregator {
   final Schema schema;
   final List<Integer> groups;
@@ -35,6 +38,13 @@ public class GroupAggregator implements Aggregator {
     iterator = aggregatorMap.entrySet().iterator();
   }
 
+  /**
+   * 向GroupAggregator添加Row对象
+   * 会根据该Row对象上的groups对应的取值不同，而被分配给不同的SingleAggregator
+   * 
+   * 比如给定Row[a b c]、Row[a b d]、Row[b c d]以及groups=[0 1]
+   * 则对应取值为[a b]、[a b]、[b c]，前两个Row对象分配给同一个SingleAggregator
+   */
   @Override
   public void add(Row row) {
     keyBuilder.reset();
@@ -51,6 +61,9 @@ public class GroupAggregator implements Aggregator {
     }
   }
 
+  /**
+   * 由于每次调用会触发iterator迭代，多次调用返回值可能不同
+   */
   @Override
   public Row aggregate() {
     if (iterator == null) {
@@ -59,7 +72,6 @@ public class GroupAggregator implements Aggregator {
     Map.Entry<Row, SingleAggregator> entry = iterator.next();
     Row value = entry.getValue().aggregate();
     ArrayRow.Builder builder = ArrayRow.newBuilder(schema.size());
-    // add agg result
     for (int i = 0; i < schema.size(); ++i) {
       builder.set(i, value.get(i));
     }

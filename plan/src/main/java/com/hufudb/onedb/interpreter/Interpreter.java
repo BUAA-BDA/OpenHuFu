@@ -22,10 +22,22 @@ import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import com.hufudb.onedb.proto.OneDBPlan.JoinCondition;
 import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
-
+/**
+ * 用于解析Expression对象
+ * 而Expression对象通常是由Plan对象导出
+ * 因此，通常将该类看作对Plan对象的解析
+ * 
+ * used for interprete Expression
+ * usually, Expression is provided by Plan
+ */
 public class Interpreter {
   private Interpreter() {}
 
+  /**
+   * 按照给定的条件对数据进行筛选操作
+   * 
+   * filter the source dataset by conditions
+   */
   public static DataSet filter(DataSet source, List<Expression> conditions) {
     if (conditions.isEmpty()) {
       return source;
@@ -35,10 +47,17 @@ public class Interpreter {
     }
   }
 
+
+  /**
+   * 按照给定的表达式对数据进行映射操作
+   * 
+   * map the dataset by specified exps
+   */
   public static DataSet map(DataSet source, List<Expression> exps) {
     if (exps.isEmpty()) {
       return source;
     } else {
+      // DirectMapping 是指 将一张表上的每一个列都直接映射 因此实际上相当于没做任何操作
       boolean isDirectMapping = exps.size() == source.getSchema().size();
       if (isDirectMapping) {
         for (int i = 0; i < exps.size(); ++i) {
@@ -60,12 +79,18 @@ public class Interpreter {
     }
   }
 
+  /**
+   * 对目标集合source进行聚合操作并返回结果
+   * groups来自Plan对象，指定了plan
+   */
   public static DataSet aggregate(DataSet source, List<Integer> groups, List<Expression> aggs) {
     if (aggs.isEmpty()) {
       return source;
     } else {
+      // we convert every aggregate Expression into AggregateFunction
       List<AggregateFunction<Row, Comparable>> funcs = AggregateFunctions.createAggregateFunction(aggs);
       Aggregator aggregator = null;
+      // outSchema represents what the expected output looks like
       final Schema outSchema = ExpressionUtils.createSchema(aggs);
       if (groups.isEmpty()) {
         aggregator = new SingleAggregator(outSchema, funcs);
@@ -95,7 +120,12 @@ public class Interpreter {
       return (boolean) implement(row, condition);
     }
   }
-
+  
+  /**
+   * 根据给定的Expression和Schema对象，来定义一种映射关系
+   * 
+   * represents mapping relationship by specified Expression and Schema
+   */
   public static class InterpretiveMapper implements Mapper {
     final Schema schema;
     final Expression exp;
@@ -179,6 +209,9 @@ public class Interpreter {
     }
   }
 
+  /**
+   * 在给定的Row对象上执行Expression获得实际计算值并返回
+   */
   public static Object implement(Row row, Expression e) {
     final List<Expression> inputs = e.getInList();
     final OperatorType type = e.getOpType();
@@ -293,6 +326,10 @@ public class Interpreter {
     }
   }
 
+  /**
+   * 根据参与计算的双方的ColumnType，判断计算结果的类型
+   * 需要保证ColumnType.getNumber()遵循类型提升规范
+   */
   private static ColumnType dominate(ColumnType a, ColumnType b) {
     if (a.getNumber() > b.getNumber()) {
       return a;
@@ -409,6 +446,9 @@ public class Interpreter {
     }
   }
 
+  /**
+   * 将给定的value转换为指定的ColumnType对应的实际类型
+   */
   public static Object cast(ColumnType type, Object value) {
     if (value == null) {
       return null;

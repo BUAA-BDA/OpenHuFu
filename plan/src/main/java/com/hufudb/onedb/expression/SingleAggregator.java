@@ -8,6 +8,12 @@ import com.hufudb.onedb.data.storage.ArrayRow;
 import com.hufudb.onedb.data.storage.Row;
 import com.hufudb.onedb.interpreter.Interpreter;
 
+/**
+ * SingleAggregator会在Plan的groups.size()==0时启用
+ * 同时GroupAggregator也依赖于它
+ * 其管理着一组AggregateFunction
+ * 每个AggregateFunction计算获得一个值，最后组成一行（即Row）并返回
+ */
 public class SingleAggregator implements Aggregator {
   final Schema schema;
   final List<AggregateFunction<Row, Comparable>> aggFunc;
@@ -26,6 +32,11 @@ public class SingleAggregator implements Aggregator {
     }
   }
 
+  /**
+   * 根据给定的AggregateFunction集合，获得结果集合Row
+   * 
+   * get result as a Row based on the given AggregateFunction(s)
+   */
   @Override
   public Row aggregate() {
     ArrayRow.Builder builder = ArrayRow.newBuilder(aggFunc.size());
