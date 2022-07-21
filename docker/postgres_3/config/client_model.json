@@ -1,37 +1,35 @@
 {
-    "version": "1.0",
-    "defaultSchema": "default",
-    "schemas": [
-      {
-        "name": "default",
-        "type": "custom",
-        "factory": "com.hufudb.onedb.core.sql.schema.OneDBSchemaFactory",
-        "operand": {
-          "endpoints": ["localhost:12345", "localhost:12346", "localhost:12347"]
+  "owners": [
+    {
+      "endpoint": "localhost:12345",
+      "trustcertpath": "./cert/ca.pem"
+    },
+    {
+      "endpoint": "localhost:12346",
+      "trustcertpath": "./cert/ca.pem"
+    },
+    {
+      "endpoint": "localhost:12347",
+      "trustcertpath": "./cert/ca.pem"
+    }
+  ],
+  "tables": [
+    {
+      "tablename": "student1",
+      "localtables": [
+        {
+          "endpoint": "localhost:12345",
+          "localname": "student1"
         },
-        "tables": [
-            {
-              "name": "student",
-              "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
-              "operand": {
-                "feds": [
-                  {
-                    "endpoint": "localhost:12345",
-                    "name": "student"
-                  },
-                  {
-                    "endpoint": "localhost:12346",
-                    "name": "student"
-                  },
-                  {
-                    "endpoint": "localhost:12347",
-                    "name": "student"
-                  }
-                ]
-              }
-            }
-        ]
-      }
-    ]
-  }
-  
+        {
+          "endpoint": "localhost:12346",
+          "localname": "student1"
+        },
+        {
+          "endpoint": "localhost:12347",
+          "localname": "student1"
+        }
+      ]
+    }
+  ]
+}

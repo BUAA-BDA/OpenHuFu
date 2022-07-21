@@ -41,7 +41,7 @@
     - backend.sh: Spring boot 示例启动脚本
     - init_env.sh: 本地示例初始化脚本
 - user.sh: 查询端运行脚本
-- owner.sh 数据拥有端运行脚本
+- owner.sh: 数据拥有端运行脚本
 
 ## 运行
 `release/demo` 文件夹下提供了一个本地运行的示例，运行该示例需要完成上述安装步骤并安装 docker >= 20.10, docker-compose >= 1.29
@@ -120,21 +120,13 @@ onedb>!q
 
 ### UserSide
 
-配置文件样例位于 `release/conf/client_model.json`：
-- version: 该项请勿修改
-- defaultSchema: 该项请勿修改
-- schemas: 可用的全局表模式
-    - name: 该项请勿修改
-    - type: 该项请勿修改
-    - factory: 该项请勿修改
-    - operand: **需要配置的项**
-        - owners: 需要连接的参与方信息
-            - endpoint: ownerside 的 hostname:port
-            - trustcertpath: 该owner的ca证书路径
-    - tables: 全局表模式信息，**需要配置的项**
-        - name: 全局表名
-        - factory: 该项请勿修改
-        - operand: 全局到本地表映射信息
-            - feds: 全局表对应的本地表（可以有多个）
-                - endpoint: 本地表所在的owner的 endpoint
-                - name: 本地表的表名
+配置文件样例位于 `release/conf/client_model.json`
+
+- owners: 需要连接的参与方信息
+    - endpoint: ownerside 的 hostname:port
+    - trustcertpath: 可信任的 CA 证书路径
+- tables: 全局表模式信息
+    - tablename: 全局表名
+    - localtables: 全局表对应的本地表（可以有多个）
+        - endpoint: 本地表所在 owner 的 endpoint
+        - localname: 本地表的表名

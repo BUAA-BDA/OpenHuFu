@@ -1,119 +1,90 @@
 {
-  "version": "1.0",
-  "defaultSchema": "onedb",
-  "schemas": [
+  "owners": [
     {
-      "name": "onedb",
-      "type": "custom",
-      "factory": "com.hufudb.onedb.core.sql.schema.OneDBSchemaFactory",
-      "operand": {
-        "owners": [
-          {
-            "endpoint": "htowner1:12345",
-            "trustcertpath": "./cert/ca.pem"
-          },
-          {
-            "endpoint": "htowner2:12345",
-            "trustcertpath": "./cert/ca.pem"
-          },
-          {
-            "endpoint": "htowner3:12345",
-            "trustcertpath": "./cert/ca.pem"
-          },
-          {
-            "endpoint": "htowner4:12345",
-            "trustcertpath": "./cert/ca.pem"
-          }
-        ]
-      },
-      "tables": [
+      "endpoint": "htowner1:12345",
+      "trustcertpath": "./cert/ca.pem"
+    },
+    {
+      "endpoint": "htowner2:12345",
+      "trustcertpath": "./cert/ca.pem"
+    },
+    {
+      "endpoint": "htowner3:12345",
+      "trustcertpath": "./cert/ca.pem"
+    },
+    {
+      "endpoint": "htowner4:12345",
+      "trustcertpath": "./cert/ca.pem"
+    }
+  ],
+  "tables": [
+    {
+      "tablename": "student1",
+      "localtables": [
         {
-          "name": "student1",
-          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
-          "operand": {
-            "feds": [
-              {
-                "endpoint": "htowner1:12345",
-                "name": "student1"
-              },
-              {
-                "endpoint": "htowner2:12345",
-                "name": "student1"
-              },
-              {
-                "endpoint": "htowner3:12345",
-                "name": "student1"
-              },
-              {
-                "endpoint": "htowner4:12345",
-                "name": "student1"
-              }
-            ]
-          }
+          "endpoint": "htowner1:12345",
+          "localname": "student1"
         },
         {
-          "name": "st_pro_1",
-          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
-          "operand": {
-            "feds": [
-              {
-                "endpoint": "htowner1:12345",
-                "name": "st_pro_1"
-              }
-            ]
-          }
+          "endpoint": "htowner2:12345",
+          "localname": "student1"
         },
         {
-          "name": "st_pro_2",
-          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
-          "operand": {
-            "feds": [
-              {
-                "endpoint": "htowner2:12345",
-                "name": "st_pro_2"
-              }
-            ]
-          }
+          "endpoint": "htowner3:12345",
+          "localname": "student1"
         },
         {
-          "name": "st_pro_3",
-          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
-          "operand": {
-            "feds": [
-              {
-                "endpoint": "htowner1:12345",
-                "name": "st_pro_3"
-              },
-              {
-                "endpoint": "htowner2:12345",
-                "name": "st_pro_3"
-              }
-            ]
-          }
+          "endpoint": "htowner4:12345",
+          "localname": "student1"
+        }
+      ]
+    },
+    {
+      "tablename": "st_pro_1",
+      "localtables": [
+        {
+          "endpoint": "htowner1:12345",
+          "localname": "st_pro_1"
+        }
+      ]
+    },
+    {
+      "tablename": "st_pro_2",
+      "localtables": [
+        {
+          "endpoint": "htowner2:12345",
+          "localname": "st_pro_2"
+        }
+      ]
+    },
+    {
+      "tablename": "st_pro_3",
+      "localtables": [
+        {
+          "endpoint": "htowner1:12345",
+          "localname": "st_pro_3"
         },
         {
-          "name": "student2",
-          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
-          "operand": {
-            "feds": [
-              {
-                "endpoint": "htowner1:12345",
-                "name": "student2"
-              }
-            ]
-          }
-        },
+          "endpoint": "htowner2:12345",
+          "localname": "st_pro_3"
+        }
+      ]
+    },
+    {
+      "tablename": "student2",
+      "localtables": [
         {
-          "name": "student3",
-          "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
-          "operand": {
-            "feds": [
-              {
-                "endpoint": "htowner1:12345",
-                "name": "student3"
-              }
-            ]
-          }
+          "endpoint": "htowner1:12345",
+          "localname": "student2"
+        }
+      ]
+    },
+    {
+      "tablename": "student3",
+      "localtables": [
+        {
+          "endpoint": "htowner1:12345",
+          "name": "student3"
         }
       ]
     }
