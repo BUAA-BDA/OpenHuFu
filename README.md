@@ -111,12 +111,11 @@ onedb>!q
 - tables: 预定义的可被 query user 获取的本地表 schema 信息
     - actualName: 本地真实表名
     - publishedName: 对外发布的表名，query user 通过该表名来查询此表
-    - columns: 列模式信息，各列顺序需要和本地表一致
+    - publishedColumns: 需要公开的列信息
         - name: 对外发布的列名
         - type: 对外发布的类型（当前版本需要和本地类型保持一致）
         - modifier: 安全级别
-    - actualColumns: 对应列在被发布表中的顺序，例如本地表 [A, B, C]，通过设置 actualColumns 为[2, 1, 0]，即可将发布表中列顺序变为 [C, B, A]
-    - columns 和 actualColumns 同时留空则表示直接使用本地表的模式信息，并且所有列的modifier为public
+        - columnId: 对应的真实列在真实表中的序号
 
 
 ### UserSide
