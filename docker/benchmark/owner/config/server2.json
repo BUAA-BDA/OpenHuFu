@@ -16,38 +16,32 @@
     {
       "actualName": "partsupp",
       "publishedName": "partsupp",
-      "publishedColumns": [],
-      "actualColumns": []
+      "publishedColumns": []
     },
     {
       "actualName": "customer",
       "publishedName": "customer",
-      "publishedColumns": [],
-      "actualColumns": []
+      "publishedColumns": []
     },
     {
       "actualName": "lineitem",
       "publishedName": "lineitem",
-      "publishedColumns": [],
-      "actualColumns": []
+      "publishedColumns": []
     },
     {
       "actualName": "orders",
       "publishedName": "orders",
-      "publishedColumns": [],
-      "actualColumns": []
+      "publishedColumns": []
     },
     {
       "actualName": "part",
       "publishedName": "part",
-      "publishedColumns": [],
-      "actualColumns": []
+      "publishedColumns": []
     },
     {
       "actualName": "supplier",
       "publishedName": "supplier",
-      "publishedColumns": [],
-      "actualColumns": []
+      "publishedColumns": []
     },
     {
       "actualName": "partsupp",
@@ -56,25 +50,28 @@
         {
           "name": "ps_partkey",
           "type": "INT",
-          "modifier": "protected"
+          "modifier": "protected",
+          "columnId": 0
         },
         {
           "name": "ps_suppkey",
           "type": "INT",
-          "modifier": "protected"
+          "modifier": "protected",
+          "columnId": 1
         },
         {
           "name": "ps_availqty",
           "type": "INT",
-          "modifier": "protected"
+          "modifier": "protected",
+          "columnId": 2
         },
         {
           "name": "ps_supplycost",
           "type": "DOUBLE",
-          "modifier": "protected"
+          "modifier": "protected",
+          "columnId": 3
         }
-      ],
-      "actualColumns": [0, 1, 2, 3]
+      ]
     }
   ]
 }

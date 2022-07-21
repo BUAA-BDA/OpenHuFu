@@ -41,7 +41,7 @@
     - backend.sh: Spring boot 示例启动脚本
     - init_env.sh: 本地示例初始化脚本
 - user.sh: 查询端运行脚本
-- owner.sh 数据拥有端运行脚本
+- owner.sh: 数据拥有端运行脚本
 
 ## 运行
 `release/demo` 文件夹下提供了一个本地运行的示例，运行该示例需要完成上述安装步骤并安装 docker >= 20.10, docker-compose >= 1.29
@@ -111,17 +111,16 @@ onedb>!q
 - tables: 预定义的可被 query user 获取的本地表 schema 信息
     - actualName: 本地真实表名
     - publishedName: 对外发布的表名，query user 通过该表名来查询此表
-    - columns: 列模式信息，各列顺序需要和本地表一致
+    - publishedColumns: 需要公开的列信息
         - name: 对外发布的列名
         - type: 对外发布的类型（当前版本需要和本地类型保持一致）
         - modifier: 安全级别
-    - actualColumns: publishedColumns 对应在本地表中列的顺序，其中第 i 项的值代表该列对应本地表的列号。
-    - columns 和 actualColumns 同时留空则表示直接使用本地表的模式信息，并且所有列的modifier为public
+        - columnId: 对应的真实列在真实表中的序号
 
 
 ### UserSide
 
-配置文件样例位于 `release/conf/client_model.json`：
+配置文件样例位于 `release/conf/client_model.json`
 
 - owners: 需要连接的参与方信息
     - endpoint: ownerside 的 hostname:port

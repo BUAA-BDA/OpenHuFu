@@ -117,11 +117,10 @@ public class SchemaManager {
       throw new RuntimeException("Table not found in local database");
     }
     List<PojoColumnDesc> publishedColumns = publishedTableSchema.getPublishedColumns();
-    List<Integer> originNames = publishedTableSchema.getActualColumns();
     for (int i = 0; i < publishedColumns.size(); ++i) {
       if (!publishedColumns.get(i).getModifier().equals(Modifier.HIDDEN)) {
         pFields.add(publishedColumns.get(i).toColumnDesc());
-        mappings.add(originNames.get(i));
+        mappings.add(publishedColumns.get(i).getColumnId());
       }
     }
     return new PublishedTableSchema(actualSchema, publishedTableSchema.getPublishedName(),

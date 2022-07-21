@@ -16,50 +16,42 @@
     {
       "actualName": "region",
       "publishedName": "region",
-      "publishedColumns": [],
-      "actualColumns": []
+      "publishedColumns": []
     },
     {
       "actualName": "nation",
       "publishedName": "nation",
-      "publishedColumns": [],
-      "actualColumns": []
+      "publishedColumns": []
     },
     {
       "actualName": "partsupp",
       "publishedName": "partsupp",
-      "publishedColumns": [],
-      "actualColumns": []
+      "publishedColumns": []
     },
     {
       "actualName": "customer",
       "publishedName": "customer",
-      "publishedColumns": [],
-      "actualColumns": []
+      "publishedColumns": []
     },
     {
       "actualName": "lineitem",
       "publishedName": "lineitem",
-      "publishedColumns": [],
-      "actualColumns": []
+      "publishedColumns": []
     },
     {
       "actualName": "orders",
       "publishedName": "orders",
-      "publishedColumns": [],
-      "actualColumns": []
+      "publishedColumns": []
     },
     {
       "actualName": "part",
       "publishedName": "part",
-      "publishedColumns": [],
-      "actualColumns": []
+      "publishedColumns": []
     },
     {
       "actualName": "supplier",
       "publishedName": "supplier",
-      "publishedColumns": [],
-      "actualColumns": []
+      "publishedColumns": []
     },
     {
       "actualName": "supplier",
@@ -68,35 +60,40 @@
         {
           "name": "s_suppkey",
           "type": "INT",
-          "modifier": "protected"
+          "modifier": "protected",
+          "columnId": 0
         },
         {
           "name": "s_name",
           "type": "STRING",
-          "modifier": "protected"
+          "modifier": "protected",
+          "columnId": 1
         },
         {
           "name": "s_address",
           "type": "STRING",
-          "modifier": "protected"
+          "modifier": "protected",
+          "columnId": 2
         },
         {
           "name": "s_nationkey",
           "type": "INT",
-          "modifier": "protected"
+          "modifier": "protected",
+          "columnId": 3
         },
         {
           "name": "s_phone",
           "type": "STRING",
-          "modifier": "protected"
+          "modifier": "protected",
+          "columnId": 4
         },
         {
           "name": "s_comment",
           "type": "STRING",
-          "modifier": "protected"
+          "modifier": "protected",
+          "columnId": 5
         }
-      ],
-      "actualColumns": [0, 1, 2, 3, 4, 5, 6]
+      ]
     }
   ]
 }

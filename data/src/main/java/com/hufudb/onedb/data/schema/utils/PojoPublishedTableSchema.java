@@ -8,27 +8,23 @@ public class PojoPublishedTableSchema {
   public String publishedName;
   public String actualName;
   public List<PojoColumnDesc> publishedColumns;
-  public List<Integer> actualColumns;
 
   public PojoPublishedTableSchema() {}
 
   public PojoPublishedTableSchema(
         String publishedName,
         String actualName,
-        List<PojoColumnDesc> publishedColumns,
-        List<Integer> actualColumns) {
+        List<PojoColumnDesc> publishedColumns) {
     this.publishedName = publishedName;
     this.actualName = actualName;
     this.publishedColumns = publishedColumns;
-    this.actualColumns = actualColumns;
   }
 
   public static PojoPublishedTableSchema from(PublishedTableSchema schema) {
     return new PojoPublishedTableSchema(
         schema.getPublishedTableName(),
         schema.getActualTableName(),
-        PojoColumnDesc.fromColumnDesc(schema.getFakeTableSchema().getSchema().getColumnDescs()),
-        schema.getMappings());
+        PojoColumnDesc.fromColumnDesc(schema.getFakeTableSchema().getSchema().getColumnDescs()));
   }
 
   public static List<PojoPublishedTableSchema> from(List<PublishedTableSchema> tableSchemas) {
@@ -59,11 +55,4 @@ public class PojoPublishedTableSchema {
     this.publishedColumns = publishedColumns;
   }
 
-  public List<Integer> getActualColumns() {
-    return actualColumns;
-  }
-
-  public void setActualColumns(List<Integer> actualColumns) {
-    this.actualColumns = actualColumns;
-  }
 }

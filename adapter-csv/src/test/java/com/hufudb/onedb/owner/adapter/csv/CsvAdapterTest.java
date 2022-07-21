@@ -61,26 +61,23 @@ public class CsvAdapterTest {
     t1.setActualName("test2");
     t1.setPublishedName("student1");
     t1.setPublishedColumns(ImmutableList.of());
-    t1.setActualColumns(ImmutableList.of());
     PojoPublishedTableSchema t2 = new PojoPublishedTableSchema();
     t2.setActualName("test2");
     t2.setPublishedName("student2");
     t2.setPublishedColumns(ImmutableList.of(
-        new PojoColumnDesc("DeptName", ColumnTypeWrapper.STRING, ModifierWrapper.PUBLIC),
-        new PojoColumnDesc("Score", ColumnTypeWrapper.INT, ModifierWrapper.PUBLIC),
-        new PojoColumnDesc("Name", ColumnTypeWrapper.STRING, ModifierWrapper.PUBLIC),
-        new PojoColumnDesc("Weight", ColumnTypeWrapper.DOUBLE, ModifierWrapper.PUBLIC)));
-    t2.setActualColumns(ImmutableList.of(3, 2, 0, 4));
+        new PojoColumnDesc("DeptName", ColumnTypeWrapper.STRING, ModifierWrapper.PUBLIC, 3),
+        new PojoColumnDesc("Score", ColumnTypeWrapper.INT, ModifierWrapper.PUBLIC, 2),
+        new PojoColumnDesc("Name", ColumnTypeWrapper.STRING, ModifierWrapper.PUBLIC, 0),
+        new PojoColumnDesc("Weight", ColumnTypeWrapper.DOUBLE, ModifierWrapper.PUBLIC, 4)));
     PojoPublishedTableSchema t3 = new PojoPublishedTableSchema();
     t3.setActualName("test3");
     t3.setPublishedName("datetime");
     t3.setPublishedColumns(ImmutableList.of(
-        new PojoColumnDesc("license", ColumnTypeWrapper.STRING, ModifierWrapper.PUBLIC),
-        new PojoColumnDesc("cur_date", ColumnTypeWrapper.DATE, ModifierWrapper.PUBLIC),
-        new PojoColumnDesc("cur_time", ColumnTypeWrapper.TIME, ModifierWrapper.PUBLIC),
-        new PojoColumnDesc("time_stamp", ColumnTypeWrapper.TIMESTAMP, ModifierWrapper.PUBLIC)
+        new PojoColumnDesc("license", ColumnTypeWrapper.STRING, ModifierWrapper.PUBLIC, 0),
+        new PojoColumnDesc("cur_date", ColumnTypeWrapper.DATE, ModifierWrapper.PUBLIC, 1),
+        new PojoColumnDesc("cur_time", ColumnTypeWrapper.TIME, ModifierWrapper.PUBLIC, 2),
+        new PojoColumnDesc("time_stamp", ColumnTypeWrapper.TIMESTAMP, ModifierWrapper.PUBLIC, 3)
     ));
-    t3.setActualColumns(ImmutableList.of(0, 1, 2, 3));
     manager.addPublishedTable(t1);
     manager.addPublishedTable(t2);
     manager.addPublishedTable(t3);

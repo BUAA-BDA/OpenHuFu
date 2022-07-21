@@ -90,7 +90,6 @@ public class IntegrationManagementTest {
     t1.setActualName("student");
     t1.setPublishedName("student1");
     t1.setPublishedColumns(ImmutableList.of());
-    t1.setActualColumns(ImmutableList.of());
     assertTrue(os1.addPublishedTable(t1));
     assertFalse(os1.addPublishedTable(t1));
     assertTrue(os1.getAllPublishedTable().size() == 1);
