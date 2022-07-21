@@ -2,6 +2,7 @@ package com.hufudb.onedb.data.schema.utils;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import com.google.gson.annotations.SerializedName;
 import com.hufudb.onedb.data.storage.utils.ColumnTypeWrapper;
 import com.hufudb.onedb.data.storage.utils.ModifierWrapper;
 import com.hufudb.onedb.proto.OneDBData.ColumnDesc;
@@ -12,6 +13,7 @@ public class PojoColumnDesc {
   public String name;
   public ColumnTypeWrapper type;
   public ModifierWrapper modifier;
+  @SerializedName(value = "columnId", alternate = { "columnid", "column_id" })
   public int columnId;
 
   public PojoColumnDesc() {}
