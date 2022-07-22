@@ -106,8 +106,6 @@ public class ExpressionFactory {
         return builder.setI32(DateUtils.calendarToTimeInt((Calendar) value)).build();
       case TIMESTAMP:
         return builder.setI64(DateUtils.calendarToTimestampLong((Calendar) value)).build();
-      case POINT:
-        return builder.setStr((String) value.toString()).build();
       default:
         throw new UnsupportedOperationException("Unsupported literal type");
     }

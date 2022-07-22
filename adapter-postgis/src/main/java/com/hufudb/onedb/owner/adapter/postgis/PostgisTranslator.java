@@ -17,38 +17,6 @@ public class PostgisTranslator extends BasicTranslator {
   }
 
   @Override
-  protected String literal(Expression literal) {
-    ColumnType type = literal.getOutType();
-    switch (type) {
-      case BOOLEAN:
-        return String.valueOf(literal.getB());
-      case BYTE:
-      case SHORT:
-      case INT:
-        return String.valueOf(literal.getI32());
-      case LONG:
-        return String.valueOf(literal.getI64());
-      case DATE:
-        return String.format("date '%s'", dateUtils.intToDate(literal.getI32()).toString());
-      case TIME:
-        return String.format("time '%s'", dateUtils.intToTime(literal.getI32()).toString());
-      case TIMESTAMP:
-        return String.format("timestamp '%s'", dateUtils.longToTimestamp(literal.getI64()).toString());
-      case FLOAT:
-        return String.valueOf(literal.getF32());
-      case DOUBLE:
-        return String.valueOf(literal.getF64());
-      case STRING:
-        return String.format("'%s'", literal.getStr());
-      case POINT:
-        // todo: decouple String format of Point from Postgis
-        return String.format("ST_GeomFromText('%s', 4326)", Point.fromBytes(literal.getBlob().toByteArray()).toString());
-      default:
-        throw new RuntimeException("can't translate literal " + literal);
-    }
-  }
-
-  @Override
   protected String scalarFunc(Expression exp) {
     ScalarFuncType func = ScalarFuncType.of(exp.getI32());
     List<String> inputs = exp.getInList().stream().map(e -> translate(e)).collect(Collectors.toList());

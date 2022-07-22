@@ -23,11 +23,11 @@ import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import com.hufudb.onedb.proto.OneDBPlan.JoinCondition;
 import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
 /**
- * 用于解析Expression对象
+ * 用于将Expression对象应用到Dataset上获得结果
  * 而Expression对象通常是由Plan对象导出
  * 因此，通常将该类看作对Plan对象的解析
  * 
- * used for interprete Expression
+ * used for interprete Expression into result,
  * usually, Expression is provided by Plan
  */
 public class Interpreter {
@@ -252,9 +252,15 @@ public class Interpreter {
           }
         }
         return implement(row, inputs.get(inputs.size() - 1));
+      case SCALAR_FUNC:
+        return calScalarFunc(row, type, inputs);
       default:
         throw new UnsupportedOperationException("operator not support in intereperter");
     }
+  }
+
+  private static Object calScalarFunc(Row row, OperatorType type, List<Expression> inputs) {
+    return null;
   }
 
   private static Boolean calBoolean(Row row, OperatorType type, List<Expression> inputs) {
