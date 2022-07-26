@@ -14,6 +14,8 @@ import com.hufudb.onedb.data.storage.FilterDataSet;
 import com.hufudb.onedb.data.storage.JoinDataSet;
 import com.hufudb.onedb.data.storage.MapDataSet;
 import com.hufudb.onedb.data.storage.Row;
+import com.hufudb.onedb.data.storage.Point;
+import com.hufudb.onedb.expression.ScalarFuncType;
 import com.hufudb.onedb.expression.AggregateFunctions;
 import com.hufudb.onedb.expression.ExpressionUtils;
 import com.hufudb.onedb.expression.GroupAggregator;
@@ -253,14 +255,56 @@ public class Interpreter {
         }
         return implement(row, inputs.get(inputs.size() - 1));
       case SCALAR_FUNC:
-        return calScalarFunc(row, type, inputs);
+        return calScalarFunc(row, e);
       default:
         throw new UnsupportedOperationException("operator not support in intereperter");
     }
   }
 
-  private static Object calScalarFunc(Row row, OperatorType type, List<Expression> inputs) {
-    return null;
+  private static Object calScalarFunc(Row row, Expression exp) {
+    ScalarFuncType func = ScalarFuncType.of(exp.getI32());
+    List<Expression> inputs = exp.getInList();
+    switch (func) {
+      case ABS:
+        if (inputs.size() != 1) {
+          throw new RuntimeException("ABS need 1 arguements, but given " + inputs.size());
+        }
+        Number x = (Number) implement(row, inputs.get(0));
+        if(x instanceof Integer) {
+          return Math.abs((Integer)x);
+        } else if (x instanceof Long) {
+          return Math.abs((Long) x);
+        } else if (x instanceof Float) {
+          return Math.abs((Float) x);
+        } else if (x instanceof Double) {
+          return Math.abs((Double) x);
+        } else {
+          throw new RuntimeException("ABS can't handle this type of Number as " + x.getClass());
+        }
+      case POINT:
+        if (inputs.size() != 2) {
+          throw new RuntimeException("Point need 2 arguments, but given " + inputs.size());
+        }
+        return new Point(((Number) implement(row, inputs.get(0))).doubleValue(), 
+                         ((Number) implement(row, inputs.get(1))).doubleValue());
+      case DWITHIN:
+        if (inputs.size() != 3) {
+          throw new RuntimeException("DWithin need 3 arguments, but given " + inputs.size());
+        }
+        Double maxDist = ((Number) implement(row, inputs.get(2))).doubleValue();
+        Point from = (Point) implement(row, inputs.get(0));
+        Point to = (Point) implement(row, inputs.get(1));
+        return Math.sqrt(Math.pow(from.getX() - to.getX(), 2) + Math.pow(from.getY() - to.getY(), 2)) <= maxDist;
+      case DISTANCE:
+        if (inputs.size() != 2) {
+          throw new RuntimeException("Distance need 2 arguments, but given " + inputs.size());
+        }
+        Point a = (Point) implement(row, inputs.get(0));
+        Point b = (Point) implement(row, inputs.get(1));
+        return Math.sqrt(Math.pow(a.getX() - b.getX(), 2) + Math.pow(a.getY() - b.getY(), 2));
+      default:
+        throw new RuntimeException("can't translate scalarFunc " + exp);
+    }
   }
 
   private static Boolean calBoolean(Row row, OperatorType type, List<Expression> inputs) {
