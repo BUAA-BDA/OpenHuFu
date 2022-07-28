@@ -1,11 +1,9 @@
 package com.hufudb.onedb.owner.adapter.postgis;
 
-import com.hufudb.onedb.data.storage.Point;
 import com.hufudb.onedb.expression.AggFuncType;
 import com.hufudb.onedb.expression.BasicTranslator;
 import com.hufudb.onedb.expression.ExpressionUtils;
 import com.hufudb.onedb.expression.ScalarFuncType;
-import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import java.util.List;
 import java.util.stream.Collectors;

@@ -24,21 +24,15 @@ import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import com.hufudb.onedb.proto.OneDBPlan.JoinCondition;
 import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
+
 /**
- * 用于将Expression对象应用到Dataset上获得结果
- * 而Expression对象通常是由Plan对象导出
- * 因此，通常将该类看作对Plan对象的解析
- * 
- * used for interprete Expression into result,
- * usually, Expression is provided by Plan
+ * Interpret expressions as different types of datasets
  */
 public class Interpreter {
   private Interpreter() {}
 
   /**
-   * 按照给定的条件对数据进行筛选操作
-   * 
-   * filter the source dataset by conditions
+   * filter the source dataset by condition expressions
    */
   public static DataSet filter(DataSet source, List<Expression> conditions) {
     if (conditions.isEmpty()) {
@@ -51,9 +45,7 @@ public class Interpreter {
 
 
   /**
-   * 按照给定的表达式对数据进行映射操作
-   * 
-   * map the dataset by specified exps
+   * map the dataset by specified expressions
    */
   public static DataSet map(DataSet source, List<Expression> exps) {
     if (exps.isEmpty()) {
@@ -82,8 +74,7 @@ public class Interpreter {
   }
 
   /**
-   * 对目标集合source进行聚合操作并返回结果
-   * groups来自Plan对象，指定了plan
+   * aggregate the dataset with groups and aggregate epxressions
    */
   public static DataSet aggregate(DataSet source, List<Integer> groups, List<Expression> aggs) {
     if (aggs.isEmpty()) {
@@ -124,8 +115,6 @@ public class Interpreter {
   }
   
   /**
-   * 根据给定的Expression和Schema对象，来定义一种映射关系
-   * 
    * represents mapping relationship by specified Expression and Schema
    */
   public static class InterpretiveMapper implements Mapper {
@@ -211,9 +200,6 @@ public class Interpreter {
     }
   }
 
-  /**
-   * 在给定的Row对象上执行Expression获得实际计算值并返回
-   */
   public static Object implement(Row row, Expression e) {
     final List<Expression> inputs = e.getInList();
     final OperatorType type = e.getOpType();
@@ -496,9 +482,6 @@ public class Interpreter {
     }
   }
 
-  /**
-   * 将给定的value转换为指定的ColumnType对应的实际类型
-   */
   public static Object cast(ColumnType type, Object value) {
     if (value == null) {
       return null;

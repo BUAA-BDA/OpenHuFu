@@ -8,10 +8,8 @@ import com.hufudb.onedb.proto.OneDBData.Modifier;
 import com.hufudb.onedb.proto.OneDBData.SchemaProto;
 
 /**
- * Schema用于描述关系表中各列的信息，通常作为中间变量，不可变
- * 
- * Schema of relation table, used in @DataSet.java, @TableSchema.java Encapsulation of protocol
- * buffer, immutable
+ * Schema of relation table, used in @DataSet.java, @TableSchema.java.
+ * Encapsulation of protocol buffer, immutable
  */
 public class Schema {
   public final static Schema EMPTY = new Schema(SchemaProto.newBuilder().build());

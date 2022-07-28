@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.stream.Collectors;
 import com.google.common.collect.BoundType;
 import com.google.common.collect.ImmutableList;
@@ -275,7 +274,7 @@ public class CalciteConverter {
       return ExpressionFactory.createBinaryOperator(op, type, left, right);
     }
 
-    /*
+    /**
      * add unary operator
      */
     Expression unary(RexCall call) {
@@ -307,7 +306,7 @@ public class CalciteConverter {
       return ExpressionFactory.createUnaryOperator(op, type, in);
     }
 
-    /*
+    /**
      * translate case
      */
     Expression caseCall(RexCall call) {
@@ -391,7 +390,7 @@ public class CalciteConverter {
           rightCmp);
     }
 
-    /*
+    /**
      * translate localref
      */
     Expression localRef(RexLocalRef node) {
@@ -400,7 +399,7 @@ public class CalciteConverter {
       return convert(local);
     }
 
-    /*
+    /**
      * translate func
      */
     Expression scalarFunc(RexCall call) {

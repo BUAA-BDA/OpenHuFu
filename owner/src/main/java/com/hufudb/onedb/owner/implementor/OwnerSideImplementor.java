@@ -17,10 +17,6 @@ import com.hufudb.onedb.plan.UnaryPlan;
 import com.hufudb.onedb.proto.OneDBPlan.PlanType;
 import com.hufudb.onedb.rpc.Rpc;
 
-/**
- * 在数据持有方执行Plan
- * 依赖于Adapter对象实现LeafPlan的执行
- */
 public class OwnerSideImplementor implements PlanImplementor {
   Rpc rpc;
   Adapter dataSourceAdapter;
@@ -58,7 +54,7 @@ public class OwnerSideImplementor implements PlanImplementor {
     }
     try {
       DataSet result =
-      HashEqualJoin.join(in, binary.getJoinCond(), isLeft, rpc, binary.getTaskInfo());
+          HashEqualJoin.join(in, binary.getJoinCond(), isLeft, rpc, binary.getTaskInfo());
       if (!binary.getSelectExps().isEmpty()) {
         result = Interpreter.map(result, binary.getSelectExps());
       }

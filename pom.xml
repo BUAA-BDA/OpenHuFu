@@ -15,6 +15,7 @@
     <module>proto</module>
     <module>data</module>
     <module>plan</module>
+    <module>udf</module>
     <module>rpc</module>
     <module>mpc</module>
     <module>core</module>

@@ -17,8 +17,6 @@ import com.hufudb.onedb.proto.OneDBPlan.QueryPlanProto;
 import com.hufudb.onedb.rewriter.Rewriter;
 
 /**
- * Plan的叶子节点，没有更下一层的Plan了
- * 
  * Plan for single global table query (horizontal partitioned table)
  */
 public class LeafPlan extends BasePlan {
