@@ -621,11 +621,18 @@ public class InterpreterTest {
         .setModifier(Modifier.PUBLIC).setCondition(cmp).build();
     DataSet res = Interpreter.join(s0, s1, condition);
     DataSetIterator it = res.getIterator();
-    int count = 0;
+    assertTrue(it.next());
+    assertEquals(3, it.get(0));
+    assertEquals(4.2, (double) it.get(1), 0.001);
+    assertEquals("Alice", it.get(2));
+    assertEquals(5, it.get(3));
+    assertEquals(3.1, (double) it.get(4), 0.001);
+    assertEquals("Snow", it.get(5));
+    int count = 1;
     while (it.next()) {
       count++;
     }
-    assertEquals(5, count);
+    assertEquals(4, count);
   }
 
   @Test
@@ -640,7 +647,14 @@ public class InterpreterTest {
         .setModifier(Modifier.PUBLIC).setCondition(cmp).build();
     DataSet res = Interpreter.join(s0, s1, condition);
     DataSetIterator it = res.getIterator();
-    int count = 0;
+    assertTrue(it.next());
+    assertEquals(3, it.get(0));
+    assertEquals(4.2, (double) it.get(1), 0.001);
+    assertEquals("Alice", it.get(2));
+    assertEquals(5, it.get(3));
+    assertEquals(3.1, (double) it.get(4), 0.001);
+    assertEquals("Snow", it.get(5));
+    int count = 1;
     while (it.next()) {
       count++;
     }

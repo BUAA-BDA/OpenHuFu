@@ -68,6 +68,7 @@ public class JoinDataSet implements DataSet {
 
     DataSetIterator leftIter;
     DataSetIterator rightIter;
+    MaterializedDataSet mright;
     Row masterRow;
     RowStatus status;
     int rowIndex;
@@ -79,7 +80,8 @@ public class JoinDataSet implements DataSet {
       if (joinType == JoinType.LEFT) {
         masterRow = leftIter.next() ? leftIter : null;
         ProtoDataSet materializeRight = ProtoDataSet.materialize(right);
-        rightIter = materializeRight.getIterator();
+        this.mright = materializeRight;
+        rightIter = mright.getIterator();
       }else {
         masterRow = rightIter.next() ? rightIter : null;
       }
@@ -123,7 +125,7 @@ public class JoinDataSet implements DataSet {
         case LEFT:
           if (status == RowStatus.RIGHTNULL) {
             masterRow = leftIter.next() ? leftIter : null;
-            rightIter = right.getIterator();
+            rightIter = mright.getIterator();
             status = RowStatus.UNMATCHED;
           }
           while (masterRow != null) {
@@ -138,7 +140,7 @@ public class JoinDataSet implements DataSet {
               return true;
             }else {
               masterRow = leftIter.next() ? leftIter : null;
-              rightIter = right.getIterator();
+              rightIter = mright.getIterator();
               status = RowStatus.UNMATCHED;
             }
           }
