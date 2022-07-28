@@ -22,6 +22,7 @@ import com.hufudb.onedb.expression.ExpressionUtils;
 import com.hufudb.onedb.expression.GroupAggregator;
 import com.hufudb.onedb.expression.SingleAggregator;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
+import com.hufudb.onedb.proto.OneDBPlan.JoinType;
 import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import com.hufudb.onedb.proto.OneDBPlan.JoinCondition;
 import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
@@ -81,7 +82,7 @@ public class Interpreter {
 
   public static DataSet join(DataSet left, DataSet right, JoinCondition condition) {
     return JoinDataSet.create(left, right,
-        new InterpretiveMatcher(condition, left.getSchema(), right.getSchema()));
+        new InterpretiveMatcher(condition, left.getSchema(), right.getSchema()), condition.getType());
   }
 
   public static class InterpretiveFilter implements Filter {
