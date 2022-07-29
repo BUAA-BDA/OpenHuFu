@@ -17,6 +17,7 @@ import com.hufudb.onedb.data.storage.FilterDataSet;
 import com.hufudb.onedb.data.storage.JoinDataSet;
 import com.hufudb.onedb.data.storage.MapDataSet;
 import com.hufudb.onedb.data.storage.Row;
+import com.hufudb.onedb.expression.ScalarFuncType;
 import com.hufudb.onedb.expression.AggregateFunctions;
 import com.hufudb.onedb.expression.ExpressionUtils;
 import com.hufudb.onedb.expression.GroupAggregator;
@@ -25,10 +26,21 @@ import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import com.hufudb.onedb.proto.OneDBPlan.JoinCondition;
 import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
+import com.hufudb.onedb.udf.UDFLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+/**
+ * Interpret expressions as different types of datasets
+ */
 public class Interpreter {
+  public static final Logger LOG = LoggerFactory.getLogger(Interpreter.class);
+
   private Interpreter() {}
 
+  /**
+   * filter the source dataset by condition expressions
+   */
   public static DataSet filter(DataSet source, List<Expression> conditions) {
     if (conditions.isEmpty()) {
       return source;
@@ -38,10 +50,15 @@ public class Interpreter {
     }
   }
 
+
+  /**
+   * map the dataset by specified expressions
+   */
   public static DataSet map(DataSet source, List<Expression> exps) {
     if (exps.isEmpty()) {
       return source;
     } else {
+      // DirectMapping means nothing has changed during the mapping, e.g. (A,B,C) -> (A,B,C)
       boolean isDirectMapping = exps.size() == source.getSchema().size();
       if (isDirectMapping) {
         for (int i = 0; i < exps.size(); ++i) {
@@ -63,12 +80,18 @@ public class Interpreter {
     }
   }
 
+  /**
+   * aggregate the dataset with groups and aggregate epxressions
+   */
   public static DataSet aggregate(DataSet source, List<Integer> groups, List<Expression> aggs) {
     if (aggs.isEmpty()) {
       return source;
     } else {
-      List<AggregateFunction<Row, Comparable>> funcs = AggregateFunctions.createAggregateFunction(aggs);
+      // we convert every aggregate Expression into AggregateFunction
+      List<AggregateFunction<Row, Comparable>> funcs =
+          AggregateFunctions.createAggregateFunction(aggs);
       Aggregator aggregator = null;
+      // outSchema represents what the expected output looks like
       final Schema outSchema = ExpressionUtils.createSchema(aggs);
       if (groups.isEmpty()) {
         aggregator = new SingleAggregator(outSchema, funcs);
@@ -99,6 +122,9 @@ public class Interpreter {
     }
   }
 
+  /**
+   * represents mapping relationship by specified Expression and Schema
+   */
   public static class InterpretiveMapper implements Mapper {
     final Schema schema;
     final Expression exp;
@@ -222,9 +248,34 @@ public class Interpreter {
           }
         }
         return implement(row, inputs.get(inputs.size() - 1));
+      case SCALAR_FUNC:
+        return calScalarFunc(row, e);
       default:
         throw new UnsupportedOperationException("operator not support in intereperter");
     }
+  }
+
+  private static Object calScalarFunc(Row row, Expression exp) {
+    List<Object> inputs =
+        exp.getInList().stream().map(e -> implement(row, e)).collect(Collectors.toList());
+    String funcName = exp.getStr();
+    if (ScalarFuncType.support(funcName)) {
+      ScalarFuncType func = ScalarFuncType.of(exp.getStr());
+      switch (func) {
+        case ABS:
+          if (inputs.size() != 1) {
+            throw new RuntimeException("ABS need 1 argument, but given " + inputs.size());
+          }
+          if (inputs.get(0) instanceof Number) {
+            throw new RuntimeException("ABS expect (Number)");
+          }
+          Number x = (Number) inputs.get(0);
+          return Math.abs(x.doubleValue());
+        default:
+          throw new RuntimeException("can't translate scalarFunc " + exp);
+      }
+    }
+    return UDFLoader.implementScalar(funcName, inputs);
   }
 
   private static Boolean calBoolean(Row row, OperatorType type, List<Expression> inputs) {
@@ -296,6 +347,9 @@ public class Interpreter {
     }
   }
 
+  /**
+   * type conversion mechanism
+   */
   private static ColumnType dominate(ColumnType a, ColumnType b) {
     if (a.getNumber() > b.getNumber()) {
       return a;

@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 import com.hufudb.onedb.owner.adapter.AdapterFactory;
+import com.hufudb.onedb.expression.BasicTranslator;
 import com.hufudb.onedb.owner.adapter.Adapter;
 import com.hufudb.onedb.owner.adapter.AdapterConfig;
 import org.slf4j.Logger;
@@ -26,7 +27,7 @@ public class MysqlAdapterFactory implements AdapterFactory {
     try {
       Connection connection = DriverManager.getConnection(config.url, config.user, config.passwd);
       Statement statement = connection.createStatement();
-      return new MysqlAdapter(config.catalog, connection, statement, new MysqlTypeConverter());
+      return new MysqlAdapter(config.catalog, connection, statement, new MysqlTypeConverter(), new BasicTranslator(getType()));
     } catch (Exception e) {
       LOG.error("Fail to connect to {}: {}", config.url, e.getMessage());
       e.printStackTrace();

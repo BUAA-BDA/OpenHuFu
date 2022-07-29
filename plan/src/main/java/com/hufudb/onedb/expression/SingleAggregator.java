@@ -8,6 +8,9 @@ import com.hufudb.onedb.data.storage.ArrayRow;
 import com.hufudb.onedb.data.storage.Row;
 import com.hufudb.onedb.interpreter.Interpreter;
 
+/**
+ * aggregator which aggregates multiple rows into a single row
+ */
 public class SingleAggregator implements Aggregator {
   final Schema schema;
   final List<AggregateFunction<Row, Comparable>> aggFunc;
@@ -26,6 +29,9 @@ public class SingleAggregator implements Aggregator {
     }
   }
 
+  /**
+   * get result as a Row based on the given AggregateFunction(s)
+   */
   @Override
   public Row aggregate() {
     ArrayRow.Builder builder = ArrayRow.newBuilder(aggFunc.size());

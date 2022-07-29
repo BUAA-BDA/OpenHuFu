@@ -76,12 +76,34 @@ services:
     ports:
       - 12353:12345
 
+  htowner5:
+    image: maven:3.8-openjdk-11
+    container_name: htowner5
+    working_dir: /usr/src/mymvn
+    restart: "no"
+    command: nohup java -jar ./bin/onedb_owner_server.jar -c ./config/server5.json > ./log/owner5.log &
+    environment:
+      - ONEDB_ROOT=/usr/src/mymvn
+    volumes:
+      - $PWD/../../../../release/bin:/usr/src/mymvn/bin
+      - $PWD/../../../../release/adapter:/usr/src/mymvn/adapter
+      - $PWD/config:/usr/src/mymvn/config
+      - $PWD/log:/usr/src/mymvn/log
+      - $PWD/data:/usr/src/mymvn/data
+    networks:
+      - ht_owner_net_5
+      - ht_public_net
+    ports:
+      - 12354:12345
+
   # todo: more heterogeneous owners here
 
 networks:
   ht_owner_net_1:
     external: true
   ht_owner_net_3:
+    external: true
+  ht_owner_net_5:
     external: true
   ht_public_net:
     driver: bridge

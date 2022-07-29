@@ -1,15 +1,18 @@
 package com.hufudb.onedb.expression;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import com.hufudb.onedb.data.function.AggregateFunction;
 import com.hufudb.onedb.data.function.Aggregator;
 import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.data.storage.ArrayRow;
 import com.hufudb.onedb.data.storage.Row;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
+/**
+ * aggregator which aggregates multiple rows into a row for each group
+ */
 public class GroupAggregator implements Aggregator {
   final Schema schema;
   final List<Integer> groups;
@@ -59,7 +62,6 @@ public class GroupAggregator implements Aggregator {
     Map.Entry<Row, SingleAggregator> entry = iterator.next();
     Row value = entry.getValue().aggregate();
     ArrayRow.Builder builder = ArrayRow.newBuilder(schema.size());
-    // add agg result
     for (int i = 0; i < schema.size(); ++i) {
       builder.set(i, value.get(i));
     }

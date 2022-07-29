@@ -170,8 +170,10 @@ public class BasicRewriter implements Rewriter {
     }
   }
 
-  // convert agg into two parts: local aggs and global agg, local agg are added into localAggs,
-  // global agg is returned
+  /**
+   * convert agg into two parts: local aggs and global agg, local agg are added into localAggs,
+   * global agg is returned
+   */
   private Expression convertAgg(Expression agg, List<Expression> localAggs,
       Map<Integer, Expression> groupMap) {
     AggFuncType type = AggFuncType.of(Math.abs(agg.getI32()));
@@ -193,7 +195,9 @@ public class BasicRewriter implements Rewriter {
     }
   }
 
-  // rewrite exp into global agg and add new local aggs into localAggs
+  /**
+   * rewrite exp into global agg and add new local aggs into localAggs
+   */
   private Expression rewriteAggregate(Expression exp, List<Expression> localAggs,
       Map<Integer, Expression> groupMap) {
     // traverse exp tree, and convert each aggCall

@@ -54,7 +54,7 @@ public class OwnerSideImplementor implements PlanImplementor {
     }
     try {
       DataSet result =
-      HashEqualJoin.join(in, binary.getJoinCond(), isLeft, rpc, binary.getTaskInfo());
+          HashEqualJoin.join(in, binary.getJoinCond(), isLeft, rpc, binary.getTaskInfo());
       if (!binary.getSelectExps().isEmpty()) {
         result = Interpreter.map(result, binary.getSelectExps());
       }

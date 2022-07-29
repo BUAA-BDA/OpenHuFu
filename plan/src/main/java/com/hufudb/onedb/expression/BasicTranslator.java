@@ -8,11 +8,14 @@ import com.hufudb.onedb.data.storage.utils.DateUtils;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
+import com.hufudb.onedb.udf.UDFLoader;
 
 public class BasicTranslator implements Translator {
+  protected String dataSource;
   protected List<String> inputStrs;
 
-  public BasicTranslator() {
+  public BasicTranslator(String dataSource) {
+    this.dataSource = dataSource;
     this.inputStrs = ImmutableList.of();
   }
 
@@ -176,18 +179,21 @@ public class BasicTranslator implements Translator {
   }
 
   protected String scalarFunc(Expression exp) {
-    ScalarFuncType func = ScalarFuncType.of(exp.getI32());
     List<String> inputs =
         exp.getInList().stream().map(e -> translate(e)).collect(Collectors.toList());
-    switch (func) {
-      case ABS:
-        if (inputs.size() != 1) {
-          throw new RuntimeException("ABS need 1 arguements, but give " + inputs.size());
-        }
-        return String.format("ABS(%s)", inputs.get(0));
-      default:
-        throw new RuntimeException("can't translate scalarFunc " + exp);
+    if (ScalarFuncType.support(exp.getStr())) {
+      ScalarFuncType func = ScalarFuncType.of(exp.getStr());
+      switch (func) {
+        case ABS:
+          if (inputs.size() != 1) {
+            throw new RuntimeException("ABS need 1 arguements, but give " + inputs.size());
+          }
+          return String.format("ABS(%s)", inputs.get(0));
+        default:
+          throw new RuntimeException("Unsupported scalar function");
+      }
     }
+    return UDFLoader.translateScalar(exp.getStr(), dataSource, inputs);
   }
 
   protected String aggregateFunc(Expression exp) {

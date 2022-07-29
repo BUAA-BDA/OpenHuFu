@@ -1,8 +1,14 @@
 package com.hufudb.onedb.data.storage;
 
 import java.nio.ByteBuffer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Point {
+  private static PointParser parser = new PointParser();
+
   private double x;
   private double y;
 
@@ -53,5 +59,35 @@ public class Point {
   @Override
   public boolean equals(Object obj) {
     return obj == this || (obj instanceof Point && ((Point) obj).getX() == x && ((Point) obj).getY() == y);
+  }
+
+  private static class PointParser {
+    private final static Logger LOG = LoggerFactory.getLogger(PointParser.class);
+
+    private static String pointRex = "\\(\\s*([\\-]?[0-9]+[.]?[0-9]*)\\s+([\\-]?[0-9]+[.]?[0-9]*)\\s*\\)";
+    private Pattern pointPattern;
+
+    PointParser() {
+      pointPattern = Pattern.compile(pointRex);
+    }
+
+    Point parse(String pointStr) {
+      if (pointStr == null) {
+        return null;
+      }
+      Matcher pointMatcher = pointPattern.matcher(pointStr);
+      if (pointMatcher.find()) {
+        String xStr = pointMatcher.group(1);
+        String yStr = pointMatcher.group(2);
+        return new Point(Double.parseDouble(xStr), Double.parseDouble(yStr));
+      } else {
+        LOG.debug("can't parse {} to Point", pointStr);
+        return null;
+      }
+    }
+  }
+
+  public static Point parse(String p) {
+    return parser.parse(p);
   }
 }

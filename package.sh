@@ -6,8 +6,10 @@ then
   mkdir -p ./release/bin
   mkdir -p ./release/adapter
   mkdir -p ./release/lib
+  mkdir -p ./release/udf/scalar
   cp user/target/*-with-dependencies.jar ./release/bin/onedb_user_client.jar
   cp owner/target/*-with-dependencies.jar ./release/bin/onedb_owner_server.jar
+  cp udf/spatial-udf/target/*-with-dependencies.jar ./release/udf/scalar/spatial_udf.jar
   cp adapter-postgresql/target/*-with-dependencies.jar ./release/adapter/adapter_postgresql.jar
   cp adapter-mysql/target/*-with-dependencies.jar ./release/adapter/adapter_mysql.jar
   cp adapter-sqlite/target/*-with-dependencies.jar ./release/adapter/adapter_sqlite.jar

@@ -13,7 +13,6 @@ import com.hufudb.onedb.data.storage.utils.ModifierWrapper;
 import com.hufudb.onedb.expression.AggFuncType;
 import com.hufudb.onedb.expression.ExpressionFactory;
 import com.hufudb.onedb.expression.ExpressionUtils;
-import com.hufudb.onedb.expression.ScalarFuncType;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBData.Modifier;
 import com.hufudb.onedb.proto.OneDBPlan.Collation;
@@ -22,6 +21,7 @@ import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import com.hufudb.onedb.proto.OneDBPlan.JoinCondition;
 import com.hufudb.onedb.proto.OneDBPlan.JoinType;
 import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
+import com.hufudb.onedb.udf.UDFLoader;
 import org.apache.calcite.rex.RexLiteral;
 import org.apache.calcite.rex.RexLocalRef;
 import org.apache.calcite.rel.RelFieldCollation;
@@ -202,6 +202,7 @@ public class CalciteConverter {
         case MINUS_PREFIX:
         case IS_NULL:
         case IS_NOT_NULL:
+        case CAST: // todo support cast
           return unary((RexCall) node);
         // case
         case CASE:
@@ -274,15 +275,16 @@ public class CalciteConverter {
       return ExpressionFactory.createBinaryOperator(op, type, left, right);
     }
 
-    /*
+    /**
      * add unary operator
      */
     Expression unary(RexCall call) {
       OperatorType op;
+      Expression in = convert(call.operands.get(0));
       switch (call.getKind()) {
         case AS:
-          op = OperatorType.AS;
-          break;
+        case CAST: // todo: support cast
+          return in;
         case NOT:
           op = OperatorType.NOT;
           break;
@@ -301,12 +303,11 @@ public class CalciteConverter {
         default:
           throw new RuntimeException("can't translate " + call);
       }
-      Expression in = convert(call.operands.get(0));
       ColumnType type = TypeConverter.convert2OneDBType(call.getType().getSqlTypeName());
       return ExpressionFactory.createUnaryOperator(op, type, in);
     }
 
-    /*
+    /**
      * translate case
      */
     Expression caseCall(RexCall call) {
@@ -390,7 +391,7 @@ public class CalciteConverter {
           rightCmp);
     }
 
-    /*
+    /**
      * translate localref
      */
     Expression localRef(RexLocalRef node) {
@@ -399,29 +400,26 @@ public class CalciteConverter {
       return convert(local);
     }
 
-    /*
+    /**
      * translate func
      */
     Expression scalarFunc(RexCall call) {
       SqlUserDefinedFunction function = (SqlUserDefinedFunction) call.op;
-      ScalarFuncType func;
-      switch (function.getName()) {
-        case "ABS":
-          func = ScalarFuncType.ABS;
-          break;
-        case "DWithin":
-          func = ScalarFuncType.DWITHIN;
-          break;
-        case "Distance":
-          func = ScalarFuncType.DISTANCE;
-          break;
-        default:
-          throw new RuntimeException("can't translate " + call);
-      }
+      String funcName = function.getName().toLowerCase();
       List<Expression> eles =
           call.operands.stream().map(r -> convert(r)).collect(Collectors.toList());
-      ColumnType type = TypeConverter.convert2OneDBType(call.getType().getSqlTypeName());
-      return ExpressionFactory.createScalarFunc(type, func.getId(), eles);
+      switch (funcName) {
+        case "abs":
+        // todo: add more scalar function here
+          ColumnType type = TypeConverter.convert2OneDBType(call.getType().getSqlTypeName());
+          return ExpressionFactory.createScalarFunc(type, function.getName(), eles);
+        default:
+          if (!UDFLoader.scalarUDFs.containsKey(function.getName())) {
+            throw new RuntimeException("can't translate " + call);
+          } else {
+            return ExpressionFactory.createScalarFunc(UDFLoader.getScalarOutType(funcName, eles), function.getName(), eles);
+          }
+      }
     }
   }
 }

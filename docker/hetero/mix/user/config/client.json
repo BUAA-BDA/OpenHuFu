@@ -15,6 +15,10 @@
     {
       "endpoint": "htowner4:12345",
       "trustcertpath": "./cert/ca.pem"
+    },
+    {
+      "endpoint": "htowner5:12345",
+      "trustcertpath": "./cert/ca.pem"
     }
   ],
   "tables": [
@@ -84,7 +88,20 @@
       "localtables": [
         {
           "endpoint": "htowner1:12345",
-          "name": "student3"
+          "localname": "student3"
+        }
+      ]
+    },
+    {
+      "tablename": "traffic",
+      "localtables": [
+        {
+          "endpoint": "htowner4:12345",
+          "localname": "traffic"
+        },
+        {
+          "endpoint": "htowner5:12345",
+          "localname": "traffic"
         }
       ]
     }
