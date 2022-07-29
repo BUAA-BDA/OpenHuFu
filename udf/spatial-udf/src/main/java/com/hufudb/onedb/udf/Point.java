@@ -21,6 +21,9 @@ public class Point implements ScalarUDF {
       LOG.error("Point UDF expect 2 parameters, but give {}", inputs.size());
       throw new RuntimeException("Point UDF expect 2 parameters");
     }
+    if (inputs.get(0) == null || inputs.get(1) == null) {
+      return null;
+    }
     return new com.hufudb.onedb.data.storage.Point(((Number) inputs.get(0)).doubleValue(), ((Number) inputs.get(1)).doubleValue());
   }
 

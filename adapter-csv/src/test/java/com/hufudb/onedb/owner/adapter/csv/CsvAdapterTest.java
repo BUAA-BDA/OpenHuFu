@@ -19,6 +19,7 @@ import com.hufudb.onedb.data.schema.utils.PojoColumnDesc;
 import com.hufudb.onedb.data.schema.utils.PojoPublishedTableSchema;
 import com.hufudb.onedb.data.storage.DataSet;
 import com.hufudb.onedb.data.storage.DataSetIterator;
+import com.hufudb.onedb.data.storage.Point;
 import com.hufudb.onedb.data.storage.utils.ColumnTypeWrapper;
 import com.hufudb.onedb.data.storage.utils.ModifierWrapper;
 import com.hufudb.onedb.expression.ExpressionFactory;
@@ -56,7 +57,7 @@ public class CsvAdapterTest {
     Adapter adapter = factory.create(config);
     // add published schema
     SchemaManager manager = adapter.getSchemaManager();
-    assertEquals(3, manager.getAllLocalTable().size());
+    assertEquals(4, manager.getAllLocalTable().size());
     PojoPublishedTableSchema t1 = new PojoPublishedTableSchema();
     t1.setActualName("test2");
     t1.setPublishedName("student1");
@@ -78,9 +79,16 @@ public class CsvAdapterTest {
         new PojoColumnDesc("cur_time", ColumnTypeWrapper.TIME, ModifierWrapper.PUBLIC, 2),
         new PojoColumnDesc("time_stamp", ColumnTypeWrapper.TIMESTAMP, ModifierWrapper.PUBLIC, 3)
     ));
+    PojoPublishedTableSchema t4 = new PojoPublishedTableSchema();
+    t4.setActualName("test4");
+    t4.setPublishedName("traffic");
+    t4.setPublishedColumns(ImmutableList.of(
+      new PojoColumnDesc("id", ColumnTypeWrapper.INT, ModifierWrapper.PUBLIC, 0),
+      new PojoColumnDesc("location", ColumnTypeWrapper.POINT, ModifierWrapper.PUBLIC, 1)));
     manager.addPublishedTable(t1);
     manager.addPublishedTable(t2);
     manager.addPublishedTable(t3);
+    manager.addPublishedTable(t4);
     LeafPlan plan = new LeafPlan();
     plan.setTableName("student2");
     // select * from student2;
@@ -237,6 +245,52 @@ public class CsvAdapterTest {
     assertEquals(Timestamp.valueOf("2018-09-01 09:05:10"), (Timestamp) it.get(3));
     assertFalse(it.next());
     result.close();
+    // select * from traffic
+    plan = new LeafPlan();
+    plan.setTableName("traffic");
+    plan.setSelectExps(ExpressionFactory.createInputRef(manager.getPublishedSchema("traffic")));
+    result = adapter.query(plan);
+    it = result.getIterator();
+    assertTrue(it.next());
+    assertEquals(new Point(0, -1), it.get(1));
+    assertTrue(it.next());
+    assertEquals(new Point(0, 0), it.get(1));
+    assertTrue(it.next());
+    assertEquals(new Point(1, -1), it.get(1));
+    assertTrue(it.next());
+    assertEquals(new Point(-1, 1), it.get(1));
+    assertTrue(it.next());
+    assertNull(it.get(1));
+    assertFalse(it.next());
+    result.close();
+    // select id from traffic where DWithin(Point(0, 0), location, 0.5)
+    plan.setSelectExps(ImmutableList.of(
+        ExpressionFactory.createScalarFunc(ColumnType.DOUBLE, "Distance", ImmutableList.of(
+            ExpressionFactory.createScalarFunc(ColumnType.POINT, "Point", ImmutableList.of(
+                ExpressionFactory.createLiteral(ColumnType.DOUBLE, 0),
+                ExpressionFactory.createLiteral(ColumnType.DOUBLE, 0))),
+            ExpressionFactory.createInputRef(1, ColumnType.INT, Modifier.PUBLIC))
+          )
+        )
+      );
+    plan.setWhereExps(ImmutableList.of(
+      ExpressionFactory.createScalarFunc(ColumnType.DOUBLE, "DWithin", ImmutableList.of(
+          ExpressionFactory.createScalarFunc(ColumnType.POINT, "Point", ImmutableList.of(
+              ExpressionFactory.createLiteral(ColumnType.DOUBLE, 0),
+              ExpressionFactory.createLiteral(ColumnType.DOUBLE, 0))),
+          ExpressionFactory.createInputRef(1, ColumnType.INT, Modifier.PUBLIC),
+          ExpressionFactory.createLiteral(ColumnType.DOUBLE, 1.0)
+          )
+        )
+      )
+    );
+    result = adapter.query(plan);
+    it = result.getIterator();
+    assertTrue(it.next());
+    assertEquals(1.0, (double) it.get(0), 0.001);
+    assertTrue(it.next());
+    assertEquals(0.0, (double) it.get(0), 0.001);
+    assertFalse(it.next());
     adapter.shutdown();
   }
 }

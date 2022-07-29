@@ -22,6 +22,9 @@ public class Distance implements ScalarUDF {
       LOG.error("Distance UDF expect 2 parameters, but give {}", inputs.size());
       throw new RuntimeException("Distance UDF expect 2 parameters");
     }
+    if (inputs.get(0) == null || inputs.get(1) == null) {
+      return null;
+    }
     if (!(inputs.get(0) instanceof Point) || !(inputs.get(1) instanceof Point)) {
       LOG.error("Distance UDF requires (Point, Point)");
       throw new RuntimeException("Distance UDF requires (Point, Point)");

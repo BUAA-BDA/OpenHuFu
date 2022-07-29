@@ -15,6 +15,7 @@ import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.data.storage.DataSet;
 import com.hufudb.onedb.data.storage.EmptyDataSet;
 import com.hufudb.onedb.data.storage.MapDataSet;
+import com.hufudb.onedb.data.storage.Point;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 
 public class CsvTable {
@@ -126,6 +127,9 @@ public class CsvTable {
               return Double.valueOf((String) row.get(actualColumnIdx));
             }
           });
+          break;
+        case POINT:
+          mappers.add(row -> Point.parse((String) row.get(actualColumnIdx)));
           break;
         case STRING:
           mappers.add(row -> row.get(actualColumnIdx));
