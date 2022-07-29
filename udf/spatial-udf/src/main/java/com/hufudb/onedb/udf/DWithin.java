@@ -1,6 +1,7 @@
 package com.hufudb.onedb.udf;
 
 import java.util.List;
+import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.data.storage.Point;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 
@@ -16,11 +17,18 @@ public class DWithin implements ScalarUDF {
     return ColumnType.BOOLEAN;
   }
 
+  public Boolean dwithin(Point left, Point right, Double distance) {
+    return (Boolean) implement(ImmutableList.of(left, right, distance));
+  }
+
   @Override
   public Object implement(List<Object> inputs) {
     if (inputs.size() != 3) {
       LOG.error("DWithin UDF expect 3 parameters, but give {}", inputs.size());
       throw new RuntimeException("DWithin UDF expect 3 parameters");
+    }
+    if (inputs.get(0) == null || inputs.get(1) == null || inputs.get(2) == null) {
+      return null;
     }
     if (!(inputs.get(0) instanceof Point) || !(inputs.get(1) instanceof Point)
         || !(inputs.get(2) instanceof Number)) {

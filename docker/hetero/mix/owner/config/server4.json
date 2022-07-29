@@ -37,6 +37,24 @@
           "columnId": 3
         }
       ]
+    },
+    {
+      "actualName": "traffic",
+      "publishedName": "traffic",
+      "publishedColumns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "modifier": "public",
+          "columnId": 0
+        },
+        {
+          "name": "location",
+          "type": "POINT",
+          "modifier": "public",
+          "columnId": 1
+        }
+      ]
     }
   ]
 }

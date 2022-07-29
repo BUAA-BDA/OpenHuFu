@@ -1,6 +1,7 @@
 package com.hufudb.onedb.udf;
 
 import java.util.List;
+import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 
 public class Point implements ScalarUDF {
@@ -15,11 +16,18 @@ public class Point implements ScalarUDF {
     return ColumnType.POINT;
   }
 
+  public com.hufudb.onedb.data.storage.Point point(Double x, Double y) {
+    return (com.hufudb.onedb.data.storage.Point) implement(ImmutableList.of(x, y));
+  }
+
   @Override
   public Object implement(List<Object> inputs) {
     if (inputs.size() != 2) {
       LOG.error("Point UDF expect 2 parameters, but give {}", inputs.size());
       throw new RuntimeException("Point UDF expect 2 parameters");
+    }
+    if (inputs.get(0) == null || inputs.get(1) == null) {
+      return null;
     }
     return new com.hufudb.onedb.data.storage.Point(((Number) inputs.get(0)).doubleValue(), ((Number) inputs.get(1)).doubleValue());
   }

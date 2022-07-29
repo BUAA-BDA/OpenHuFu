@@ -38,7 +38,7 @@ public class PostgisTypeConverter implements AdapterTypeConverter {
       return ColumnType.TIME;
       case "timestamp":
       return ColumnType.TIMESTAMP;
-      case "point":
+      case "geometry":
       return ColumnType.POINT;
       default:
       return ColumnType.STRING;

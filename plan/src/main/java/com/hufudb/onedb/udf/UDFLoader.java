@@ -10,9 +10,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableMap;
+import com.hufudb.onedb.proto.OneDBData.ColumnType;
+import com.hufudb.onedb.proto.OneDBPlan.Expression;
 
 public class UDFLoader {
   private static final Logger LOG = LoggerFactory.getLogger(UDFLoader.class);
@@ -41,7 +44,8 @@ public class UDFLoader {
         e.printStackTrace();
       }
     }
-    ClassLoader udfClassLoader = new URLClassLoader(udfURLs.toArray(new URL[0]), ScalarUDF.class.getClassLoader());
+    ClassLoader udfClassLoader =
+        new URLClassLoader(udfURLs.toArray(new URL[0]), ScalarUDF.class.getClassLoader());
     ServiceLoader<ScalarUDF> udfServices = ServiceLoader.load(ScalarUDF.class, udfClassLoader);
     ImmutableMap.Builder<String, ScalarUDF> scalarUDFs = ImmutableMap.builder();
     for (ScalarUDF scalar : udfServices) {
@@ -65,5 +69,10 @@ public class UDFLoader {
       throw new RuntimeException("Unsupported scalar UDF");
     }
     return UDFLoader.scalarUDFs.get(funcName).translate(dataSource, inputs);
+  }
+
+  public static ColumnType getScalarOutType(String funcName, List<Expression> inputs) {
+    return UDFLoader.scalarUDFs.get(funcName)
+        .getOutType(inputs.stream().map(in -> in.getOutType()).collect(Collectors.toList()));
   }
 }

@@ -1,11 +1,8 @@
 package com.hufudb.onedb.core.sql.expression;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import com.google.common.collect.BoundType;
@@ -16,7 +13,6 @@ import com.hufudb.onedb.data.storage.utils.ModifierWrapper;
 import com.hufudb.onedb.expression.AggFuncType;
 import com.hufudb.onedb.expression.ExpressionFactory;
 import com.hufudb.onedb.expression.ExpressionUtils;
-import com.hufudb.onedb.expression.ScalarFuncType;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBData.Modifier;
 import com.hufudb.onedb.proto.OneDBPlan.Collation;
@@ -206,6 +202,7 @@ public class CalciteConverter {
         case MINUS_PREFIX:
         case IS_NULL:
         case IS_NOT_NULL:
+        case CAST: // todo support cast
           return unary((RexCall) node);
         // case
         case CASE:
@@ -283,10 +280,11 @@ public class CalciteConverter {
      */
     Expression unary(RexCall call) {
       OperatorType op;
+      Expression in = convert(call.operands.get(0));
       switch (call.getKind()) {
         case AS:
-          op = OperatorType.AS;
-          break;
+        case CAST: // todo: support cast
+          return in;
         case NOT:
           op = OperatorType.NOT;
           break;
@@ -305,7 +303,6 @@ public class CalciteConverter {
         default:
           throw new RuntimeException("can't translate " + call);
       }
-      Expression in = convert(call.operands.get(0));
       ColumnType type = TypeConverter.convert2OneDBType(call.getType().getSqlTypeName());
       return ExpressionFactory.createUnaryOperator(op, type, in);
     }
@@ -409,18 +406,20 @@ public class CalciteConverter {
     Expression scalarFunc(RexCall call) {
       SqlUserDefinedFunction function = (SqlUserDefinedFunction) call.op;
       String funcName = function.getName().toLowerCase();
+      List<Expression> eles =
+          call.operands.stream().map(r -> convert(r)).collect(Collectors.toList());
       switch (funcName) {
         case "abs":
-          break;
+        // todo: add more scalar function here
+          ColumnType type = TypeConverter.convert2OneDBType(call.getType().getSqlTypeName());
+          return ExpressionFactory.createScalarFunc(type, function.getName(), eles);
         default:
           if (!UDFLoader.scalarUDFs.containsKey(function.getName())) {
             throw new RuntimeException("can't translate " + call);
+          } else {
+            return ExpressionFactory.createScalarFunc(UDFLoader.getScalarOutType(funcName, eles), function.getName(), eles);
           }
       }
-      List<Expression> eles =
-          call.operands.stream().map(r -> convert(r)).collect(Collectors.toList());
-      ColumnType type = TypeConverter.convert2OneDBType(call.getType().getSqlTypeName());
-      return ExpressionFactory.createScalarFunc(type, function.getName(), eles);
     }
   }
 }

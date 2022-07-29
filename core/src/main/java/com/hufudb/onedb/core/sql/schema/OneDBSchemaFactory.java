@@ -1,12 +1,15 @@
 package com.hufudb.onedb.core.sql.schema;
 
 import com.hufudb.onedb.core.zk.ZkConfig;
+import com.hufudb.onedb.udf.ScalarUDF;
+import com.hufudb.onedb.udf.UDFLoader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.apache.calcite.schema.Schema;
 import org.apache.calcite.schema.SchemaFactory;
 import org.apache.calcite.schema.SchemaPlus;
+import org.apache.calcite.schema.impl.ScalarFunctionImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +18,13 @@ public class OneDBSchemaFactory implements SchemaFactory {
   private static final Logger LOG = LoggerFactory.getLogger(OneDBSchemaFactory.class);
 
   private OneDBSchemaFactory() {}
+
+  private void addUDF(SchemaPlus parentSchema) {
+    // parentSchema.add("POINT", new PointType());
+    for (ScalarUDF udf : UDFLoader.scalarUDFs.values()) {
+      parentSchema.add(udf.getName(), ScalarFunctionImpl.create(udf.getClass(), udf.getName()));
+    }
+  }
 
   @Override
   public Schema create(SchemaPlus parentSchema, String name, Map<String, Object> operand) {
@@ -38,6 +48,7 @@ public class OneDBSchemaFactory implements SchemaFactory {
     if (operand.containsKey("tables")) {
       tableObjs.addAll((List) operand.get("tables"));
     }
+    addUDF(parentSchema);
     ZkConfig zkConfig = new ZkConfig();
     zkConfig.servers = (String) operand.get("zookeeper");
     zkConfig.schemaName = (String) operand.get("schema");
