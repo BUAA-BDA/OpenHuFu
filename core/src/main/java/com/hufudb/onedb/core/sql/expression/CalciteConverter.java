@@ -1,8 +1,11 @@
 package com.hufudb.onedb.core.sql.expression;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import com.google.common.collect.BoundType;
@@ -22,6 +25,7 @@ import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import com.hufudb.onedb.proto.OneDBPlan.JoinCondition;
 import com.hufudb.onedb.proto.OneDBPlan.JoinType;
 import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
+import com.hufudb.onedb.udf.UDFLoader;
 import org.apache.calcite.rex.RexLiteral;
 import org.apache.calcite.rex.RexLocalRef;
 import org.apache.calcite.rel.RelFieldCollation;
@@ -404,27 +408,19 @@ public class CalciteConverter {
      */
     Expression scalarFunc(RexCall call) {
       SqlUserDefinedFunction function = (SqlUserDefinedFunction) call.op;
-      ScalarFuncType func;
-      switch (function.getName()) {
-        case "ABS":
-          func = ScalarFuncType.ABS;
-          break;
-        case "DWithin":
-          func = ScalarFuncType.DWITHIN;
-          break;
-        case "Distance":
-          func = ScalarFuncType.DISTANCE;
-          break;
-        case "Point":
-          func = ScalarFuncType.POINT;
+      String funcName = function.getName().toLowerCase();
+      switch (funcName) {
+        case "abs":
           break;
         default:
-          throw new RuntimeException("can't translate " + call);
+          if (!UDFLoader.scalarUDFs.containsKey(function.getName())) {
+            throw new RuntimeException("can't translate " + call);
+          }
       }
       List<Expression> eles =
           call.operands.stream().map(r -> convert(r)).collect(Collectors.toList());
       ColumnType type = TypeConverter.convert2OneDBType(call.getType().getSqlTypeName());
-      return ExpressionFactory.createScalarFunc(type, func.getId(), eles);
+      return ExpressionFactory.createScalarFunc(type, function.getName(), eles);
     }
   }
 }

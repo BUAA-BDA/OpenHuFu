@@ -14,7 +14,6 @@ import com.hufudb.onedb.data.storage.FilterDataSet;
 import com.hufudb.onedb.data.storage.JoinDataSet;
 import com.hufudb.onedb.data.storage.MapDataSet;
 import com.hufudb.onedb.data.storage.Row;
-import com.hufudb.onedb.data.storage.Point;
 import com.hufudb.onedb.expression.ScalarFuncType;
 import com.hufudb.onedb.expression.AggregateFunctions;
 import com.hufudb.onedb.expression.ExpressionUtils;
@@ -24,11 +23,16 @@ import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import com.hufudb.onedb.proto.OneDBPlan.JoinCondition;
 import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
+import com.hufudb.onedb.udf.UDFLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Interpret expressions as different types of datasets
  */
 public class Interpreter {
+  public static final Logger LOG = LoggerFactory.getLogger(Interpreter.class);
+
   private Interpreter() {}
 
   /**
@@ -51,7 +55,7 @@ public class Interpreter {
     if (exps.isEmpty()) {
       return source;
     } else {
-      // DirectMapping 是指 将一张表上的每一个列都直接映射 因此实际上相当于没做任何操作
+      // DirectMapping means nothing has changed during the mapping, e.g. (A,B,C) -> (A,B,C)
       boolean isDirectMapping = exps.size() == source.getSchema().size();
       if (isDirectMapping) {
         for (int i = 0; i < exps.size(); ++i) {
@@ -81,7 +85,8 @@ public class Interpreter {
       return source;
     } else {
       // we convert every aggregate Expression into AggregateFunction
-      List<AggregateFunction<Row, Comparable>> funcs = AggregateFunctions.createAggregateFunction(aggs);
+      List<AggregateFunction<Row, Comparable>> funcs =
+          AggregateFunctions.createAggregateFunction(aggs);
       Aggregator aggregator = null;
       // outSchema represents what the expected output looks like
       final Schema outSchema = ExpressionUtils.createSchema(aggs);
@@ -113,7 +118,7 @@ public class Interpreter {
       return (boolean) implement(row, condition);
     }
   }
-  
+
   /**
    * represents mapping relationship by specified Expression and Schema
    */
@@ -248,49 +253,26 @@ public class Interpreter {
   }
 
   private static Object calScalarFunc(Row row, Expression exp) {
-    ScalarFuncType func = ScalarFuncType.of(exp.getI32());
-    List<Expression> inputs = exp.getInList();
-    switch (func) {
-      case ABS:
-        if (inputs.size() != 1) {
-          throw new RuntimeException("ABS need 1 arguements, but given " + inputs.size());
-        }
-        Number x = (Number) implement(row, inputs.get(0));
-        if(x instanceof Integer) {
-          return Math.abs((Integer)x);
-        } else if (x instanceof Long) {
-          return Math.abs((Long) x);
-        } else if (x instanceof Float) {
-          return Math.abs((Float) x);
-        } else if (x instanceof Double) {
-          return Math.abs((Double) x);
-        } else {
-          throw new RuntimeException("ABS can't handle this type of Number as " + x.getClass());
-        }
-      case POINT:
-        if (inputs.size() != 2) {
-          throw new RuntimeException("Point need 2 arguments, but given " + inputs.size());
-        }
-        return new Point(((Number) implement(row, inputs.get(0))).doubleValue(), 
-                         ((Number) implement(row, inputs.get(1))).doubleValue());
-      case DWITHIN:
-        if (inputs.size() != 3) {
-          throw new RuntimeException("DWithin need 3 arguments, but given " + inputs.size());
-        }
-        Double maxDist = ((Number) implement(row, inputs.get(2))).doubleValue();
-        Point from = (Point) implement(row, inputs.get(0));
-        Point to = (Point) implement(row, inputs.get(1));
-        return Math.sqrt(Math.pow(from.getX() - to.getX(), 2) + Math.pow(from.getY() - to.getY(), 2)) <= maxDist;
-      case DISTANCE:
-        if (inputs.size() != 2) {
-          throw new RuntimeException("Distance need 2 arguments, but given " + inputs.size());
-        }
-        Point a = (Point) implement(row, inputs.get(0));
-        Point b = (Point) implement(row, inputs.get(1));
-        return Math.sqrt(Math.pow(a.getX() - b.getX(), 2) + Math.pow(a.getY() - b.getY(), 2));
-      default:
-        throw new RuntimeException("can't translate scalarFunc " + exp);
+    List<Object> inputs =
+        exp.getInList().stream().map(e -> implement(row, e)).collect(Collectors.toList());
+    String funcName = exp.getStr();
+    if (ScalarFuncType.support(funcName)) {
+      ScalarFuncType func = ScalarFuncType.of(exp.getStr());
+      switch (func) {
+        case ABS:
+          if (inputs.size() != 1) {
+            throw new RuntimeException("ABS need 1 argument, but given " + inputs.size());
+          }
+          if (inputs.get(0) instanceof Number) {
+            throw new RuntimeException("ABS expect (Number)");
+          }
+          Number x = (Number) inputs.get(0);
+          return Math.abs(x.doubleValue());
+        default:
+          throw new RuntimeException("can't translate scalarFunc " + exp);
+      }
     }
+    return UDFLoader.implementScalar(funcName, inputs);
   }
 
   private static Boolean calBoolean(Row row, OperatorType type, List<Expression> inputs) {
@@ -363,8 +345,7 @@ public class Interpreter {
   }
 
   /**
-   * 根据参与计算的双方的ColumnType，判断计算结果的类型
-   * 需要保证ColumnType.getNumber()遵循类型提升规范
+   * type conversion mechanism
    */
   private static ColumnType dominate(ColumnType a, ColumnType b) {
     if (a.getNumber() > b.getNumber()) {

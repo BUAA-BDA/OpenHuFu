@@ -8,7 +8,7 @@ public class DWithin implements ScalarUDF {
 
   @Override
   public String getName() {
-    return "DWithin";
+    return "dwithin";
   }
 
   @Override
@@ -35,7 +35,7 @@ public class DWithin implements ScalarUDF {
   }
 
   @Override
-  public String toString(String dataSource, List<String> inputs) {
+  public String translate(String dataSource, List<String> inputs) {
     switch(dataSource) {
       case "postgis":
         return String.format("ST_DWithin(%s, %s, %s)", inputs.get(0), inputs.get(1), inputs.get(2));

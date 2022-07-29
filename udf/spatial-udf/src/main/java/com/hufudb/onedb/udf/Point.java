@@ -7,7 +7,7 @@ public class Point implements ScalarUDF {
 
   @Override
   public String getName() {
-    return "Point";
+    return "point";
   }
 
   @Override
@@ -25,7 +25,7 @@ public class Point implements ScalarUDF {
   }
 
   @Override
-  public String toString(String dataSource, List<String> inputs) {
+  public String translate(String dataSource, List<String> inputs) {
     switch (dataSource) {
       case "postgis":
         return String.format("'SRID=4326;POINT(%s %s)'", inputs.get(0), inputs.get(1));

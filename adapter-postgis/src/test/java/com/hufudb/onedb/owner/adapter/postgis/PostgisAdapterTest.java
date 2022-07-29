@@ -13,7 +13,6 @@ import com.hufudb.onedb.data.schema.utils.PojoPublishedTableSchema;
 import com.hufudb.onedb.data.storage.DataSet;
 import com.hufudb.onedb.data.storage.DataSetIterator;
 import com.hufudb.onedb.expression.ExpressionFactory;
-import com.hufudb.onedb.expression.ScalarFuncType;
 import com.hufudb.onedb.owner.adapter.AdapterConfig;
 import com.hufudb.onedb.owner.adapter.AdapterFactory;
 import com.hufudb.onedb.plan.LeafPlan;
@@ -75,15 +74,14 @@ public class PostgisAdapterTest {
     }
     assertEquals(9, count);
     // select * from traffic where DWithin(location, Point(116.0, 40.0, 0.5), 0.5);
-    Expression pointFunc = ExpressionFactory.createScalarFunc(ColumnType.POINT, ScalarFuncType.POINT.getId(), ImmutableList.of(
-      ExpressionFactory.createLiteral(ColumnType.DOUBLE, 116.0),
-      ExpressionFactory.createLiteral(ColumnType.DOUBLE, 40.0)
-    ));
-    Expression dwithinFunc = ExpressionFactory.createScalarFunc(ColumnType.BOOLEAN, ScalarFuncType.DWITHIN.getId(), ImmutableList.of(
-      ExpressionFactory.createInputRef(1, ColumnType.POINT, Modifier.PUBLIC),
-      pointFunc,
-      ExpressionFactory.createLiteral(ColumnType.DOUBLE, 0.5)
-    ));
+    Expression pointFunc =
+        ExpressionFactory.createScalarFunc(ColumnType.POINT, "Point",
+            ImmutableList.of(ExpressionFactory.createLiteral(ColumnType.DOUBLE, 116.0),
+                ExpressionFactory.createLiteral(ColumnType.DOUBLE, 40.0)));
+    Expression dwithinFunc =
+        ExpressionFactory.createScalarFunc(ColumnType.BOOLEAN, "DWithin",
+            ImmutableList.of(ExpressionFactory.createInputRef(1, ColumnType.POINT, Modifier.PUBLIC),
+                pointFunc, ExpressionFactory.createLiteral(ColumnType.DOUBLE, 0.5)));
     plan.setWhereExps(ImmutableList.of(dwithinFunc));
     result = adapter.query(plan);
     it = result.getIterator();
@@ -94,11 +92,10 @@ public class PostgisAdapterTest {
     }
     assertEquals(3, count);
     // select * from traffic where Distance(location, Point(116.0, 40.0, 0.5)) <= 0.5;
-    Expression distanceFunc =  ExpressionFactory.createScalarFunc(ColumnType.DOUBLE, ScalarFuncType.DISTANCE.getId(), ImmutableList.of(
-      ExpressionFactory.createInputRef(1, ColumnType.POINT, Modifier.PUBLIC),
-      pointFunc
-    ));
-    Expression cmp = ExpressionFactory.createBinaryOperator(OperatorType.LE, ColumnType.BOOLEAN, distanceFunc, ExpressionFactory.createLiteral(ColumnType.DOUBLE, 0.5));
+    Expression distanceFunc = ExpressionFactory.createScalarFunc(ColumnType.DOUBLE, "Distance", ImmutableList
+            .of(ExpressionFactory.createInputRef(1, ColumnType.POINT, Modifier.PUBLIC), pointFunc));
+    Expression cmp = ExpressionFactory.createBinaryOperator(OperatorType.LE, ColumnType.BOOLEAN,
+        distanceFunc, ExpressionFactory.createLiteral(ColumnType.DOUBLE, 0.5));
     plan.setWhereExps(ImmutableList.of(cmp));
     result = adapter.query(plan);
     it = result.getIterator();

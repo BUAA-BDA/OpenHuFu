@@ -8,7 +8,7 @@ public class Distance implements ScalarUDF {
 
   @Override
   public String getName() {
-    return "Distance";
+    return "distance";
   }
 
   @Override
@@ -33,7 +33,7 @@ public class Distance implements ScalarUDF {
   }
 
   @Override
-  public String toString(String dataSource, List<String> inputs) {
+  public String translate(String dataSource, List<String> inputs) {
     switch(dataSource) {
       case "postgis":
         return String.format("%s <-> %s", inputs.get(0), inputs.get(1));

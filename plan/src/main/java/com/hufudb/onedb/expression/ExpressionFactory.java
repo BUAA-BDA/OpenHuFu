@@ -65,10 +65,11 @@ public class ExpressionFactory {
         .setModifier(mod).build();
   }
 
-  public static Expression createScalarFunc(ColumnType type, int funcId, List<Expression> inputs) {
+  public static Expression createScalarFunc(ColumnType type, String funcName,
+      List<Expression> inputs) {
     Modifier mod = ModifierWrapper.deduceModifier(inputs);
     return Expression.newBuilder().setOpType(OperatorType.SCALAR_FUNC).setOutType(type)
-        .addAllIn(inputs).setModifier(mod).setI32(funcId).build();
+        .setStr(funcName.toLowerCase()).addAllIn(inputs).setModifier(mod).build();
   }
 
   public static Expression createAggFunc(ColumnType type, int funcId, List<Expression> inputs) {
@@ -77,7 +78,8 @@ public class ExpressionFactory {
         .addAllIn(inputs).setModifier(mod).setI32(funcId).build();
   }
 
-  public static Expression createAggFunc(ColumnType type, Modifier mod, int funcId, List<Expression> inputs) {
+  public static Expression createAggFunc(ColumnType type, Modifier mod, int funcId,
+      List<Expression> inputs) {
     return Expression.newBuilder().setOpType(OperatorType.AGG_FUNC).setOutType(type)
         .addAllIn(inputs).setModifier(mod).setI32(funcId).build();
   }
@@ -117,8 +119,8 @@ public class ExpressionFactory {
 
   public static JoinCondition createJoinCondition(JoinType joinType, List<Integer> leftKeys,
       List<Integer> rightKyes, Expression condition, Modifier modifier) {
-    JoinCondition.Builder builder = JoinCondition.newBuilder().setType(joinType).addAllLeftKey(leftKeys)
-        .addAllRightKey(rightKyes).setModifier(modifier);
+    JoinCondition.Builder builder = JoinCondition.newBuilder().setType(joinType)
+        .addAllLeftKey(leftKeys).addAllRightKey(rightKyes).setModifier(modifier);
     if (condition != null) {
       builder.setCondition(condition);
     }

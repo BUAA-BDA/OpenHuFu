@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileFilter;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +16,12 @@ import com.google.common.collect.ImmutableMap;
 
 public class UDFLoader {
   private static final Logger LOG = LoggerFactory.getLogger(UDFLoader.class);
+  public static Map<String, ScalarUDF> scalarUDFs;
+
+  static {
+    Path libDir = Paths.get(System.getenv("ONEDB_ROOT"), "udf", "scalar");
+    scalarUDFs = UDFLoader.loadScalarUDF(libDir.toString());
+  }
 
   private UDFLoader() {}
 
@@ -41,5 +49,21 @@ public class UDFLoader {
       LOG.info("get scalar udf {}", scalar.getClass().getName());
     }
     return scalarUDFs.build();
+  }
+
+  public static Object implementScalar(String funcName, List<Object> inputs) {
+    if (!UDFLoader.scalarUDFs.containsKey(funcName)) {
+      LOG.error("Unsupported scalar UDF {}", funcName);
+      throw new RuntimeException("Unsupported scalar UDF");
+    }
+    return UDFLoader.scalarUDFs.get(funcName).implement(inputs);
+  }
+
+  public static String translateScalar(String funcName, String dataSource, List<String> inputs) {
+    if (!UDFLoader.scalarUDFs.containsKey(funcName)) {
+      LOG.error("Unsupported scalar UDF {}", funcName);
+      throw new RuntimeException("Unsupported scalar UDF");
+    }
+    return UDFLoader.scalarUDFs.get(funcName).translate(dataSource, inputs);
   }
 }

@@ -8,13 +8,14 @@ import com.hufudb.onedb.owner.adapter.AdapterTypeConverter;
 import com.hufudb.onedb.owner.adapter.jdbc.JDBCAdapter;
 import com.hufudb.onedb.data.storage.DataSet;
 import com.hufudb.onedb.data.storage.EmptyDataSet;
+import com.hufudb.onedb.expression.Translator;
 import com.hufudb.onedb.data.schema.Schema;
 
 
 public class PostgisAdapter extends JDBCAdapter {
   PostgisAdapter(String catalog, Connection connection, Statement statement,
-      AdapterTypeConverter converter) {
-    super(catalog, connection, statement, converter, new PostgisTranslator());
+      AdapterTypeConverter converter, Translator translator) {
+    super(catalog, connection, statement, converter, translator);
   }
 
   @Override
