@@ -22,7 +22,6 @@ import com.hufudb.onedb.expression.ExpressionUtils;
 import com.hufudb.onedb.expression.GroupAggregator;
 import com.hufudb.onedb.expression.SingleAggregator;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
-import com.hufudb.onedb.proto.OneDBPlan.JoinType;
 import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import com.hufudb.onedb.proto.OneDBPlan.JoinCondition;
 import com.hufudb.onedb.proto.OneDBPlan.OperatorType;

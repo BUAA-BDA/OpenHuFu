@@ -4,10 +4,8 @@ import com.hufudb.onedb.data.function.Matcher;
 import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.proto.OneDBPlan.JoinType;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Stack;
 
 /**
  * A dataset used for join through nested loop
