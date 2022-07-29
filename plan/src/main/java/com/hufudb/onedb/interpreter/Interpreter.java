@@ -1,5 +1,8 @@
 package com.hufudb.onedb.interpreter;
 
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 import com.hufudb.onedb.data.function.AggregateFunction;
@@ -115,7 +118,7 @@ public class Interpreter {
 
     @Override
     public boolean filter(Row row) {
-      return (boolean) implement(row, condition);
+      return Boolean.TRUE == implement(row, condition);
     }
   }
 
@@ -473,11 +476,14 @@ public class Interpreter {
       case SHORT:
       case INT:
         return ((Number) value).intValue();
-      case DATE:
-      case TIME:
-      case TIMESTAMP:
       case LONG:
         return ((Number) value).longValue();
+      case DATE:
+        return (Date) value;
+      case TIME:
+        return (Time) value;
+      case TIMESTAMP:
+        return (Timestamp) value;
       case FLOAT:
         return ((Number) value).floatValue();
       case DOUBLE:

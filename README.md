@@ -34,18 +34,21 @@
     - ca.pem: CA 根证书
     - owner[x].pem: CA 签发给 owner x 的证书
     - owner[x].key: owner x 证书对应的私钥
-- start_server.sh: Owner Side 示例启动脚本
-- start_client.sh: User Side 示例启动脚本
-- stop_server.sh: Owner Side 示例关闭脚本
-- backend.sh: Spring boot 示例启动脚本
-- init_env.sh: 本地示例初始化脚本
+- demo: 运行示例目录
+    - start_server.sh: Owner Side 示例启动脚本
+    - start_client.sh: User Side 示例启动脚本
+    - stop_server.sh: Owner Side 示例关闭脚本
+    - backend.sh: Spring boot 示例启动脚本
+    - init_env.sh: 本地示例初始化脚本
+- user.sh: 查询端运行脚本
+- owner.sh: 数据拥有端运行脚本
 
 ## 运行
-`release` 文件夹下提供了一个本地运行的示例，运行该示例需要完成上述安装步骤并安装 docker >= 20.10, docker-compose >= 1.29
+`release/demo` 文件夹下提供了一个本地运行的示例，运行该示例需要完成上述安装步骤并安装 docker >= 20.10, docker-compose >= 1.29
 
 1. 初始化数据库环境并安装证书
 ```
-cd release
+cd release/demo
 ./init_env.sh
 ```
 2. 启动 owner side
@@ -108,31 +111,22 @@ onedb>!q
 - tables: 预定义的可被 query user 获取的本地表 schema 信息
     - actualName: 本地真实表名
     - publishedName: 对外发布的表名，query user 通过该表名来查询此表
-    - columns: 列模式信息，各列顺序需要和本地表一致
+    - publishedColumns: 需要公开的列信息
         - name: 对外发布的列名
         - type: 对外发布的类型（当前版本需要和本地类型保持一致）
         - modifier: 安全级别
-    - actualColumns: 对应列在被发布表中的顺序，例如本地表 [A, B, C]，通过设置 actualColumns 为[2, 1, 0]，即可将发布表中列顺序变为 [C, B, A]
-    - columns 和 actualColumns 同时留空则表示直接使用本地表的模式信息，并且所有列的modifier为public
+        - columnId: 对应的真实列在真实表中的序号
 
 
 ### UserSide
 
-配置文件样例位于 `release/conf/client_model.json`：
-- version: 该项请勿修改
-- defaultSchema: 该项请勿修改
-- schemas: 可用的全局表模式
-    - name: 该项请勿修改
-    - type: 该项请勿修改
-    - factory: 该项请勿修改
-    - operand: **需要配置的项**
-        - owners: 需要连接的参与方信息
-            - endpoint: ownerside 的 hostname:port
-            - trustcertpath: 该owner的ca证书路径
-    - tables: 全局表模式信息，**需要配置的项**
-        - name: 全局表名
-        - factory: 该项请勿修改
-        - operand: 全局到本地表映射信息
-            - feds: 全局表对应的本地表（可以有多个）
-                - endpoint: 本地表所在的owner的 endpoint
-                - name: 本地表的表名
+配置文件样例位于 `release/conf/client_model.json`
+
+- owners: 需要连接的参与方信息
+    - endpoint: ownerside 的 hostname:port
+    - trustcertpath: 可信任的 CA 证书路径
+- tables: 全局表模式信息
+    - tablename: 全局表名
+    - localtables: 全局表对应的本地表（可以有多个）
+        - endpoint: 本地表所在 owner 的 endpoint
+        - localname: 本地表的表名

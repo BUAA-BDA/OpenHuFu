@@ -17,14 +17,12 @@
     {
       "actualName": "student",
       "publishedName": "student1",
-      "publishedColumns": [],
-      "actualColumns": []
+      "publishedColumns": []
     },
     {
       "actualName": "taxi",
       "publishedName": "taxi",
-      "publishedColumns": [],
-      "actualColumns": []
+      "publishedColumns": []
     },
     {
       "actualName": "student",
@@ -33,25 +31,28 @@
         {
           "name": "name",
           "type": "STRING",
-          "modifier": "protected"
+          "modifier": "protected",
+          "columnId": 0
         },
         {
           "name": "score",
           "type": "INT",
-          "modifier": "protected"
+          "modifier": "protected",
+          "columnId": 1
         },
         {
           "name": "age",
           "type": "INT",
-          "modifier": "protected"
+          "modifier": "protected",
+          "columnId": 2
         },
         {
           "name": "dept_name",
           "type": "STRING",
-          "modifier": "public"
+          "modifier": "public",
+          "columnId": 3
         }
-      ],
-      "actualColumns": [0, 1, 2, 3]
+      ]
     },
     {
       "actualName": "student",
@@ -60,25 +61,28 @@
         {
           "name": "name",
           "type": "STRING",
-          "modifier": "protected"
+          "modifier": "protected",
+          "columnId": 0
         },
         {
           "name": "score",
           "type": "INT",
-          "modifier": "protected"
+          "modifier": "protected",
+          "columnId": 1
         },
         {
           "name": "age",
           "type": "INT",
-          "modifier": "protected"
+          "modifier": "protected",
+          "columnId": 2
         },
         {
           "name": "dept_name",
           "type": "STRING",
-          "modifier": "public"
+          "modifier": "public",
+          "columnId": 3
         }
-      ],
-      "actualColumns": [0, 1, 2, 3]
+      ]
     }
   ]
 }

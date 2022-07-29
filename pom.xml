@@ -26,6 +26,7 @@
     <module>adapter-mysql</module>
     <module>adapter-sqlite</module>
     <module>adapter-csv</module>
+    <module>adapter-json</module>
     <module>benchmark</module>
     <module>backend</module>
     <module>coverage</module>

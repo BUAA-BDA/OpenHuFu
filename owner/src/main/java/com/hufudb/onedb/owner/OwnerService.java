@@ -1,6 +1,7 @@
 package com.hufudb.onedb.owner;
 
 import com.hufudb.onedb.owner.adapter.Adapter;
+import com.hufudb.onedb.owner.checker.Checker;
 import com.hufudb.onedb.owner.config.OwnerConfig;
 import com.hufudb.onedb.owner.implementor.OwnerSideImplementor;
 import com.hufudb.onedb.owner.storage.StreamDataSet;
@@ -58,6 +59,11 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
   @Override
   public void query(QueryPlanProto request, StreamObserver<DataSetProto> responseObserver) {
     Plan plan = Plan.fromProto(request);
+    if (!Checker.check(plan, schemaManager)) {
+      LOG.warn("Check fail for plan {}", request.toString());
+      responseObserver.onCompleted();
+      return;
+    }
     try {
       DataSet result = implementor.implement(plan);
       StreamDataSet output = new StreamDataSet(result, responseObserver);

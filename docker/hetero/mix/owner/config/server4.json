@@ -15,25 +15,28 @@
         {
           "name": "name",
           "type": "STRING",
-          "modifier": "public"
+          "modifier": "public",
+          "columnId": 0
         },
         {
           "name": "age",
           "type": "INT",
-          "modifier": "public"
+          "modifier": "public",
+          "columnId": 1
         },
         {
           "name": "score",
           "type": "INT",
-          "modifier": "public"
+          "modifier": "public",
+          "columnId": 2
         },
         {
           "name": "dept_name",
           "type": "STRING",
-          "modifier": "public"
+          "modifier": "public",
+          "columnId": 3
         }
-      ],
-      "actualColumns": [0,1,2,3]
+      ]
     }
   ]
 }

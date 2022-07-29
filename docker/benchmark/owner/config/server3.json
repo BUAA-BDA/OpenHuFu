@@ -16,38 +16,32 @@
     {
       "actualName": "partsupp",
       "publishedName": "partsupp",
-      "publishedColumns": [],
-      "actualColumns": []
+      "publishedColumns": []
     },
     {
       "actualName": "customer",
       "publishedName": "customer",
-      "publishedColumns": [],
-      "actualColumns": []
+      "publishedColumns": []
     },
     {
       "actualName": "lineitem",
       "publishedName": "lineitem",
-      "publishedColumns": [],
-      "actualColumns": []
+      "publishedColumns": []
     },
     {
       "actualName": "orders",
       "publishedName": "orders",
-      "publishedColumns": [],
-      "actualColumns": []
+      "publishedColumns": []
     },
     {
       "actualName": "part",
       "publishedName": "part",
-      "publishedColumns": [],
-      "actualColumns": []
+      "publishedColumns": []
     },
     {
       "actualName": "supplier",
       "publishedName": "supplier",
-      "publishedColumns": [],
-      "actualColumns": []
+      "publishedColumns": []
     }
   ]
 }

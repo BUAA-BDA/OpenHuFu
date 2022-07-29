@@ -23,8 +23,12 @@ test:
   needs: ["build"]
   dependencies:
     - build
+  before_script:
+    - sh test.sh clean_ci
   script:
     - sh test.sh ci
+  after_script:
+    - sh test.sh clean_ci
   artifacts:
     when: always
     reports:

@@ -102,9 +102,9 @@ public class OneDBTable extends AbstractQueryableTable implements TranslatableTa
 
   public static Table create(OneDBSchemaManager schemaManager, String tableName, Map operand,
       RelProtoDataType protoRowType) {
-    List<Map<String, Object>> feds = (List<Map<String, Object>>) operand.get("feds");
+    List<Map<String, Object>> components = (List<Map<String, Object>>) operand.get("components");
     OneDBTable table = null;
-    for (Map<String, Object> fed : feds) {
+    for (Map<String, Object> fed : components) {
       String endpoint = fed.get("endpoint").toString();
       String localName = fed.get("name").toString();
       OwnerClient client = schemaManager.getOwnerClient(endpoint);
