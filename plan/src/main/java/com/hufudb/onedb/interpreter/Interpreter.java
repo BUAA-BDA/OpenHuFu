@@ -1,10 +1,5 @@
 package com.hufudb.onedb.interpreter;
 
-import java.sql.Date;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.stream.Collectors;
 import com.hufudb.onedb.data.function.AggregateFunction;
 import com.hufudb.onedb.data.function.Aggregator;
 import com.hufudb.onedb.data.function.Filter;
@@ -17,26 +12,30 @@ import com.hufudb.onedb.data.storage.FilterDataSet;
 import com.hufudb.onedb.data.storage.JoinDataSet;
 import com.hufudb.onedb.data.storage.MapDataSet;
 import com.hufudb.onedb.data.storage.Row;
-import com.hufudb.onedb.expression.ScalarFuncType;
 import com.hufudb.onedb.expression.AggregateFunctions;
 import com.hufudb.onedb.expression.ExpressionUtils;
 import com.hufudb.onedb.expression.GroupAggregator;
+import com.hufudb.onedb.expression.ScalarFuncType;
 import com.hufudb.onedb.expression.SingleAggregator;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import com.hufudb.onedb.proto.OneDBPlan.JoinCondition;
 import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
 import com.hufudb.onedb.udf.UDFLoader;
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Interpret expressions as different types of datasets
+ * >>>>>>> issue/nym/35
  */
 public class Interpreter {
   public static final Logger LOG = LoggerFactory.getLogger(Interpreter.class);
-
-  private Interpreter() {}
 
   /**
    * filter the source dataset by condition expressions
@@ -50,7 +49,6 @@ public class Interpreter {
     }
   }
 
-
   /**
    * map the dataset by specified expressions
    */
@@ -58,7 +56,8 @@ public class Interpreter {
     if (exps.isEmpty()) {
       return source;
     } else {
-      // DirectMapping means nothing has changed during the mapping, e.g. (A,B,C) -> (A,B,C)
+      // DirectMapping means nothing has changed during the mapping, e.g. (A,B,C) ->
+      // (A,B,C)
       boolean isDirectMapping = exps.size() == source.getSchema().size();
       if (isDirectMapping) {
         for (int i = 0; i < exps.size(); ++i) {
@@ -88,8 +87,7 @@ public class Interpreter {
       return source;
     } else {
       // we convert every aggregate Expression into AggregateFunction
-      List<AggregateFunction<Row, Comparable>> funcs =
-          AggregateFunctions.createAggregateFunction(aggs);
+      List<AggregateFunction<Row, Comparable>> funcs = AggregateFunctions.createAggregateFunction(aggs);
       Aggregator aggregator = null;
       // outSchema represents what the expected output looks like
       final Schema outSchema = ExpressionUtils.createSchema(aggs);
@@ -241,6 +239,8 @@ public class Interpreter {
         return implement(row, inputs.get(0)) == null;
       case IS_NOT_NULL:
         return implement(row, inputs.get(0)) != null;
+      case LIKE:
+        return calLike(row, e);
       case CASE:
         for (int i = 1; i < inputs.size(); i += 2) {
           if ((Boolean) implement(row, inputs.get(i - 1))) {
@@ -255,9 +255,40 @@ public class Interpreter {
     }
   }
 
+  private static boolean calLike(Row row, Expression exp) {
+    String JAVA_REGEX_SPECIALS = "[]()|^-+*?{}$\\.";
+    List<Expression> inputs = exp.getInList();
+    String sqlPattern = (String) implement(row, inputs.get(1));
+
+    int i;
+    final int len = sqlPattern.length();
+    final StringBuilder javaPattern = new StringBuilder(len + len);
+    for (i = 0; i < len; i++) {
+      char c = sqlPattern.charAt(i);
+      if (JAVA_REGEX_SPECIALS.indexOf(c) >= 0) {
+        javaPattern.append('\\');
+      }
+      if (c == '_') {
+        javaPattern.append('.');
+      } else if (c == '%') {
+        javaPattern.append("(?s:.*)");
+      } else {
+        javaPattern.append(c);
+      }
+    }
+
+    java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(javaPattern.toString());
+    java.util.regex.Matcher matcher = pattern.matcher(((String) implement(row, inputs.get(0))));
+
+    if (matcher.find()) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   private static Object calScalarFunc(Row row, Expression exp) {
-    List<Object> inputs =
-        exp.getInList().stream().map(e -> implement(row, e)).collect(Collectors.toList());
+    List<Object> inputs = exp.getInList().stream().map(e -> implement(row, e)).collect(Collectors.toList());
     String funcName = exp.getStr();
     if (ScalarFuncType.support(funcName)) {
       ScalarFuncType func = ScalarFuncType.of(exp.getStr());
@@ -359,8 +390,7 @@ public class Interpreter {
   }
 
   private static Number calculate(Row row, OperatorType type, List<Expression> inputExps) {
-    List<Number> inputs =
-        inputExps.stream().map(e -> (Number) implement(row, e)).collect(Collectors.toList());
+    List<Number> inputs = inputExps.stream().map(e -> (Number) implement(row, e)).collect(Collectors.toList());
     ColumnType calType = inputExps.stream().reduce(ColumnType.INT,
         (d, t) -> dominate(d, t.getOutType()), (t1, t2) -> dominate(t1, t2));
     for (Object in : inputs) {

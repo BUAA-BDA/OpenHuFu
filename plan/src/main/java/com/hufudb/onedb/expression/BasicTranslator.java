@@ -31,7 +31,7 @@ public class BasicTranslator implements Translator {
         return literal(exp);
       case PLUS:
       case MINUS:
-        // binary
+      // binary
       case GT:
       case GE:
       case LT:
@@ -43,6 +43,7 @@ public class BasicTranslator implements Translator {
       case MOD:
       case AND:
       case OR:
+      case LIKE:
         return binary(exp);
       // unary
       case AS:
@@ -109,7 +110,7 @@ public class BasicTranslator implements Translator {
       case IS_NULL:
         return String.format("(%s IS NULL)", in);
       case IS_NOT_NULL:
-        return String.format("(%s IS NOT NULL", in);
+        return String.format("(%s IS NOT NULL)", in);
       case NOT:
         return String.format("(NOT %s)", in);
       default:
@@ -160,6 +161,9 @@ public class BasicTranslator implements Translator {
         break;
       case OR:
         op = "OR";
+        break;
+      case LIKE:
+        op = "LIKE";
         break;
       default:
         throw new RuntimeException("can't translate binary " + exp);

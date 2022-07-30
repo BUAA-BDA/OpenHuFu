@@ -194,6 +194,7 @@ public class CalciteConverter {
         case MOD:
         case AND:
         case OR:
+        case LIKE:
           return binary((RexCall) node);
         // unary
         case AS:
@@ -266,6 +267,8 @@ public class CalciteConverter {
         case OR:
           op = OperatorType.OR;
           break;
+        case LIKE:
+          op = OperatorType.LIKE;
         default:
           throw new RuntimeException("can't translate " + call);
       }

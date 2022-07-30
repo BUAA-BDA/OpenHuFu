@@ -10,34 +10,35 @@ enum OperatorType {
   REF = 1;
   LITERAL = 2;
   // for binary
-  PLUS = 3;
-  MINUS = 4;
-  TIMES = 5;
-  DIVIDE = 6;
-  MOD = 7;
-  GT = 8;
-  GE = 9;
-  LT = 10;
-  LE = 11;
-  EQ = 12;
-  NE = 13;
-  AND = 14;
-  OR = 15;
+  PLUS = 100;
+  MINUS = 101;
+  TIMES = 102;
+  DIVIDE = 103;
+  MOD = 104;
+  GT = 105;
+  GE = 106;
+  LT = 107;
+  LE = 108;
+  EQ = 109;
+  NE = 110;
+  AND = 111;
+  OR = 112;
+  LIKE = 113;
   // for unary
-  AS = 16;
-  NOT = 17;
-  PLUS_PRE = 18;
-  MINUS_PRE = 19;
-  IS_NULL = 20;
-  IS_NOT_NULL = 21;
+  AS = 200;
+  NOT = 201;
+  PLUS_PRE = 202;
+  MINUS_PRE = 203;
+  IS_NULL = 204;
+  IS_NOT_NULL = 205;
   // for mutliple
-  CASE = 22;
+  CASE = 300;
   // for set
-  INTERSECTION = 30;
-  UNION = 31;
+  INTERSECTION = 400;
+  UNION = 401;
   // for functions
-  SCALAR_FUNC = 100;
-  AGG_FUNC = 101;
+  SCALAR_FUNC = 500;
+  AGG_FUNC = 501;
 }
 
 enum Direction {
