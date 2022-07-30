@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.lang.Float;
@@ -13,10 +14,7 @@ import java.lang.Double;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.hufudb.onedb.data.schema.Schema;
-import com.hufudb.onedb.data.storage.ArrayRow;
-import com.hufudb.onedb.data.storage.DataSet;
-import com.hufudb.onedb.data.storage.DataSetIterator;
-import com.hufudb.onedb.data.storage.ProtoDataSet;
+import com.hufudb.onedb.data.storage.*;
 import com.hufudb.onedb.expression.AggFuncType;
 import com.hufudb.onedb.expression.ExpressionFactory;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
@@ -483,6 +481,109 @@ public class InterpreterTest {
   }
 
   @Test
+  public void testEqualLeftJoinDataSet() {
+    DataSet s0 = generateLeft();
+    DataSet s1 = generateRight();
+    JoinCondition condition = JoinCondition.newBuilder().setType(JoinType.LEFT).addLeftKey(2)
+        .addRightKey(2).setModifier(Modifier.PUBLIC).build();
+    DataSet res = Interpreter.join(s0, s1, condition);
+    DataSetIterator it = res.getIterator();
+    assertTrue(it.next());
+    assertEquals(3, it.get(0));
+    assertEquals(4.2, (double) it.get(1), 0.001);
+    assertEquals("Alice", it.get(2));
+    assertEquals(2, it.get(3));
+    assertEquals(6.3, (double) it.get(4), 0.001);
+    assertEquals("Alice", it.get(5));
+    assertTrue(it.next());
+    assertEquals(5, it.get(0));
+    assertEquals(6.3, (double) it.get(1), 0.001);
+    assertEquals("Bob", it.get(2));
+    assertEquals(9, it.get(3));
+    assertEquals(8.5, (double) it.get(4), 0.001);
+    assertEquals("Bob", it.get(5));
+    assertTrue(it.next());
+    assertEquals(7, it.get(0));
+    assertEquals(8.4, (double) it.get(1), 0.001);
+    assertEquals("Tom", it.get(2));
+    assertEquals(null, it.get(3));
+    assertEquals(null, it.get(4));
+    assertEquals(null, it.get(5));
+    assertFalse(it.next());
+  }
+
+  @Test
+  public void testEqualRightJoinDataSet() {
+    DataSet s0 = generateLeft();
+    DataSet s1 = generateRight();
+    JoinCondition condition = JoinCondition.newBuilder().setType(JoinType.RIGHT).addLeftKey(2)
+        .addRightKey(2).setModifier(Modifier.PUBLIC).build();
+    DataSet res = Interpreter.join(s0, s1, condition);
+    DataSetIterator it = res.getIterator();
+    assertTrue(it.next());
+    assertEquals(null, it.get(0));
+    assertEquals(null, it.get(1));
+    assertEquals(null, it.get(2));
+    assertEquals(5, it.get(3));
+    assertEquals(3.1, it.get(4));
+    assertEquals("Snow", it.get(5));
+    assertTrue(it.next());
+    assertEquals(3, it.get(0));
+    assertEquals(4.2, (double) it.get(1), 0.001);
+    assertEquals("Alice", it.get(2));
+    assertEquals(2, it.get(3));
+    assertEquals(6.3, (double) it.get(4), 0.001);
+    assertEquals("Alice", it.get(5));
+    assertTrue(it.next());
+    assertEquals(5, it.get(0));
+    assertEquals(6.3, (double) it.get(1), 0.001);
+    assertEquals("Bob", it.get(2));
+    assertEquals(9, it.get(3));
+    assertEquals(8.5, (double) it.get(4), 0.001);
+    assertEquals("Bob", it.get(5));
+    assertFalse(it.next());
+  }
+
+  @Test
+  public void testEqualOuterJoinDataSet() {
+    DataSet s0 = generateLeft();
+    DataSet s1 = generateRight();
+    JoinCondition condition = JoinCondition.newBuilder().setType(JoinType.OUTER).addLeftKey(2)
+        .addRightKey(2).setModifier(Modifier.PUBLIC).build();
+    DataSet res = Interpreter.join(s0, s1, condition);
+    DataSetIterator it = res.getIterator();
+    assertTrue(it.next());
+    assertEquals(null, it.get(0));
+    assertEquals(null, it.get(1));
+    assertEquals(null, it.get(2));
+    assertEquals(5, it.get(3));
+    assertEquals(3.1, it.get(4));
+    assertEquals("Snow", it.get(5));
+    assertTrue(it.next());
+    assertEquals(3, it.get(0));
+    assertEquals(4.2, (double) it.get(1), 0.001);
+    assertEquals("Alice", it.get(2));
+    assertEquals(2, it.get(3));
+    assertEquals(6.3, (double) it.get(4), 0.001);
+    assertEquals("Alice", it.get(5));
+    assertTrue(it.next());
+    assertEquals(5, it.get(0));
+    assertEquals(6.3, (double) it.get(1), 0.001);
+    assertEquals("Bob", it.get(2));
+    assertEquals(9, it.get(3));
+    assertEquals(8.5, (double) it.get(4), 0.001);
+    assertEquals("Bob", it.get(5));
+    assertTrue(it.next());
+    assertEquals(7, it.get(0));
+    assertEquals(8.4, (double) it.get(1), 0.001);
+    assertEquals("Tom", it.get(2));
+    assertEquals(null, it.get(3));
+    assertEquals(null, it.get(4));
+    assertEquals(null, it.get(5));
+    assertFalse(it.next());
+  }
+
+  @Test
   public void testThetaJoinDataSet() {
     DataSet s0 = generateLeft();
     DataSet s1 = generateRight();
@@ -509,6 +610,77 @@ public class InterpreterTest {
   }
 
   @Test
+  public void testThetaLeftJoinDataSet() {
+    DataSet s0 = generateLeft();
+    DataSet s1 = generateRight();
+    Expression leftRef = ExpressionFactory.createInputRef(1, ColumnType.DOUBLE, Modifier.PUBLIC);
+    Expression rightRef = ExpressionFactory.createInputRef(4, ColumnType.DOUBLE, Modifier.PUBLIC);
+    Expression cmp = ExpressionFactory.createBinaryOperator(OperatorType.GT, ColumnType.BOOLEAN,
+        leftRef, rightRef);
+    JoinCondition condition = JoinCondition.newBuilder().setType(JoinType.LEFT)
+        .setModifier(Modifier.PUBLIC).setCondition(cmp).build();
+    DataSet res = Interpreter.join(s0, s1, condition);
+    DataSetIterator it = res.getIterator();
+    assertTrue(it.next());
+    assertEquals(3, it.get(0));
+    assertEquals(4.2, (double) it.get(1), 0.001);
+    assertEquals("Alice", it.get(2));
+    assertEquals(5, it.get(3));
+    assertEquals(3.1, (double) it.get(4), 0.001);
+    assertEquals("Snow", it.get(5));
+    int count = 1;
+    while (it.next()) {
+      count++;
+    }
+    assertEquals(4, count);
+  }
+
+  @Test
+  public void testThetaRightJoinDataSet() {
+    DataSet s0 = generateLeft();
+    DataSet s1 = generateRight();
+    Expression leftRef = ExpressionFactory.createInputRef(1, ColumnType.DOUBLE, Modifier.PUBLIC);
+    Expression rightRef = ExpressionFactory.createInputRef(4, ColumnType.DOUBLE, Modifier.PUBLIC);
+    Expression cmp = ExpressionFactory.createBinaryOperator(OperatorType.GT, ColumnType.BOOLEAN,
+        leftRef, rightRef);
+    JoinCondition condition = JoinCondition.newBuilder().setType(JoinType.RIGHT)
+        .setModifier(Modifier.PUBLIC).setCondition(cmp).build();
+    DataSet res = Interpreter.join(s0, s1, condition);
+    DataSetIterator it = res.getIterator();
+    assertTrue(it.next());
+    assertEquals(3, it.get(0));
+    assertEquals(4.2, (double) it.get(1), 0.001);
+    assertEquals("Alice", it.get(2));
+    assertEquals(5, it.get(3));
+    assertEquals(3.1, (double) it.get(4), 0.001);
+    assertEquals("Snow", it.get(5));
+    int count = 1;
+    while (it.next()) {
+      count++;
+    }
+    assertEquals(5, count);
+  }
+
+  @Test
+  public void testThetaOuterJoinDataSet() {
+    DataSet s0 = generateLeft();
+    DataSet s1 = generateRight();
+    Expression leftRef = ExpressionFactory.createInputRef(1, ColumnType.DOUBLE, Modifier.PUBLIC);
+    Expression rightRef = ExpressionFactory.createInputRef(4, ColumnType.DOUBLE, Modifier.PUBLIC);
+    Expression cmp = ExpressionFactory.createBinaryOperator(OperatorType.LT, ColumnType.BOOLEAN,
+        leftRef, rightRef);
+    JoinCondition condition = JoinCondition.newBuilder().setType(JoinType.OUTER)
+        .setModifier(Modifier.PUBLIC).setCondition(cmp).build();
+    DataSet res = Interpreter.join(s0, s1, condition);
+    DataSetIterator it = res.getIterator();
+    int count = 0;
+    while (it.next()) {
+      count++;
+    }
+    assertEquals(5, count);
+  }
+
+  @Test
   public void testcombineJoinDataSet() {
     DataSet s0 = generateLeft();
     DataSet s1 = generateRight();
@@ -527,6 +699,128 @@ public class InterpreterTest {
     assertEquals(2, it.get(3));
     assertEquals(6.3, (double) it.get(4), 0.001);
     assertEquals("Alice", it.get(5));
+    assertFalse(it.next());
+  }
+
+  @Test
+  public void testcombineLeftJoinDataSet() {
+    DataSet s0 = generateLeft();
+    DataSet s1 = generateRight();
+    Expression leftRef = ExpressionFactory.createInputRef(0, ColumnType.INT, Modifier.PUBLIC);
+    Expression rightRef = ExpressionFactory.createInputRef(3, ColumnType.INT, Modifier.PUBLIC);
+    Expression cmp = ExpressionFactory.createBinaryOperator(OperatorType.GT, ColumnType.BOOLEAN,
+        leftRef, rightRef);
+    JoinCondition condition = JoinCondition.newBuilder().setType(JoinType.LEFT)
+        .setModifier(Modifier.PUBLIC).addLeftKey(2).addRightKey(2).setCondition(cmp).build();
+    DataSet res = Interpreter.join(s0, s1, condition);
+    DataSetIterator it = res.getIterator();
+    assertTrue(it.next());
+    assertEquals(3, it.get(0));
+    assertEquals(4.2, (double) it.get(1), 0.001);
+    assertEquals("Alice", it.get(2));
+    assertEquals(2, it.get(3));
+    assertEquals(6.3, (double) it.get(4), 0.001);
+    assertEquals("Alice", it.get(5));
+    assertTrue(it.next());
+    assertEquals(5, it.get(0));
+    assertEquals(6.3, (double) it.get(1), 0.001);
+    assertEquals("Bob", it.get(2));
+    assertEquals(null, it.get(3));
+    assertEquals(null, it.get(4));
+    assertEquals(null, it.get(5));
+    assertTrue(it.next());
+    assertEquals(7, it.get(0));
+    assertEquals(8.4, (double) it.get(1), 0.001);
+    assertEquals("Tom", it.get(2));
+    assertEquals(null, it.get(3));
+    assertEquals(null, it.get(4));
+    assertEquals(null, it.get(5));
+    assertFalse(it.next());
+  }
+
+  @Test
+  public void testcombineRightJoinDataSet() {
+    DataSet s0 = generateLeft();
+    DataSet s1 = generateRight();
+    Expression leftRef = ExpressionFactory.createInputRef(0, ColumnType.INT, Modifier.PUBLIC);
+    Expression rightRef = ExpressionFactory.createInputRef(3, ColumnType.INT, Modifier.PUBLIC);
+    Expression cmp = ExpressionFactory.createBinaryOperator(OperatorType.GT, ColumnType.BOOLEAN,
+        leftRef, rightRef);
+    JoinCondition condition = JoinCondition.newBuilder().setType(JoinType.RIGHT)
+        .setModifier(Modifier.PUBLIC).addLeftKey(2).addRightKey(2).setCondition(cmp).build();
+    DataSet res = Interpreter.join(s0, s1, condition);
+    DataSetIterator it = res.getIterator();
+    assertTrue(it.next());
+    assertEquals(null, it.get(0));
+    assertEquals(null, it.get(1));
+    assertEquals(null, it.get(2));
+    assertEquals(5, it.get(3));
+    assertEquals(3.1, (double) it.get(4), 0.001);
+    assertEquals("Snow", it.get(5));
+    assertTrue(it.next());
+    assertEquals(3, it.get(0));
+    assertEquals(4.2, (double) it.get(1), 0.001);
+    assertEquals("Alice", it.get(2));
+    assertEquals(2, it.get(3));
+    assertEquals(6.3, (double) it.get(4), 0.001);
+    assertEquals("Alice", it.get(5));
+    assertTrue(it.next());
+    assertEquals(null, it.get(0));
+    assertEquals(null, it.get(1));
+    assertEquals(null, it.get(2));
+    assertEquals(9, it.get(3));
+    assertEquals(8.5, (double) it.get(4), 0.001);
+    assertEquals("Bob", it.get(5));
+    assertFalse(it.next());
+  }
+
+  @Test
+  public void testcombineOuterJoinDataSet() {
+    DataSet s0 = generateLeft();
+    DataSet s1 = generateRight();
+    Expression leftRef = ExpressionFactory.createInputRef(0, ColumnType.INT, Modifier.PUBLIC);
+    Expression rightRef = ExpressionFactory.createInputRef(3, ColumnType.INT, Modifier.PUBLIC);
+    Expression cmp = ExpressionFactory.createBinaryOperator(OperatorType.LT, ColumnType.BOOLEAN,
+        leftRef, rightRef);
+    JoinCondition condition = JoinCondition.newBuilder().setType(JoinType.OUTER)
+        .setModifier(Modifier.PUBLIC).addLeftKey(2).addRightKey(2).setCondition(cmp).build();
+    DataSet res = Interpreter.join(s0, s1, condition);
+    DataSetIterator it = res.getIterator();
+    assertTrue(it.next());
+    assertEquals(null, it.get(0));
+    assertEquals(null, it.get(1));
+    assertEquals(null, it.get(2));
+    assertEquals(5, it.get(3));
+    assertEquals(3.1, (double) it.get(4), 0.001);
+    assertEquals("Snow", it.get(5));
+    assertTrue(it.next());
+    assertEquals(null, it.get(0));
+    assertEquals(null, it.get(1));
+    assertEquals(null, it.get(2));
+    assertEquals(2, it.get(3));
+    assertEquals(6.3, (double) it.get(4), 0.001);
+    assertEquals("Alice", it.get(5));
+    assertTrue(it.next());
+    assertEquals(5, it.get(0));
+    assertEquals(6.3, (double) it.get(1), 0.001);
+    assertEquals("Bob", it.get(2));
+    assertEquals(9, it.get(3));
+    assertEquals(8.5, (double) it.get(4), 0.001);
+    assertEquals("Bob", it.get(5));
+    assertTrue(it.next());
+    assertEquals(3, it.get(0));
+    assertEquals(4.2, (double) it.get(1), 0.001);
+    assertEquals("Alice", it.get(2));
+    assertEquals(null, it.get(3));
+    assertEquals(null, it.get(4));
+    assertEquals(null, it.get(5));
+    assertTrue(it.next());
+    assertEquals(7, it.get(0));
+    assertEquals(8.4, (double) it.get(1), 0.001);
+    assertEquals("Tom", it.get(2));
+    assertEquals(null, it.get(3));
+    assertEquals(null, it.get(4));
+    assertEquals(null, it.get(5));
     assertFalse(it.next());
   }
 

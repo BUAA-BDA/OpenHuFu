@@ -104,7 +104,7 @@ public class Interpreter {
 
   public static DataSet join(DataSet left, DataSet right, JoinCondition condition) {
     return JoinDataSet.create(left, right,
-        new InterpretiveMatcher(condition, left.getSchema(), right.getSchema()));
+        new InterpretiveMatcher(condition, left.getSchema(), right.getSchema()), condition.getType());
   }
 
   public static class InterpretiveFilter implements Filter {
