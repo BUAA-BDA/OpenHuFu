@@ -3,6 +3,17 @@ package com.hufudb.onedb;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import com.google.common.collect.ImmutableList;
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+import com.hufudb.onedb.core.table.GlobalTableConfig;
+import com.hufudb.onedb.data.storage.ArrayRow;
+import com.hufudb.onedb.data.storage.DataSet;
+import com.hufudb.onedb.data.storage.DataSetIterator;
+import com.hufudb.onedb.expression.ExpressionFactory;
+import com.hufudb.onedb.owner.OwnerServer;
+import com.hufudb.onedb.plan.LeafPlan;
+import com.hufudb.onedb.user.OneDB;
 import java.io.Reader;
 import java.net.URL;
 import java.nio.file.Files;
@@ -22,17 +33,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import com.google.common.collect.ImmutableList;
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
-import com.hufudb.onedb.core.table.GlobalTableConfig;
-import com.hufudb.onedb.data.storage.ArrayRow;
-import com.hufudb.onedb.data.storage.DataSet;
-import com.hufudb.onedb.data.storage.DataSetIterator;
-import com.hufudb.onedb.expression.ExpressionFactory;
-import com.hufudb.onedb.owner.OwnerServer;
-import com.hufudb.onedb.plan.LeafPlan;
-import com.hufudb.onedb.user.OneDB;
 
 @RunWith(JUnit4.class)
 public class IntegrationQueryTest {
@@ -355,6 +355,38 @@ public class IntegrationQueryTest {
       ImmutableList.of(92)
     ));
     compareRows(expect, toRows(result));
+    result.close();
+  }
+
+  @Test
+  public void likeTest() throws SQLException {
+    ResultSet result = user.executeQuery("select name from student_pub_share where dept_name like 'software'");
+    List<ArrayRow> expect = toRows(ImmutableList.of(
+      ImmutableList.of("anna"),
+      ImmutableList.of("Snow"),
+      ImmutableList.of("Brown")
+    ));
+    List<ArrayRow> act = toRows(result);
+    compareRows(expect, act);
+    result.close();
+
+    result  = user.executeQuery("select name from student_pub_share where dept_name like 'e%r'");
+    expect = toRows(ImmutableList.of(
+      ImmutableList.of("tom"),
+      ImmutableList.of("peter"),
+      ImmutableList.of("john"),
+      ImmutableList.of("Brand")
+    ));
+    act = toRows(result);
+    compareRows(expect, act);
+    result.close();
+
+    result  = user.executeQuery("select name from student_pub_share where dept_name like 'r__ics'");
+    expect = toRows(ImmutableList.of(
+      ImmutableList.of("Brand")
+    ));
+    act = toRows(result);
+    compareRows(expect, act);
     result.close();
   }
 
