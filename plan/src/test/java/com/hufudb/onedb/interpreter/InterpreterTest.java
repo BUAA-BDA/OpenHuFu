@@ -3,7 +3,10 @@ package com.hufudb.onedb.interpreter;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import org.junit.Test;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.hufudb.onedb.data.schema.Schema;
@@ -19,18 +22,12 @@ import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import com.hufudb.onedb.proto.OneDBPlan.JoinCondition;
 import com.hufudb.onedb.proto.OneDBPlan.JoinType;
 import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
-import java.lang.Double;
-import java.lang.Float;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import org.junit.Test;
 
 
 public class InterpreterTest {
   ProtoDataSet generateStringDataSet() {
     final Schema schema = Schema.newBuilder().add("NAME", ColumnType.STRING, Modifier.PUBLIC)
-            .add("DESCRIPTION", ColumnType.STRING, Modifier.PUBLIC).build();
+        .add("DESCRIPTION", ColumnType.STRING, Modifier.PUBLIC).build();
     ProtoDataSet.Builder dBuilder = ProtoDataSet.newBuilder(schema);
     ArrayRow.Builder builder = ArrayRow.newBuilder(2);
     builder.reset();
@@ -55,11 +52,10 @@ public class InterpreterTest {
 
   ProtoDataSet generateABSDataSet() {
     final Schema schema = Schema.newBuilder().add("ID", ColumnType.INT, Modifier.PUBLIC)
-    .add("DOUBLE_VALUE", ColumnType.DOUBLE, Modifier.PUBLIC)
-    .add("FLOAT_VALUE", ColumnType.FLOAT, Modifier.PUBLIC)
-    .add("INT_VALUE", ColumnType.DOUBLE, Modifier.PUBLIC)
-    .add("LONG_VALUE", ColumnType.DOUBLE, Modifier.PUBLIC)
-    .build();
+        .add("DOUBLE_VALUE", ColumnType.DOUBLE, Modifier.PUBLIC)
+        .add("FLOAT_VALUE", ColumnType.FLOAT, Modifier.PUBLIC)
+        .add("INT_VALUE", ColumnType.DOUBLE, Modifier.PUBLIC)
+        .add("LONG_VALUE", ColumnType.DOUBLE, Modifier.PUBLIC).build();
     ProtoDataSet.Builder dBuilder = ProtoDataSet.newBuilder(schema);
     ArrayRow.Builder builder = ArrayRow.newBuilder(5);
     builder.reset();
@@ -149,51 +145,57 @@ public class InterpreterTest {
 
   @Test
   public void testLike() {
-      DataSet source = generateStringDataSet();
-      Expression ref0 = ExpressionFactory.createInputRef(1, ColumnType.STRING, Modifier.PUBLIC);
+    DataSet source = generateStringDataSet();
+    Expression ref0 = ExpressionFactory.createInputRef(1, ColumnType.STRING, Modifier.PUBLIC);
 
-      Expression c0 = ExpressionFactory.createLiteral(ColumnType.STRING, "Java%Python_.");
-      Expression exp0 = ExpressionFactory.createBinaryOperator(OperatorType.LIKE, ColumnType.STRING, ref0, c0);
+    Expression c0 = ExpressionFactory.createLiteral(ColumnType.STRING, "Java%Python_.");
+    Expression exp0 =
+        ExpressionFactory.createBinaryOperator(OperatorType.LIKE, ColumnType.STRING, ref0, c0);
 
-      DataSet m = Interpreter.map(source, ImmutableList.of(exp0));
-      DataSetIterator it = m.getIterator();
+    DataSet m = Interpreter.map(source, ImmutableList.of(exp0));
+    DataSetIterator it = m.getIterator();
 
-      assertTrue("first row not found in map dataset", it.next());
-      assertEquals(it.get(0), true);
-      assertTrue("second row not found in map dataset", it.next());
-      assertEquals(it.get(0), false);
-      assertTrue("third row not found in map dataset", it.next());
-      assertEquals(it.get(0), true);
-      assertTrue("fourth row not found in map dataset", it.next());
-      assertEquals(it.get(0), false);
-      assertFalse("too much row in map dataset", it.next());
-    }
+    assertTrue("first row not found in map dataset", it.next());
+    assertEquals(it.get(0), true);
+    assertTrue("second row not found in map dataset", it.next());
+    assertEquals(it.get(0), false);
+    assertTrue("third row not found in map dataset", it.next());
+    assertEquals(it.get(0), true);
+    assertTrue("fourth row not found in map dataset", it.next());
+    assertEquals(it.get(0), false);
+    assertFalse("too much row in map dataset", it.next());
+  }
 
 
-    @Test
+  @Test
   public void testABS() {
-      DataSet source = generateABSDataSet();
-      Expression ref0 = ExpressionFactory.createInputRef(0, ColumnType.INT, Modifier.PUBLIC);
-      Expression ref1 = ExpressionFactory.createInputRef(1, ColumnType.DOUBLE, Modifier.PUBLIC);
-      Expression ref2 = ExpressionFactory.createInputRef(2, ColumnType.FLOAT, Modifier.PUBLIC);
-      Expression ref3 = ExpressionFactory.createInputRef(3, ColumnType.INT, Modifier.PUBLIC);
-      Expression ref4 = ExpressionFactory.createInputRef(4, ColumnType.LONG, Modifier.PUBLIC);
+    DataSet source = generateABSDataSet();
+    Expression ref0 = ExpressionFactory.createInputRef(0, ColumnType.INT, Modifier.PUBLIC);
+    Expression ref1 = ExpressionFactory.createInputRef(1, ColumnType.DOUBLE, Modifier.PUBLIC);
+    Expression ref2 = ExpressionFactory.createInputRef(2, ColumnType.FLOAT, Modifier.PUBLIC);
+    Expression ref3 = ExpressionFactory.createInputRef(3, ColumnType.INT, Modifier.PUBLIC);
+    Expression ref4 = ExpressionFactory.createInputRef(4, ColumnType.LONG, Modifier.PUBLIC);
 
-      Expression exp0 = ExpressionFactory.createScalarFunc(ColumnType.DOUBLE, "ABS", ImmutableList.of(ref1));
-      Expression exp1 = ExpressionFactory.createScalarFunc(ColumnType.FLOAT, "ABS", ImmutableList.of(ref2));
-      Expression exp2 = ExpressionFactory.createScalarFunc(ColumnType.INT, "ABS", ImmutableList.of(ref3));
-      Expression exp3 = ExpressionFactory.createScalarFunc(ColumnType.LONG, "ABS", ImmutableList.of(ref4));
+    Expression exp0 =
+        ExpressionFactory.createScalarFunc(ColumnType.DOUBLE, "ABS", ImmutableList.of(ref1));
+    Expression exp1 =
+        ExpressionFactory.createScalarFunc(ColumnType.FLOAT, "ABS", ImmutableList.of(ref2));
+    Expression exp2 =
+        ExpressionFactory.createScalarFunc(ColumnType.INT, "ABS", ImmutableList.of(ref3));
+    Expression exp3 =
+        ExpressionFactory.createScalarFunc(ColumnType.LONG, "ABS", ImmutableList.of(ref4));
 
-      DataSet m = Interpreter.map(source, ImmutableList.of(exp0, exp1, exp2, exp3));
-      DataSetIterator it = m.getIterator();
+    DataSet m = Interpreter.map(source, ImmutableList.of(exp0, exp1, exp2, exp3));
+    DataSetIterator it = m.getIterator();
 
-      assertTrue("first row not found in map dataset", it.next());
-      assertEquals(it.get(0), (double)1.14514);
-      assertEquals(it.get(1), (float)1.14514);
-      assertEquals(it.get(2), (int)114514);
-      assertEquals(it.get(3), (long)114514);
-      assertFalse("too much row in map dataset", it.next());
-    }
+    assertTrue("first row not found in map dataset", it.next());
+    assertEquals(it.get(0), (double) 1.14514);
+    assertEquals(it.get(1), (float) 1.14514);
+    assertEquals(it.get(2), (int) 114514);
+    assertEquals(it.get(3), (long) 114514);
+    assertFalse("too much row in map dataset", it.next());
+  }
+
   @Test
   public void testBoolDataSet() {
     DataSet source = generateBoolDataSet();
@@ -539,15 +541,9 @@ public class InterpreterTest {
   }
 
   /**
-   * Left:
-   * 3 | 4.2 | Alice
-   * 5 | 6.3 | Bob
-   * 7 | 8.4 | Tom
+   * Left: 3 | 4.2 | Alice 5 | 6.3 | Bob 7 | 8.4 | Tom
    * 
-   * Right:
-   * 5 | 3.1 | Snow
-   * 2 | 6.3 | Alice
-   * 9 | 8.5 | Bob
+   * Right: 5 | 3.1 | Snow 2 | 6.3 | Alice 9 | 8.5 | Bob
    */
   @Test
   public void testEqualJoinDataSet() {
@@ -571,6 +567,109 @@ public class InterpreterTest {
     assertEquals(9, it.get(3));
     assertEquals(8.5, (double) it.get(4), 0.001);
     assertEquals("Bob", it.get(5));
+    assertFalse(it.next());
+  }
+
+  @Test
+  public void testEqualLeftJoinDataSet() {
+    DataSet s0 = generateLeft();
+    DataSet s1 = generateRight();
+    JoinCondition condition = JoinCondition.newBuilder().setType(JoinType.LEFT).addLeftKey(2)
+        .addRightKey(2).setModifier(Modifier.PUBLIC).build();
+    DataSet res = Interpreter.join(s0, s1, condition);
+    DataSetIterator it = res.getIterator();
+    assertTrue(it.next());
+    assertEquals(3, it.get(0));
+    assertEquals(4.2, (double) it.get(1), 0.001);
+    assertEquals("Alice", it.get(2));
+    assertEquals(2, it.get(3));
+    assertEquals(6.3, (double) it.get(4), 0.001);
+    assertEquals("Alice", it.get(5));
+    assertTrue(it.next());
+    assertEquals(5, it.get(0));
+    assertEquals(6.3, (double) it.get(1), 0.001);
+    assertEquals("Bob", it.get(2));
+    assertEquals(9, it.get(3));
+    assertEquals(8.5, (double) it.get(4), 0.001);
+    assertEquals("Bob", it.get(5));
+    assertTrue(it.next());
+    assertEquals(7, it.get(0));
+    assertEquals(8.4, (double) it.get(1), 0.001);
+    assertEquals("Tom", it.get(2));
+    assertEquals(null, it.get(3));
+    assertEquals(null, it.get(4));
+    assertEquals(null, it.get(5));
+    assertFalse(it.next());
+  }
+
+  @Test
+  public void testEqualRightJoinDataSet() {
+    DataSet s0 = generateLeft();
+    DataSet s1 = generateRight();
+    JoinCondition condition = JoinCondition.newBuilder().setType(JoinType.RIGHT).addLeftKey(2)
+        .addRightKey(2).setModifier(Modifier.PUBLIC).build();
+    DataSet res = Interpreter.join(s0, s1, condition);
+    DataSetIterator it = res.getIterator();
+    assertTrue(it.next());
+    assertEquals(null, it.get(0));
+    assertEquals(null, it.get(1));
+    assertEquals(null, it.get(2));
+    assertEquals(5, it.get(3));
+    assertEquals(3.1, it.get(4));
+    assertEquals("Snow", it.get(5));
+    assertTrue(it.next());
+    assertEquals(3, it.get(0));
+    assertEquals(4.2, (double) it.get(1), 0.001);
+    assertEquals("Alice", it.get(2));
+    assertEquals(2, it.get(3));
+    assertEquals(6.3, (double) it.get(4), 0.001);
+    assertEquals("Alice", it.get(5));
+    assertTrue(it.next());
+    assertEquals(5, it.get(0));
+    assertEquals(6.3, (double) it.get(1), 0.001);
+    assertEquals("Bob", it.get(2));
+    assertEquals(9, it.get(3));
+    assertEquals(8.5, (double) it.get(4), 0.001);
+    assertEquals("Bob", it.get(5));
+    assertFalse(it.next());
+  }
+
+  @Test
+  public void testEqualOuterJoinDataSet() {
+    DataSet s0 = generateLeft();
+    DataSet s1 = generateRight();
+    JoinCondition condition = JoinCondition.newBuilder().setType(JoinType.OUTER).addLeftKey(2)
+        .addRightKey(2).setModifier(Modifier.PUBLIC).build();
+    DataSet res = Interpreter.join(s0, s1, condition);
+    DataSetIterator it = res.getIterator();
+    assertTrue(it.next());
+    assertEquals(null, it.get(0));
+    assertEquals(null, it.get(1));
+    assertEquals(null, it.get(2));
+    assertEquals(5, it.get(3));
+    assertEquals(3.1, it.get(4));
+    assertEquals("Snow", it.get(5));
+    assertTrue(it.next());
+    assertEquals(3, it.get(0));
+    assertEquals(4.2, (double) it.get(1), 0.001);
+    assertEquals("Alice", it.get(2));
+    assertEquals(2, it.get(3));
+    assertEquals(6.3, (double) it.get(4), 0.001);
+    assertEquals("Alice", it.get(5));
+    assertTrue(it.next());
+    assertEquals(5, it.get(0));
+    assertEquals(6.3, (double) it.get(1), 0.001);
+    assertEquals("Bob", it.get(2));
+    assertEquals(9, it.get(3));
+    assertEquals(8.5, (double) it.get(4), 0.001);
+    assertEquals("Bob", it.get(5));
+    assertTrue(it.next());
+    assertEquals(7, it.get(0));
+    assertEquals(8.4, (double) it.get(1), 0.001);
+    assertEquals("Tom", it.get(2));
+    assertEquals(null, it.get(3));
+    assertEquals(null, it.get(4));
+    assertEquals(null, it.get(5));
     assertFalse(it.next());
   }
 
@@ -601,6 +700,77 @@ public class InterpreterTest {
   }
 
   @Test
+  public void testThetaLeftJoinDataSet() {
+    DataSet s0 = generateLeft();
+    DataSet s1 = generateRight();
+    Expression leftRef = ExpressionFactory.createInputRef(1, ColumnType.DOUBLE, Modifier.PUBLIC);
+    Expression rightRef = ExpressionFactory.createInputRef(4, ColumnType.DOUBLE, Modifier.PUBLIC);
+    Expression cmp = ExpressionFactory.createBinaryOperator(OperatorType.GT, ColumnType.BOOLEAN,
+        leftRef, rightRef);
+    JoinCondition condition = JoinCondition.newBuilder().setType(JoinType.LEFT)
+        .setModifier(Modifier.PUBLIC).setCondition(cmp).build();
+    DataSet res = Interpreter.join(s0, s1, condition);
+    DataSetIterator it = res.getIterator();
+    assertTrue(it.next());
+    assertEquals(3, it.get(0));
+    assertEquals(4.2, (double) it.get(1), 0.001);
+    assertEquals("Alice", it.get(2));
+    assertEquals(5, it.get(3));
+    assertEquals(3.1, (double) it.get(4), 0.001);
+    assertEquals("Snow", it.get(5));
+    int count = 1;
+    while (it.next()) {
+      count++;
+    }
+    assertEquals(4, count);
+  }
+
+  @Test
+  public void testThetaRightJoinDataSet() {
+    DataSet s0 = generateLeft();
+    DataSet s1 = generateRight();
+    Expression leftRef = ExpressionFactory.createInputRef(1, ColumnType.DOUBLE, Modifier.PUBLIC);
+    Expression rightRef = ExpressionFactory.createInputRef(4, ColumnType.DOUBLE, Modifier.PUBLIC);
+    Expression cmp = ExpressionFactory.createBinaryOperator(OperatorType.GT, ColumnType.BOOLEAN,
+        leftRef, rightRef);
+    JoinCondition condition = JoinCondition.newBuilder().setType(JoinType.RIGHT)
+        .setModifier(Modifier.PUBLIC).setCondition(cmp).build();
+    DataSet res = Interpreter.join(s0, s1, condition);
+    DataSetIterator it = res.getIterator();
+    assertTrue(it.next());
+    assertEquals(3, it.get(0));
+    assertEquals(4.2, (double) it.get(1), 0.001);
+    assertEquals("Alice", it.get(2));
+    assertEquals(5, it.get(3));
+    assertEquals(3.1, (double) it.get(4), 0.001);
+    assertEquals("Snow", it.get(5));
+    int count = 1;
+    while (it.next()) {
+      count++;
+    }
+    assertEquals(5, count);
+  }
+
+  @Test
+  public void testThetaOuterJoinDataSet() {
+    DataSet s0 = generateLeft();
+    DataSet s1 = generateRight();
+    Expression leftRef = ExpressionFactory.createInputRef(1, ColumnType.DOUBLE, Modifier.PUBLIC);
+    Expression rightRef = ExpressionFactory.createInputRef(4, ColumnType.DOUBLE, Modifier.PUBLIC);
+    Expression cmp = ExpressionFactory.createBinaryOperator(OperatorType.LT, ColumnType.BOOLEAN,
+        leftRef, rightRef);
+    JoinCondition condition = JoinCondition.newBuilder().setType(JoinType.OUTER)
+        .setModifier(Modifier.PUBLIC).setCondition(cmp).build();
+    DataSet res = Interpreter.join(s0, s1, condition);
+    DataSetIterator it = res.getIterator();
+    int count = 0;
+    while (it.next()) {
+      count++;
+    }
+    assertEquals(5, count);
+  }
+
+  @Test
   public void testcombineJoinDataSet() {
     DataSet s0 = generateLeft();
     DataSet s1 = generateRight();
@@ -619,6 +789,128 @@ public class InterpreterTest {
     assertEquals(2, it.get(3));
     assertEquals(6.3, (double) it.get(4), 0.001);
     assertEquals("Alice", it.get(5));
+    assertFalse(it.next());
+  }
+
+  @Test
+  public void testcombineLeftJoinDataSet() {
+    DataSet s0 = generateLeft();
+    DataSet s1 = generateRight();
+    Expression leftRef = ExpressionFactory.createInputRef(0, ColumnType.INT, Modifier.PUBLIC);
+    Expression rightRef = ExpressionFactory.createInputRef(3, ColumnType.INT, Modifier.PUBLIC);
+    Expression cmp = ExpressionFactory.createBinaryOperator(OperatorType.GT, ColumnType.BOOLEAN,
+        leftRef, rightRef);
+    JoinCondition condition = JoinCondition.newBuilder().setType(JoinType.LEFT)
+        .setModifier(Modifier.PUBLIC).addLeftKey(2).addRightKey(2).setCondition(cmp).build();
+    DataSet res = Interpreter.join(s0, s1, condition);
+    DataSetIterator it = res.getIterator();
+    assertTrue(it.next());
+    assertEquals(3, it.get(0));
+    assertEquals(4.2, (double) it.get(1), 0.001);
+    assertEquals("Alice", it.get(2));
+    assertEquals(2, it.get(3));
+    assertEquals(6.3, (double) it.get(4), 0.001);
+    assertEquals("Alice", it.get(5));
+    assertTrue(it.next());
+    assertEquals(5, it.get(0));
+    assertEquals(6.3, (double) it.get(1), 0.001);
+    assertEquals("Bob", it.get(2));
+    assertEquals(null, it.get(3));
+    assertEquals(null, it.get(4));
+    assertEquals(null, it.get(5));
+    assertTrue(it.next());
+    assertEquals(7, it.get(0));
+    assertEquals(8.4, (double) it.get(1), 0.001);
+    assertEquals("Tom", it.get(2));
+    assertEquals(null, it.get(3));
+    assertEquals(null, it.get(4));
+    assertEquals(null, it.get(5));
+    assertFalse(it.next());
+  }
+
+  @Test
+  public void testcombineRightJoinDataSet() {
+    DataSet s0 = generateLeft();
+    DataSet s1 = generateRight();
+    Expression leftRef = ExpressionFactory.createInputRef(0, ColumnType.INT, Modifier.PUBLIC);
+    Expression rightRef = ExpressionFactory.createInputRef(3, ColumnType.INT, Modifier.PUBLIC);
+    Expression cmp = ExpressionFactory.createBinaryOperator(OperatorType.GT, ColumnType.BOOLEAN,
+        leftRef, rightRef);
+    JoinCondition condition = JoinCondition.newBuilder().setType(JoinType.RIGHT)
+        .setModifier(Modifier.PUBLIC).addLeftKey(2).addRightKey(2).setCondition(cmp).build();
+    DataSet res = Interpreter.join(s0, s1, condition);
+    DataSetIterator it = res.getIterator();
+    assertTrue(it.next());
+    assertEquals(null, it.get(0));
+    assertEquals(null, it.get(1));
+    assertEquals(null, it.get(2));
+    assertEquals(5, it.get(3));
+    assertEquals(3.1, (double) it.get(4), 0.001);
+    assertEquals("Snow", it.get(5));
+    assertTrue(it.next());
+    assertEquals(3, it.get(0));
+    assertEquals(4.2, (double) it.get(1), 0.001);
+    assertEquals("Alice", it.get(2));
+    assertEquals(2, it.get(3));
+    assertEquals(6.3, (double) it.get(4), 0.001);
+    assertEquals("Alice", it.get(5));
+    assertTrue(it.next());
+    assertEquals(null, it.get(0));
+    assertEquals(null, it.get(1));
+    assertEquals(null, it.get(2));
+    assertEquals(9, it.get(3));
+    assertEquals(8.5, (double) it.get(4), 0.001);
+    assertEquals("Bob", it.get(5));
+    assertFalse(it.next());
+  }
+
+  @Test
+  public void testcombineOuterJoinDataSet() {
+    DataSet s0 = generateLeft();
+    DataSet s1 = generateRight();
+    Expression leftRef = ExpressionFactory.createInputRef(0, ColumnType.INT, Modifier.PUBLIC);
+    Expression rightRef = ExpressionFactory.createInputRef(3, ColumnType.INT, Modifier.PUBLIC);
+    Expression cmp = ExpressionFactory.createBinaryOperator(OperatorType.LT, ColumnType.BOOLEAN,
+        leftRef, rightRef);
+    JoinCondition condition = JoinCondition.newBuilder().setType(JoinType.OUTER)
+        .setModifier(Modifier.PUBLIC).addLeftKey(2).addRightKey(2).setCondition(cmp).build();
+    DataSet res = Interpreter.join(s0, s1, condition);
+    DataSetIterator it = res.getIterator();
+    assertTrue(it.next());
+    assertEquals(null, it.get(0));
+    assertEquals(null, it.get(1));
+    assertEquals(null, it.get(2));
+    assertEquals(5, it.get(3));
+    assertEquals(3.1, (double) it.get(4), 0.001);
+    assertEquals("Snow", it.get(5));
+    assertTrue(it.next());
+    assertEquals(null, it.get(0));
+    assertEquals(null, it.get(1));
+    assertEquals(null, it.get(2));
+    assertEquals(2, it.get(3));
+    assertEquals(6.3, (double) it.get(4), 0.001);
+    assertEquals("Alice", it.get(5));
+    assertTrue(it.next());
+    assertEquals(5, it.get(0));
+    assertEquals(6.3, (double) it.get(1), 0.001);
+    assertEquals("Bob", it.get(2));
+    assertEquals(9, it.get(3));
+    assertEquals(8.5, (double) it.get(4), 0.001);
+    assertEquals("Bob", it.get(5));
+    assertTrue(it.next());
+    assertEquals(3, it.get(0));
+    assertEquals(4.2, (double) it.get(1), 0.001);
+    assertEquals("Alice", it.get(2));
+    assertEquals(null, it.get(3));
+    assertEquals(null, it.get(4));
+    assertEquals(null, it.get(5));
+    assertTrue(it.next());
+    assertEquals(7, it.get(0));
+    assertEquals(8.4, (double) it.get(1), 0.001);
+    assertEquals("Tom", it.get(2));
+    assertEquals(null, it.get(3));
+    assertEquals(null, it.get(4));
+    assertEquals(null, it.get(5));
     assertFalse(it.next());
   }
 
@@ -724,8 +1016,8 @@ public class InterpreterTest {
 
   DataSet generateDataSetWithNull() {
     final Schema schema = Schema.newBuilder().add("A", ColumnType.INT, Modifier.PUBLIC)
-        .add("B", ColumnType.FLOAT, Modifier.PUBLIC)
-        .add("C", ColumnType.BOOLEAN, Modifier.PUBLIC).build();
+        .add("B", ColumnType.FLOAT, Modifier.PUBLIC).add("C", ColumnType.BOOLEAN, Modifier.PUBLIC)
+        .build();
     ProtoDataSet.Builder dBuilder = ProtoDataSet.newBuilder(schema);
     ArrayRow.Builder builder = ArrayRow.newBuilder(3);
     builder.reset();
@@ -753,13 +1045,20 @@ public class InterpreterTest {
     Expression ref0 = ExpressionFactory.createInputRef(0, ColumnType.INT, Modifier.PUBLIC);
     Expression ref1 = ExpressionFactory.createInputRef(1, ColumnType.FLOAT, Modifier.PUBLIC);
     Expression ref2 = ExpressionFactory.createInputRef(2, ColumnType.BOOLEAN, Modifier.PUBLIC);
-    Expression cmp = ExpressionFactory.createBinaryOperator(OperatorType.LE, ColumnType.BOOLEAN, ref0, ref1);
-    Expression and = ExpressionFactory.createBinaryOperator(OperatorType.AND, ColumnType.BOOLEAN, cmp, ref2);
-    Expression or = ExpressionFactory.createBinaryOperator(OperatorType.OR, ColumnType.BOOLEAN, cmp, ref2);
-    Expression not = ExpressionFactory.createUnaryOperator(OperatorType.NOT, ColumnType.BOOLEAN, ref2);
-    Expression notNull = ExpressionFactory.createUnaryOperator(OperatorType.IS_NOT_NULL, ColumnType.BOOLEAN, ref1);
-    Expression isNull = ExpressionFactory.createUnaryOperator(OperatorType.IS_NULL, ColumnType.BOOLEAN, ref2);
-    Expression add = ExpressionFactory.createBinaryOperator(OperatorType.PLUS, ColumnType.FLOAT, ref0, ref1);
+    Expression cmp =
+        ExpressionFactory.createBinaryOperator(OperatorType.LE, ColumnType.BOOLEAN, ref0, ref1);
+    Expression and =
+        ExpressionFactory.createBinaryOperator(OperatorType.AND, ColumnType.BOOLEAN, cmp, ref2);
+    Expression or =
+        ExpressionFactory.createBinaryOperator(OperatorType.OR, ColumnType.BOOLEAN, cmp, ref2);
+    Expression not =
+        ExpressionFactory.createUnaryOperator(OperatorType.NOT, ColumnType.BOOLEAN, ref2);
+    Expression notNull =
+        ExpressionFactory.createUnaryOperator(OperatorType.IS_NOT_NULL, ColumnType.BOOLEAN, ref1);
+    Expression isNull =
+        ExpressionFactory.createUnaryOperator(OperatorType.IS_NULL, ColumnType.BOOLEAN, ref2);
+    Expression add =
+        ExpressionFactory.createBinaryOperator(OperatorType.PLUS, ColumnType.FLOAT, ref0, ref1);
     DataSet res = Interpreter.map(source, ImmutableList.of(and, or, not, notNull, isNull, add));
     DataSetIterator it = res.getIterator();
     assertTrue(it.next());
@@ -796,7 +1095,8 @@ public class InterpreterTest {
         AggFuncType.MIN.getId(), ImmutableList.of(ref0));
     Expression MAX = ExpressionFactory.createAggFunc(ColumnType.FLOAT, Modifier.PUBLIC,
         AggFuncType.MAX.getId(), ImmutableList.of(ref1));
-    DataSet agg = Interpreter.aggregate(source, ImmutableList.of(), ImmutableList.of(CNT, CNT_NOT_NULL, SUM, AVG, MIN, MAX));
+    DataSet agg = Interpreter.aggregate(source, ImmutableList.of(),
+        ImmutableList.of(CNT, CNT_NOT_NULL, SUM, AVG, MIN, MAX));
     DataSetIterator aggit = agg.getIterator();
     assertTrue(aggit.next());
     assertEquals(3, aggit.get(0));
