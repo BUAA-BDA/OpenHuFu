@@ -259,6 +259,7 @@ public class Interpreter {
     String JAVA_REGEX_SPECIALS = "[]()|^-+*?{}$\\.";
     List<Expression> inputs = exp.getInList();
     String sqlPattern = (String) implement(row, inputs.get(1));
+    String target = ((String) implement(row, inputs.get(0)));
 
     int i;
     final int len = sqlPattern.length();
@@ -278,7 +279,7 @@ public class Interpreter {
     }
 
     java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(javaPattern.toString());
-    java.util.regex.Matcher matcher = pattern.matcher(((String) implement(row, inputs.get(0))));
+    java.util.regex.Matcher matcher = pattern.matcher(target);
 
     if (matcher.find()) {
       return true;
@@ -297,7 +298,7 @@ public class Interpreter {
           if (inputs.size() != 1) {
             throw new RuntimeException("ABS need 1 argument, but given " + inputs.size());
           }
-          if (inputs.get(0) instanceof Number) {
+          if (!(inputs.get(0) instanceof Number)) {
             throw new RuntimeException("ABS expect (Number)");
           }
           Number x = (Number) inputs.get(0);

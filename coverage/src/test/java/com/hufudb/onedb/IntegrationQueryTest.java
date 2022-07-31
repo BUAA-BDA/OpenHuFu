@@ -370,7 +370,7 @@ public class IntegrationQueryTest {
     compareRows(expect, act);
     result.close();
 
-    result  = user.executeQuery("select name from student_pub_share where dept_name like 'e%r'");
+    result  = user.executeQuery("select name from student_pub_share where dept_name like '%e%r%'");
     expect = toRows(ImmutableList.of(
       ImmutableList.of("tom"),
       ImmutableList.of("peter"),
@@ -381,10 +381,16 @@ public class IntegrationQueryTest {
     compareRows(expect, act);
     result.close();
 
-    result  = user.executeQuery("select name from student_pub_share where dept_name like 'r__ics'");
+    result  = user.executeQuery("select name from student_pub_share where dept_name like '%r__ics'");
     expect = toRows(ImmutableList.of(
       ImmutableList.of("Brand")
     ));
+    act = toRows(result);
+    compareRows(expect, act);
+    result.close();
+
+    result  = user.executeQuery("select * from student_pub_share where dept_name like '%.%'");
+    expect = toRows(ImmutableList.of());
     act = toRows(result);
     compareRows(expect, act);
     result.close();

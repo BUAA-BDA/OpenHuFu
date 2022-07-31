@@ -35,19 +35,39 @@ public class InterpreterTest {
     ArrayRow.Builder builder = ArrayRow.newBuilder(2);
     builder.reset();
     builder.set(0, "Yiming Niu");
-    builder.set(1, "Java, Python\'\'\', C++");
+    builder.set(1, "Java, Python,. ** C++.");
     dBuilder.addRow(builder.build());
     builder.reset();
     builder.set(0, "Xuchen Pan");
-    builder.set(1, "Java, Database\'\'\', C++, Python\'");
+    builder.set(1, "Java, Database, **C++, Python");
     dBuilder.addRow(builder.build());
     builder.reset();
     builder.set(0, "Liubo Niu");
-    builder.set(1, "Python, Java, C++");
+    builder.set(1, "Java, C++, like .vscode, Python(.)");
     dBuilder.addRow(builder.build());
     builder.reset();
     builder.set(0, "Changhe Pan");
-    builder.set(1, "C++ and \'\'\' Database");
+    builder.set(1, "C++ and Database.");
+    dBuilder.addRow(builder.build());
+    builder.reset();
+    return dBuilder.build();
+  }
+
+  ProtoDataSet generateABSDataSet() {
+    final Schema schema = Schema.newBuilder().add("ID", ColumnType.INT, Modifier.PUBLIC)
+    .add("DOUBLE_VALUE", ColumnType.DOUBLE, Modifier.PUBLIC)
+    .add("FLOAT_VALUE", ColumnType.FLOAT, Modifier.PUBLIC)
+    .add("INT_VALUE", ColumnType.DOUBLE, Modifier.PUBLIC)
+    .add("LONG_VALUE", ColumnType.DOUBLE, Modifier.PUBLIC)
+    .build();
+    ProtoDataSet.Builder dBuilder = ProtoDataSet.newBuilder(schema);
+    ArrayRow.Builder builder = ArrayRow.newBuilder(5);
+    builder.reset();
+    builder.set(0, 1);
+    builder.set(1, -1.14514);
+    builder.set(2, -1.14514);
+    builder.set(3, -114514);
+    builder.set(4, -114514);
     dBuilder.addRow(builder.build());
     builder.reset();
     return dBuilder.build();
@@ -132,7 +152,7 @@ public class InterpreterTest {
       DataSet source = generateStringDataSet();
       Expression ref0 = ExpressionFactory.createInputRef(1, ColumnType.STRING, Modifier.PUBLIC);
 
-      Expression c0 = ExpressionFactory.createLiteral(ColumnType.STRING, "Java%Python\'");
+      Expression c0 = ExpressionFactory.createLiteral(ColumnType.STRING, "Java%Python_.");
       Expression exp0 = ExpressionFactory.createBinaryOperator(OperatorType.LIKE, ColumnType.STRING, ref0, c0);
 
       DataSet m = Interpreter.map(source, ImmutableList.of(exp0));
@@ -141,14 +161,39 @@ public class InterpreterTest {
       assertTrue("first row not found in map dataset", it.next());
       assertEquals(it.get(0), true);
       assertTrue("second row not found in map dataset", it.next());
-      assertEquals(it.get(0), true);
-      assertTrue("third row not found in map dataset", it.next());
       assertEquals(it.get(0), false);
+      assertTrue("third row not found in map dataset", it.next());
+      assertEquals(it.get(0), true);
       assertTrue("fourth row not found in map dataset", it.next());
       assertEquals(it.get(0), false);
       assertFalse("too much row in map dataset", it.next());
     }
 
+
+    @Test
+  public void testABS() {
+      DataSet source = generateABSDataSet();
+      Expression ref0 = ExpressionFactory.createInputRef(0, ColumnType.INT, Modifier.PUBLIC);
+      Expression ref1 = ExpressionFactory.createInputRef(1, ColumnType.DOUBLE, Modifier.PUBLIC);
+      Expression ref2 = ExpressionFactory.createInputRef(2, ColumnType.FLOAT, Modifier.PUBLIC);
+      Expression ref3 = ExpressionFactory.createInputRef(3, ColumnType.INT, Modifier.PUBLIC);
+      Expression ref4 = ExpressionFactory.createInputRef(4, ColumnType.LONG, Modifier.PUBLIC);
+
+      Expression exp0 = ExpressionFactory.createScalarFunc(ColumnType.DOUBLE, "ABS", ImmutableList.of(ref1));
+      Expression exp1 = ExpressionFactory.createScalarFunc(ColumnType.FLOAT, "ABS", ImmutableList.of(ref2));
+      Expression exp2 = ExpressionFactory.createScalarFunc(ColumnType.INT, "ABS", ImmutableList.of(ref3));
+      Expression exp3 = ExpressionFactory.createScalarFunc(ColumnType.LONG, "ABS", ImmutableList.of(ref4));
+
+      DataSet m = Interpreter.map(source, ImmutableList.of(exp0, exp1, exp2, exp3));
+      DataSetIterator it = m.getIterator();
+
+      assertTrue("first row not found in map dataset", it.next());
+      assertEquals(it.get(0), (double)1.14514);
+      assertEquals(it.get(1), (float)1.14514);
+      assertEquals(it.get(2), (int)114514);
+      assertEquals(it.get(3), (long)114514);
+      assertFalse("too much row in map dataset", it.next());
+    }
   @Test
   public void testBoolDataSet() {
     DataSet source = generateBoolDataSet();
