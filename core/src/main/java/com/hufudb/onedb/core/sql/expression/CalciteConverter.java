@@ -1,10 +1,5 @@
 package com.hufudb.onedb.core.sql.expression;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 import com.google.common.collect.BoundType;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Range;
@@ -22,14 +17,19 @@ import com.hufudb.onedb.proto.OneDBPlan.JoinCondition;
 import com.hufudb.onedb.proto.OneDBPlan.JoinType;
 import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
 import com.hufudb.onedb.udf.UDFLoader;
-import org.apache.calcite.rex.RexLiteral;
-import org.apache.calcite.rex.RexLocalRef;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.calcite.rel.RelFieldCollation;
 import org.apache.calcite.rel.core.AggregateCall;
 import org.apache.calcite.rel.core.JoinInfo;
 import org.apache.calcite.rel.core.JoinRelType;
 import org.apache.calcite.rex.RexCall;
 import org.apache.calcite.rex.RexInputRef;
+import org.apache.calcite.rex.RexLiteral;
+import org.apache.calcite.rex.RexLocalRef;
 import org.apache.calcite.rex.RexNode;
 import org.apache.calcite.rex.RexProgram;
 import org.apache.calcite.sql.SqlKind;
@@ -194,6 +194,7 @@ public class CalciteConverter {
         case MOD:
         case AND:
         case OR:
+        case LIKE:
           return binary((RexCall) node);
         // unary
         case AS:
@@ -265,6 +266,9 @@ public class CalciteConverter {
           break;
         case OR:
           op = OperatorType.OR;
+          break;
+        case LIKE:
+          op = OperatorType.LIKE;
           break;
         default:
           throw new RuntimeException("can't translate " + call);
