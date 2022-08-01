@@ -3,6 +3,7 @@
 start() {
   echo "load config from $1"
   log4j="./config/log4j.properties"
+  export ONEDB_ROOT=$PWD
   if [ $# -eq 2 ]
   then
     echo "use log4j properties from $2"

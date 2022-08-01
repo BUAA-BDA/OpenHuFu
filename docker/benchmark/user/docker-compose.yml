@@ -7,6 +7,8 @@ services:
     working_dir: /usr/src/benchmark
     restart: "no"
     command: java -jar ./bin/onedb_user_client.jar -c ./config/client.json
+    environment:
+      - ONEDB_ROOT=/usr/src/benchmark
     volumes:
       - $PWD/../../../release/bin:/usr/src/benchmark/bin
       - $PWD/config:/usr/src/benchmark/config

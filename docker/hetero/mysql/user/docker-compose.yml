@@ -7,6 +7,8 @@ services:
     working_dir: /usr/src/mymvn
     restart: "no"
     command: java -jar ./bin/onedb_user_client.jar -c ./config/client.json
+    environment:
+      - ONEDB_ROOT=/usr/src/mymvn
     volumes:
       - $PWD/../../../../release/bin:/usr/src/mymvn/bin
       - $PWD/config:/usr/src/mymvn/config
