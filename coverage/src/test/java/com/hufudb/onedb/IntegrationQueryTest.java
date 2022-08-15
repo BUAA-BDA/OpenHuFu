@@ -561,6 +561,18 @@ public class IntegrationQueryTest {
       ImmutableList.of("10001", Date.valueOf("2018-06-01"))
     ));
     compareRows(expect, toRows(result));
+
+    result = user.executeQuery("select license, time_stamp from time_table where time_stamp + interval '1' second < timestamp '2018-09-01 09:05:10'");
+    expect = toRows(ImmutableList.of(ImmutableList.of("10001", Timestamp.valueOf("2018-06-01 10:14:45"))));
+    compareRows(expect, toRows(result));
+
+    result = user.executeQuery("select license, cur_time from time_table where cur_time - interval '1' minute > time '16:51:32'");
+    expect = toRows(ImmutableList.of(ImmutableList.of("10002", Time.valueOf("21:31:20"))));
+    compareRows(expect, toRows(result));
+
+    result = user.executeQuery("select license, cur_date from time_table where cur_date - interval '1' day = date '2018-08-31'");
+    expect = toRows(ImmutableList.of(ImmutableList.of("10000", Date.valueOf("2018-09-01"))));
+    compareRows(expect, toRows(result));
   }
 
   @Test

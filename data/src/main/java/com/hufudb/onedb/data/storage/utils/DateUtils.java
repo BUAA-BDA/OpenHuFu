@@ -24,14 +24,14 @@ public class DateUtils {
    * convert date into long
    */
   public static long dateToLong(Date date) {
-    return date.getTime() - (long) DEFAULT_ZONE.getRawOffset();
+    return date.getTime();
   }
 
   /**
    * convert calendar into date long
    */
   public static long calendarToDateLong(Calendar calendar) {
-    return calendar.getTimeInMillis();
+    return calendar.getTimeInMillis() - (long) DEFAULT_ZONE.getRawOffset();
   }
 
   /**
@@ -45,7 +45,7 @@ public class DateUtils {
    * convert time to int
    */
   public static int timeToInt(Time time) {
-    return (int) ((time.getTime() - (long) DEFAULT_ZONE.getRawOffset()) % MSFORDAY);
+    return (int) ((time.getTime()) % MSFORDAY);
   }
 
   /**
@@ -53,34 +53,34 @@ public class DateUtils {
    * convert calendar into time integer
    */
   public static int calendarToTimeInt(Calendar calendar) {
-    return (int) ((calendar.getTimeInMillis()) % MSFORDAY);
+    return (int) ((calendar.getTimeInMillis()  - (long) DEFAULT_ZONE.getRawOffset()) % MSFORDAY);
   }
 
   /**
    * convert encoded int to time
    */
   public static Time intToTime(int t) {
-    return new Time(((long) t + (long) DEFAULT_ZONE.getRawOffset()) % MSFORDAY);
+    return new Time(((long) t) % MSFORDAY);
   }
 
   /**
    * convert timestamp to long
    */
   public static long timestampToLong(Timestamp ts) {
-    return ts.getTime() - (long) DEFAULT_ZONE.getRawOffset();
+    return ts.getTime();
   }
 
   /**
    * convert calendar into time integer
    */
   public static long calendarToTimestampLong(Calendar calendar) {
-    return calendar.getTimeInMillis();
+    return calendar.getTimeInMillis() - (long) DEFAULT_ZONE.getRawOffset();
   }
 
   /**
    * convert long to timestamp
    */
   public static Timestamp longToTimestamp(long ts) {
-    return new Timestamp(ts + (long) DEFAULT_ZONE.getRawOffset());
+    return new Timestamp(ts);
   }
 }

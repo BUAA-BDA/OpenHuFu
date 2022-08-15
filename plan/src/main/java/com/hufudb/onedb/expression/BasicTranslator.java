@@ -79,7 +79,7 @@ public class BasicTranslator implements Translator {
       case INT:
         return String.valueOf(literal.getI32());
       case DATE:
-        return String.format("date '%s'", DateUtils.longToDate(literal.getI32()).toString());
+        return String.format("date '%s'", DateUtils.longToDate(literal.getI64()).toString());
       case TIME:
         return String.format("time '%s'", DateUtils.intToTime(literal.getI32()).toString());
       case TIMESTAMP:
