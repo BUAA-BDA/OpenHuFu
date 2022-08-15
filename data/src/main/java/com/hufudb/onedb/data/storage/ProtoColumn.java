@@ -31,9 +31,6 @@ public class ProtoColumn implements Column {
     switch (column.getColCase()) {
       case I32COL:
         switch (type) {
-          case DATE:
-            this.getter = (rowNum) -> DateUtils.intToDate(column.getI32Col().getCell(rowNum));
-            break;
           case TIME:
             this.getter = (rowNum) -> DateUtils.intToTime(column.getI32Col().getCell(rowNum));
             break;
@@ -43,10 +40,15 @@ public class ProtoColumn implements Column {
         this.size = column.getI32Col().getCellCount();
         break;
       case I64COL:
-        if (type == ColumnType.TIMESTAMP) {
-          this.getter = (rowNum) -> DateUtils.longToTimestamp(column.getI64Col().getCell(rowNum));
-        } else {
-          this.getter = (rowNum) -> column.getI64Col().getCell(rowNum);
+        switch (type) {
+          case DATE:
+            this.getter = (rowNum) -> DateUtils.longToDate(column.getI64Col().getCell(rowNum));
+            break;
+          case TIMESTAMP:
+            this.getter = (rowNum) -> DateUtils.longToTimestamp(column.getI64Col().getCell(rowNum));
+            break;
+          default:
+            this.getter = (rowNum) -> column.getI64Col().getCell(rowNum);
         }
         this.size = column.getI64Col().getCellCount();
         break;
@@ -156,10 +158,6 @@ public class ProtoColumn implements Column {
           i32Builder = I32Column.newBuilder();
           appender = (val) -> i32Builder.addCell(((Number) val).intValue());
           break;
-        case DATE:
-          i32Builder = I32Column.newBuilder();
-          appender = (val) -> i32Builder.addCell(DateUtils.dateToInt((Date) val));
-          break;
         case TIME:
           i32Builder = I32Column.newBuilder();
           appender = (val) -> i32Builder.addCell(DateUtils.timeToInt((Time) val));
@@ -167,6 +165,10 @@ public class ProtoColumn implements Column {
         case LONG:
           i64Builder = I64Column.newBuilder();
           appender = (val) -> i64Builder.addCell(((Number) val).longValue());
+          break;
+        case DATE:
+          i64Builder = I64Column.newBuilder();
+          appender = (val) -> i64Builder.addCell(DateUtils.dateToLong((Date) val));
           break;
         case TIMESTAMP:
           i64Builder = I64Column.newBuilder();
@@ -221,11 +223,11 @@ public class ProtoColumn implements Column {
         case BYTE:
         case SHORT:
         case INT:
-        case DATE:
         case TIME:
           i32Builder.clear();
           break;
         case LONG:
+        case DATE:
         case TIMESTAMP:
           i64Builder.clear();
           break;
@@ -254,12 +256,12 @@ public class ProtoColumn implements Column {
           break;
         case BYTE:
         case SHORT:
-        case DATE:
         case TIME:
         case INT:
           columnBuilder.setI32Col(i32Builder.build());
           break;
         case LONG:
+        case DATE:
         case TIMESTAMP:
           columnBuilder.setI64Col(i64Builder.build());
           break;

@@ -10,20 +10,20 @@ public class DateUtilsTest {
   @Test
   public void testDateConverter() {
     Date date = Date.valueOf("2022-07-03");
-    int dint = DateUtils.dateToInt(date);
-    assertEquals(date, DateUtils.intToDate(dint));
+    long dlon = DateUtils.dateToLong(date);
+    assertEquals(date, DateUtils.longToDate(dlon));
 
     date = Date.valueOf("1970-01-01");
-    dint = DateUtils.dateToInt(date);
-    assertEquals(date, DateUtils.intToDate(dint));
+    dlon = DateUtils.dateToLong(date);
+    assertEquals(date, DateUtils.longToDate(dlon));
 
     date = Date.valueOf("1969-02-28");
-    dint = DateUtils.dateToInt(date);
-    assertEquals(date, DateUtils.intToDate(dint));
+    dlon = DateUtils.dateToLong(date);
+    assertEquals(date, DateUtils.longToDate(dlon));
 
     date = Date.valueOf("1900-12-28");
-    dint = DateUtils.dateToInt(date);
-    assertEquals(date, DateUtils.intToDate(dint));
+    dlon = DateUtils.dateToLong(date);
+    assertEquals(date, DateUtils.longToDate(dlon));
 
     Time time = Time.valueOf("00:05:29");
     int t = DateUtils.timeToInt(time);
