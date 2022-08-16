@@ -61,6 +61,9 @@ final public class ProtoDataSet implements MaterializedDataSet {
   }
 
   public static ProtoDataSet materialize(DataSet dataSet) {
+    if (dataSet instanceof ProtoDataSet) {
+      return (ProtoDataSet) dataSet;
+    }
     Builder builder = new Builder(dataSet.getSchema());
     DataSetIterator it = dataSet.getIterator();
     while (it.next()) {

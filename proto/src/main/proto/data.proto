@@ -12,15 +12,16 @@ enum ColumnType {
   BYTE = 2;
   SHORT = 3;
   INT = 4;
-  DATE = 5;
-  TIME = 6;
-  TIMESTAMP = 7;
-  LONG = 8;
-  FLOAT = 9;
-  DOUBLE = 10;
-  STRING = 11;
-  BLOB = 12;
-  POINT = 13;
+  LONG = 5;
+  FLOAT = 6;
+  DOUBLE = 7;
+  STRING = 8;
+  BLOB = 9;
+  DATE = 10;
+  TIME = 11;
+  TIMESTAMP = 12;
+  INTERVAL = 13;
+  POINT = 14;
 }
 
 enum Modifier {

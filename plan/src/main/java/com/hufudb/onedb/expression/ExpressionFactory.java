@@ -103,11 +103,13 @@ public class ExpressionFactory {
       case LONG:
         return builder.setI64(((Number) value).longValue()).build();
       case DATE:
-        return builder.setI32(DateUtils.calendarToDateInt((Calendar) value)).build();
+        return builder.setI64(DateUtils.calendarToDateLong((Calendar) value)).build();
       case TIME:
         return builder.setI32(DateUtils.calendarToTimeInt((Calendar) value)).build();
       case TIMESTAMP:
         return builder.setI64(DateUtils.calendarToTimestampLong((Calendar) value)).build();
+      case INTERVAL:
+        return builder.setI64(((Number) value).longValue()).build();
       default:
         throw new UnsupportedOperationException("Unsupported literal type");
     }

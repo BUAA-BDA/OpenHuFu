@@ -140,11 +140,13 @@ public class CalciteConverter {
   public static Expression convertLiteral(RexLiteral literal) {
     ColumnType type = TypeConverter.convert2OneDBType(literal.getTypeName());
     switch (type) {
+      // NOTE:  rely on calcite unstable api in RexLiteral.java, check this when calcite update
       case DATE:
       case TIME:
       case TIMESTAMP:
-        // NOTE:  rely on calcite unstable api in RexLiteral.java, check this when calcite update
         return ExpressionFactory.createLiteral(type, literal.getValueAs(Calendar.class));
+      case INTERVAL:
+        return ExpressionFactory.createLiteral(type, literal.getValueAs(Long.class));
       default:
         return ExpressionFactory.createLiteral(type, literal.getValue2());
     }

@@ -8,6 +8,7 @@ services:
     ports:
       - 13101:5432
     environment:
+      TZ: Asia/Shanghai
       POSTGRES_PASSWORD: onedb
     volumes:
       - $PWD/raw_data/feda:/data
@@ -22,6 +23,7 @@ services:
     ports:
       - 13102:5432
     environment:
+      TZ: Asia/Shanghai
       POSTGRES_PASSWORD: onedb
     volumes:
       - $PWD/raw_data/fedb:/data
@@ -36,6 +38,7 @@ services:
     ports:
       - 13103:5432
     environment:
+      TZ: Asia/Shanghai
       POSTGRES_PASSWORD: onedb
     volumes:
       - $PWD/raw_data/fedc:/data

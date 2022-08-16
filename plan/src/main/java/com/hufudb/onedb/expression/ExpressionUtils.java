@@ -15,9 +15,6 @@ public class ExpressionUtils {
   private final static Logger LOG = LoggerFactory.getLogger(ExpressionUtils.class);
 
   /**
-   * 根据一系列表达式对象，建立一个Schema对象来描述相应的关系表。
-   * 返回的Schema中每一列对应一个Expression对象的输出。
-   * 
    * create Schema by a serie of Expressions,
    * each column in the returned Schema corresponds to an Expression.
    */
@@ -48,10 +45,10 @@ public class ExpressionUtils {
       case SHORT:
       case INT:
         return lit.getI32();
-      case DATE:
-        return DateUtils.intToDate(lit.getI32());
       case TIME:
         return DateUtils.intToTime(lit.getI32());
+      case DATE:
+        return DateUtils.longToDate(lit.getI64());
       case TIMESTAMP:
         return DateUtils.longToTimestamp(lit.getI64());
       case LONG:
@@ -62,9 +59,6 @@ public class ExpressionUtils {
   }
 
   /**
-   * 将多个Expression通过逻辑与（AND）连接成一个Expression
-   * 需要输入的conditions都是布尔类型的Expression对象
-   * 
    * Join multiple expressions logically with (AND) to form a single Expression
    * All conditions that need to be entered are Boolean Expression objects
    */

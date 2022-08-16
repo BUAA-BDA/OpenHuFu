@@ -60,6 +60,19 @@ public class TypeConverter {
         return ColumnType.TIME;
       case TIMESTAMP:
         return ColumnType.TIMESTAMP;
+      case INTERVAL_YEAR:
+      case INTERVAL_YEAR_MONTH:
+      case INTERVAL_MONTH:
+      case INTERVAL_DAY:
+      case INTERVAL_DAY_MINUTE:
+      case INTERVAL_DAY_SECOND:
+      case INTERVAL_HOUR:
+      case INTERVAL_HOUR_MINUTE:
+      case INTERVAL_HOUR_SECOND:
+      case INTERVAL_MINUTE:
+      case INTERVAL_MINUTE_SECOND:
+      case INTERVAL_SECOND:
+        return ColumnType.INTERVAL;
       default:
         throw new UnsupportedOperationException("Unsupported type " + type.getName());
     }

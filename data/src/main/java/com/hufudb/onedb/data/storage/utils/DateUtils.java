@@ -15,55 +15,37 @@ public class DateUtils {
   final static int MONTH_MASK = 0xF;
   final static int MONTH_OFFSET = 4;
   final static long MSFORDAY = 86400000L;
-  final static TimeZone timeZone = TimeZone.getDefault();
+  final static TimeZone DEFAULT_ZONE = TimeZone.getDefault();
+  final static TimeZone GMT = TimeZone.getTimeZone("GMT");
 
   private DateUtils() {}
 
   /**
-   * convert date into integer
-   *
-   * year (23 bit) | month (4 bit) | day (5 bit)
+   * convert date into long
    */
-  public static int dateToInt(Date date) {
-    Calendar calendar = Calendar.getInstance();
-    calendar.setTime(date);
-    int year = calendar.get(Calendar.YEAR);
-    int month = calendar.get(Calendar.MONTH);
-    int day = calendar.get(Calendar.DAY_OF_MONTH);
-    return (year << 9) | (month << 5) | day;
+  public static long dateToLong(Date date) {
+    return date.getTime();
   }
 
   /**
-   * convert calendar into date integer
-   *
-   * year (23 bit) | month (4 bit) | day (5 bit)
+   * convert calendar into date long
    */
-  public static int calendarToDateInt(Calendar calendar) {
-    int year = calendar.get(Calendar.YEAR);
-    int month = calendar.get(Calendar.MONTH);
-    int day = calendar.get(Calendar.DAY_OF_MONTH);
-    return (year << 9) | (month << 5) | day;
+  public static long calendarToDateLong(Calendar calendar) {
+    return calendar.getTimeInMillis() - (long) DEFAULT_ZONE.getRawOffset();
   }
 
   /**
-   * convert int to date
+   * convert long to date
    */
-  public static Date intToDate(int dint) {
-    int day = dint & DAY_MASK;
-    dint = dint >> DAY_OFFSET;
-    int month = dint & MONTH_MASK;
-    dint = dint >> MONTH_OFFSET;
-    Calendar calendar = Calendar.getInstance();
-    calendar.clear();
-    calendar.set(dint, month, day);
-    return new Date(calendar.getTimeInMillis());
+  public static Date longToDate(long dint) {
+    return new Date(dint + (long) DEFAULT_ZONE.getRawOffset());
   }
 
   /**
    * convert time to int
    */
   public static int timeToInt(Time time) {
-    return (int) (time.getTime() % MSFORDAY);
+    return (int) ((time.getTime()) % MSFORDAY);
   }
 
   /**
@@ -71,14 +53,14 @@ public class DateUtils {
    * convert calendar into time integer
    */
   public static int calendarToTimeInt(Calendar calendar) {
-    return (int) ((calendar.getTimeInMillis() - (long) timeZone.getRawOffset()) % MSFORDAY);
+    return (int) ((calendar.getTimeInMillis()  - (long) DEFAULT_ZONE.getRawOffset()) % MSFORDAY);
   }
 
   /**
    * convert encoded int to time
    */
   public static Time intToTime(int t) {
-    return new Time((long) t);
+    return new Time(((long) t) % MSFORDAY);
   }
 
   /**
@@ -92,7 +74,7 @@ public class DateUtils {
    * convert calendar into time integer
    */
   public static long calendarToTimestampLong(Calendar calendar) {
-    return calendar.getTimeInMillis() - (long) timeZone.getRawOffset();
+    return calendar.getTimeInMillis() - (long) DEFAULT_ZONE.getRawOffset();
   }
 
   /**
