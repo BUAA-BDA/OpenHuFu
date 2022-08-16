@@ -1,0 +1,27 @@
+{
+  "owners": [
+    {
+      "endpoint": "localhost:6789",
+      "trustcertpath": "./cert/ca.pem"
+    },
+    {
+      "endpoint": "localhost:6790",
+      "trustcertpath": "./cert/ca.pem"
+    }
+  ],
+  "tables": [
+    {
+      "tablename": "student",
+      "localtables": [
+        {
+          "endpoint": "localhost:6789",
+          "localname": "student1"
+        },
+        {
+          "endpoint": "localhost:6790",
+          "localname": "student1"
+        }
+      ]
+    }
+  ]
+}

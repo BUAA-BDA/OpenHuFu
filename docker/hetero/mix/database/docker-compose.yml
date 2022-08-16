@@ -1,0 +1,65 @@
+version: '3.3'
+
+services:
+  htpostgres1:
+    image: postgres
+    restart: "no"
+    container_name: htpostgres1
+    ports:
+      - 13110:5432
+    environment:
+      POSTGRES_PASSWORD: onedb
+    volumes:
+      - $PWD/config/db1.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - ht_owner_net_1
+
+  # sqlite2:
+  # sqlite use db2.db file directly
+
+  htmysql3:
+    image: mysql
+    restart: "no"
+    container_name: htmysql3
+    ports:
+      - 13111:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: onedb
+      MYSQL_DATABASE: mydb
+      TZ: Asia/Shanghai
+    volumes:
+      - $PWD/config/db3.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - ht_owner_net_3
+    healthcheck:
+      test: "mysql --user=root --password=onedb --execute \"SHOW DATABASES;\""
+      timeout: 10s
+      interval: 5s
+      retries: 10
+
+  # csv4:
+  # csv use .csv file directly
+
+  htpostgis5:
+    image: postgis/postgis
+    restart: "no"
+    container_name: htpostgis5
+    ports:
+      - 13112:5432
+    environment:
+      POSTGRES_PASSWORD: onedb
+    volumes:
+      - $PWD/config/db5.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - ht_owner_net_5
+
+networks:
+  ht_owner_net_1:
+    name: ht_owner_net_1
+    driver: bridge
+  ht_owner_net_3:
+    name: ht_owner_net_3
+    driver: bridge
+  ht_owner_net_5:
+    name: ht_owner_net_5
+    driver: bridge

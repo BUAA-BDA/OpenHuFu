@@ -1,0 +1,22 @@
+version: '3.3'
+
+services:
+  user:
+    image: maven:3.8-openjdk-11
+    container_name: query_user
+    working_dir: /root/onedb
+    restart: "no"
+    command: java -jar ./bin/onedb_user_client.jar -c ./config/client.json
+    environment:
+      - ONEDB_ROOT=/root/onedb
+    volumes:
+      - $PWD/../../release/bin:/root/onedb/bin
+      - $PWD/config:/root/onedb/config
+      - $PWD/log:/root/onedb/log
+      - $PWD/cert:/root/onedb/cert
+    networks:
+      - public_net
+
+networks:
+  public_net:
+    external: true

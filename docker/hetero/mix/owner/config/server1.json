@@ -1,0 +1,80 @@
+{
+  "id": 0,
+  "port": 12345,
+  "theadnum": 4,
+  "hostname": "htowner1",
+  "adapterconfig": {
+    "datasource": "postgresql",
+    "url": "jdbc:postgresql://htpostgres1:5432/postgres",
+    "catalog": "postgres",
+    "user": "postgres",
+    "passwd": "onedb"
+  },
+  "tables": [
+    {
+      "actualName": "student",
+      "publishedName": "student1",
+      "publishedColumns": []
+    },
+    {
+      "actualName": "student",
+      "publishedName": "student2",
+      "publishedColumns": [
+        {
+          "name": "name",
+          "type": "STRING",
+          "modifier": "public",
+          "columnId": 0
+        },
+        {
+          "name": "score",
+          "type": "INT",
+          "modifier": "public",
+          "columnId": 2
+        },
+        {
+          "name": "age",
+          "type": "INT",
+          "modifier": "hidden",
+          "columnId": 1
+        },
+        {
+          "name": "dept_name",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 3
+        }
+      ]
+    },
+    {
+      "actualName": "student",
+      "publishedName": "student3",
+      "publishedColumns": [
+        {
+          "name": "name",
+          "type": "STRING",
+          "modifier": "public",
+          "columnId": 0
+        },
+        {
+          "name": "score",
+          "type": "INT",
+          "modifier": "public",
+          "columnId": 2
+        },
+        {
+          "name": "age",
+          "type": "INT",
+          "modifier": "hidden",
+          "columnId": 1
+        },
+        {
+          "name": "dept_name",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 3
+        }
+      ]
+    }
+  ]
+}

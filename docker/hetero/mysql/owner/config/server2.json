@@ -1,0 +1,23 @@
+{
+  "id": 1,
+  "port": 12346,
+  "theadnum": 4,
+  "hostname": "owner2",
+  "privatekeypath": "./cert/owner2.key",
+  "certchainpath": "./cert/owner2.pem",
+  "trustcertpath": "./cert/ca.pem",
+  "adapterconfig": {
+    "datasource": "mysql",
+    "url": "jdbc:mysql://mysql2:3306/mydb",
+    "catalog": "mydb",
+    "user": "root",
+    "passwd": "onedb"
+  },
+  "tables": [
+    {
+      "actualName": "student",
+      "publishedName": "student1",
+      "publishedColumns": []
+    }
+  ]
+}

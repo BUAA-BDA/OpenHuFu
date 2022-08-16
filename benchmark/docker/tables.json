@@ -1,0 +1,141 @@
+[
+  {
+    "tableName": "region",
+    "localTables": [
+      {
+        "endpoint": "tpchowner1:12345",
+        "localName": "region"
+      }
+    ]
+  },
+  {
+    "tableName": "nation",
+    "localTables": [
+      {
+        "endpoint": "tpchowner1:12345",
+        "localName": "nation"
+      }
+    ]
+  },
+  {
+    "tableName": "partsupp",
+    "localTables": [
+      {
+        "endpoint": "tpchowner1:12345",
+        "localName": "partsupp"
+      },
+      {
+        "endpoint": "tpchowner2:12345",
+        "localName": "partsupp"
+      },
+      {
+        "endpoint": "tpchowner3:12345",
+        "localName": "partsupp"
+      }
+    ]
+  },
+  {
+    "tableName": "customer",
+    "localTables": [
+      {
+        "endpoint": "tpchowner1:12345",
+        "localName": "customer"
+      },
+      {
+        "endpoint": "tpchowner2:12345",
+        "localName": "customer"
+      },
+      {
+        "endpoint": "tpchowner3:12345",
+        "localName": "customer"
+      }
+    ]
+  },
+  {
+    "tableName": "lineitem",
+    "localTables": [
+      {
+        "endpoint": "tpchowner1:12345",
+        "localName": "lineitem"
+      },
+      {
+        "endpoint": "tpchowner2:12345",
+        "localName": "lineitem"
+      },
+      {
+        "endpoint": "tpchowner3:12345",
+        "localName": "lineitem"
+      }
+    ]
+  },
+  {
+    "tableName": "orders",
+    "localTables": [
+      {
+        "endpoint": "tpchowner1:12345",
+        "localName": "orders"
+      },
+      {
+        "endpoint": "tpchowner2:12345",
+        "localName": "orders"
+      },
+      {
+        "endpoint": "tpchowner3:12345",
+        "localName": "orders"
+      }
+    ]
+  },
+  {
+    "tableName": "part",
+    "localTables": [
+      {
+        "endpoint": "tpchowner1:12345",
+        "localName": "part"
+      },
+      {
+        "endpoint": "tpchowner2:12345",
+        "localName": "part"
+      },
+      {
+        "endpoint": "tpchowner3:12345",
+        "localName": "part"
+      }
+    ]
+  },
+  {
+    "tableName": "supplier",
+    "localTables": [
+      {
+        "endpoint": "tpchowner1:12345",
+        "localName": "supplier"
+      }
+    ]
+  },
+  {
+    "tableName": "partsupp",
+    "localTables": [
+      {
+        "endpoint": "tpchowner2:12345",
+        "localName": "partsupp"
+      }
+    ]
+  },
+  {
+    "tableName": "supplier_p",
+    "localTables": [
+      {
+        "endpoint": "tpchowner1:12345",
+        "localName": "supplier"
+      }
+    ]
+  },
+  {
+    "tableName": "partsupp_p",
+    "localTables": [
+      {
+        "endpoint": "tpchowner2:12345",
+        "localName": "partsupp_p"
+      }
+    ]
+  }
+]

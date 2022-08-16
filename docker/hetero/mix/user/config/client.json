@@ -1,0 +1,109 @@
+{
+  "owners": [
+    {
+      "endpoint": "htowner1:12345",
+      "trustcertpath": "./cert/ca.pem"
+    },
+    {
+      "endpoint": "htowner2:12345",
+      "trustcertpath": "./cert/ca.pem"
+    },
+    {
+      "endpoint": "htowner3:12345",
+      "trustcertpath": "./cert/ca.pem"
+    },
+    {
+      "endpoint": "htowner4:12345",
+      "trustcertpath": "./cert/ca.pem"
+    },
+    {
+      "endpoint": "htowner5:12345",
+      "trustcertpath": "./cert/ca.pem"
+    }
+  ],
+  "tables": [
+    {
+      "tablename": "student1",
+      "localtables": [
+        {
+          "endpoint": "htowner1:12345",
+          "localname": "student1"
+        },
+        {
+          "endpoint": "htowner2:12345",
+          "localname": "student1"
+        },
+        {
+          "endpoint": "htowner3:12345",
+          "localname": "student1"
+        },
+        {
+          "endpoint": "htowner4:12345",
+          "localname": "student1"
+        }
+      ]
+    },
+    {
+      "tablename": "st_pro_1",
+      "localtables": [
+        {
+          "endpoint": "htowner1:12345",
+          "localname": "st_pro_1"
+        }
+      ]
+    },
+    {
+      "tablename": "st_pro_2",
+      "localtables": [
+        {
+          "endpoint": "htowner2:12345",
+          "localname": "st_pro_2"
+        }
+      ]
+    },
+    {
+      "tablename": "st_pro_3",
+      "localtables": [
+        {
+          "endpoint": "htowner1:12345",
+          "localname": "st_pro_3"
+        },
+        {
+          "endpoint": "htowner2:12345",
+          "localname": "st_pro_3"
+        }
+      ]
+    },
+    {
+      "tablename": "student2",
+      "localtables": [
+        {
+          "endpoint": "htowner1:12345",
+          "localname": "student2"
+        }
+      ]
+    },
+    {
+      "tablename": "student3",
+      "localtables": [
+        {
+          "endpoint": "htowner1:12345",
+          "localname": "student3"
+        }
+      ]
+    },
+    {
+      "tablename": "traffic",
+      "localtables": [
+        {
+          "endpoint": "htowner4:12345",
+          "localname": "traffic"
+        },
+        {
+          "endpoint": "htowner5:12345",
+          "localname": "traffic"
+        }
+      ]
+    }
+  ]
+}

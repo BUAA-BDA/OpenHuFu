@@ -1,0 +1,21 @@
+{
+  "id": 4,
+  "port": 12345,
+  "theadnum": 4,
+  "hostname": "htowner5",
+  "adapterconfig": {
+    "datasource": "postgis",
+    "url": "jdbc:postgresql://htpostgis5:5432/postgres",
+    "catalog": "postgres",
+    "user": "postgres",
+    "passwd": "onedb"
+  },
+  "tables": [
+    {
+      "actualName": "traffic",
+      "publishedName": "traffic",
+      "publishedColumns": [
+      ]
+    }
+  ]
+}

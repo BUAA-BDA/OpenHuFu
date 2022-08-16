@@ -1,0 +1,107 @@
+[
+  {
+    "tableName": "student_pub_share",
+    "localTables": [
+      {
+        "endpoint": "localhost:6789",
+        "localName": "student1"
+      },
+      {
+        "endpoint": "localhost:6790",
+        "localName": "student1"
+      },
+      {
+        "endpoint": "localhost:6791",
+        "localName": "student1"
+      }
+    ]
+  },
+  {
+    "tableName": "time_table",
+    "localTables": [
+      {
+        "endpoint": "localhost:6789",
+        "localName": "taxi"
+      },
+      {
+        "endpoint": "localhost:6790",
+        "localName": "taxi"
+      }
+    ]
+  },
+  {
+    "tableName": "student_pub_s1",
+    "localTables": [
+      {
+        "endpoint": "localhost:6789",
+        "localName": "student1"
+      }
+    ]
+  },
+  {
+    "tableName": "student_pub_s2",
+    "localTables": [
+      {
+        "endpoint": "localhost:6790",
+        "localName": "student1"
+      }
+    ]
+  },
+  {
+    "tableName": "student_pub_s3",
+    "localTables": [
+      {
+        "endpoint": "localhost:6791",
+        "localName": "student1"
+      }
+    ]
+  },
+  {
+    "tableName": "student_pro_s1",
+    "localTables": [
+      {
+        "endpoint": "localhost:6789",
+        "localName": "st_pro_1"
+      }
+    ]
+  },
+  {
+    "tableName": "student_pro_s2",
+    "localTables": [
+      {
+        "endpoint": "localhost:6790",
+        "localName": "st_pro_2"
+      }
+    ]
+  },
+  {
+    "tableName": "student_pro_share2",
+    "localTables": [
+      {
+        "endpoint": "localhost:6789",
+        "localName": "st_pro_3"
+      },
+      {
+        "endpoint": "localhost:6790",
+        "localName": "st_pro_3"
+      }
+    ]
+  },
+  {
+    "tableName": "student_pro_share3",
+    "localTables": [
+      {
+        "endpoint": "localhost:6789",
+        "localName": "st_pro_3"
+      },
+      {
+        "endpoint": "localhost:6790",
+        "localName": "st_pro_3"
+      },
+      {
+        "endpoint": "localhost:6791",
+        "localName": "st_pro_3"
+      }
+    ]
+  }
+]

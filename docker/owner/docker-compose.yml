@@ -1,0 +1,73 @@
+version: '3.3'
+
+services:
+  owner1:
+    image: maven:3.8-openjdk-11
+    container_name: owner1
+    working_dir: /usr/src/mymvn
+    restart: "no"
+    command: nohup java -jar ./bin/onedb_owner_server.jar -c ./config/server1.json > ./log/owner1.log &
+    environment:
+      - ONEDB_ROOT=/usr/src/mymvn
+    volumes:
+      - $PWD/../../release/bin:/usr/src/mymvn/bin
+      - $PWD/../../release/adapter:/usr/src/mymvn/adapter
+      - $PWD/config:/usr/src/mymvn/config
+      - $PWD/log:/usr/src/mymvn/log
+      - $PWD/cert:/usr/src/mymvn/cert
+    networks:
+      - owner_pg_1
+      - public_net
+    ports:
+      - 12345:12345
+
+  owner2:
+    image: maven:3.8-openjdk-11
+    container_name: owner2
+    working_dir: /usr/src/mymvn
+    restart: "no"
+    command: nohup java -jar ./bin/onedb_owner_server.jar -c ./config/server2.json > ./log/owner2.log &
+    environment:
+      - ONEDB_ROOT=/usr/src/mymvn
+    volumes:
+      - $PWD/../../release/bin:/usr/src/mymvn/bin
+      - $PWD/../../release/adapter:/usr/src/mymvn/adapter
+      - $PWD/config:/usr/src/mymvn/config
+      - $PWD/log:/usr/src/mymvn/log
+      - $PWD/cert:/usr/src/mymvn/cert
+    networks:
+      - owner_pg_2
+      - public_net
+    ports:
+      - 12346:12345
+
+  owner3:
+    image: maven:3.8-openjdk-11
+    container_name: owner3
+    working_dir: /usr/src/mymvn
+    restart: "no"
+    command: nohup java -jar ./bin/onedb_owner_server.jar -c ./config/server3.json > ./log/owner3.log &
+    environment:
+      - ONEDB_ROOT=/usr/src/mymvn
+    volumes:
+      - $PWD/../../release/bin:/usr/src/mymvn/bin
+      - $PWD/../../release/adapter:/usr/src/mymvn/adapter
+      - $PWD/config:/usr/src/mymvn/config
+      - $PWD/log:/usr/src/mymvn/log
+      - $PWD/cert:/usr/src/mymvn/cert
+    networks:
+      - owner_pg_3
+      - public_net
+    ports:
+      - 12347:12345
+
+networks:
+  owner_pg_1:
+    external: true
+  owner_pg_2:
+    external: true
+  owner_pg_3:
+    external: true
+  public_net:
+    driver: bridge
+    name: public_net

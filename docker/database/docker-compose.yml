@@ -1,0 +1,58 @@
+version: '3.3'
+
+services:
+  postgres1:
+    image: postgres
+    restart: "no"
+    container_name: postgres1
+    ports:
+      - 13101:5432
+    environment:
+      TZ: Asia/Shanghai
+      POSTGRES_PASSWORD: onedb
+    volumes:
+      - $PWD/raw_data/feda:/data
+      - $PWD/config/db1.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - owner_pg_1
+
+  postgres2:
+    image: postgres
+    restart: "no"
+    container_name: postgres2
+    ports:
+      - 13102:5432
+    environment:
+      TZ: Asia/Shanghai
+      POSTGRES_PASSWORD: onedb
+    volumes:
+      - $PWD/raw_data/fedb:/data
+      - $PWD/config/db2.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - owner_pg_2
+
+  postgres3:
+    image: postgres
+    restart: "no"
+    container_name: postgres3
+    ports:
+      - 13103:5432
+    environment:
+      TZ: Asia/Shanghai
+      POSTGRES_PASSWORD: onedb
+    volumes:
+      - $PWD/raw_data/fedc:/data
+      - $PWD/config/db3.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - owner_pg_3
+
+networks:
+  owner_pg_1:
+    driver: bridge
+    name: owner_pg_1
+  owner_pg_2:
+    driver: bridge
+    name: owner_pg_2
+  owner_pg_3:
+    driver: bridge
+    name: owner_pg_3

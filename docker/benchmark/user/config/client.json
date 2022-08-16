@@ -1,0 +1,157 @@
+{
+  "owners": [
+    {
+      "endpoint": "tpchowner1:12345",
+      "trustcertpath": "./cert/ca.pem"
+    },
+    {
+      "endpoint": "tpchowner2:12345",
+      "trustcertpath": "./cert/ca.pem"
+    },
+    {
+      "endpoint": "tpchowner3:12345",
+      "trustcertpath": "./cert/ca.pem"
+    }
+  ],
+  "tables": [
+    {
+      "tablename": "region",
+      "localtables": [
+        {
+          "endpoint": "tpchowner1:12345",
+          "localname": "region"
+        }
+      ]
+    },
+    {
+      "tablename": "nation",
+      "localtables": [
+        {
+          "endpoint": "tpchowner1:12345",
+          "localname": "nation"
+        }
+      ]
+    },
+    {
+      "tablename": "partsupp",
+      "localtables": [
+        {
+          "endpoint": "tpchowner1:12345",
+          "localname": "partsupp"
+        },
+        {
+          "endpoint": "tpchowner2:12345",
+          "localname": "partsupp"
+        },
+        {
+          "endpoint": "tpchowner3:12345",
+          "localname": "partsupp"
+        }
+      ]
+    },
+    {
+      "tablename": "customer",
+      "localtables": [
+        {
+          "endpoint": "tpchowner1:12345",
+          "localname": "customer"
+        },
+        {
+          "endpoint": "tpchowner2:12345",
+          "localname": "customer"
+        },
+        {
+          "endpoint": "tpchowner3:12345",
+          "localname": "customer"
+        }
+      ]
+    },
+    {
+      "tablename": "lineitem",
+      "localtables": [
+        {
+          "endpoint": "tpchowner1:12345",
+          "localname": "lineitem"
+        },
+        {
+          "endpoint": "tpchowner2:12345",
+          "localname": "lineitem"
+        },
+        {
+          "endpoint": "tpchowner3:12345",
+          "localname": "lineitem"
+        }
+      ]
+    },
+    {
+      "tablename": "orders",
+      "localtables": [
+        {
+          "endpoint": "tpchowner1:12345",
+          "localname": "orders"
+        },
+        {
+          "endpoint": "tpchowner2:12345",
+          "localname": "orders"
+        },
+        {
+          "endpoint": "tpchowner3:12345",
+          "localname": "orders"
+        }
+      ]
+    },
+    {
+      "tablename": "part",
+      "localtables": [
+        {
+          "endpoint": "tpchowner1:12345",
+          "localname": "part"
+        },
+        {
+          "endpoint": "tpchowner2:12345",
+          "localname": "part"
+        },
+        {
+          "endpoint": "tpchowner3:12345",
+          "localname": "part"
+        }
+      ]
+    },
+    {
+      "tablename": "supplier",
+      "localtables": [
+        {
+          "endpoint": "tpchowner1:12345",
+          "localname": "supplier"
+        }
+      ]
+    },
+    {
+      "tablename": "partsupp",
+      "localtables": [
+        {
+          "endpoint": "tpchowner2:12345",
+          "localname": "partsupp"
+        }
+      ]
+    },
+    {
+      "tablename": "supplier_p",
+      "localtables": [
+        {
+          "endpoint": "tpchowner1:12345",
+          "localname": "supplier_p"
+        }
+      ]
+    },
+    {
+      "tablename": "partsupp_p",
+      "localtables": [
+        {
+          "endpoint": "tpchowner2:12345",
+          "localname": "partsupp_p"
+        }
+      ]
+    }
+  ]
+}

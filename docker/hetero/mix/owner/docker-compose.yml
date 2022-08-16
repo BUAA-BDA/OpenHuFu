@@ -1,0 +1,110 @@
+version: '3.3'
+
+services:
+  htowner1:
+    image: maven:3.8-openjdk-11
+    container_name: htowner1
+    working_dir: /usr/src/mymvn
+    restart: "no"
+    command: nohup java -jar ./bin/onedb_owner_server.jar -c ./config/server1.json > ./log/owner1.log &
+    environment:
+      - ONEDB_ROOT=/usr/src/mymvn
+    volumes:
+      - $PWD/../../../../release/bin:/usr/src/mymvn/bin
+      - $PWD/../../../../release/adapter:/usr/src/mymvn/adapter
+      - $PWD/config:/usr/src/mymvn/config
+      - $PWD/log:/usr/src/mymvn/log
+    networks:
+      - ht_owner_net_1
+      - ht_public_net
+    ports:
+      - 12350:12345
+
+  htowner2:
+    image: maven:3.8-openjdk-11
+    container_name: htowner2
+    working_dir: /usr/src/mymvn
+    restart: "no"
+    command: nohup java -jar ./bin/onedb_owner_server.jar -c ./config/server2.json > ./log/owner2.log &
+    environment:
+      - ONEDB_ROOT=/usr/src/mymvn
+    volumes:
+      - $PWD/../../../../release/bin:/usr/src/mymvn/bin
+      - $PWD/../../../../release/adapter:/usr/src/mymvn/adapter
+      - $PWD/config:/usr/src/mymvn/config
+      - $PWD/log:/usr/src/mymvn/log
+    networks:
+      - ht_public_net
+    ports:
+      - 12351:12345
+
+  htowner3:
+    image: maven:3.8-openjdk-11
+    container_name: htowner3
+    working_dir: /usr/src/mymvn
+    restart: "no"
+    command: nohup java -jar ./bin/onedb_owner_server.jar -c ./config/server3.json > ./log/owner3.log &
+    environment:
+      - ONEDB_ROOT=/usr/src/mymvn
+    volumes:
+      - $PWD/../../../../release/bin:/usr/src/mymvn/bin
+      - $PWD/../../../../release/adapter:/usr/src/mymvn/adapter
+      - $PWD/config:/usr/src/mymvn/config
+      - $PWD/log:/usr/src/mymvn/log
+    networks:
+      - ht_owner_net_3
+      - ht_public_net
+    ports:
+      - 12352:12345
+
+  htowner4:
+    image: maven:3.8-openjdk-11
+    container_name: htowner4
+    working_dir: /usr/src/mymvn
+    restart: "no"
+    command: nohup java -jar ./bin/onedb_owner_server.jar -c ./config/server4.json > ./log/owner4.log &
+    environment:
+      - ONEDB_ROOT=/usr/src/mymvn
+    volumes:
+      - $PWD/../../../../release/bin:/usr/src/mymvn/bin
+      - $PWD/../../../../release/adapter:/usr/src/mymvn/adapter
+      - $PWD/config:/usr/src/mymvn/config
+      - $PWD/log:/usr/src/mymvn/log
+      - $PWD/data:/usr/src/mymvn/data
+    networks:
+      - ht_public_net
+    ports:
+      - 12353:12345
+
+  htowner5:
+    image: maven:3.8-openjdk-11
+    container_name: htowner5
+    working_dir: /usr/src/mymvn
+    restart: "no"
+    command: nohup java -jar ./bin/onedb_owner_server.jar -c ./config/server5.json > ./log/owner5.log &
+    environment:
+      - ONEDB_ROOT=/usr/src/mymvn
+    volumes:
+      - $PWD/../../../../release/bin:/usr/src/mymvn/bin
+      - $PWD/../../../../release/adapter:/usr/src/mymvn/adapter
+      - $PWD/config:/usr/src/mymvn/config
+      - $PWD/log:/usr/src/mymvn/log
+      - $PWD/data:/usr/src/mymvn/data
+    networks:
+      - ht_owner_net_5
+      - ht_public_net
+    ports:
+      - 12354:12345
+
+  # todo: more heterogeneous owners here
+
+networks:
+  ht_owner_net_1:
+    external: true
+  ht_owner_net_3:
+    external: true
+  ht_owner_net_5:
+    external: true
+  ht_public_net:
+    driver: bridge
+    name: ht_public_net

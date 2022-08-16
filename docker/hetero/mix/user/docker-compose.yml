@@ -1,0 +1,22 @@
+version: '3.3'
+
+services:
+  ht-user:
+    image: maven:3.8-openjdk-11
+    container_name: ht-user
+    working_dir: /usr/src/mymvn
+    restart: "no"
+    command: java -jar ./bin/onedb_user_client.jar -c ./config/client.json
+    environment:
+      - ONEDB_ROOT=/usr/src/mymvn
+    volumes:
+      - $PWD/../../../../release/bin:/usr/src/mymvn/bin
+      - $PWD/../../../../release/udf/scalar:/usr/src/mymvn/udf/scalar
+      - $PWD/config:/usr/src/mymvn/config
+      - $PWD/log:/usr/src/mymvn/log
+    networks:
+      - ht_public_net
+
+networks:
+  ht_public_net:
+    external: true

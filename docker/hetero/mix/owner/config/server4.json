@@ -1,0 +1,60 @@
+{
+  "id": 3,
+  "port": 12345,
+  "theadnum": 4,
+  "hostname": "htowner4",
+  "adapterconfig": {
+    "datasource": "csv",
+    "url": "./data"
+  },
+  "tables": [
+    {
+      "actualName": "student",
+      "publishedName": "student1",
+      "publishedColumns": [
+        {
+          "name": "name",
+          "type": "STRING",
+          "modifier": "public",
+          "columnId": 0
+        },
+        {
+          "name": "age",
+          "type": "INT",
+          "modifier": "public",
+          "columnId": 1
+        },
+        {
+          "name": "score",
+          "type": "INT",
+          "modifier": "public",
+          "columnId": 2
+        },
+        {
+          "name": "dept_name",
+          "type": "STRING",
+          "modifier": "public",
+          "columnId": 3
+        }
+      ]
+    },
+    {
+      "actualName": "traffic",
+      "publishedName": "traffic",
+      "publishedColumns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "modifier": "public",
+          "columnId": 0
+        },
+        {
+          "name": "location",
+          "type": "POINT",
+          "modifier": "public",
+          "columnId": 1
+        }
+      ]
+    }
+  ]
+}

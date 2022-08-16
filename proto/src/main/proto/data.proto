@@ -1,0 +1,119 @@
+syntax = "proto3";
+package onedb;
+
+option java_package = "com.hufudb.onedb.proto";
+option java_outer_classname = "OneDBData";
+
+enum ColumnType {
+  // don't change the number of each type
+  // type of larger number has higher priority in type convertion
+  UNKNOWN = 0;
+  BOOLEAN = 1;
+  BYTE = 2;
+  SHORT = 3;
+  INT = 4;
+  LONG = 5;
+  FLOAT = 6;
+  DOUBLE = 7;
+  STRING = 8;
+  BLOB = 9;
+  DATE = 10;
+  TIME = 11;
+  TIMESTAMP = 12;
+  INTERVAL = 13;
+  POINT = 14;
+}
+
+enum Modifier {
+  HIDDEN = 0;
+  PUBLIC = 1;
+  PROTECTED = 2;
+  PRIVATE = 3;
+  UNSUPPORT = 100;
+}
+
+message ColumnDesc {
+  string name = 1;
+  ColumnType type = 2;
+  Modifier modifier = 3;
+}
+
+message SchemaProto {
+  repeated ColumnDesc columnDesc = 1;
+}
+
+message I32Column {
+  repeated int32 cell = 1;
+}
+
+message I64Column {
+  repeated int64 cell = 1;
+}
+
+message F32Column {
+  repeated float cell = 1;
+}
+
+message F64Column {
+  repeated double cell = 1;
+}
+
+message BoolColumn {
+  repeated bool cell = 1;
+}
+
+message StringColumn {
+  repeated string cell = 1;
+}
+
+message BytesColumn {
+  repeated bytes cell = 1;
+}
+
+message ColumnProto {
+  bytes isnull = 1;
+  oneof col {
+    I32Column i32col = 2;
+    I64Column i64col = 3;
+    F32Column f32col = 4;
+    F64Column f64col = 5;
+    BoolColumn boolcol = 6;
+    StringColumn strcol = 7;
+    BytesColumn bytescol = 8;
+  }
+}
+
+message CellProto {
+  oneof cel {
+    int32 i32cel = 1;
+    int64 i64cel = 2;
+    float f32cel = 3;
+    double f64cel = 4;
+    bool boolcel = 5;
+    string strcel = 6;
+    bytes bytescel = 7;
+  }
+}
+
+message RowProto {
+  bytes isnull = 1;
+  repeated CellProto cells = 2;
+}
+
+message RowsProto {
+  repeated RowProto rows = 1;
+}
+
+message DataSetProto {
+  SchemaProto schema = 1;
+  repeated ColumnProto column = 2;
+}
+
+message TableSchemaProto {
+  string name = 1;
+  SchemaProto schema = 2;
+}
+
+message TableSchemaListProto {
+  repeated TableSchemaProto table = 1;
+}

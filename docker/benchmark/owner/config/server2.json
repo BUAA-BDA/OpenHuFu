@@ -1,0 +1,77 @@
+{
+  "id": 1,
+  "port": 12345,
+  "hostname": "tpchowner2",
+  "privatekeypath": "./cert/owner2.key",
+  "certchainpath": "./cert/owner2.pem",
+  "trustcertpath": "./cert/ca.pem",
+  "adapterconfig": {
+    "datasource": "postgresql",
+    "url": "jdbc:postgresql://tpch2:5432/postgres",
+    "catalog": "postgres",
+    "user": "postgres",
+    "passwd": "onedb"
+  },
+  "tables": [
+    {
+      "actualName": "partsupp",
+      "publishedName": "partsupp",
+      "publishedColumns": []
+    },
+    {
+      "actualName": "customer",
+      "publishedName": "customer",
+      "publishedColumns": []
+    },
+    {
+      "actualName": "lineitem",
+      "publishedName": "lineitem",
+      "publishedColumns": []
+    },
+    {
+      "actualName": "orders",
+      "publishedName": "orders",
+      "publishedColumns": []
+    },
+    {
+      "actualName": "part",
+      "publishedName": "part",
+      "publishedColumns": []
+    },
+    {
+      "actualName": "supplier",
+      "publishedName": "supplier",
+      "publishedColumns": []
+    },
+    {
+      "actualName": "partsupp",
+      "publishedName": "partsupp_p",
+      "publishedColumns": [
+        {
+          "name": "ps_partkey",
+          "type": "INT",
+          "modifier": "protected",
+          "columnId": 0
+        },
+        {
+          "name": "ps_suppkey",
+          "type": "INT",
+          "modifier": "protected",
+          "columnId": 1
+        },
+        {
+          "name": "ps_availqty",
+          "type": "INT",
+          "modifier": "protected",
+          "columnId": 2
+        },
+        {
+          "name": "ps_supplycost",
+          "type": "DOUBLE",
+          "modifier": "protected",
+          "columnId": 3
+        }
+      ]
+    }
+  ]
+}

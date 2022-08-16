@@ -1,0 +1,20 @@
+{
+  "id": 1,
+  "port": 12345,
+  "theadnum": 4,
+  "hostname": "htowner2",
+  "adapterconfig": {
+    "datasource": "sqlite",
+    "url": "jdbc:sqlite:/usr/src/mymvn/config/db2.db",
+    "catalog": "db2",
+    "user": "admin",
+    "passwd": "admin"
+  },
+  "tables": [
+    {
+      "actualName": "student",
+      "publishedName": "student1",
+      "publishedColumns": []
+    }
+  ]
+}

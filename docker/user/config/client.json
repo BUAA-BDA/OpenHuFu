@@ -1,0 +1,54 @@
+{
+  "owners": [
+    {
+      "endpoint": "owner1:12345",
+      "trustcertpath": "./cert/ca.pem"
+    },
+    {
+      "endpoint": "owner2:12345",
+      "trustcertpath": "./cert/ca.pem"
+    },
+    {
+      "endpoint": "owner3:12345",
+      "trustcertpath": "./cert/ca.pem"
+    }
+  ],
+  "tables": [
+    {
+      "tablename": "student1",
+      "localtables": [
+        {
+          "endpoint": "owner1:12345",
+          "localname": "student1"
+        },
+        {
+          "endpoint": "owner2:12345",
+          "localname": "student1"
+        },
+        {
+          "endpoint": "owner3:12345",
+          "localname": "student1"
+        }
+      ]
+    },
+    {
+      "tablename": "student2",
+      "localtables": [
+        {
+          "endpoint": "owner1:12345",
+          "localname": "student2"
+        }
+      ]
+    },
+    {
+      "tablename": "student3",
+      "factory": "com.hufudb.onedb.core.table.OneDBTableFactory",
+      "localtables": [
+        {
+          "endpoint": "owner1:12345",
+          "localname": "student3"
+        }
+      ]
+    }
+  ]
+}
