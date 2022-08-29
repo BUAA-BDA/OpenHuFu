@@ -24,7 +24,7 @@
     - server[x].json: Owner Side 配置文件
     - client_model.json: User Side 配置文件
     - server[x].properties: Spring boot Owner Side 配置文件
-    - client.properties: Spring boot User Side 配置文件
+    - user.properties: Spring boot User Side 配置文件
     - log4j.properties: 日志配置文件
 - adapter: 数据库适配器目录
     - adapter_[x].jar: x数据库的适配器
@@ -35,11 +35,13 @@
     - owner[x].pem: CA 签发给 owner x 的证书
     - owner[x].key: owner x 证书对应的私钥
 - demo: 运行示例目录
+    - config: 本地示例配置文件目录
     - start_server.sh: Owner Side 示例启动脚本
     - start_client.sh: User Side 示例启动脚本
     - stop_server.sh: Owner Side 示例关闭脚本
-    - backend.sh: Spring boot 示例启动脚本
-    - init_env.sh: 本地示例初始化脚本
+    - backend.sh: Spring boot 后端示例启动脚本
+    - setup_env.sh: 本地示例数据库环境初始化脚本
+    - shutdown_env.sh: 本地示例数据库环境关闭脚本
 - user.sh: 查询端运行脚本
 - owner.sh: 数据拥有端运行脚本
 
@@ -49,7 +51,7 @@
 1. 初始化数据库环境并安装证书
 ```
 cd release/demo
-./init_env.sh
+./setup_env.sh
 ```
 2. 启动 owner side
 
@@ -75,6 +77,10 @@ onedb>!q
 6. 关闭 owner side
 ```
 ./stop_server.sh
+```
+7. 关闭数据库
+```
+./shutdown_env.sh
 ```
 
 ## 测试
