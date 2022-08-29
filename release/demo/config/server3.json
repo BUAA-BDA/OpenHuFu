@@ -1,0 +1,52 @@
+{
+  "id": 2,
+  "port": 12347,
+  "hostname": "localhost",
+  "privatekeypath": "./cert/owner1.key",
+  "certchainpath": "./cert/owner1.pem",
+  "trustcertpath": "./cert/ca.pem",
+  "adapterconfig": {
+    "datasource": "postgresql",
+    "url": "jdbc:postgresql://localhost:13103/postgres",
+    "catalog": "postgres",
+    "user": "postgres",
+    "passwd": "onedb"
+  },
+  "tables": [
+    {
+      "actualName": "student",
+      "publishedName": "student1",
+      "publishedColumns": []
+    },
+    {
+      "actualName": "student",
+      "publishedName": "st_pro",
+      "publishedColumns": [
+        {
+          "name": "name",
+          "type": "STRING",
+          "modifier": "public",
+          "columnId": 0
+        },
+        {
+          "name": "score",
+          "type": "INT",
+          "modifier": "protected",
+          "columnId": 1
+        },
+        {
+          "name": "age",
+          "type": "INT",
+          "modifier": "protected",
+          "columnId": 2
+        },
+        {
+          "name": "dept_name",
+          "type": "STRING",
+          "modifier": "protected",
+          "columnId": 3
+        }
+      ]
+    }
+  ]
+}

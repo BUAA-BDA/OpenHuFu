@@ -1,0 +1,88 @@
+{
+  "id": 1,
+  "port": 12346,
+  "theadnum": 4,
+  "hostname": "localhost",
+  "privatekeypath": "./cert/owner1.key",
+  "certchainpath": "./cert/owner1.pem",
+  "trustcertpath": "./cert/ca.pem",
+  "adapterconfig": {
+    "datasource": "postgresql",
+    "url": "jdbc:postgresql://localhost:13102/postgres",
+    "catalog": "postgres",
+    "user": "postgres",
+    "passwd": "onedb"
+  },
+  "tables": [
+    {
+      "actualName": "student",
+      "publishedName": "student1",
+      "publishedColumns": []
+    },
+    {
+      "actualName": "taxi",
+      "publishedName": "taxi",
+      "publishedColumns": []
+    },
+    {
+      "actualName": "student",
+      "publishedName": "st_pro_2",
+      "publishedColumns": [
+        {
+          "name": "name",
+          "type": "STRING",
+          "modifier": "protected",
+          "columnId": 0
+        },
+        {
+          "name": "score",
+          "type": "INT",
+          "modifier": "protected",
+          "columnId": 1
+        },
+        {
+          "name": "age",
+          "type": "INT",
+          "modifier": "protected",
+          "columnId": 2
+        },
+        {
+          "name": "dept_name",
+          "type": "STRING",
+          "modifier": "public",
+          "columnId": 3
+        }
+      ]
+    },
+    {
+      "actualName": "student",
+      "publishedName": "st_pro_3",
+      "publishedColumns": [
+        {
+          "name": "name",
+          "type": "STRING",
+          "modifier": "protected",
+          "columnId": 0
+        },
+        {
+          "name": "score",
+          "type": "INT",
+          "modifier": "protected",
+          "columnId": 1
+        },
+        {
+          "name": "age",
+          "type": "INT",
+          "modifier": "protected",
+          "columnId": 2
+        },
+        {
+          "name": "dept_name",
+          "type": "STRING",
+          "modifier": "public",
+          "columnId": 3
+        }
+      ]
+    }
+  ]
+}
