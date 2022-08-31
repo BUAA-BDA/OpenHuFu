@@ -24,6 +24,7 @@
     <module>adapter-csv</module>
     <module>adapter-json</module>
     <module>adapter-postgis</module>
+    <module>adapter-hive</module>
   </modules>
 
   <dependencies>
