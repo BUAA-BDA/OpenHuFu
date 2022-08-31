@@ -1,0 +1,81 @@
+version: "3"
+
+services:
+  hthive-namenode7:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop2.7.4-java8
+    container_name: "hthive-namenode7"
+    hostname: "hthive-namenode7"
+    volumes:
+      - namenode:/hadoop/dfs/name
+    environment:
+      - CLUSTER_NAME=test
+    env_file:
+      - hadoop-hive.env
+    ports:
+      - "50070:50070"
+    networks:
+      - ht_owner_net_6
+  hthive-datanode7:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop2.7.4-java8
+    container_name: "hthive-datanode7"
+    hostname: "hthive-datanode7"
+    volumes:
+      - datanode:/hadoop/dfs/data
+    env_file:
+      - hadoop-hive.env
+    environment:
+      SERVICE_PRECONDITION: "hthive-namenode7:50070"
+    ports:
+      - "50075:50075"
+    networks:
+      - ht_owner_net_6
+  hthive-server7:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    container_name: "hthive-server7"
+    hostname: "hthive-server7"
+    env_file:
+      - hadoop-hive.env
+    environment:
+      HIVE_CORE_CONF_javax_jdo_option_ConnectionURL: "jdbc:postgresql://hthive-metastore7/metastore"
+      SERVICE_PRECONDITION: "hthive-metastore7:9083"
+    volumes:
+      - $PWD/init:/opt/hive/init
+    command: /opt/hive/init/loaddata.sh
+    ports:
+      - "10000:10000"
+    networks:
+      - ht_owner_net_6
+  hthive-metastore7:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    container_name: "hthive-metastore7"
+    hostname: "hthive-metastore7"
+    env_file:
+      - hadoop-hive.env
+    command: /opt/hive/bin/hive --service metastore
+    environment:
+      SERVICE_PRECONDITION: "hthive-namenode7:50070 hthive-datanode7:50075 hthive-metastore-postgresql7:5432"
+    ports:
+      - "9083:9083"
+    networks:
+      - ht_owner_net_6
+  hthive-metastore-postgresql7:
+    image: bde2020/hive-metastore-postgresql:2.3.0
+    container_name: "hthive-metastore-postgresql7"
+    hostname: "hthive-metastore-postgresql7"
+    networks:
+      - ht_owner_net_6
+#  presto-coordinator:
+#    image: shawnzhu/prestodb:0.181
+#    ports:
+#      - "8080:8080"
+#    networks:
+#      - ht_owner_net_6
+
+volumes:
+  namenode:
+  datanode:
+
+networks:
+  ht_owner_net_6:
+    name: ht_owner_net_6
+    driver: bridge

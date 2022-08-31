@@ -1,0 +1,20 @@
+{
+  "id": 5,
+  "port": 12345,
+  "theadnum": 4,
+  "hostname": "htowner6",
+  "adapterconfig": {
+    "datasource": "hive",
+    "url": "jdbc:hive2://hthive-server7:10000/default",
+    "catalog": "default",
+    "user": "",
+    "passwd": ""
+  },
+  "tables": [
+    {
+      "actualName": "student",
+      "publishedName": "student1",
+      "publishedColumns": []
+    }
+  ]
+}

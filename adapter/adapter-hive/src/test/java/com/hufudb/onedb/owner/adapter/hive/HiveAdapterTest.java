@@ -19,14 +19,21 @@ public class HiveAdapterTest {
     }
 
     try{
-      Connection con = DriverManager.getConnection("jdbc:hive2://localhost:10000", "", "");
+      Connection con = DriverManager.getConnection("jdbc:hive2://localhost:10000/default", "", "");
       Statement stmt = con.createStatement();
 
-      String sql = "select * from pokes limit 10";
+      String sql = "select * from student";
       System.out.println("Running: " + sql);
       ResultSet res = stmt.executeQuery(sql);
       while (res.next()) {
         System.out.println(String.valueOf(res.getString(1)));
+      }
+
+      DatabaseMetaData meta = con.getMetaData();
+      ResultSet rs = meta.getTables("default", null, "%", new String[] {"TABLE"});
+      while (rs.next()) {
+        String tableName = rs.getString("TABLE_NAME");
+        System.out.println(tableName);
       }
     } catch (SQLException e) {
       e.printStackTrace();
