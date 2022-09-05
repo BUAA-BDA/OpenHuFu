@@ -62,15 +62,19 @@ public class ModelGenerator {
     return String.format(modelTemplate, ownerStr, tableStr);
   }
 
-  static class Model {
+  public static class Model {
     public List<PojoOwnerInfo> owners;
     public List<GlobalTableConfig> tables;
   }
 
-  public static String loadUserConfig(String path) throws IOException {
+  public static Model parseModel(String path) throws IOException {
     Gson gson = new Gson();
     Reader reader = Files.newBufferedReader(Paths.get(path));
-    Model model = gson.fromJson(reader, Model.class);
+    return gson.fromJson(reader, Model.class);
+  }
+
+  public static String loadUserConfig(String path) throws IOException {
+    Model model = parseModel(path);
     return generateModel(model.owners, model.tables);
   }
 }

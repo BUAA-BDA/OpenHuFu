@@ -1,0 +1,97 @@
+{
+  "owners": [
+    {
+      "endpoint": "localhost:12345",
+      "trustCertPath": "./cert/ca.pem"
+    },
+    {
+      "endpoint": "localhost:12346",
+      "trustCertPath": "./cert/ca.pem"
+    },
+    {
+      "endpoint": "localhost:12347",
+      "trustCertPath": "./cert/ca.pem"
+    }
+  ],
+  "tables": [
+    {
+      "tableName": "student1",
+      "localTables": [
+        {
+          "endpoint": "localhost:12345",
+          "localname": "student1"
+        },
+        {
+          "endpoint": "localhost:12346",
+          "localname": "student1"
+        },
+        {
+          "endpoint": "localhost:12347",
+          "localname": "student1"
+        }
+      ]
+    },
+    {
+      "tableName": "st_pro_1",
+      "localTables": [
+        {
+          "endpoint": "localhost:12345",
+          "localName": "st_pro_1"
+        }
+      ]
+    },
+    {
+      "tableName": "st_pro_2",
+      "localTables": [
+        {
+          "endpoint": "localhost:12346",
+          "localName": "st_pro_2"
+        }
+      ]
+    },
+    {
+      "tableName": "st_pro_3",
+      "localTables": [
+        {
+          "endpoint": "localhost:12345",
+          "localName": "st_pro_3"
+        },
+        {
+          "endpoint": "localhost:12346",
+          "localName": "st_pro_3"
+        }
+      ]
+    },
+    {
+      "tableName": "student2",
+      "localTables": [
+        {
+          "endpoint": "localhost:12345",
+          "localName": "student2"
+        }
+      ]
+    },
+    {
+      "tableName": "student3",
+      "localTables": [
+        {
+          "endpoint": "localhost:12345",
+          "localName": "student3"
+        }
+      ]
+    },
+    {
+      "tableName": "taxi",
+      "localTables": [
+        {
+          "endpoint": "localhost:12345",
+          "localName": "taxi"
+        },
+        {
+          "endpoint": "localhost:12346",
+          "localName": "taxi"
+        }
+      ]
+    }
+  ]
+}
