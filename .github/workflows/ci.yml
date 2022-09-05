@@ -25,6 +25,7 @@ jobs:
         name: Hu-Fu-release
         path: release
   test:
+    needs: build
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
