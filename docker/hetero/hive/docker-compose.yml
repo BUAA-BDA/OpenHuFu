@@ -1,10 +1,10 @@
 version: "3"
 
 services:
-  hthive-namenode7:
+  hthive-namenode8:
     image: bde2020/hadoop-namenode:2.0.0-hadoop2.7.4-java8
-    container_name: "hthive-namenode7"
-    hostname: "hthive-namenode7"
+    container_name: "hthive-namenode8"
+    hostname: "hthive-namenode8"
     volumes:
       - namenode:/hadoop/dfs/name
     environment:
@@ -14,68 +14,68 @@ services:
     ports:
       - "50070:50070"
     networks:
-      - ht_owner_net_6
-  hthive-datanode7:
+      - ht_owner_net_8
+  hthive-datanode8:
     image: bde2020/hadoop-datanode:2.0.0-hadoop2.7.4-java8
-    container_name: "hthive-datanode7"
-    hostname: "hthive-datanode7"
+    container_name: "hthive-datanode8"
+    hostname: "hthive-datanode8"
     volumes:
       - datanode:/hadoop/dfs/data
     env_file:
       - hadoop-hive.env
     environment:
-      SERVICE_PRECONDITION: "hthive-namenode7:50070"
+      SERVICE_PRECONDITION: "hthive-namenode8:50070"
     ports:
       - "50075:50075"
     networks:
-      - ht_owner_net_6
-  hthive-server7:
+      - ht_owner_net_8
+  hthive-server8:
     image: bde2020/hive:2.3.2-postgresql-metastore
-    container_name: "hthive-server7"
-    hostname: "hthive-server7"
+    container_name: "hthive-server8"
+    hostname: "hthive-server8"
     env_file:
       - hadoop-hive.env
     environment:
-      HIVE_CORE_CONF_javax_jdo_option_ConnectionURL: "jdbc:postgresql://hthive-metastore7/metastore"
-      SERVICE_PRECONDITION: "hthive-metastore7:9083"
+      HIVE_CORE_CONF_javax_jdo_option_ConnectionURL: "jdbc:postgresql://hthive-metastore8/metastore"
+      SERVICE_PRECONDITION: "hthive-metastore8:9083"
     volumes:
       - $PWD/init:/opt/hive/init
     command: /opt/hive/init/loaddata.sh
     ports:
       - "10000:10000"
     networks:
-      - ht_owner_net_6
-  hthive-metastore7:
+      - ht_owner_net_8
+  hthive-metastore8:
     image: bde2020/hive:2.3.2-postgresql-metastore
-    container_name: "hthive-metastore7"
-    hostname: "hthive-metastore7"
+    container_name: "hthive-metastore8"
+    hostname: "hthive-metastore8"
     env_file:
       - hadoop-hive.env
     command: /opt/hive/bin/hive --service metastore
     environment:
-      SERVICE_PRECONDITION: "hthive-namenode7:50070 hthive-datanode7:50075 hthive-metastore-postgresql7:5432"
+      SERVICE_PRECONDITION: "hthive-namenode8:50070 hthive-datanode8:50075 hthive-metastore-postgresql8:5432"
     ports:
       - "9083:9083"
     networks:
-      - ht_owner_net_6
-  hthive-metastore-postgresql7:
+      - ht_owner_net_8
+  hthive-metastore-postgresql8:
     image: bde2020/hive-metastore-postgresql:2.3.0
-    container_name: "hthive-metastore-postgresql7"
-    hostname: "hthive-metastore-postgresql7"
+    container_name: "hthive-metastore-postgresql8"
+    hostname: "hthive-metastore-postgresql8"
     networks:
-      - ht_owner_net_6
+      - ht_owner_net_8
 #  presto-coordinator:
 #    image: shawnzhu/prestodb:0.181
 #    ports:
 #      - "8080:8080"
 #    networks:
-#      - ht_owner_net_6
+#      - ht_owner_net_8
 
 volumes:
   namenode:
   datanode:
 
 networks:
-  ht_owner_net_6:
-    name: ht_owner_net_6
+  ht_owner_net_8:
+    name: ht_owner_net_8
     driver: bridge
