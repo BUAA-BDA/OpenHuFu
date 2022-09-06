@@ -19,7 +19,7 @@ jobs:
     - name: Build with Maven
       run: ./package.sh
 
-    - name: Upload a Build Artifact
+    - name: Upload Hu-Fu Release Artifact
       uses: actions/upload-artifact@v3.1.0
       with:
         name: Hu-Fu-release
@@ -33,5 +33,7 @@ jobs:
       uses: KengoTODA/actions-setup-docker-compose@v1.0.9
       with:
         version: v2.2.0
+    - name: Download Hu-Fu Release Artifact
+      uses: release
     - name: Run Hu-Fu Test
-      run: ./test.sh
+      run: ./test.sh ci
