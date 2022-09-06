@@ -20,7 +20,7 @@ clean_ci() {
   cd ../database
   docker-compose down
   cd ../hetero/mix
-  sh shutdown.sh all
+  ./shutdown.sh all
   cd ../../..
 }
 
@@ -39,7 +39,7 @@ setup() {
 
 setup_ci() {
   cd docker/hetero/mix
-  sh setup.sh db
+  ./setup.sh db
   cd ../../database
   docker-compose up -d
   sleep 3
