@@ -1,6 +1,6 @@
 # OneDB
 
-[![coverage](https://gitlab.hufudb.com/pxc/onedb/badges/master/coverage.svg)](https://gitlab.hufudb.com/pxc/onedb)
+[![codecov](https://codecov.io/gh/BUAA-BDA/Hu-Fu/branch/develop/graph/badge.svg?token=QJBEGGNL2P)](https://codecov.io/gh/BUAA-BDA/Hu-Fu)
 
 ## 介绍
 数据库联合查询中间件

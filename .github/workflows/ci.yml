@@ -40,3 +40,15 @@ jobs:
         version: v2.2.0
     - name: Run Hu-Fu Test
       run: ./test.sh ci
+    - name: Upload Hu-Fu Jacoco Coverage Report
+      uses: actions/upload-artifact@v3.1.0
+      with:
+        name: Jacaco-report
+        path: coverage/target/site/jacoco-aggregate
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3.1.0
+      with:
+        token: 35f3d309-9a7d-44c7-b8c7-04b574579c8d
+        files: coverage/target/site/jacoco-aggregate/jacoco.xml
+        flags: unittests
+        name: Hu-Fu-Codecov

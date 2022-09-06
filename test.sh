@@ -57,6 +57,8 @@ test_ci() {
     docker-compose logs;
     rm failed;
     exit 1;
+  else
+    echo "TEST SUCCESS"
   fi
   cd ../..
 }
