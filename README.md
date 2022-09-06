@@ -1,138 +1,147 @@
-# OneDB
+# Hu-Fu
 
-[![codecov](https://codecov.io/gh/BUAA-BDA/Hu-Fu/branch/develop/graph/badge.svg?token=QJBEGGNL2P)](https://codecov.io/gh/BUAA-BDA/Hu-Fu)
+[![codecov](https://codecov.io/gh/BUAA-BDA/Hu-Fu/branch/main/graph/badge.svg?token=QJBEGGNL2P)](https://codecov.io/gh/BUAA-BDA/Hu-Fu)
 
-## 介绍
-数据库联合查询中间件
+A federated database middleware
 
-## 安装
-已安装 java jdk 11 及以上版本、maven 3.5.2 及以上版本
+## Building Hu-Fu from Source
 
-在项目根目录下运行打包命令，打包结果位于 `release` 目录下
+Prerequistes:
+- Linux
+- Java 11
+- Maven (version at least 3.5.2)
 
-```
+Run the following commands
+```cmd
+git clone https://github.com/BUAA-BDA/Hu-Fu.git
+cd Hu-Fu
 ./package.sh
 ```
 
-`release` 目录结构:
+Hu-Fu is now installed in `release`
 
-- bin: 可执行文件目录
-    - onedb_owner_server.jar: OneDB Owner Side 可执行文件
-    - onedb_user_client.jar: OneDB User Side 可执行文件
-    - backend.jar: Owner && User Side 的 Spring boot 封装
-- config: 配置文件目录
-    - server[x].json: Owner Side 配置文件
-    - client_model.json: User Side 配置文件
-    - server[x].properties: Spring boot Owner Side 配置文件
-    - user.properties: Spring boot User Side 配置文件
-    - log4j.properties: 日志配置文件
-- adapter: 数据库适配器目录
-    - adapter_[x].jar: x数据库的适配器
-- log: Owner Side 的日志目录
-    - [x].log: owner x 的日志文件
-- cert: 安全证书目录(运行本地示例时直接从 docker/cert/local 目录下拷贝如下文件到该目录即可)
-    - ca.pem: CA 根证书
-    - owner[x].pem: CA 签发给 owner x 的证书
-    - owner[x].key: owner x 证书对应的私钥
-- demo: 运行示例目录
-    - config: 本地示例配置文件目录
-    - start_server.sh: Owner Side 示例启动脚本
-    - start_client.sh: User Side 示例启动脚本
-    - stop_server.sh: Owner Side 示例关闭脚本
-    - backend.sh: Spring boot 后端示例启动脚本
-    - setup_env.sh: 本地示例数据库环境初始化脚本
-    - shutdown_env.sh: 本地示例数据库环境关闭脚本
-- user.sh: 查询端运行脚本
-- owner.sh: 数据拥有端运行脚本
+`release` structure:
 
-## 运行
-`release/demo` 文件夹下提供了一个本地运行的示例，运行该示例需要完成上述安装步骤并安装 docker >= 20.10, docker-compose >= 1.29
+```
+release
+├── adapter -- database adapter jar folder
+│   └── adapter_[x].jar -- adapter of datasource [x]
+├── bin -- executable file folder
+│   ├── backend.jar -- Spring boot backend jar
+│   ├── onedb_owner_server.jar -- Hu-Fu Owner Side jar
+│   └── onedb_user_client.jar -- Hu-Fu User Side jar
+├── config -- configuration file folder
+│   ├── client_model.json -- User Side Configuration
+│   ├── log4j.properties -- log4j Configuration
+│   ├── server[x].json -- Owner Side Configuration
+│   ├── server[x].properties -- Spring Boot Owner Side Configuration
+│   └── user.properties -- Spring Boot User Side Configuration
+├── demo -- demo folder of Hu-Fu
+│   ├── backend.sh -- Spring Boot setup script
+│   ├── config -- configuration files for demo
+│   ├── setup_env.sh -- multiple databases setup script
+│   ├── shutdown_env.sh -- databases shutdown script
+│   ├── start_client.sh -- User Side setup script
+│   ├── start_server.sh -- Owner Side demo setup script
+│   └── stop_server.sh -- Owner Side demo shutdown script
+├── owner.sh -- Owner Side setup script
+├── udf -- User define function jar folder
+└── user.sh -- User Side setup script
+```
 
-1. 初始化数据库环境并安装证书
+## Running Hu-Fu (demo)
+
+Prerequistes:
+- docker (version at least 20.10)
+- docker-compose (version at least 1.29)
+
+The demo of Hu-Fu is placed in `release/demo` (need to build from source first)
+
+1. initialize multiple database environments
 ```
 cd release/demo
 ./setup_env.sh
 ```
-2. 启动 owner side
+2. setup the owner side of Hu-Fu
 
 ```
-./start_server.sh #启动 owner side
+./start_server.sh
 ```
 
-3. 启动 user side
+3. setup the user side of Hu-Fu
 
 ```
-./start_client.sh #启动 user side
+./start_client.sh
 ```
 
-4. 在命令行界面中执行查询
+4. execute queries in the command line interface
 ```
 onedb>select name from student1;
 ```
 
-5. 退出 user side
+5. quit the user side of Hu-Fu
 ```
 onedb>!q
 ```
-6. 关闭 owner side
+6. shutdown the owner side of Hu-Fu
 ```
 ./stop_server.sh
 ```
-7. 关闭数据库
+7. shutdown databases
 ```
 ./shutdown_env.sh
 ```
 
-## 测试
+## Running Hu-Fu test
 
-在项目根目录下运行测试命令，运行测试需要 docker >= 20.10, docker-compose >= 1.29
+Prerequistes:
+- docker (version at least 20.10)
+- docker-compose (version at least 1.29)
+
 
 ```
 ./test.sh
 ```
 
-测试覆盖率报告位于 `coverage/target/site/jacoco-aggregate/index.html`，使用清理命令清除测试相关文件
+Test result are placed `coverage/target/site/jacoco-aggregate`, use the following commands to clean up the test realated files
 
 ```
 ./clean.sh
 ```
 
-## 配置文件简介
+## Basic Introduction for Configuration File
 
 ### OwnerSide
 
-配置文件样例位于 `release/conf/server[x].json`：
-- id: owner 的标识 id，一个联邦中不允许两个 owner 有相同 id
-- port: owner side 监听的端口号（提供服务的端口）
-- threadnum: owner side 线程池中线程数量
-- privatekeypath: 证书私钥路径
-- certchainpath: 证书路径
-- trustcertpath: CA根证书路径
-- adapterconfig: 数据库适配器参数
-    - datasource: 数据库类型，例如 postgresql, mysql
-    - url: 数据库连接 url
-    - catalog: 连接的数据库
-    - user: 连接用户
-    - passwd: 连接密码
-- tables: 预定义的可被 query user 获取的本地表 schema 信息
-    - actualName: 本地真实表名
-    - publishedName: 对外发布的表名，query user 通过该表名来查询此表
-    - publishedColumns: 需要公开的列信息
-        - name: 对外发布的列名
-        - type: 对外发布的类型（当前版本需要和本地类型保持一致）
-        - modifier: 安全级别
-        - columnId: 对应的真实列在真实表中的序号
+The configuration is located in `release/conf/` as `server[x].json`, the details are as follows:
+- id: the identifier of the owner, two different owners are not allowed to have the same id in a federation
+- hostname: the hostname of the owner which is accessible by other owners and query users
+- port: the port on which the owner side listens
+- threadnum: owner side thread pool size
+- adapterconfig: database adapter configurations
+    - datasource: database system type, such as postgresql, mysql
+    - url: connection url
+    - catalog: database to connect
+    - user: user name
+    - passwd: password of the user
+- tables: predefined local table schemas that can be obtained by query user
+    - actualName: the actual name of the table in the database system
+    - publishedName: the table name published to the outside, query users can use the name to query this table
+    - publishedColumns: columns informations
+        - name: the column name published to the outside
+        - type: the column type published to the outside (for now, it needs to be consistent with the actual type)
+        - modifier: security level(public, protected and hidden)
+        - columnId: the ordinal number of the corresponding column in the actual table
 
 
 ### UserSide
 
-配置文件样例位于 `release/conf/client_model.json`
+The configuration is located in `release/conf/client_model.json`
 
-- owners: 需要连接的参与方信息
-    - endpoint: ownerside 的 hostname:port
-    - trustcertpath: 可信任的 CA 证书路径
-- tables: 全局表模式信息
-    - tablename: 全局表名
-    - localtables: 全局表对应的本地表（可以有多个）
-        - endpoint: 本地表所在 owner 的 endpoint
-        - localname: 本地表的表名
+- owners: the owner information
+    - endpoint: {hostname}:{port} of the corresponding owner side
+- tables: global table configuration
+    - tablename: global table name
+    - localtables: components of the global table (at least one)
+        - endpoint: the endpoint of the owner of the local table
+        - localname: published name of the table
