@@ -39,4 +39,4 @@ jobs:
         name: Hu-Fu-release
         path: release
     - name: Run Hu-Fu Test
-      run: ./test.sh ci
+      run: sh test.sh ci
