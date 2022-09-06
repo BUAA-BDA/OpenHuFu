@@ -34,6 +34,9 @@ jobs:
       with:
         version: v2.2.0
     - name: Download Hu-Fu Release Artifact
-      uses: release
+      uses: actions/download-artifact@v3.0.0
+      with:
+        name: Hu-Fu-release
+        path: release
     - name: Run Hu-Fu Test
       run: ./test.sh ci
