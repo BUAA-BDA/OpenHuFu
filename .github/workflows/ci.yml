@@ -29,14 +29,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Docker Compose Setup
-      uses: KengoTODA/actions-setup-docker-compose@v1.0.9
-      with:
-        version: v2.2.0
     - name: Download Hu-Fu Release Artifact
       uses: actions/download-artifact@v3.0.0
       with:
         name: Hu-Fu-release
         path: release
+    - name: Docker Compose Setup
+      uses: KengoTODA/actions-setup-docker-compose@v1.0.9
+      with:
+        version: v2.2.0
     - name: Run Hu-Fu Test
-      run: sh test.sh ci
+      run: ./test.sh ci
