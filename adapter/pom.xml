@@ -25,6 +25,7 @@
     <module>adapter-json</module>
     <module>adapter-postgis</module>
     <module>adapter-hive</module>
+    <module>adapter-kylin</module>
   </modules>
 
   <dependencies>
