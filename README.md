@@ -15,7 +15,7 @@ Run the following commands
 ```cmd
 git clone https://github.com/BUAA-BDA/Hu-Fu.git
 cd Hu-Fu
-./package.sh
+./build/script/package.sh
 ```
 
 Hu-Fu is now installed in `release`
@@ -100,13 +100,13 @@ Prerequistes:
 
 
 ```
-./test.sh
+./build/script/test.sh
 ```
 
 Test result are placed `coverage/target/site/jacoco-aggregate`, use the following commands to clean up the test realated files
 
 ```
-./clean.sh
+./build/script/clean.sh
 ```
 
 ## Basic Introduction for Configuration File

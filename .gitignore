@@ -80,9 +80,12 @@ docker/owner/cert/
 # vscode
 .vscode/
 
+#frontdn resource
+
 webapp/node_modules
 webapp/dist
 webapp/dist_electron
+backend/src/main/resources/static
 
 # Log files
 webapp/npm-debug.log*
