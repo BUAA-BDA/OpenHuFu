@@ -79,3 +79,13 @@ docker/owner/cert/
 
 # vscode
 .vscode/
+
+webapp/node_modules
+webapp/dist
+webapp/dist_electron
+
+# Log files
+webapp/npm-debug.log*
+webapp/yarn-debug.log*
+webapp/yarn-error.log*
+webapp/pnpm-debug.log*
