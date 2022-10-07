@@ -1,0 +1,16 @@
+version: "3"
+
+services:
+  htkylin9:
+    build: .
+    container_name: "htkylin9"
+    hostname: "htkylin9"
+    ports:
+      - "7070:7070"
+    networks:
+      - ht_owner_net_9
+
+networks:
+  ht_owner_net_9:
+    name: ht_owner_net_9
+    driver: bridge
