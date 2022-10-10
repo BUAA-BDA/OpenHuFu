@@ -1,6 +1,9 @@
 package com.hufudb.onedb.backend.config;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+
 import com.hufudb.onedb.core.table.GlobalTableConfig;
 import com.hufudb.onedb.core.table.utils.PojoOwnerInfo;
 import com.hufudb.onedb.owner.OwnerServer;
@@ -28,8 +31,10 @@ public class BackendConfiguration {
   private String userConfigPath;
 
   @Bean
-  public OneDB initUser() {
-    return new OneDB();
+  public OneDB initUser(Connection DBConn) {
+    OneDB onedb = new OneDB();
+    onedb.setDBConn(DBConn);
+    return onedb;
   }
 
   @Bean
@@ -87,5 +92,19 @@ public class BackendConfiguration {
         }
       }
     };
+  }
+
+  @Bean
+  public Connection initDBCon() {
+    Connection connection = null;
+    try {
+      Class.forName("com.mysql.jdbc.Driver");
+      String url = "jdbc:mysql://localhost:3306/Hu-Fu?user=root&password=123&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8";
+      connection = DriverManager.getConnection(url);
+      System.out.println("database connect successfully!!!");
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return connection;
   }
 }

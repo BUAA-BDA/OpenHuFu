@@ -1,1 +1,0 @@
-# MPC Library Dir

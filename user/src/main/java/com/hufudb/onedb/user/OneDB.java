@@ -13,12 +13,9 @@ import com.hufudb.onedb.plan.Plan;
 import com.hufudb.onedb.user.utils.ModelGenerator;
 import com.hufudb.onedb.user.utils.OneDBLine;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
@@ -37,6 +34,8 @@ public class OneDB {
   private CalciteConnection calciteConnection;
   private OneDBSchemaManager schema;
   private Connection connection;
+
+  private Connection DBConn;
 
   private static String getSystemTimeZone() {
     TimeZone timeZone = TimeZone.getDefault();
@@ -103,6 +102,50 @@ public class OneDB {
     return null;
   }
 
+  public ResultSet executeQuery(String sql, long id) {
+    String status;
+    ResultSet ret = null;
+    long start = System.currentTimeMillis();
+    try {
+      // get start Time; Status = In Process; store startTime into sqlRecord database(update status)
+      Statement statement = connection.createStatement();
+
+      String startSQL = "UPDATE sqlRecord set startTime = ?, status = ? where id = ?";
+      PreparedStatement startPs = DBConn.prepareStatement(startSQL);
+      status = "In Progress";
+      startPs.setString(2, status);
+      startPs.setLong(3, id);
+      start = System.currentTimeMillis();
+      Timestamp startTimestamp = new Timestamp(start);
+      startPs.setTimestamp(1, startTimestamp);
+      startPs.executeUpdate();
+
+      ret = statement.executeQuery(sql);
+      // get end Time; Status = Succeed
+      status = "Succeed";
+
+    } catch (SQLException e) {
+      // get end Time; Status = Failed;
+      e.printStackTrace();
+      status = "Failed";
+    }
+
+    try {
+      // execTime = endTime - startTime; store status execTime into sqlRecord database(update status)
+      String endSQL = "UPDATE sqlRecord set status = ?, execTime = ? where id = ?";
+      PreparedStatement endPs = DBConn.prepareStatement(endSQL);
+      endPs.setString(1, status);
+      endPs.setLong(3, id);
+      long execTime = System.currentTimeMillis() - start;
+      endPs.setLong(2, execTime);
+
+      endPs.executeUpdate();
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+    return ret;
+  }
+
   public DataSet executeQuery(Plan plan) {
     return schema.query(plan);
   }
@@ -166,5 +209,9 @@ public class OneDB {
 
   public void dropLocalTable(String oneDBTableName, String endpoint, String localTableName) {
     schema.dropLocalTable(oneDBTableName, endpoint, localTableName);
+  }
+
+  public void setDBConn(Connection DBConn) {
+    this.DBConn = DBConn;
   }
 }

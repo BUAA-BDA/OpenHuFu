@@ -1,7 +1,14 @@
 package com.hufudb.onedb.backend.controller;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
+
+import com.hufudb.onedb.backend.entity.SqlRecord;
 import com.hufudb.onedb.backend.utils.PojoResultSet;
 import com.hufudb.onedb.backend.utils.Request;
 import com.hufudb.onedb.core.table.GlobalTableConfig;
@@ -86,7 +93,19 @@ public class UserController {
   }
 
   @PostMapping("/user/query")
-  PojoResultSet query(@RequestBody Request request) {
-    return PojoResultSet.fromResultSet(onedb.executeQuery(request.value));
+  PojoResultSet query(@RequestBody Request request) throws SQLException {
+    PreparedStatement ps = null;
+
+    String sql = "INSERT INTO sqlRecord (id, context, username, status, subTime) VALUES (?, ?, ?, ?, ?)";
+    ps = DBController.connection.prepareStatement(sql);
+    ps.setLong(1, ++DBController.id);
+    ps.setString(2, request.value);
+    ps.setString(3, "qlh");
+    ps.setString(4, "Submitted");
+    ps.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
+    ps.executeUpdate();
+    //TODO get submit Time; Status = Submitted
+    //TODO store into sqlRecord database
+    return PojoResultSet.fromResultSet(onedb.executeQuery(request.value, DBController.id));
   }
 }
