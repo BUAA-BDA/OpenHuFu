@@ -16,8 +16,20 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
         cache: maven
+    - name: Build frontend with Vue
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+    - run: |
+        cd webapp
+        yarn install
+        yarn build
+        cd ..
+        mkdir backend/src/main/resources/static
+        mv webapp/dist/* backend/src/main/resources/static/
+
     - name: Build with Maven
-      run: ./package.sh
+      run: ./build/script/package.sh
 
     - name: Upload Hu-Fu Release Artifact
       uses: actions/upload-artifact@v3.1.0
@@ -39,7 +51,7 @@ jobs:
       with:
         version: v2.2.0
     - name: Run Hu-Fu Test
-      run: ./test.sh ci
+      run: ./build/script/test.sh ci
     - name: Upload Hu-Fu Jacoco Coverage Report
       uses: actions/upload-artifact@v3.1.0
       with:
