@@ -1,4 +1,4 @@
-package com.hufudb.onedb.backend;
+package com.hufudb.onedb.backend.config;
 
 import java.io.IOException;
 import com.hufudb.onedb.core.table.GlobalTableConfig;

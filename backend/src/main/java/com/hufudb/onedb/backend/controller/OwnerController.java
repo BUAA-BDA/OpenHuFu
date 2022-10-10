@@ -1,4 +1,4 @@
-package com.hufudb.onedb.backend;
+package com.hufudb.onedb.backend.controller;
 
 import java.util.List;
 import com.hufudb.onedb.data.schema.utils.PojoPublishedTableSchema;
