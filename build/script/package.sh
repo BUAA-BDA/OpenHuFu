@@ -1,7 +1,19 @@
 #!/bin/bash
 
+function buildFrontEnd() {
+  echo "start build front end..."
+  cd webapp
+  yarn install
+  yarn build
+  cd ..
+  mkdir backend/src/main/resources/static
+  mv webapp/dist/* backend/src/main/resources/static/
+  echo "build front end finish"
+}
+
 if [ $# -eq 0 ]
 then
+  buildFrontEnd
   mvn clean install -T 0.5C -Dmaven.test.skip=true
   mkdir -p ./release/bin
   mkdir -p ./release/adapter
@@ -18,6 +30,13 @@ then
   cp adapter/adapter-postgis/target/*-with-dependencies.jar ./release/adapter/adapter_postgis.jar
   cp backend/target/backend*.jar ./release/bin/backend.jar
 else
+  if [ $1 == "backend" ]
+  then
+    buildFrontEnd
+    mvn install -T 0.5C -Dmaven.test.skip=true -pl $1
+    cp backend/target/backend*.jar ./release/bin/backend.jar
+    return
+  fi
   mvn install -T 0.5C -Dmaven.test.skip=true -pl $1
   if [ $1 == "user" ]
   then
@@ -40,8 +59,5 @@ else
   elif [ $1 == "adapter-postgis" ]
   then
     cp adapter/adapter-postgis/target/*-with-dependencies.jar ./release/adapter/adapter_postgis.jar
-  elif [ $1 == "backend" ]
-  then
-    cp backend/target/backend*.jar ./release/bin/backend.jar
   fi
 fi
