@@ -6,6 +6,7 @@ function buildFrontEnd() {
   yarn install
   yarn build
   cd ..
+  rm -r backend/src/main/resources/static
   mkdir backend/src/main/resources/static
   mv webapp/dist/* backend/src/main/resources/static/
   echo "build front end finish"
