@@ -16,21 +16,12 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
         cache: maven
-    - name: Build frontend with Vue
-      uses: actions/setup-node@v2
+    - name: Set up Node 16
+      uses: actions/setup-node@v3
       with:
         node-version: '16'
-    - run: |
-        cd webapp
-        yarn install
-        yarn build
-        cd ..
-        mkdir backend/src/main/resources/static
-        mv webapp/dist/* backend/src/main/resources/static/
-
     - name: Build with Maven
       run: ./build/script/package.sh
-
     - name: Upload Hu-Fu Release Artifact
       uses: actions/upload-artifact@v3.1.0
       with:

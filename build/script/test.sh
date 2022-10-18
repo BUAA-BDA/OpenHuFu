@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -ex
+
 clean() {
   cd docker/test
   docker-compose down

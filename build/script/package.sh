@@ -1,13 +1,15 @@
 #!/bin/bash
 
+set -ex
+
 function buildFrontEnd() {
   echo "start build front end..."
   cd webapp
   yarn install
   yarn build
   cd ..
-  rm -r backend/src/main/resources/static
-  mkdir backend/src/main/resources/static
+  rm -rf backend/src/main/resources/static
+  mkdir -p backend/src/main/resources/static
   mv webapp/dist/* backend/src/main/resources/static/
   echo "build front end finish"
 }
