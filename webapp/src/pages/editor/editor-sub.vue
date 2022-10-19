@@ -55,7 +55,7 @@ const hufuTheme = {
     },
     {
       fontStyle: "bold",
-      token: "constant.language"
+      token: "constant.languages"
     },
     {
       fontStyle: "bold",
@@ -81,7 +81,7 @@ const hufuTheme = {
     },
     {
       foreground: "999999",
-      token: "variable.language"
+      token: "variable.languages"
     },
     {
       foreground: "445588",

@@ -24,7 +24,10 @@
     "element-plus": "^2.2.1",
     "monaco-editor": "^0.33.0",
     "splitpanes": "^3.1.1",
+    "vue-i18n": "^9.2.2",
+    "js-cookie": "^3.0.1",
     "vue": "^3.2.13",
+    "vuex": "^4.0.2",
     "vue-router": "4"
   },
   "devDependencies": {
@@ -33,6 +36,9 @@
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-eslint": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
+    "node-sass": "^6.0.1",
+    "sass-loader": "^10.0.1",
+    "webpack": "^5.54.0",
     "electron": "^18.2.4",
     "electron-devtools-installer": "^3.2.0",
     "eslint": "^7.32.0",
