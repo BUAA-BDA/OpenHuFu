@@ -1,3 +1,6 @@
+#!/bin/bash
+set -e
+
 mkdir -p cert
 cp -r ../../docker/cert/local/* cert
 cd ../../docker/database
