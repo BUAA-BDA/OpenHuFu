@@ -14,7 +14,7 @@
                 icon="spinner"
                 class="prefix-icon rotate-element"
             />
-            Connecting to {{ backendUrl }}
+            Connecting to Backend
           </span>
         </el-header>
         <el-header class="top-bar connect-info" v-if="connectState == 2">
@@ -24,20 +24,13 @@
                 class="prefix-icon icon-button"
                 @click="refreshAll()"
             />
-            Connect to {{ backendUrl }}
-          </span>
-          <span>
-            <font-awesome-icon
-                icon="circle-xmark"
-                class="prefix-icon icon-button"
-                @click="disconnect()"
-            />
+            Connected to Backend
           </span>
         </el-header>
         <el-header class="top-bar connect-info" v-if="connectState == 3">
           <span>
             <font-awesome-icon icon="circle-exclamation" class="prefix-icon" />
-            Fail to connect {{ backendUrl }}
+            Fail to Connect Backend
           </span>
         </el-header>
         <el-collapse class="collapse-panel">
@@ -340,80 +333,6 @@
       </el-header>
       <el-main v-if="activeTab == 1" class="main-pane">
         <el-row class="vertical-split" justify="space-around">
-          <el-col :span="24" class="pane-cell" v-if="connectState != 2">
-            <img src="../../assets/images/hufu-logo-with-name.svg" class="hufu-logo" />
-            <div v-if="connectState != 2" class="horizontal-split">
-              <el-tabs class="horizontal-tabs" stretch="true">
-                <el-tab-pane label="Launch Locally">
-                  <el-button
-                      type="primary"
-                      class="full-width-button"
-                      v-if="connectState == 1"
-                  >
-                    <font-awesome-icon
-                        icon="spinner"
-                        class="prefix-icon rotate-element"
-                    />
-                    Launching
-                  </el-button>
-                  <el-button
-                      type="primary"
-                      class="full-width-button"
-                      @click="connectLocal()"
-                      v-else
-                  >
-                    <font-awesome-icon icon="circle-play" class="prefix-icon" />
-                    Launch
-                  </el-button>
-                </el-tab-pane>
-                <el-tab-pane label="Connect Remote">
-                  <el-input
-                      v-model="inputUrl"
-                      placeholder="Please input remote url"
-                      clearable
-                      class="line-input"
-                  >
-                  </el-input>
-                  <el-button
-                      type="primary"
-                      class="full-width-button"
-                      v-if="connectState == 1"
-                  >
-                    <font-awesome-icon
-                        icon="spinner"
-                        class="prefix-icon rotate-element"
-                    />
-                    Connecting
-                  </el-button>
-                  <el-button
-                      type="primary"
-                      class="full-width-button"
-                      @click="connectRemote()"
-                      v-else
-                  >
-                    <font-awesome-icon icon="link" class="prefix-icon" />
-                    Connect
-                  </el-button>
-                </el-tab-pane>
-              </el-tabs>
-            </div>
-          </el-col>
-          <el-col v-if="connectState == 2" class="pane-cell" :span="8">
-            <img src="../../assets/images/hufu-logo-with-name.svg" class="hufu-logo" />
-            <div class="horizontal-tabs">
-              <el-input
-                  v-model="inputUrl"
-                  clearable
-                  class="line-input center"
-                  disabled
-              >
-              </el-input>
-              <el-button type="primary" @click="disconnect()">
-                <font-awesome-icon icon="circle-xmark" class="prefix-icon" />
-                Disconnect
-              </el-button>
-            </div>
-          </el-col>
           <el-col v-if="connectState == 2" :span="16">
             <div class="horizontal-split">
               <el-card shadow="hover" class="card-pane" v-if="hasOwner">
@@ -677,11 +596,10 @@ export default {
     this.refreshOwnerTree();
     this.refreshGlobalTableTree();
     this.refreshLocalTableTree();
+    this.connectRemote();
   },
   data() {
     return {
-      inputUrl: "http://localhost:8001",
-      backendUrl: "http://localhost:8001",
       connectState: 0, // 0: no_connection, 1: connecting, 2: connected, 3: connect_fail
       hasOwner: false,
       hasLocalData: false,
@@ -746,23 +664,10 @@ export default {
     };
   },
   methods: {
-    connectLocal() {
-      // todo: implement this function correctly
-      this.inputUrl = "localhost:8001";
-      this.connectRemote();
-    },
     connectRemote() {
       this.connectState = 1;
-      if (
-          this.inputUrl.startsWith("http://") ||
-          this.inputUrl.startsWith("https://")
-      ) {
-        this.backendUrl = this.inputUrl;
-      } else {
-        this.backendUrl = "http://" + this.inputUrl;
-      }
       axios
-          .get(this.backendUrl + "/alive")
+          .get("/alive")
           .then((response) => {
             this.hasOwner = response.data;
             this.connectState = 2;
@@ -775,11 +680,6 @@ export default {
       this.refreshLocalTableTree();
       this.refreshGlobalTableTree();
     },
-    disconnect() {
-      this.backendUrl = "";
-      this.connectState = 0;
-      this.hasOwner = false;
-    },
     refreshAll() {
       this.refreshOwnerTree();
       this.refreshLocalTableTree();
@@ -787,7 +687,7 @@ export default {
     },
     refreshOwnerTree() {
       axios
-          .get(this.backendUrl + "/user/owners")
+          .get("/user/owners")
           .then((response) => {
             this.owners = response.data;
             this.ownerTree = [];
@@ -812,7 +712,7 @@ export default {
     },
     getLocalTables(owner, id) {
       axios
-          .get(this.backendUrl + "/user/owners/" + owner)
+          .get("/user/owners/" + owner)
           .then((response) => {
             this.localTables[owner] = response.data;
             response.data.forEach((table) => {
@@ -842,7 +742,7 @@ export default {
     },
     refreshGlobalTableTree() {
       axios
-          .get(this.backendUrl + "/user/globaltables")
+          .get("/user/globaltables")
           .then((response) => {
             this.globalTables = response.data;
             this.globalTableTree = [];
@@ -897,11 +797,8 @@ export default {
           });
     },
     refreshLocalTableTree() {
-      if (this.backendUrl == "") {
-        return;
-      }
       axios
-          .get(this.backendUrl + "/owner/localtables")
+          .get("/owner/localtables")
           .then((response) => {
             this.localTables = response.data;
             this.localTableTree[0].children = [];
@@ -926,7 +823,7 @@ export default {
             console.log(err);
           });
       axios
-          .get(this.backendUrl + "/owner/publishedtables")
+          .get("/owner/publishedtables")
           .then((response) => {
             this.publishedTables = response.data;
             this.localTableTree[1].children = [];
@@ -955,7 +852,7 @@ export default {
     },
     addOwner() {
       axios
-          .post(this.backendUrl + "/user/owners", { value: this.ownerAddress })
+          .post("/user/owners", { value: this.ownerAddress })
           .then(() => {
             this.refreshOwnerTree();
             this.ownerAddress = "";
@@ -966,7 +863,7 @@ export default {
     },
     removeOwner(endpoint) {
       axios
-          .delete(this.backendUrl + "/user/owners/" + endpoint)
+          .delete("/user/owners/" + endpoint)
           .then(() => {
             this.refreshOwnerTree();
             this.refreshGlobalTableTree();
@@ -982,7 +879,7 @@ export default {
         sql = sql.substring(0, sql.length - 1);
       }
       axios
-          .post(this.backendUrl + "/user/query", { value: sql })
+          .post("/user/query", { value: sql })
           .then((response) => {
             this.resultTable = this.parseResult(response.data);
             this.resultSet = response.data;
@@ -1041,7 +938,7 @@ export default {
         publishedColumns: columns
       };
       axios
-          .post(this.backendUrl + "/owner/publishedtables", publishedSchema)
+          .post("/owner/publishedtables", publishedSchema)
           .then(() => {
             this.refreshOwnerTree();
             this.refreshLocalTableTree();
@@ -1060,7 +957,7 @@ export default {
     },
     removePublishedSchema(publishedName) {
       axios
-          .delete(this.backendUrl + "/owner/publishedtables/" + publishedName)
+          .delete("/owner/publishedtables/" + publishedName)
           .then(() => {
             this.refreshLocalTableTree();
             this.refreshOwnerTree();
@@ -1106,7 +1003,7 @@ export default {
         return;
       }
       axios
-          .post(this.backendUrl + "/user/globaltables", this.newGlobalTable)
+          .post("/user/globaltables", this.newGlobalTable)
           .then(() => {
             this.refreshGlobalTableTree();
             this.newGlobalTable.tableName = "";
@@ -1121,7 +1018,7 @@ export default {
           });
     },
     delGlobalTable(name) {
-      axios.delete(this.backendUrl + "/user/globaltables/" + name).then(() => {
+      axios.delete("/user/globaltables/" + name).then(() => {
         this.refreshGlobalTableTree();
       });
     },
@@ -1416,13 +1313,5 @@ export default {
 }
 .rotate-element {
   animation: spin 2s infinite;
-}
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  margin: 0;
-  height: 100%;
 }
 </style>

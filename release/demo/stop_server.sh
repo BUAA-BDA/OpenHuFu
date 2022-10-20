@@ -1,7 +1,10 @@
 #!/bin/bash
+set -e
+
 stop() {
   kill -9 $(cat log/pid_$1)
   echo "stop server $1"
+  rm log/$1.log
   rm log/pid_$1
 }
 

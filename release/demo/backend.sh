@@ -1,3 +1,6 @@
+#!/bin/bash
+set -e
+
 start_owner() {
   echo "starting server $1..."
   nohup java -jar ../bin/backend.jar --spring.config.location=./config/server$1.properties > log/$1.log &

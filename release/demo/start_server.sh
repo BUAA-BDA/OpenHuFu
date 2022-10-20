@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 start() {
   echo "starting server $1..."
