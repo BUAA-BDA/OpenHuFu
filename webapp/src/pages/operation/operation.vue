@@ -28,7 +28,7 @@
     <div class="search-bar2">
       <el-button
           type="primary"
-          @click="getQueryRecord">
+          @click="search">
         {{ $t('operation.query') }}
       </el-button>
       <el-button
@@ -47,13 +47,13 @@
       </el-table-column>
       <el-table-column prop="context" :label="$t('operation.context')">
       </el-table-column>
-      <el-table-column prop="username" :label="$t('operation.username')">
+      <el-table-column prop="userName" :label="$t('operation.username')">
       </el-table-column>
       <el-table-column prop="status" :label="$t('operation.status')">
       </el-table-column>
-      <el-table-column prop="subTime" :label="$t('operation.subTime')">
+      <el-table-column prop="startTime" :label="$t('operation.subTime')">
       </el-table-column>
-      <el-table-column prop="execTime" :label="$t('operation.execTime')">
+      <el-table-column prop="endTime" :label="$t('operation.execTime')" :formatter="format1">
       </el-table-column>
     </el-table>
   </div>
@@ -67,6 +67,8 @@
 
 <script>
 
+import axios from "axios";
+
 export default {
   name: 'OperationPage',
   components: {
@@ -77,7 +79,6 @@ export default {
         id: 'operation.id'
       },
       tableData: [],
-      allData: [],
       pageNow: 1,
       size: 10,
       total: 0,
@@ -87,25 +88,49 @@ export default {
     }
   },
   methods: {
+    format1(row) {
+      let date1, date2, execTime;
+      date1 = new Date(row.startTime);
+      date2 = new Date(row.endTime);
+      execTime = date2-date1;
+      let s = 1000;
+      let m = s * 60;
+      let h = m * 60;
+      let d = h * 24;
+      if (execTime > d) {
+        return parseInt(execTime/d) + "d " + parseInt((execTime % d)/h) + "h";
+      }
+      else if (execTime > h) {
+        return parseInt(execTime/h) + "h " + parseInt((execTime % h)/m) + "m";
+      }
+      else if (execTime > m) {
+        return parseInt(execTime/m) + "m " + parseInt((execTime % m)/s) + "s";
+      }
+      else if (execTime > s) {
+        return parseInt(execTime/s) + "s " + parseInt(execTime % s) + "ms";
+      }
+      else {
+        return execTime + "ms";
+      }
+    },
     getQueryRecordInThisPage() {
-      this.tableData = this.allData.slice(
-          (this.pageNow - 1) * this.size,
-          this.pageNow * this.size);
-      this.total = this.allData.length;
+      this.getQueryRecord();
+    },
+    search() {
+      this.pageNow = 1;
+      this.getQueryRecord();
     },
     getQueryRecord() {
       axios
-          .post(this.backendUrl + "/sqlRecord/query", {
+          .post("/sqlRecord/query", {
             context: (this.recordContext.length == 0)?null: this.recordContext,
             status: (this.recordStatus == 0)?null: this.recordStatus,
-            page: this.pageNow,
-            size: this.size
+            pageId: this.pageNow,
+            pageSize: this.size
           })
           .then((response) => {
-            this.allData = response.data;
-            this.total = response.data.size;
-            this.pageNow = 1;
-            this.getQueryRecordInThisPage();
+            this.tableData = response.data.data;
+            this.total = response.data.pagination.total;
           })
           .catch((err) => {
             console.log(err);
