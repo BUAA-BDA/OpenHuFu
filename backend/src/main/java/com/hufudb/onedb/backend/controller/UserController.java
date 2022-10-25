@@ -1,7 +1,10 @@
 package com.hufudb.onedb.backend.controller;
 
+import java.sql.*;
 import java.util.List;
 import java.util.Set;
+
+import com.hufudb.onedb.backend.service.SqlRecordService;
 import com.hufudb.onedb.backend.utils.PojoResultSet;
 import com.hufudb.onedb.backend.utils.Request;
 import com.hufudb.onedb.core.table.GlobalTableConfig;
@@ -12,6 +15,7 @@ import com.hufudb.onedb.data.schema.utils.PojoTableSchema;
 import com.hufudb.onedb.user.OneDB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +31,9 @@ public class UserController {
 
   @Value("${owner.enable:false}")
   private boolean hasOwner;
+
+  @Autowired
+  private SqlRecordService sqlRecordService;
 
   UserController(OneDB service) {
     this.onedb = service;
@@ -87,6 +94,10 @@ public class UserController {
 
   @PostMapping("/user/query")
   PojoResultSet query(@RequestBody Request request) {
-    return PojoResultSet.fromResultSet(onedb.executeQuery(request.value));
+    Long id = sqlRecordService.insertRecord(request.value, "root");
+    ResultSet rs = onedb.executeQuery(request.value);
+    String status = rs != null ? "Succeed" : "Failed";
+    sqlRecordService.updateStatus(id, status);
+    return PojoResultSet.fromResultSet(rs);
   }
 }

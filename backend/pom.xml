@@ -17,6 +17,15 @@
   <properties>
     <java.version>11</java.version>
     <springdoc.version>1.6.11</springdoc.version>
+    <mysql.connector.version>8.0.30</mysql.connector.version>
+    <mybatis.version>3.5.2</mybatis.version>
+    <druid.version>1.2.13</druid.version>
+    <mybatis.generator.version>3.3.2</mybatis.generator.version>
+    <freemarker.version>2.3.31</freemarker.version>
+    <lombok.version>1.18.24</lombok.version>
+    <flyway.version>5.2.1</flyway.version>
+    <pagehelper.version>1.4.3</pagehelper.version>
+    <swagger.version>1.7.0.RELEASE</swagger.version>
   </properties>
 
   <dependencies>
@@ -52,6 +61,54 @@
       <groupId>com.hufudb.onedb</groupId>
       <artifactId>owner</artifactId>
       <version>1.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>${mysql.connector.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-jdbc</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.baomidou</groupId>
+      <artifactId>mybatis-plus-boot-starter</artifactId>
+      <version>${mybatis.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.alibaba</groupId>
+      <artifactId>druid</artifactId>
+      <version>${druid.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.baomidou</groupId>
+      <artifactId>mybatis-plus-generator</artifactId>
+      <version>${mybatis.generator.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.freemarker</groupId>
+      <artifactId>freemarker</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-core</artifactId>
+      <version>${flyway.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.pagehelper</groupId>
+      <artifactId>pagehelper-spring-boot-starter</artifactId>
+      <version>${pagehelper.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.spring4all</groupId>
+      <artifactId>swagger-spring-boot-starter</artifactId>
+      <version>${swagger.version}</version>
     </dependency>
   </dependencies>
 
@@ -161,6 +218,16 @@
         <artifactId>spring-boot-maven-plugin</artifactId>
       </plugin>
     </plugins>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+        <excludes>
+          <exclude>*.yml</exclude>
+          <exclude>*.properties</exclude>
+        </excludes>
+      </resource>
+    </resources>
   </build>
 
 </project>
