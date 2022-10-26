@@ -5,7 +5,7 @@
         <el-header class="top-bar connect-info" v-if="connectState == 0">
           <span>
             <font-awesome-icon icon="circle-exclamation" class="prefix-icon" />
-            No Connection
+            {{ $t("editor.noConnection") }}
           </span>
         </el-header>
         <el-header class="top-bar connect-info" v-if="connectState == 1">
@@ -14,7 +14,7 @@
                 icon="spinner"
                 class="prefix-icon rotate-element"
             />
-            Connecting to Backend
+            {{ $t("editor.connectingToBackend") }}
           </span>
         </el-header>
         <el-header class="top-bar connect-info" v-if="connectState == 2">
@@ -24,13 +24,13 @@
                 class="prefix-icon icon-button"
                 @click="refreshAll()"
             />
-            Connected to Backend
+            {{ $t("editor.connectingToBackend") }}
           </span>
         </el-header>
         <el-header class="top-bar connect-info" v-if="connectState == 3">
           <span>
             <font-awesome-icon icon="circle-exclamation" class="prefix-icon" />
-            Fail to Connect Backend
+            {{ $t("editor.failToConnectBackend") }}
           </span>
         </el-header>
         <el-collapse class="collapse-panel">
@@ -38,17 +38,17 @@
             <template #title>
               <div class="collapse-title">
                 <font-awesome-icon icon="users" class="prefix-icon" />
-                <span>Owners</span>
+                <span>{{ $t("editor.owners") }}</span>
               </div>
             </template>
             <div v-if="connectState != 2" class="collapse-placeholder">
-              <span> No connection </span>
+              <span> {{ $t("editor.noConnection") }} </span>
             </div>
             <div
                 v-if="connectState == 2 && owners.length == 0"
                 class="collapse-placeholder"
             >
-              <span> No owner </span>
+              <span> {{ $t("editor.noOwner") }}</span>
             </div>
             <div
                 class="collapse-content"
@@ -140,17 +140,17 @@
             <template #title>
               <div class="collapse-title">
                 <font-awesome-icon icon="table-list" class="prefix-icon" />
-                <span>Global Tables</span>
+                <span> {{ $t("editor.globalTables") }}</span>
               </div>
             </template>
             <div v-if="connectState != 2" class="collapse-placeholder">
-              <span> No connection </span>
+              <span> {{ $t("editor.noConnection") }}</span>
             </div>
             <div
                 v-if="connectState == 2 && globalTables.length == 0"
                 class="collapse-placeholder"
             >
-              <span> No global table </span>
+              <span> {{ $t("editor.noGlobalTable") }} </span>
             </div>
             <el-tree
                 v-if="connectState == 2 && globalTables.length != 0"
@@ -241,11 +241,11 @@
             <template #title>
               <div class="collapse-title">
                 <font-awesome-icon icon="house" class="prefix-icon" />
-                <span>My Tables</span>
+                <span>{{ $t("editor.myTables") }}</span>
               </div>
             </template>
             <div v-if="connectState != 2" class="collapse-placeholder">
-              <span> No Connection </span>
+              <span> {{ $t("editor.noConnection") }} </span>
             </div>
             <el-tree
                 v-else
@@ -323,11 +323,11 @@
         >
           <el-menu-item index="1">
             <font-awesome-icon icon="gauge" class="prefix-icon" />
-            Dash Board
+            {{ $t("editor.dashBoard") }}
           </el-menu-item>
           <el-menu-item index="2">
             <font-awesome-icon icon="magnifying-glass" class="prefix-icon" />
-            Query Panel
+            {{ $t("editor.queryPanel") }}
           </el-menu-item>
         </el-menu>
       </el-header>
@@ -338,7 +338,7 @@
               <el-card shadow="hover" class="card-pane" v-if="hasOwner">
                 <template #header>
                   <div class="card-header">
-                    <span>Publish Local Table Schema</span>
+                    <span>{{ $t("editor.publishLocalTableSchema") }}</span>
                   </div>
                 </template>
                 <div class="card-content">
@@ -404,21 +404,19 @@
                         type="primary"
                         class="full-width-button bottom-button"
                         disabled
-                    >Publish Table</el-button
+                    >{{ $t("editor.publishTable") }}</el-button
                     >
                     <el-button
                         v-else
                         type="primary"
                         class="full-width-button bottom-button"
                         @click="publishSchema()"
-                    >Publish Table</el-button
+                    >{{ $t("editor.publishTable") }}</el-button
                     >
                   </div>
                   <div class="card-content" v-else>
                     <span>
-                      Publish schemas of local tables, allowing users to perform
-                      federated queries over local tables with security
-                      constraints.
+                      {{ $t("editor.cardContent1") }}
                     </span>
                     <el-button
                         class="full-width-button bottom-button"
@@ -429,7 +427,7 @@
                           icon="circle-plus"
                           class="prefix-icon"
                       />
-                      Try
+                      {{ $t("editor.try") }}
                     </el-button>
                   </div>
                 </div>
@@ -437,7 +435,7 @@
               <el-card shadow="hover" class="card-pane">
                 <template #header>
                   <div class="card-header">
-                    <span>Assemble Global Schema</span>
+                    <span>{{ $t("editor.assembleGlobalSchema") }}</span>
                   </div>
                 </template>
                 <div class="card-content">
@@ -457,20 +455,19 @@
                         type="primary"
                         class="full-width-button bottom-button"
                         disabled
-                    >Create Global Schema</el-button
+                    >{{ $t("editor.createGlobalSchema") }}</el-button
                     >
                     <el-button
                         v-else
                         type="primary"
                         class="full-width-button bottom-button"
                         @click="addGlobalTable()"
-                    >Create Global Schema</el-button
+                    >{{ $t("editor.createGlobalSchema") }}</el-button
                     >
                   </div>
                   <div v-else>
                     <span>
-                      Assemble published schemas from multiple owners to create
-                      a global table schema.
+                      {{ $t("editor.cardContent2") }}
                     </span>
                     <el-button
                         class="full-width-button bottom-button"
@@ -481,7 +478,7 @@
                           icon="circle-plus"
                           class="prefix-icon"
                       />
-                      Try
+                      {{ $t("editor.try") }}
                     </el-button>
                   </div>
                 </div>
