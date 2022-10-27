@@ -1,4 +1,4 @@
-name: Hu-Fu Workflow
+name: CI Workflow
 on:
   push:
     branches: ["main"]
