@@ -26,8 +26,8 @@
         <el-icon><Reading /></el-icon>
         {{ $t("language.locale") }}
       </template>
-      <el-menu-item index="6-1" @click="changeLanguage('zh')">{{ $t("language.chinese") }}</el-menu-item>
-      <el-menu-item index="6-2" @click="changeLanguage('en')">{{ $t("language.english") }}</el-menu-item>
+      <el-menu-item index="6-1" @click="changeLanguage('zh')">中文</el-menu-item>
+      <el-menu-item index="6-2" @click="changeLanguage('en')">English</el-menu-item>
     </el-sub-menu>
   </el-menu>
 </template>

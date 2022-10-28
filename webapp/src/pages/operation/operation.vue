@@ -4,7 +4,7 @@
       <a class="my-pad">{{ $t("operation.context") }}:</a>
       <el-input
           v-model="recordContext"
-          placeholder="Please Input"
+          :placeholder="$t('operation.pleaseInput')"
           clearable
           style="width:300px;">
       </el-input>
@@ -13,14 +13,14 @@
       <a class="my-pad">{{ $t("operation.status") }}:</a>
       <el-select
           v-model="recordStatus"
-          placeholder="Please Select"
+          :placeholder="$t('operation.pleaseSelect')"
           text-align="center"
           style="width:150px;">
         <el-option
-            v-for="item in statusList"
-            :key="item"
-            :label="item"
-            :value="item"
+            v-for="item in allStatus"
+            :key="$t(item.name)"
+            :label="$t(item.name)"
+            :value="$t(item.value)"
 
         />
       </el-select>
@@ -43,13 +43,16 @@
               height="450px"
               class="result-table"
               max-height="450px">
-      <el-table-column prop="id" :label="$t(tableItems.id)">
+      <template v-slot:empty>
+        {{ $t('operation.noData') }}
+      </template>
+      <el-table-column prop="id" :label="$t('operation.id')">
       </el-table-column>
       <el-table-column prop="context" :label="$t('operation.context')">
       </el-table-column>
       <el-table-column prop="userName" :label="$t('operation.username')">
       </el-table-column>
-      <el-table-column prop="status" :label="$t('operation.status')">
+      <el-table-column prop="status" :label="$t('operation.status')" :formatter="format2">
       </el-table-column>
       <el-table-column prop="startTime" :label="$t('operation.subTime')">
       </el-table-column>
@@ -75,16 +78,34 @@ export default {
   },
   data() {
     return {
-      tableItems: {
-        id: 'operation.id'
-      },
+      allStatus: [
+        {
+          name: 'operation.submitted',
+          value: 'Submitted'
+        },
+        {
+          name: 'operation.inProgress',
+          value: 'In Progress'
+        },
+        {
+          name: 'operation.succeed',
+          value: 'Succeed'
+        },
+        {
+          name: 'operation.failed',
+          value: 'Failed'
+        },
+        {
+          name: 'operation.warning',
+          value: 'Warning'
+        },
+      ],
       tableData: [],
       pageNow: 1,
       size: 10,
       total: 0,
       recordContext: "",
       recordStatus: "",
-      statusList: ["Submitted", "In Progress", "Succeed", "Failed", "Warning"],
     }
   },
   methods: {
@@ -112,6 +133,17 @@ export default {
       else {
         return execTime + "ms";
       }
+    },
+    format2(row) {
+      let key = row.status;
+      for (let item of this.allStatus) {
+        console.log(key);
+        console.log(item.value);
+        if (key == item.value) {
+          return this.$t(item.name);
+        }
+      }
+      return "ERROR!!"
     },
     getQueryRecordInThisPage() {
       this.getQueryRecord();

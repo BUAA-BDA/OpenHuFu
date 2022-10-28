@@ -1,8 +1,6 @@
 module.exports =  {
     language: {
         locale: "语言",
-        chinese: "中文",
-        english: "英文"
     },
     menu: {
         overview: "概览",
@@ -46,6 +44,7 @@ module.exports =  {
         id: "ID",
         username: "用户名",
         subTime: "提交时间",
-        execTime: "执行时长"
+        execTime: "执行时长",
+        noData: "无记录"
     }
 }
