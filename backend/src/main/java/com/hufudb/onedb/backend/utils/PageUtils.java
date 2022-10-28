@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 public class PageUtils {
 
     public static <E> Page<E> getPage(Supplier<List<E>> method, int page, int size) {
-        com.github.pagehelper.Page<E> originPage = PageHelper.startPage(page, size);
+        com.github.pagehelper.Page<E> originPage = PageHelper.startPage(page, size, "id desc");
         List<E> result = method.get();
 
         Page<E> resultPage = new Page<>();
