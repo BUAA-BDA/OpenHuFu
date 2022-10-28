@@ -25,4 +25,24 @@ public class PageUtils {
         resultPage.setPagination(pagination);
         return resultPage;
     }
+
+    public static <E> Page<E> getPage(Supplier<List<E>> method, int page, int size, String order) {
+        com.github.pagehelper.Page<E> originPage = PageHelper.startPage(page, size, order);
+        List<E> result = method.get();
+
+        Page<E> resultPage = new Page<>();
+        resultPage.setData(result);
+
+        Pagination pagination = new Pagination();
+        pagination.setTotal((int) originPage.getTotal());
+        if (0 == originPage.getPageSize()) {
+            pagination.setPage(page);
+            pagination.setSize(size);
+        } else {
+            pagination.setPage(originPage.getPageNum());
+            pagination.setSize(originPage.getPageSize());
+        }
+        resultPage.setPagination(pagination);
+        return resultPage;
+    }
 }
