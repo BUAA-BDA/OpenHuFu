@@ -34,6 +34,7 @@ public class SqlRecordController {
         int pageSize = request.pageSize;
         String context = request.context == null ? ".*" : request.context;
         String status = request.status == null ? ".*" : request.status;
-        return PageUtils.getPage(()->sqlRecordService.selectRecord(context, status), pageId, pageSize);
+        String order = "id DESC";
+        return PageUtils.getPage(()->sqlRecordService.selectRecord(context, status), pageId, pageSize, order);
     }
 }
