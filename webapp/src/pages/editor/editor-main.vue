@@ -113,7 +113,7 @@
                 <el-col :span="20">
                   <el-input
                       v-model="ownerAddress"
-                      placeholder="New owner"
+                      :placeholder="$t('editor.newOwner')"
                       clearable
                       class="line-input"
                   >
@@ -211,7 +211,7 @@
                         color="primary"
                     ></font-awesome-icon>
                     <span>
-                      {{ node.label }}
+                      {{ $t(node.label) }}
                       <el-tag
                           v-if="data.type"
                           class="ml-2 info-tag"
@@ -276,7 +276,7 @@
                         icon="table-columns"
                         class="prefix-icon"
                     ></font-awesome-icon>
-                    <span v-if="node.level == 1"> {{ data.label }} </span>
+                    <span v-if="node.level == 1"> {{ $t(data.label) }} </span>
                     <span v-if="node.level == 2"> {{ data.label }} </span>
                     <span v-if="node.level == 3">
                       {{ data.label }}
@@ -346,12 +346,12 @@
                     <el-input
                         class="table-selector"
                         v-model="publishedTableName"
-                        placeholder="Name of Published Schema"
+                        :placeholder="$t('editor.nameOfPublishedSchema')"
                     >
                       <template #prepend>
                         <el-select
                             v-model="selectedLocalTableIndex"
-                            placeholder="Select Local Table"
+                            :placeholder="$t('editor.selectLocalTable')"
                             @change="selectedLocalTable"
                         >
                           <el-option
@@ -376,7 +376,7 @@
                           <span class="column-name">
                             <el-input
                                 v-model="data.name"
-                                placeholder="Name of published Column"
+                                :placeholder="$t('editor.nameOfPublishedColumn')"
                                 class="entry-form"
                             >
                             </el-input>
@@ -385,7 +385,7 @@
                             Constraint:
                             <el-select
                                 v-model="data.modifier"
-                                placeholder="Select"
+                                :placeholder="$t('editor.select')"
                                 class="entry-form"
                             >
                               <el-option
@@ -443,11 +443,11 @@
                     <el-input
                         class="table-selector"
                         v-model="newGlobalTable.tableName"
-                        placeholder="Name of Global Table"
+                        :placeholder="$t('editor.nameOfGlobalTable')"
                     >
                     </el-input>
                     <el-cascader class="component-selector"
-                                 placeholder="Select component tables"
+                    :placeholder="$t('editor.selectComponentTables')"
                                  :options="ownerTables" :props="{ multiple: true }" clearable v-model="componentTables">
                     </el-cascader>
                     <el-button
@@ -613,13 +613,13 @@ export default {
       localTableTree: [
         {
           id: 0,
-          label: "Local table",
+          label: 'editor.localTable',
           icon: "local",
           children: [],
         },
         {
           id: 1,
-          label: "Published table",
+          label: 'editor.publishedTable',
           icon: "published",
           children: [],
         },
@@ -751,7 +751,7 @@ export default {
                 children: [
                   {
                     id: gTable.name + "$schema",
-                    label: "schema",
+                    label: "editor.schema",
                     icon: "schema",
                     children: gTable.schema.columns.map((column) => {
                       return {
@@ -766,7 +766,7 @@ export default {
                   },
                   {
                     id: gTable.name + "$owners",
-                    label: "owners",
+                    label: "editor.owners",
                     icon: "owners",
                     children: gTable.mappings.map((meta) => {
                       return {
