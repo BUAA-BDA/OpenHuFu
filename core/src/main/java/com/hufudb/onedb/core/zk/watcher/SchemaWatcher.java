@@ -5,6 +5,7 @@ import com.hufudb.onedb.core.zk.OneDBZkClient;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher.Event.EventType;
 import org.apache.zookeeper.Watcher.Event.KeeperState;
@@ -40,8 +41,9 @@ public class SchemaWatcher extends ZkWatcher {
     for (String table : tables) {
       try {
         zkClient.watchGlobalTable(table);
-      } catch (Exception e) {
-        LOG.error("Error when watching global table {} : {}", table, e.getMessage());
+      } catch (KeeperException | InterruptedException e) {
+        LOG.error("Error when watching global table {}", table, e);
+        Thread.currentThread().interrupt();
       }
     }
   }
@@ -66,8 +68,9 @@ public class SchemaWatcher extends ZkWatcher {
           try {
             List<String> children = zk.getChildren(path, this);
             watchGlobalTableChange(children);
-          } catch (Exception e) {
-            LOG.error("Error in global table watcher on path {} : {}", path, e.getMessage());
+          } catch (KeeperException | InterruptedException e) {
+            LOG.error("Error in global table watcher on path {}", path, e);
+            Thread.currentThread().interrupt();
           }
         }
         break;

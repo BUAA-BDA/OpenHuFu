@@ -170,7 +170,7 @@ public class GMW extends RpcProtocolExecutor {
             concurrentTasks.add(evaluateNot(meta, gate.in1, gate.out));
             break;
           default:
-            LOG.error("Unsupported gate type {}", gate.toString());
+            LOG.error("Unsupported gate type {}", gate);
             throw new UnsupportedOperationException("Unsupported gate type");
         }
       }
@@ -179,7 +179,7 @@ public class GMW extends RpcProtocolExecutor {
         for (Future<Boolean> f : futures) {
           f.get();
         }
-      } catch (Exception e) {
+      } catch (Exception e) { // NOSONAR
         LOG.error("Error when evaluate circuit in GMW: {}", e.getMessage());
         e.printStackTrace();
       }
