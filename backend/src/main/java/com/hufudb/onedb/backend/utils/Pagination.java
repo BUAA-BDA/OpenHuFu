@@ -7,45 +7,45 @@ import io.swagger.annotations.ApiModelProperty;
 
 public class Pagination {
 
-    @ApiModelProperty("pageId")
-    private int page;
+  @ApiModelProperty("pageId")
+  private int page;
 
-    @ApiModelProperty("total")
-    private int total;
+  @ApiModelProperty("total")
+  private int total;
 
-    @ApiModelProperty("pageSize")
-    private int size;
+  @ApiModelProperty("pageSize")
+  private int size;
 
-    public Pagination() {
-    }
+  public Pagination() {
+  }
 
-    public Pagination(int total,int page,int size){
-        this.total = total;
-        this.page = page;
-        this.size = size;
-    }
+  public Pagination(int total, int page, int size) {
+    this.total = total;
+    this.page = page;
+    this.size = size;
+  }
 
-    public int getPage() {
-        return page;
-    }
+  public int getPage() {
+    return page;
+  }
 
-    public void setPage(int page) {
-        this.page = page;
-    }
+  public void setPage(int page) {
+    this.page = page;
+  }
 
-    public int getTotal() {
-        return total;
-    }
+  public int getTotal() {
+    return total;
+  }
 
-    public void setTotal(int total) {
-        this.total = total;
-    }
+  public void setTotal(int total) {
+    this.total = total;
+  }
 
-    public int getSize() {
-        return size;
-    }
+  public int getSize() {
+    return size;
+  }
 
-    public void setSize(int size) {
-        this.size = size;
-    }
+  public void setSize(int size) {
+    this.size = size;
+  }
 }

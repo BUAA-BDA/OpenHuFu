@@ -17,7 +17,7 @@ function buildFrontEnd() {
 if [ $# -eq 0 ]
 then
   buildFrontEnd
-  mvn clean install -T 0.5C -Dmaven.test.skip=true
+  mvn clean install -Pdocker -T 0.5C -Dmaven.test.skip=true
   mkdir -p ./release/bin
   mkdir -p ./release/adapter
   mkdir -p ./release/lib
@@ -36,11 +36,11 @@ else
   if [ $1 == "backend" ]
   then
     buildFrontEnd
-    mvn install -T 0.5C -Dmaven.test.skip=true -pl $1
+    mvn install -Pdocker -T 0.5C -Dmaven.test.skip=true -pl $1
     cp backend/target/backend*.jar ./release/bin/backend.jar
     return
   fi
-  mvn install -T 0.5C -Dmaven.test.skip=true -pl $1
+  mvn install -Pdocker -T 0.5C -Dmaven.test.skip=true -pl $1
   if [ $1 == "user" ]
   then
     cp user/target/*-with-dependencies.jar ./release/bin/onedb_user_client.jar

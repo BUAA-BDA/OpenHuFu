@@ -19,7 +19,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-@TableName("sqlRecord")
+@TableName("sql_record")
 public class SqlRecord extends Model<SqlRecord> {
 
     private static final long serialVersionUID = 1L;
