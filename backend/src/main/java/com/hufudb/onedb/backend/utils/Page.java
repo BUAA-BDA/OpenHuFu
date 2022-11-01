@@ -5,31 +5,31 @@ import io.swagger.annotations.ApiModelProperty;
 
 import java.util.List;
 
-@ApiModel(description = "page resul;t")
+@ApiModel(description = "page result")
 public class Page<E> {
 
-    @ApiModelProperty("pagination information")
-    private Pagination pagination;
+  @ApiModelProperty("pagination information")
+  private Pagination pagination;
 
-    @ApiModelProperty("data")
-    private List<E> data;
+  @ApiModelProperty("data")
+  private List<E> data;
 
-    public Page() {
-    }
+  public Page() {
+  }
 
-    public Pagination getPagination() {
-        return pagination;
-    }
+  public Pagination getPagination() {
+    return pagination;
+  }
 
-    public void setPagination(Pagination pagination) {
-        this.pagination = pagination;
-    }
+  public void setPagination(Pagination pagination) {
+    this.pagination = pagination;
+  }
 
-    public List<E> getData() {
-        return data;
-    }
+  public List<E> getData() {
+    return data;
+  }
 
-    public void setData(List<E> data) {
-        this.data = data;
-    }
+  public void setData(List<E> data) {
+    this.data = data;
+  }
 }

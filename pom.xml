@@ -178,4 +178,27 @@
       </plugin>
     </plugins>
   </build>
+
+  <!-- dev;test;docker -->
+  <profiles>
+    <profile>
+      <id>dev</id>
+      <properties>
+        <package.environment>dev</package.environment>
+      </properties>
+    </profile>
+    <profile>
+      <id>test</id>
+      <properties>
+        <package.environment>test</package.environment>
+      </properties>
+    </profile>
+    <profile>
+      <id>docker</id>
+      <properties>
+        <package.environment>docker</package.environment>
+      </properties>
+    </profile>
+  </profiles>
+
 </project>
