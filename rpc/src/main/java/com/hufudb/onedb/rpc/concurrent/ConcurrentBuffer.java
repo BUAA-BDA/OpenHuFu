@@ -67,7 +67,7 @@ public class ConcurrentBuffer<K, V> {
       }
       idx = searchIndex.get(key);
       target = (V) buff[idx];
-    } catch (InterruptedException e) {
+    } catch (InterruptedException e) { // NOSONAR
       LOG.error("Error when waiting for packet: {}", e.getMessage());
     } finally {
       lock.writeLock().unlock();

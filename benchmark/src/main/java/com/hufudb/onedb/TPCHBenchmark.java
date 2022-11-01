@@ -79,7 +79,7 @@ public class TPCHBenchmark {
       try {
         Thread.sleep(3);
       } catch (Exception e) {
-        e.printStackTrace();
+        LOG.error("Exception caught during setup", e);
       }
       List<String> endpoints =
           new Gson().fromJson(Files.newBufferedReader(Paths.get("docker/endpoints.json")),

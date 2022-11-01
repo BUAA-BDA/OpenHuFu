@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import com.hufudb.onedb.core.client.OneDBClient;
 import com.hufudb.onedb.core.client.OwnerClient;
@@ -92,8 +93,8 @@ public class UserSideImplementor implements PlanImplementor {
           LOG.error("Error in owner side query");
         }
       }
-    } catch (Exception e) {
-      LOG.error("Error in owner side query: {}", e.getMessage());
+    } catch (InterruptedException | ExecutionException e) {
+      LOG.error("Error in owner side query", e);
     }
     return concurrentDataSet;
   }
@@ -187,8 +188,8 @@ public class UserSideImplementor implements PlanImplementor {
           LOG.error("error in leafQuery");
         }
       }
-    } catch (Exception e) {
-      LOG.error("Error in leafQuery for {}", e.getMessage());
+    } catch (ExecutionException | InterruptedException e) {
+      LOG.error("Error in owner side query", e);
     }
     return concurrentDataSet;
   }

@@ -15,7 +15,7 @@ import com.hufudb.onedb.rpc.utils.DataPacketHeader;
  * boardcast large data to all receiver, divide the data into small pieces and tranfer in stream
  */
 public class Stream extends RpcProtocolExecutor {
-  static final long DEFAULT_MAX_SIZE = 4 * 1024 * 1023;
+  static final long DEFAULT_MAX_SIZE = 4 * 1024 * 1023L;
 
   private final long MAX_SIZE;
 
