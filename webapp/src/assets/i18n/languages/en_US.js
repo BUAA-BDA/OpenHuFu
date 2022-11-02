@@ -56,5 +56,16 @@ module.exports =  {
         subTime: "Submit Time",
         execTime: "Execution Time",
         noData: "No Data"
-    }
+    },
+    datasource: {
+        datasourceType: "DataSource Type",
+        jdbcUrl: "JDBC URL",
+        username: "Username",
+        password: "Password",
+        tables: "Tables",
+        testConnection: "Test Connection",
+        confirm: "Confirm",
+        chooseDatasourceType: "Please Choose DataSource Type",
+        chooseTables: "Please Choose Tables",
+    },
 }

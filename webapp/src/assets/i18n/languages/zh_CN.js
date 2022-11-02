@@ -56,5 +56,16 @@ module.exports =  {
         subTime: "提交时间",
         execTime: "执行时长",
         noData: "无记录"
-    }
+    },
+    datasource: {
+        datasourceType: "数据源类型",
+        jdbcUrl: "JDBC连接串",
+        username: "用户名",
+        password: "密码",
+        tables: "数据表",
+        testConnection: "测试连接",
+        confirm: "确认",
+        chooseDatasourceType: "请选择数据源类型",
+        chooseTables: "请选择数据表",
+    },
 }
