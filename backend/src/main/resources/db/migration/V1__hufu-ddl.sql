@@ -10,7 +10,6 @@ CREATE TABLE `sql_record`
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 1
   CHARSET = UTF8MB4
-<<<<<<< HEAD
   COMMENT 'SQL Record';
 
 CREATE TABLE `owner`
@@ -25,6 +24,4 @@ CREATE TABLE `owner`
   AUTO_INCREMENT = 1
   CHARSET = UTF8MB4
   COMMENT 'Owner';
-=======
-  COMMENT 'SQL Record';
->>>>>>> ae3414e5479c87452651469bafd835e7a38674fd
+
