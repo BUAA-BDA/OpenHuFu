@@ -57,7 +57,6 @@ module.exports =  {
         execTime: "Execution Time",
         noData: "No Data"
     },
-<<<<<<< HEAD
     setting:{
         id: "ID",
         port: "Port",
@@ -71,8 +70,7 @@ module.exports =  {
         address: "address",
         pleaseadd: "add a new owner",
         pleaseaddaddress: "Please input address"
-    }
-=======
+    },
     datasource: {
         datasourceType: "DataSource Type",
         jdbcUrl: "JDBC URL",
@@ -84,5 +82,4 @@ module.exports =  {
         chooseDatasourceType: "Please Choose DataSource Type",
         chooseTables: "Please Choose Tables",
     },
->>>>>>> ae3414e5479c87452651469bafd835e7a38674fd
 }
