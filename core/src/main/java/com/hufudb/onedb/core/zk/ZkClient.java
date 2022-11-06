@@ -1,6 +1,7 @@
 package com.hufudb.onedb.core.zk;
 
 import com.hufudb.onedb.core.config.OneDBConfig;
+import java.io.IOException;
 import java.util.List;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
@@ -27,8 +28,8 @@ public abstract class ZkClient implements Watcher {
     try {
       this.zk = new ZooKeeper(servers, OneDBConfig.ZK_TIME_OUT, this);
       initRootPath();
-    } catch (Exception e) {
-      LOG.error("Error when init ZkClient: {}", e.getMessage());
+    } catch (IOException e) {
+      LOG.error("Error when init ZkClient", e);
     }
   }
 
@@ -36,7 +37,7 @@ public abstract class ZkClient implements Watcher {
     return rootPath + "/" + nodeName;
   }
 
-  protected void initRootPath() throws KeeperException, InterruptedException {
+  protected void initRootPath() {
     LOG.info("root path: {}; endpoint path: {}", zkRootPath, endpointRootPath);
     createRecursive(endpointRootPath, Ids.OPEN_ACL_UNSAFE);
     createRecursive(schemaRootPath, Ids.OPEN_ACL_UNSAFE);
@@ -54,7 +55,8 @@ public abstract class ZkClient implements Watcher {
           LOG.info("Create path {}", tmp);
         }
       } catch (KeeperException | InterruptedException e) {
-        LOG.error("Error when creating path {}", tmp);
+        LOG.error("Error when creating path {}", tmp, e);
+        Thread.currentThread().interrupt();
         return false;
       }
       if (idx == -1) {

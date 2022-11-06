@@ -57,6 +57,7 @@ module.exports =  {
         execTime: "执行时长",
         noData: "无记录"
     },
+<<<<<<< HEAD
     setting:{
         id: "ID",
         port: "端口",
@@ -71,4 +72,17 @@ module.exports =  {
         pleaseadd: "添加数据拥有方",
         pleaseaddaddress: "请输入用户IP地址"
     }
+=======
+    datasource: {
+        datasourceType: "数据源类型",
+        jdbcUrl: "JDBC连接串",
+        username: "用户名",
+        password: "密码",
+        tables: "数据表",
+        testConnection: "测试连接",
+        confirm: "确认",
+        chooseDatasourceType: "请选择数据源类型",
+        chooseTables: "请选择数据表",
+    },
+>>>>>>> ae3414e5479c87452651469bafd835e7a38674fd
 }

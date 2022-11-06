@@ -29,8 +29,8 @@ public class OneDBZkClient extends ZkClient {
     try {
       watchEndpoints();
       watchSchemaDirectory();
-    } catch (KeeperException | InterruptedException e) {
-      e.printStackTrace();
+    } catch (KeeperException | InterruptedException e) { //NOSONAR
+      LOG.error("Error when load zk table", e);
     }
     LOG.info("Load table from zk success");
   }

@@ -58,8 +58,8 @@ public class OwnerServer {
         LOG.info("*** shutting down gRPC server since JVM is shutting down");
         try {
           OwnerServer.this.stop();
-        } catch (InterruptedException e) {
-          e.printStackTrace(System.err);
+        } catch (InterruptedException e) { // NOSONAR
+          LOG.error("error when stop server", e);
         }
         LOG.info("*** server shut down");
       }
@@ -108,9 +108,8 @@ public class OwnerServer {
       OwnerServer server = create(cmd.getOptionValue("config"));
       server.start();
       server.blockUntilShutdown();
-    } catch (Exception e) {
-      System.out.println(e.getMessage());
-      e.printStackTrace();
+    } catch (Exception e) { // NOSONAR
+      LOG.error("Error when start owner server", e);
       System.exit(1);
     }
   }

@@ -48,9 +48,8 @@ public class DBZkClient extends ZkClient {
       } else {
         return false;
       }
-    } catch (KeeperException | InterruptedException e) {
-      LOG.error("Error when register to schema {}: {}", schema, e.getMessage());
-      e.printStackTrace();
+    } catch (KeeperException | InterruptedException e) { //NOSONAR
+      LOG.error("Error when register to schema {}", schema, e);
       return false;
     }
   }
@@ -63,9 +62,8 @@ public class DBZkClient extends ZkClient {
       if (zk.exists(registerPath, false) != null) {
         zk.delete(registerPath, -1);
       }
-    } catch (KeeperException | InterruptedException e) {
-      LOG.error("Error when remove {} from schema {}: {}", endpoint, schema, e.getMessage());
-      e.printStackTrace();
+    } catch (KeeperException | InterruptedException e) { //NOSONAR
+      LOG.error("Error when remove {} from schema {}", endpoint, schema, e);
     }
   }
 }
