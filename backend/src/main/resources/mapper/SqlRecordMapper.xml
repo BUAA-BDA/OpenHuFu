@@ -13,17 +13,17 @@
     </resultMap>
 
     <select id="selectRecord" resultType="com.hufudb.onedb.backend.entity.SqlRecord">
-        SELECT * FROM sqlRecord WHERE context RLIKE #{context} AND status RLIKE #{status}
+        SELECT * FROM sql_record WHERE context RLIKE #{context} AND status RLIKE #{status}
     </select>
 
     <insert id="insertRecord" parameterType="com.hufudb.onedb.backend.entity.SqlRecord">
-        INSERT INTO sqlRecord(context, user_name, status) VALUES (#{context}, #{userName}, "In Progress")
+        INSERT INTO sql_record(context, user_name, status) VALUES (#{context}, #{userName}, "In Progress")
         <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
             SELECT LAST_INSERT_ID()
         </selectKey>
     </insert>
 
     <update id="updateStatus">
-        UPDATE sqlRecord SET status = #{status} where id = #{id}
+        UPDATE sql_record SET status = #{status} where id = #{id}
     </update>
 </mapper>

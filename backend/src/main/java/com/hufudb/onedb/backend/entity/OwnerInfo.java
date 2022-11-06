@@ -1,11 +1,12 @@
 package com.hufudb.onedb.backend.entity;
 
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.extension.activerecord.Model;
-import com.baomidou.mybatisplus.annotation.TableId;
-import java.time.LocalDateTime;
 import java.io.Serializable;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.extension.activerecord.Model;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -14,33 +15,36 @@ import lombok.EqualsAndHashCode;
  * 
  * </p>
  *
- * @author qlh
- * @since 2022-10-21
+ * @author fzh
+ * @since 2022-11-4
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-@TableName("sql_record")
-public class SqlRecord extends Model<SqlRecord> {
-
+@TableName("owner")
+public class OwnerInfo extends Model<OwnerInfo>{
     private static final long serialVersionUID = 1L;
-
+    
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
-    private String context;
+    private String address;
 
     private String userName;
 
     private String status;
 
-    private LocalDateTime startTime;
-
-    private LocalDateTime endTime;
-
+    private Long tableNum;
 
     @Override
     protected Serializable pkVal() {
         return this.id;
     }
 
+    public Long getId() {
+        return id;
+    }
+    
+    public String getAddress(){
+        return address;
+    }
 }

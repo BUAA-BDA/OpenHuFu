@@ -2,21 +2,21 @@
 
 set -ex
 
-function buildFrontEnd() {
-  echo "start build front end..."
-  cd webapp
-  yarn install
-  yarn build
-  cd ..
-  rm -rf backend/src/main/resources/static
-  mkdir -p backend/src/main/resources/static
-  mv webapp/dist/* backend/src/main/resources/static/
-  echo "build front end finish"
-}
+# function buildFrontEnd() {
+#   echo "start build front end..."
+#   cd webapp
+#   yarn install
+#   yarn build
+#   cd ..
+#   rm -rf backend/src/main/resources/static
+#   mkdir -p backend/src/main/resources/static
+#   mv webapp/dist/* backend/src/main/resources/static/
+#   echo "build front end finish"
+# }
 
 if [ $# -eq 0 ]
 then
-  buildFrontEnd
+  # buildFrontEnd
   mvn clean install -T 0.5C -Dmaven.test.skip=true
   mkdir -p ./release/bin
   mkdir -p ./release/adapter

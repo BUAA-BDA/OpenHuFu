@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hufudb.onedb.backend.mapper.OwnerInfoMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.hufudb.onedb.backend.entity.OwnerInfo">
+        <id column="id" property="id" />
+        <result column="address" property="address" />
+        <result column="user_name" property="userName" />
+        <result column="status" property="status" />
+        <result column="tablenum" property="tableNum" />
+    </resultMap>
+
+    <select id="selectOwner" resultType="com.hufudb.onedb.backend.entity.OwnerInfo">
+        SELECT * FROM owner WHERE address RLIKE #{context} AND status RLIKE #{status}
+    </select>
+
+    <update id="updateStatus">
+        UPDATE owner SET status = #{status} where id = #{id}
+    </update>
+</mapper>
