@@ -14,6 +14,7 @@ function buildFrontEnd() {
   echo "build front end finish"
 }
 
+
 if [ $# -eq 0 ]
 then
   buildFrontEnd
