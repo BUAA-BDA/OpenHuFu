@@ -57,6 +57,20 @@ module.exports =  {
         execTime: "Execution Time",
         noData: "No Data"
     },
+    setting:{
+        id: "ID",
+        port: "Port",
+        ip: "IP",
+        status: "Status",
+        tables: "Tables",
+        operation: "Operation",
+        delete: "delete",
+        connected: "Online",
+        disconnected: "Offline",
+        address: "address",
+        pleaseadd: "add a new owner",
+        pleaseaddaddress: "Please input address"
+    },
     datasource: {
         datasourceType: "DataSource Type",
         jdbcUrl: "JDBC URL",

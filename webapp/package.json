@@ -13,7 +13,7 @@
   },
   "main": "background.js",
   "dependencies": {
-    "@element-plus/icons-vue": "^1.1.4",
+    "@element-plus/icons-vue": "^2.0.10",
     "@fortawesome/fontawesome-svg-core": "^6.1.1",
     "@fortawesome/free-regular-svg-icons": "^6.1.1",
     "@fortawesome/free-solid-svg-icons": "^6.1.1",
@@ -22,13 +22,13 @@
     "axios": "^0.27.2",
     "core-js": "^3.8.3",
     "element-plus": "^2.2.1",
+    "js-cookie": "^3.0.1",
     "monaco-editor": "^0.33.0",
     "splitpanes": "^3.1.1",
-    "vue-i18n": "^9.2.2",
-    "js-cookie": "^3.0.1",
     "vue": "^3.2.13",
-    "vuex": "^4.0.2",
-    "vue-router": "4"
+    "vue-i18n": "^9.2.2",
+    "vue-router": "4",
+    "vuex": "^4.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
@@ -36,14 +36,14 @@
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-eslint": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
-    "node-sass": "^6.0.1",
-    "sass-loader": "^10.0.1",
-    "webpack": "^5.54.0",
     "electron": "^18.2.4",
     "electron-devtools-installer": "^3.2.0",
     "eslint": "^7.32.0",
     "eslint-plugin-vue": "^8.0.3",
-    "vue-cli-plugin-electron-builder": "~2.1.1"
+    "node-sass": "^6.0.1",
+    "sass-loader": "^10.0.1",
+    "vue-cli-plugin-electron-builder": "~2.1.1",
+    "webpack": "^5.54.0"
   },
   "eslintConfig": {
     "root": true,

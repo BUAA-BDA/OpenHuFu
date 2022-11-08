@@ -11,3 +11,17 @@ CREATE TABLE `sql_record`
   AUTO_INCREMENT = 1
   CHARSET = UTF8MB4
   COMMENT 'SQL Record';
+
+CREATE TABLE `owner`
+(
+    `id`         bigint       NOT NULL AUTO_INCREMENT,
+    `address`    varchar(255)      DEFAULT '',
+    `user_name`  varchar(255)      DEFAULT '',
+    `status`     varchar(255)      DEFAULT '',
+    `tablenum`   bigint            DEFAULT 0,
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB
+  AUTO_INCREMENT = 1
+  CHARSET = UTF8MB4
+  COMMENT 'Owner';
+
