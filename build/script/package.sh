@@ -37,28 +37,27 @@ function buildCoreModule() {
 if [ $# -eq 0 ]; then
   buildFrontEnd
   buildCoreModule
-elif [ $1 == "core" ]; then
-  buildCoreModule
 else
   if [ $1 == "backend" ]; then
     buildFrontEnd
-  fi
-  mvn install -Pdocker -T 0.5C -Dmaven.test.skip=true -pl $1
-  if [ $1 == "backend" ]; then
+    mvn install -Pdocker -T 0.5C -Dmaven.test.skip=true -pl $1
     cp backend/target/backend*.jar ./release/bin/backend.jar
+  elif [ $1 == "core" ]; then
+    buildCoreModule
   elif [ $1 == "user" ]; then
+    mvn install -Pdocker -T 0.5C -Dmaven.test.skip=true -pl $1
     cp user/target/*-with-dependencies.jar ./release/bin/onedb_user_client.jar
   elif [ $1 == "owner" ]; then
+    mvn install -Pdocker -T 0.5C -Dmaven.test.skip=true -pl $1
     cp owner/target/*-with-dependencies.jar ./release/bin/onedb_owner_server.jar
-  elif [ $1 == "adapter-postgresql" ]; then
+  elif [ $1 == "adapter" ]; then
+    mvn install -Pdocker -T 0.5C -Dmaven.test.skip=true -pl $1
     cp adapter/adapter-postgresql/target/*-with-dependencies.jar ./release/adapter/adapter_postgresql.jar
-  elif [ $1 == "adapter-mysql" ]; then
     cp adapter/adapter-mysql/target/*-with-dependencies.jar ./release/adapter/adapter_mysql.jar
-  elif [ $1 == "adapter-sqlite" ]; then
     cp adapter/adapter-sqlite/target/*-with-dependencies.jar ./release/adapter/adapter_sqlite.jar
-  elif [ $1 == "adapter-csv" ]; then
     cp adapter/adapter-csv/target/*-with-dependencies.jar ./release/adapter/adapter_csv.jar
-  elif [ $1 == "adapter-postgis" ]; then
     cp adapter/adapter-postgis/target/*-with-dependencies.jar ./release/adapter/adapter_postgis.jar
+  else
+    echo "try: package.sh [core|backend|user|owner]"
   fi
 fi
