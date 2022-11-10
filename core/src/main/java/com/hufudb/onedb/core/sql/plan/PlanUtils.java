@@ -23,7 +23,7 @@ public class PlanUtils {
       case UNARY:
         return generateUnaryOwnerPlans(client, plan);
       case BINARY:
-        return generateBianaryOwnerPlans(client, plan);
+        return generateBinaryOwnerPlans(client, plan);
       default:
         throw new UnsupportedOperationException("Unsupported plan type");
     }
@@ -83,7 +83,7 @@ public class PlanUtils {
     return ownerPlan;
   }
 
-  public static List<Pair<OwnerClient, QueryPlanProto>> generateBianaryOwnerPlans(OneDBClient client, Plan plan) {
+  public static List<Pair<OwnerClient, QueryPlanProto>> generateBinaryOwnerPlans(OneDBClient client, Plan plan) {
     QueryPlanProto.Builder builder = QueryPlanProto.newBuilder().setType(PlanType.BINARY).setFetch(plan.getFetch()).setOffset(plan.getOffset());
     if (!plan.getSelectExps().isEmpty()) {
       builder.addAllSelectExp(plan.getSelectExps());
