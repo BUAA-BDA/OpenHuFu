@@ -30,7 +30,7 @@ public class OwnerAggregation {
       throw new UnsupportedOperationException("Not support 'group by' clause");
     }
     for (Expression exp : aggs) {
-      aggFunctions.add(OwnerAggregteFunctions.getAggregateFunc(exp, rpc, threadPool, taskInfo));
+      aggFunctions.add(OwnerAggregateFunctions.getAggregateFunc(exp, rpc, threadPool, taskInfo));
       aggTypes.add(exp.getOutType());
     }
     Schema outSchema = ExpressionUtils.createSchema(aggs);
