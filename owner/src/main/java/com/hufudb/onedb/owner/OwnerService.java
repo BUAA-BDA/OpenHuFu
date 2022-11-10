@@ -59,6 +59,7 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
   @Override
   public void query(QueryPlanProto request, StreamObserver<DataSetProto> responseObserver) {
     Plan plan = Plan.fromProto(request);
+    LOG.info("receives plan:\n{}", plan);
     if (!Checker.check(plan, schemaManager)) {
       LOG.warn("Check fail for plan {}", request.toString());
       responseObserver.onCompleted();

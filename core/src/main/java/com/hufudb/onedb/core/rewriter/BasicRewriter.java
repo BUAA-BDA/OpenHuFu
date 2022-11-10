@@ -36,7 +36,7 @@ public class BasicRewriter implements Rewriter {
   }
 
   @Override
-  public Plan rewriteBianry(BinaryPlan binary) {
+  public Plan rewriteBinary(BinaryPlan binary) {
     return binary;
   }
 
