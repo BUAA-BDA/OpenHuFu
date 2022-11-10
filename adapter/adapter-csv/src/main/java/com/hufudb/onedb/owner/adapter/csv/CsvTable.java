@@ -18,6 +18,9 @@ import com.hufudb.onedb.data.storage.MapDataSet;
 import com.hufudb.onedb.data.storage.Point;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 
+/**
+ * Table build from .csv file or directory which contains
+ */
 public class CsvTable {
   final Path dataPath;
   final CSVFormat csvFormat;

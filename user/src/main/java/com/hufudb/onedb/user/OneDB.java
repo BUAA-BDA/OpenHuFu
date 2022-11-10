@@ -5,6 +5,7 @@ import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.sql.rel.OneDBTable;
 import com.hufudb.onedb.core.sql.schema.OneDBSchemaManager;
 import com.hufudb.onedb.core.sql.schema.OneDBSchemaFactory;
+import com.hufudb.onedb.core.table.OneDBTableFactory;
 import com.hufudb.onedb.core.table.OneDBTableSchema;
 import com.hufudb.onedb.core.table.GlobalTableConfig;
 import com.hufudb.onedb.data.schema.TableSchema;
@@ -65,6 +66,13 @@ public class OneDB {
     }
   }
 
+  /**
+   * User set up it's CLI env
+   * including config generation for OneDB
+   * See {@link ModelGenerator}
+   * @param configPath
+   * @throws IOException
+   */
   public static void setupCLI(String configPath) throws IOException {
     List<String> dbargs = new ArrayList<>();
     dbargs.add("-u");
@@ -153,7 +161,7 @@ public class OneDB {
   }
 
   public boolean createOneDBTable(GlobalTableConfig meta) {
-    return OneDBTable.create(schema, meta) != null;
+    return OneDBTableFactory.INSTANCE.create(schema, meta) != null;
   }
 
   public void dropOneDBTable(String tableName) {

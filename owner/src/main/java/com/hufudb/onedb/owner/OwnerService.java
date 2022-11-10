@@ -45,6 +45,13 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
   protected final Map<ProtocolType, ProtocolExecutor> libraries;
   protected final SchemaManager schemaManager;
 
+  /**
+   * Load the config and
+   * prepare the thread pool and
+   * initialize the adapter (which will generate actual table schema)
+   * get published schema from the config
+   * @param config
+   */
   public OwnerService(OwnerConfig config) {
     this.threadPool = config.threadPool;
     this.endpoint = String.format("%s:%d", config.hostname, config.port);
@@ -59,6 +66,7 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
   @Override
   public void query(QueryPlanProto request, StreamObserver<DataSetProto> responseObserver) {
     Plan plan = Plan.fromProto(request);
+    LOG.info("receives plan:\n{}", plan);
     if (!Checker.check(plan, schemaManager)) {
       LOG.warn("Check fail for plan {}", request.toString());
       responseObserver.onCompleted();
@@ -95,6 +103,11 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
     responseObserver.onCompleted();
   }
 
+  /**
+   * return only the published table schema
+   * @param request
+   * @param responseObserver
+   */
   @Override
   public void getTableSchema(GeneralRequest request, StreamObserver<SchemaProto> responseObserver) {
     Schema fakeSchema = getPublishedTableHeader(request.getValue());

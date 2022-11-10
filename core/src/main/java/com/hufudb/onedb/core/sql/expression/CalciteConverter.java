@@ -37,6 +37,9 @@ import org.apache.calcite.sql.validate.SqlUserDefinedFunction;
 import org.apache.calcite.util.NlsString;
 import org.apache.calcite.util.Sarg;
 
+/**
+ * Convert Calsite data structures into OneDB form
+ */
 public class CalciteConverter {
   private CalciteConverter() {}
 

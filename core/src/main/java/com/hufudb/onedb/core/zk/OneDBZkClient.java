@@ -4,6 +4,7 @@ import com.hufudb.onedb.core.sql.rel.OneDBTable;
 import com.hufudb.onedb.core.sql.schema.OneDBSchemaManager;
 import com.hufudb.onedb.core.table.GlobalTableConfig;
 import com.hufudb.onedb.core.table.LocalTableConfig;
+import com.hufudb.onedb.core.table.OneDBTableFactory;
 import com.hufudb.onedb.core.zk.watcher.EndpointWatcher;
 import com.hufudb.onedb.core.zk.watcher.GlobalTableWatcher;
 import com.hufudb.onedb.core.zk.watcher.LocalTableWatcher;
@@ -65,7 +66,7 @@ public class OneDBZkClient extends ZkClient {
       String localTableName = watchLocalTable(buildPath(gPath, endpoint));
       tableMeta.localTables.add(new LocalTableConfig(endpoint, localTableName));
     }
-    Table table = OneDBTable.create(manager, tableMeta);
+    Table table = OneDBTableFactory.INSTANCE.create(manager, tableMeta);
     if (table != null) {
       manager.addTable(tableName, table);
       zk.getChildren(gPath, new GlobalTableWatcher(manager, zk, gPath));

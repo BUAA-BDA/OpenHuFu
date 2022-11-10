@@ -53,6 +53,14 @@ public class OneDBSchemaManager extends AbstractSchema {
     this.userId = 0;
   }
 
+  /**
+   * tables is not used, that means schema's tables is empty after initialization
+   * Table is registered into schema during {@link OneDBTable}'s initialization
+   * @param owners
+   * @param tables
+   * @param schema
+   * @param userId
+   */
   public OneDBSchemaManager(List<OwnerInfo> owners, List<Map<String, Object>> tables, SchemaPlus schema, int userId) {
     this.parentSchema = schema;
     this.tableMap = new ConcurrentHashMap<>();
@@ -99,15 +107,13 @@ public class OneDBSchemaManager extends AbstractSchema {
       } else {
         client = new OwnerClient(endpoint);
       }
-      if (client != null) {
-        // establish connection among owners
-        for (Map.Entry<String, OwnerClient> entry : ownerMap.entrySet()) {
-          OwnerClient oldClient = entry.getValue();
-          oldClient.addOwner(client.getParty());
-          client.addOwner(oldClient.getParty());
-        }
-        ownerMap.put(endpoint, client);
+      // establish connection among owners
+      for (Map.Entry<String, OwnerClient> entry : ownerMap.entrySet()) {
+        OwnerClient oldClient = entry.getValue();
+        oldClient.addOwner(client.getParty());
+        client.addOwner(oldClient.getParty());
       }
+      ownerMap.put(endpoint, client);
       LOG.info("Add owner {}", endpoint);
     } catch (Exception e) {
       LOG.warn("Fail to add owner {}: {}", endpoint, e.getMessage());

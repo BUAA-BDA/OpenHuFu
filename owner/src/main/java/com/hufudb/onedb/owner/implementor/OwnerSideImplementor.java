@@ -42,11 +42,11 @@ public class OwnerSideImplementor implements PlanImplementor {
     DataSet in;
     boolean isLeft = true;
     if (left.getPlanType().equals(PlanType.EMPTY)) {
-      // right
+      // only right
       in = right.implement(this);
       isLeft = false;
     } else if (right.getPlanType().equals(PlanType.EMPTY)) {
-      // left
+      // only left
       in = left.implement(this);
     } else {
       LOG.error("Not support two side on a single owner yet");

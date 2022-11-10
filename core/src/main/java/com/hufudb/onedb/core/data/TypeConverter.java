@@ -4,6 +4,10 @@ import java.sql.Types;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import org.apache.calcite.sql.type.SqlTypeName;
 
+/**
+ * convert between {@link ColumnType} and {@link org.apache.calcite.sql.type}
+ * OneDB has its own {@link ColumnType} for communication need
+ */
 public class TypeConverter {
   public static SqlTypeName convert2SqlType(ColumnType type) {
     switch (type) {

@@ -11,6 +11,12 @@ import com.hufudb.onedb.core.table.GlobalTableConfig;
 import com.hufudb.onedb.core.table.LocalTableConfig;
 import com.hufudb.onedb.core.table.utils.PojoOwnerInfo;
 
+/**
+ * Read the OneDB config file
+ * and convert it into Calsite style
+ * which includes {@link com.hufudb.onedb.core.sql.schema.OneDBSchemaFactory}
+ * and {@link com.hufudb.onedb.core.table.OneDBTableFactory}
+ */
 public class ModelGenerator {
   private static String modelTemplate = "inline:"
   + "{\n"

@@ -21,8 +21,12 @@ import com.hufudb.onedb.rpc.Rpc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OwnerAggregteFunctions {
-  static final Logger LOG = LoggerFactory.getLogger(OwnerAggregteFunctions.class);
+/**
+ * Define and use Multi-Party Secure Aggregate Functions
+ * TODO: support more aggregate functions in SQL
+ */
+public class OwnerAggregateFunctions {
+  static final Logger LOG = LoggerFactory.getLogger(OwnerAggregateFunctions.class);
 
   public static AggregateFunction getAggregateFunc(Expression exp, Rpc rpc, ExecutorService threadPool, TaskInfo taskInfo) {
     int partyNum = taskInfo.getPartiesCount();

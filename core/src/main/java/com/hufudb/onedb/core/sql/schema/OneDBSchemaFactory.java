@@ -26,6 +26,16 @@ public class OneDBSchemaFactory implements SchemaFactory {
     }
   }
 
+  /**
+   * Create Schema customized by OneDB {@link OneDBSchemaManager}
+   * and register meta into SchemaPlus {@link SchemaPlus}
+   * Register meta in SchemaPlus is recommended by Calsite
+   * instead of implementing it by your own
+   * @param parentSchema
+   * @param name
+   * @param operand
+   * @return
+   */
   @Override
   public Schema create(SchemaPlus parentSchema, String name, Map<String, Object> operand) {
     List<OwnerInfo> owners = new ArrayList<>();
@@ -48,6 +58,7 @@ public class OneDBSchemaFactory implements SchemaFactory {
     if (operand.containsKey("tables")) {
       tableObjs.addAll((List) operand.get("tables"));
     }
+    // register the User Defined Function in SchemaPlus
     addUDF(parentSchema);
     ZkConfig zkConfig = new ZkConfig();
     zkConfig.servers = (String) operand.get("zookeeper");

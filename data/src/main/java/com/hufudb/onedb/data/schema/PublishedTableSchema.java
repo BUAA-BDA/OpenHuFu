@@ -6,7 +6,8 @@ import com.hufudb.onedb.proto.OneDBData.ColumnDesc;
 import com.hufudb.onedb.proto.OneDBData.Modifier;
 
 /**
- * Used for schema mapping, see @SchemaManager.java for detail
+ * Map a FAKE schema to an ACTUAL one
+ * Used for schema mapping, see {@link SchemaManager} for detail
  */
 public class PublishedTableSchema {
   private final TableSchema fakeSchema;

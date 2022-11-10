@@ -2,6 +2,7 @@ package com.hufudb.onedb.plan;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.data.storage.DataSet;
@@ -191,5 +192,19 @@ public class LeafPlan extends BasePlan {
   @Override
   public Plan rewrite(Rewriter rewriter) {
     return rewriter.rewriteLeaf(this);
+  }
+
+  @Override
+  public String toString() {
+    return "LeafPlan{" + '\n' +
+        ("\ttableName='" + tableName + '\'' + '$' +
+            "\tselectExps=" + selectExps + '$' +
+            "\twhereExps=" + whereExps + '$' +
+            "\taggExps=" + aggExps + '$' +
+            "\tgroups=" + groups + '$' +
+            "\torders=" + orders + '$' +
+            "\tfetch=" + fetch + '$' +
+            "\toffset=" + offset).replace('\n', '|').replace('$', '\n') + '\n' +
+        "}";
   }
 }

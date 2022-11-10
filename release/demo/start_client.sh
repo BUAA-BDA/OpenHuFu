@@ -1,4 +1,3 @@
-#!/bin/bash
 set -e
 
 export ONEDB_ROOT=$PWD/..

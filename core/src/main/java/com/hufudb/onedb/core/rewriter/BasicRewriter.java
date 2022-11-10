@@ -7,6 +7,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.client.OneDBClient;
+import com.hufudb.onedb.core.sql.rel.OneDBRel;
 import com.hufudb.onedb.expression.AggFuncType;
 import com.hufudb.onedb.expression.ExpressionFactory;
 import com.hufudb.onedb.plan.BinaryPlan;
@@ -36,7 +37,7 @@ public class BasicRewriter implements Rewriter {
   }
 
   @Override
-  public Plan rewriteBianry(BinaryPlan binary) {
+  public Plan rewriteBinary(BinaryPlan binary) {
     return binary;
   }
 
@@ -45,6 +46,13 @@ public class BasicRewriter implements Rewriter {
     return unary;
   }
 
+  /**
+   * put an {@link UnaryPlan} before the {@link LeafPlan}
+   * to deal project/aggregate/sort/limit inter-silo,
+   * see {@link com.hufudb.onedb.core.implementor.UserSideImplementor#implement(Plan)}
+   * @param leaf input leaf plan
+   * @return an unary plan having with input leaf plan as child
+   */
   @Override
   public Plan rewriteLeaf(LeafPlan leaf) {
     // only horizontal partitioned table need rewrite
@@ -53,13 +61,14 @@ public class BasicRewriter implements Rewriter {
       boolean hasLimit = leaf.getOffset() != 0 || leaf.getFetch() != 0;
       boolean hasSort = leaf.getOrders() != null && !leaf.getOrders().isEmpty();
       if (!hasAgg && !hasLimit && !hasSort) {
-        // return leaf directly if no aggergate, limit or sort
+        // return leaf directly if no aggregate, limit or sort
         return leaf;
       }
       UnaryPlan unary = new UnaryPlan(leaf);
       if (hasAgg) {
         rewriteAggregations(unary, leaf);
       } else {
+        // do NOT clear leaf's sort&limit operation to reduce comm cost
         if (hasLimit) {
           unary.setFetch(leaf.getFetch());
           unary.setOffset(leaf.getOffset());
@@ -78,6 +87,10 @@ public class BasicRewriter implements Rewriter {
   /**
    * for aggregate call with distinct flag, add the inputRefs into local group set and update the
    * global group set
+   * @param agg
+   * @param localAggs
+   * @param groupMap
+   * @return
    */
   private Expression updateGroupIdx(Expression agg, List<Expression> localAggs,
       Map<Integer, Expression> groupMap) {
@@ -196,7 +209,13 @@ public class BasicRewriter implements Rewriter {
   }
 
   /**
-   * rewrite exp into global agg and add new local aggs into localAggs
+   * rewrite the exp into global part and local part (as {@link Expression}),
+   * local part will be added into localAggs
+   * and this method will return the global part
+   * @param exp
+   * @param localAggs
+   * @param groupMap
+   * @return
    */
   private Expression rewriteAggregate(Expression exp, List<Expression> localAggs,
       Map<Integer, Expression> groupMap) {
@@ -217,12 +236,15 @@ public class BasicRewriter implements Rewriter {
     }
   }
 
-  /*
-   * divide aggregation into local part and global part
+  /**
+   * divide aggregation into local part and global part according to
+   * {@link com.hufudb.onedb.core.sql.rel.OneDBAggregate#implement(OneDBRel.Implementor)},
+   * put global part into UnaryPlan and local part into LeafPlan
+   * @param unary
+   * @param leaf
    */
   private void rewriteAggregations(UnaryPlan unary, LeafPlan leaf) {
-    Map<Integer, Expression> groupMap = new TreeMap<>(); // local group ref -> global group ref
-                                                         // expression
+    Map<Integer, Expression> groupMap = new TreeMap<>(); // map local ref idx to global ref expression
     List<Expression> originAggs = leaf.getAggExps();
     List<Expression> localAggs = new ArrayList<>();
     List<Expression> globalAggs = new ArrayList<>();
@@ -230,13 +252,13 @@ public class BasicRewriter implements Rewriter {
     List<Expression> inputs = leaf.getSelectExps();
     // add local groups into local aggs as group key function
     int idx = 0;
-    for (int groupRef : leaf.getGroups()) {
-      Expression in = inputs.get(groupRef);
+    for (int groupColIdx : leaf.getGroups()) {
+      Expression inRef = inputs.get(groupColIdx);
       Expression ref =
-          ExpressionFactory.createInputRef(groupRef, in.getOutType(), in.getModifier());
+          ExpressionFactory.createInputRef(groupColIdx, inRef.getOutType(), inRef.getModifier());
       localAggs.add(ExpressionFactory.createAggFunc(ref.getOutType(), ref.getModifier(),
           AggFuncType.GROUPKEY.getId(), ImmutableList.of(ref)));
-      groupMap.put(groupRef,
+      groupMap.put(groupColIdx,
           ExpressionFactory.createInputRef(idx, ref.getOutType(), ref.getModifier()));
       globalGroups.add(idx);
       ++idx;
@@ -249,8 +271,10 @@ public class BasicRewriter implements Rewriter {
     unary.setSelectExps(ExpressionFactory.createInputRef(localAggs));
     unary.setAggExps(globalAggs);
     unary.setGroups(globalGroups);
-    leaf.setGroups(groupMap.keySet().stream().collect(Collectors.toList()));
-    // delete sort and limit operations in leaf node and add them in unary node if exist
+    leaf.setGroups(new ArrayList<>(groupMap.keySet()));
+    // we don't know which row should we get from each silo before agg
+    // so delete sort and limit operations in leaf node and add them in unary node if exist
+    // in order to make leaf simply return all rows
     boolean hasLimit = leaf.getOffset() != 0 || leaf.getFetch() != 0;
     boolean hasSort = leaf.getOrders() != null && !leaf.getOrders().isEmpty();
     if (hasLimit) {

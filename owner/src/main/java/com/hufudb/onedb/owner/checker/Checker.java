@@ -25,13 +25,19 @@ public class Checker {
     return out.ordinal() >= in.ordinal();
   }
 
+  /**
+   * check if ref violates the modifier constraint
+   * @param ref
+   * @param in
+   * @return
+   */
   static boolean checkRef(Expression ref, List<Modifier> in) {
     int id = ref.getI32();
     if (id >= in.size() || id < 0) {
       LOG.warn("Column reference out of index");
       return false;
     }
-    return ref.getModifier().ordinal() >= in.get(id).ordinal();
+    return dominate(ref.getModifier(), in.get(id));
   }
 
   static boolean checkExpression(Expression exp, List<Modifier> in) {
@@ -45,6 +51,7 @@ public class Checker {
       if (!checkExpression(e, in)) {
         return false;
       }
+      // expression's output should be more strict than input
       if (!dominate(outModifier, e.getModifier())) {
         return false;
       }
@@ -66,8 +73,15 @@ public class Checker {
     return true;
   }
 
+  /**
+   * check if Plan violates the modifier constraint
+   * plan's output should be more strict than input
+   * @param plan
+   * @param manager
+   * @return
+   */
   public static boolean check(Plan plan, SchemaManager manager) {
-    List<Modifier> in = ImmutableList.of();
+    List<Modifier> in = ImmutableList.of(); // input cols' modifiers
     switch (plan.getPlanType()) {
       case LEAF:
         in = manager.getPublishedSchema(plan.getTableName()).getColumnDescs().stream()

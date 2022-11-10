@@ -42,6 +42,12 @@ public enum AggFuncType {
     return MAP.get(Math.abs(id));
   }
 
+  /**
+   * aggregate func with distinct
+   * such as count(distinct col_name)
+   * @param id
+   * @return
+   */
   public static boolean isDistinct(int id) {
     return id < 0;
   }

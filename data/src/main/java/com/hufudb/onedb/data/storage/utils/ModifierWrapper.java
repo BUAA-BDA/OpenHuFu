@@ -7,7 +7,7 @@ import com.hufudb.onedb.proto.OneDBData.Modifier;
 import com.hufudb.onedb.proto.OneDBPlan.Expression;
 
 /**
- * Wrapper for protocol buffer enum @OneDBData.Modifier
+ * Wrapper for protocol buffer enum {@link com.hufudb.onedb.proto.OneDBData.Modifier}
  */
 public enum ModifierWrapper {
   // columns marked as hide are invisible to client and other dataServers
@@ -76,6 +76,12 @@ public enum ModifierWrapper {
     return MAP.get(modifier.getNumber());
   }
 
+  /**
+   * Higher security dominates the lower ones
+   * @param a
+   * @param b
+   * @return
+   */
   public static Modifier dominate(Modifier a, Modifier b) {
     if (a.getNumber() > b.getNumber()) {
       return a;

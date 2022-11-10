@@ -66,6 +66,10 @@ public class OneDBTableScan extends TableScan implements OneDBRel {
     planner.removeRule(EnumerableLimitRule.Config.DEFAULT.toRule());
   }
 
+  /**
+   * Select from all the cols in this OneDBTable's schema
+   * @param implementor
+   */
   @Override
   public void implement(Implementor implementor) {
     LeafPlan plan = new LeafPlan();
