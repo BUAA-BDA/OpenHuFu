@@ -8,7 +8,8 @@ import com.hufudb.onedb.proto.OneDBData.Modifier;
 import com.hufudb.onedb.proto.OneDBData.SchemaProto;
 
 /**
- * Schema of relation table, used in @DataSet.java, @TableSchema.java.
+ * Schema of relation table, used in {@link TableSchema}
+ * and {@link com.hufudb.onedb.data.storage.DataSet}
  * Encapsulation of protocol buffer, immutable
  */
 public class Schema {

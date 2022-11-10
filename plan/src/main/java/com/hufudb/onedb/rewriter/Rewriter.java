@@ -13,7 +13,7 @@ public interface Rewriter {
 
   void rewriteChild(Plan Plan);
   Plan rewriteRoot(RootPlan root);
-  Plan rewriteBianry(BinaryPlan binary);
+  Plan rewriteBinary(BinaryPlan binary);
   Plan rewriteUnary(UnaryPlan unary);
   Plan rewriteLeaf(LeafPlan leaf);
 }

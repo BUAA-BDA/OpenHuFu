@@ -22,6 +22,6 @@ module.exports = defineConfig({
   },
   devServer: {
     port: 8080,
-    proxy: 'http://localhost:8001'
+    proxy: 'http://10.134.143.179:8001'
   },
 });

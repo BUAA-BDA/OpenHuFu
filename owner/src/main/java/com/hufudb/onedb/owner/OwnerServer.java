@@ -89,6 +89,14 @@ public class OwnerServer {
     return String.format("%s:%d", hostname, port);
   }
 
+  /**
+   * read the local config file from the file system
+   * and generate the {@link OwnerConfig}
+   * See {@link OwnerService}
+   * @param configPath
+   * @return
+   * @throws IOException
+   */
   public static OwnerServer create(String configPath) throws IOException {
     Gson gson = new Gson();
     Reader reader = Files.newBufferedReader(Paths.get(configPath));

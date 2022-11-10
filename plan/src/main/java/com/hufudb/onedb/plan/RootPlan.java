@@ -80,4 +80,12 @@ public class RootPlan extends BasePlan {
   public Schema getOutSchema() {
     return child.getOutSchema();
   }
+
+  @Override
+  public String toString() {
+    return "RootPlan{" + '\n' +
+        "\tid=" + id + "\n" +
+        "\tchild->"+ child.toString().replace("\n", "\n\t") + "\n" +
+        '}';
+  }
 };

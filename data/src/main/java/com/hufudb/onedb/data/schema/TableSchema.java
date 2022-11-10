@@ -11,6 +11,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Map table's name to it's {@link Schema}
+ * Represents an ACTUAL table's information in {@link SchemaManager}
+ * Encapsulation in protocol buffer, Immutable
+ */
 public class TableSchema {
   protected final String name;
   protected final Schema schema;

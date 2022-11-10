@@ -29,6 +29,14 @@ public class OneDBTableFactory implements TableFactory {
     return OneDBTable.create(schemaManager, tableName, operand, protoRowType);
   }
 
+  /**
+   * create directly from {@link GlobalTableConfig}
+   * which is parsed from request
+   * usually used for web/zookeeper
+   * @param schema
+   * @param meta
+   * @return
+   */
   public Table create(OneDBSchemaManager schema, GlobalTableConfig meta) {
     LOG.debug("create table {}", meta.tableName);
     return OneDBTable.create(schema, meta);

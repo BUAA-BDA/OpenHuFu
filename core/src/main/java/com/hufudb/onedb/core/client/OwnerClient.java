@@ -26,6 +26,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * client for a single DB
+ * it will build connection with the remote Owner
+ * by assigned endpoint
  */
 public class OwnerClient {
   private static final Logger LOG = LoggerFactory.getLogger(OwnerClient.class);
@@ -55,6 +57,10 @@ public class OwnerClient {
     return party;
   }
 
+  /**
+   * fetch owner info from the remote Owner by RPC
+   * @return
+   */
   public Party getOwnerInfo() {
     try {
       OwnerInfo proto = blockingStub.getOwnerInfo(GeneralRequest.newBuilder().build());
@@ -65,6 +71,11 @@ public class OwnerClient {
     }
   }
 
+  /**
+   * tell the remote Owner that a new owner participates
+   * @param party
+   * @return
+   */
   public boolean addOwner(Party party) {
     OwnerInfo request =
         OwnerInfo.newBuilder().setId(party.getPartyId()).setEndpoint(party.getPartyName()).build();
@@ -109,6 +120,11 @@ public class OwnerClient {
     return endpoint.equals(((OwnerClient) obj).endpoint);
   }
 
+  /**
+   * fetch table schema from remote Owner
+   * @param tableName
+   * @return
+   */
   public Schema getTableSchema(String tableName) {
     try {
       SchemaProto proto =

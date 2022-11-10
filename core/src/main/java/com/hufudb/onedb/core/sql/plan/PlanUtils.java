@@ -4,35 +4,50 @@ import java.util.ArrayList;
 import java.util.List;
 import com.hufudb.onedb.core.client.OneDBClient;
 import com.hufudb.onedb.core.client.OwnerClient;
-import com.hufudb.onedb.plan.EmptyPlan;
-import com.hufudb.onedb.plan.Plan;
+import com.hufudb.onedb.plan.*;
 import com.hufudb.onedb.proto.OneDBPlan.PlanType;
 import com.hufudb.onedb.proto.OneDBPlan.QueryPlanProto;
 import com.hufudb.onedb.proto.OneDBPlan.TaskInfo;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
+/**
+ * Builder for proto Plan
+ */
 public class PlanUtils {
+
+  /**
+   * build actual plans for different owner
+   * @param client
+   * @param plan
+   * @return
+   */
   public static List<Pair<OwnerClient, QueryPlanProto>> generateOwnerPlans(OneDBClient client, Plan plan) {
     PlanType type = plan.getPlanType();
     switch(type) {
       case ROOT:
+        assert plan instanceof RootPlan;
         return generateOwnerPlans(client, plan.getChildren().get(0));
       case LEAF:
-        return generateLeafOwnerPlans(client, plan);
+        assert plan instanceof LeafPlan;
+        return generateLeafOwnerPlans(client, (LeafPlan) plan);
       case UNARY:
-        return generateUnaryOwnerPlans(client, plan);
+        assert plan instanceof UnaryPlan;
+        return generateUnaryOwnerPlans(client, (UnaryPlan) plan);
       case BINARY:
-        return generateBianaryOwnerPlans(client, plan);
+        assert plan instanceof BinaryPlan;
+        return generateBinaryOwnerPlans(client, (BinaryPlan) plan);
       default:
         throw new UnsupportedOperationException("Unsupported plan type");
     }
   }
 
-  public static List<Pair<OwnerClient, QueryPlanProto>> generateLeafOwnerPlans(OneDBClient client, Plan plan) {
-    QueryPlanProto.Builder builder =
-    QueryPlanProto.newBuilder().setType(PlanType.LEAF)
-        .addAllSelectExp(plan.getSelectExps()).setFetch(plan.getFetch()).setOffset(plan.getOffset());
+  public static List<Pair<OwnerClient, QueryPlanProto>> generateLeafOwnerPlans(OneDBClient client, LeafPlan plan) {
+    QueryPlanProto.Builder builder = QueryPlanProto.newBuilder()
+        .setType(PlanType.LEAF)
+        .addAllSelectExp(plan.getSelectExps())
+        .setFetch(plan.getFetch())
+        .setOffset(plan.getOffset());
     if (!plan.getWhereExps().isEmpty()) {
       builder.addAllWhereExp(plan.getWhereExps());
     }
@@ -54,8 +69,11 @@ public class PlanUtils {
     return ownerContext;
   }
 
-  public static List<Pair<OwnerClient, QueryPlanProto>> generateUnaryOwnerPlans(OneDBClient client, Plan plan) {
-    QueryPlanProto.Builder builder = QueryPlanProto.newBuilder().setType(PlanType.UNARY).setFetch(plan.getFetch()).setOffset(plan.getOffset());
+  public static List<Pair<OwnerClient, QueryPlanProto>> generateUnaryOwnerPlans(OneDBClient client, UnaryPlan plan) {
+    QueryPlanProto.Builder builder = QueryPlanProto.newBuilder()
+        .setType(PlanType.UNARY)
+        .setFetch(plan.getFetch())
+        .setOffset(plan.getOffset());
     if (!plan.getSelectExps().isEmpty()) {
       builder.addAllSelectExp(plan.getSelectExps());
     }
@@ -83,7 +101,7 @@ public class PlanUtils {
     return ownerPlan;
   }
 
-  public static List<Pair<OwnerClient, QueryPlanProto>> generateBianaryOwnerPlans(OneDBClient client, Plan plan) {
+  public static List<Pair<OwnerClient, QueryPlanProto>> generateBinaryOwnerPlans(OneDBClient client, BinaryPlan plan) {
     QueryPlanProto.Builder builder = QueryPlanProto.newBuilder().setType(PlanType.BINARY).setFetch(plan.getFetch()).setOffset(plan.getOffset());
     if (!plan.getSelectExps().isEmpty()) {
       builder.addAllSelectExp(plan.getSelectExps());

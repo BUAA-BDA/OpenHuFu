@@ -77,6 +77,8 @@ public interface Plan {
 
   List<Expression> getOutExpressions();
 
+  String toString();
+
   public static Plan fromProto(QueryPlanProto proto) {
     switch (proto.getType()) {
       case LEAF:

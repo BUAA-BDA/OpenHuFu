@@ -23,7 +23,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * load all .csv file in csvDir
+ * Adapter that loads all .csv files
+ * and build correspond Schema and Table
+ * for them
  */
 public class CsvAdapter implements Adapter {
   protected final static Logger LOG = LoggerFactory.getLogger(CsvAdapter.class);
@@ -41,6 +43,12 @@ public class CsvAdapter implements Adapter {
     }
   }
 
+  /**
+   * Load .csv file or directory and
+   * register them as local table in {@link SchemaManager}
+   * @param csvDir
+   * @throws IOException
+   */
   void loadTables(String csvDir) throws IOException {
     File base = new File(csvDir);
     if (base.isDirectory()) {
@@ -92,6 +100,12 @@ public class CsvAdapter implements Adapter {
     tables.clear();
   }
 
+  /**
+   * Generate the output Schema for a published table
+   * it does NOT consider projection and return ALL the published cols
+   * @param publishedTableName
+   * @return
+   */
   Schema getOutSchema(String publishedTableName) {
     Schema schema = schemaManager.getPublishedSchema(publishedTableName);
     Schema.Builder builder = Schema.newBuilder();
@@ -101,6 +115,12 @@ public class CsvAdapter implements Adapter {
     return builder.build();
   }
 
+  /**
+   * Only LeafPlan is allowed
+   * as there should be no cross-silo operation
+   * @param plan
+   * @return
+   */
   DataSet queryInternal(LeafPlan plan) {
     String publishedTableName = plan.getTableName();
     String actualTableName = schemaManager.getActualTableName(publishedTableName);

@@ -1,4 +1,3 @@
-#!/bin/bash
 set -e
 
 stop() {
@@ -7,7 +6,6 @@ stop() {
   rm log/$1.log
   rm log/pid_$1
 }
-
 if [ $# -eq 0 ]
 then
   stop "1"

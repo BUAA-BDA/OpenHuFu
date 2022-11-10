@@ -3,6 +3,7 @@ package com.hufudb.onedb.owner.implementor.aggregate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+
 import com.hufudb.onedb.data.function.AggregateFunction;
 import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.data.storage.AggDataSet;
@@ -25,17 +26,18 @@ public class OwnerAggregation {
   public static DataSet aggregate(DataSet input, List<Integer> groups, List<Expression> aggs, List<ColumnType> types, Rpc rpc, ExecutorService threadPool, TaskInfo taskInfo) {
     List<AggregateFunction<Row, Comparable>> aggFunctions = new ArrayList<>();
     List<ColumnType> aggTypes = new ArrayList<>();
+    // todo: add 'GROUP BY' clause support
     if (!groups.isEmpty()) {
       LOG.warn("Not support 'group by' clause");
       throw new UnsupportedOperationException("Not support 'group by' clause");
     }
     for (Expression exp : aggs) {
-      aggFunctions.add(OwnerAggregteFunctions.getAggregateFunc(exp, rpc, threadPool, taskInfo));
+      aggFunctions.add(OwnerAggregateFunctions.getAggregateFunc(exp, rpc, threadPool, taskInfo));
       aggTypes.add(exp.getOutType());
     }
     Schema outSchema = ExpressionUtils.createSchema(aggs);
     DataSet result = ArrayDataSet.materialize(AggDataSet.create(outSchema, new SingleAggregator(outSchema, aggFunctions), input));
-    // todo: 
+    // only owner party returns full result, others return empty dataset
     if (taskInfo.getParties(0) == rpc.ownParty().getPartyId()) {
       return result;
     } else {

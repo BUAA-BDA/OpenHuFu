@@ -15,6 +15,7 @@
           v-model="recordStatus"
           :placeholder="$t('operation.pleaseSelect')"
           text-align="center"
+          clearable
           style="width:150px;">
         <el-option
             v-for="item in allStatus"
@@ -75,6 +76,9 @@ import axios from "axios";
 export default {
   name: 'OperationPage',
   components: {
+  },
+  mounted() {
+    this.refresh();
   },
   data() {
     return {
@@ -137,8 +141,6 @@ export default {
     format2(row) {
       let key = row.status;
       for (let item of this.allStatus) {
-        console.log(key);
-        console.log(item.value);
         if (key == item.value) {
           return this.$t(item.name);
         }
@@ -147,6 +149,11 @@ export default {
     },
     getQueryRecordInThisPage() {
       this.getQueryRecord();
+    },
+    refresh() {
+      this.recordContext = "";
+      this.recordStatus = "";
+      this.search();
     },
     search() {
       this.pageNow = 1;
@@ -193,7 +200,7 @@ export default {
   justify-content: space-around;
   align-items: center;
   height: 50px;
-  width: 100%;
+  width: 95%;
   background-color: white;
   padding: 5px 10px;
 }

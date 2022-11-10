@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+
 import com.hufudb.onedb.core.client.OneDBClient;
 import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.sql.plan.PlanUtils;
@@ -56,7 +57,7 @@ public class UserSideImplementor implements PlanImplementor {
       case LEAF:
       case UNARY:
       case BINARY:
-        // todo: refinement needed
+        // todo: even modifier is not public, the plan may possibly be implemented in non-multi way
         return !modifier.equals(Modifier.PUBLIC);
       default:
         LOG.error("Unsupport plan type {}", type);
@@ -64,7 +65,14 @@ public class UserSideImplementor implements PlanImplementor {
     }
   }
 
+  /**
+   * owner side query,
+   * see {@link PlanUtils#generateOwnerPlans(OneDBClient, Plan)}
+   * @param plan
+   * @return
+   */
   DataSet ownerSideQuery(Plan plan) {
+    // distribute plan to different Owners
     List<Pair<OwnerClient, QueryPlanProto>> queries = PlanUtils.generateOwnerPlans(client, plan);
     List<Callable<Boolean>> tasks = new ArrayList<Callable<Boolean>>();
     Schema schema = plan.getOutSchema();
@@ -99,6 +107,19 @@ public class UserSideImplementor implements PlanImplementor {
     return concurrentDataSet;
   }
 
+  /**
+   * query plan in user side,
+   * triggers
+   * {@link #binaryQuery(BinaryPlan)},
+   * {@link #unaryQuery(UnaryPlan)},
+   * {@link #leafQuery(LeafPlan)}
+   * @param plan
+   * @return
+   */
+  private DataSet userSideQuery(Plan plan) {
+    return plan.implement(this);
+  }
+
   @Override
   public DataSet implement(Plan plan) {
     if (isMultiParty(plan)) {
@@ -106,7 +127,7 @@ public class UserSideImplementor implements PlanImplementor {
       return ownerSideQuery(plan);
     } else {
       // implement on user side
-      return plan.implement(this);
+      return userSideQuery(plan);
     }
   }
 

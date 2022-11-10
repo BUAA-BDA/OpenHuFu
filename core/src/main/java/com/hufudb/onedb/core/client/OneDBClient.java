@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
- * client for all DB
+ * client for global DB
  */
 public class OneDBClient {
   private static final Logger LOG = LoggerFactory.getLogger(OneDBClient.class);
@@ -68,7 +68,9 @@ public class OneDBClient {
   }
 
   public DataSet executeQueryPlan(Plan plan) {
+    LOG.info("plan before rewrite:\n{}", plan);
     plan = plan.rewrite(rewriter);
+    LOG.info("plan after rewrite:\n{}", plan);
     return UserSideImplementor.getImplementor(plan, this).implement(plan);
   }
 

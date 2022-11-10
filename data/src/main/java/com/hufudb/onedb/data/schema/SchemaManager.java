@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Used for owner side schema mapping, give a virtual table schema for an actual table schema.
- * The virtual schema could has different table name, column names, column modifier from actual table,
+ * The virtual schema could have different table name, column names, column modifier from actual table,
  * the order of the columns can also be changed.
  */
 public class SchemaManager {
@@ -27,6 +27,11 @@ public class SchemaManager {
     publishedTableSchemaMap = new ConcurrentHashMap<>();
   }
 
+  /**
+   * Register a table represented by {@link TableSchema}
+   * as an actual table in this data-provider
+   * @param table
+   */
   public void addLocalTable(TableSchema table) {
     if (actualTableSchemaMap.containsKey(table.getName())) {
       LOG.error("Local table {} already existed", table.getName());

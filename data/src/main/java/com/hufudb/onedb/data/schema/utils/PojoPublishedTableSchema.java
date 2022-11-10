@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import com.hufudb.onedb.data.schema.PublishedTableSchema;
 
+/**
+ * Read from .json file by Gson
+ */
 public class PojoPublishedTableSchema {
   public String publishedName;
   public String actualName;

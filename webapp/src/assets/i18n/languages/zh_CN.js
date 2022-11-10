@@ -57,6 +57,20 @@ module.exports =  {
         execTime: "执行时长",
         noData: "无记录"
     },
+    setting:{
+        id: "ID",
+        port: "端口",
+        ip: "IP地址",
+        status: "状态",
+        tables: "表数",
+        operation: "操作",
+        delete: "删除",
+        connected: "在线",
+        disconnected: "离线",
+        address: "地址",
+        pleaseadd: "添加数据拥有方",
+        pleaseaddaddress: "请输入用户IP地址"
+    },
     datasource: {
         datasourceType: "数据源类型",
         jdbcUrl: "JDBC连接串",
