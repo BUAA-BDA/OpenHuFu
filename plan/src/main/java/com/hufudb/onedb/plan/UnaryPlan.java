@@ -2,6 +2,7 @@ package com.hufudb.onedb.plan;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.data.storage.DataSet;
@@ -18,8 +19,8 @@ import com.hufudb.onedb.proto.OneDBPlan.TaskInfo;
 import com.hufudb.onedb.rewriter.Rewriter;
 
 /**
- * Plan for intermediate process with single input relation 
- * (e.g., outer layer of nested aggregation)
+ * Plan for intermediate process with single input relation
+ * (e.g., outer layer of nested aggregation, )
  */
 public class UnaryPlan extends BasePlan {
   Plan child;
@@ -75,7 +76,7 @@ public class UnaryPlan extends BasePlan {
   public void setAggExps(List<Expression> aggExps) {
     this.aggExps = aggExps;
   }
-  
+
   @Override
   public List<Expression> getSelectExps() {
     return selectExps;
@@ -176,5 +177,20 @@ public class UnaryPlan extends BasePlan {
   @Override
   public Schema getOutSchema() {
     return ExpressionUtils.createSchema(getOutExpressions());
+  }
+
+  @Override
+  public String toString() {
+    return "UnaryPlan {" + '\n' +
+        ("\tselectExps=" + selectExps + '$' +
+            "\twhereExps=" + whereExps + '$' +
+            "\taggExps=" + aggExps + '$' +
+            "\tgroups=" + groups + '$' +
+            "\torders=" + orders + '$' +
+            "\tfetch=" + fetch + '$' +
+            "\toffset=" + offset + '$' +
+            "\ttaskInfo=" + taskInfo).replace('\n', '|').replace('$', '\n') + "\n" +
+        "\tchild->" + child.toString().replace("\n", "\n\t") + '\n' +
+        "}";
   }
 }

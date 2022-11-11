@@ -2,6 +2,7 @@ package com.hufudb.onedb.plan;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.data.storage.DataSet;
@@ -176,7 +177,24 @@ public class BinaryPlan extends BasePlan {
   public Plan rewrite(Rewriter rewriter) {
     this.left = left.rewrite(rewriter);
     this.right = right.rewrite(rewriter);
-    return rewriter.rewriteBianry(this);
+    return rewriter.rewriteBinary(this);
+  }
+
+  @Override
+  public String toString() {
+    return "BinaryPlan {" + '\n' +
+        ("\tselectExps=" + selectExps + '$' +
+            "\twhereExps=" + whereExps + '$' +
+            "\taggExps=" + aggExps + '$' +
+            "\tgroups=" + groups + '$' +
+            "\torders=" + orders + '$' +
+            "\tfetch=" + fetch + '$' +
+            "\toffset=" + offset + '$' +
+            "\tjoinCond=" + joinCond + '$' +
+            "\ttaskInfo=" + taskInfo).replace('\n', '|').replace('$', '\n') + "\n" +
+        "\tleft->" + left.toString().replace("\n", "\n\t") + "\n" +
+        "\tright->" + right.toString().replace("\n", "\n\t") + "\n" +
+        "}";
   }
 
   public static BinaryPlan fromProto(QueryPlanProto proto) {

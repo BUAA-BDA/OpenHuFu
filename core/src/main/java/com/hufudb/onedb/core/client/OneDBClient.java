@@ -68,7 +68,9 @@ public class OneDBClient {
   }
 
   public DataSet executeQueryPlan(Plan plan) {
+    LOG.info("plan before rewrite:\n{}", plan);
     plan = plan.rewrite(rewriter);
+    LOG.info("plan after rewrite:\n{}", plan);
     return UserSideImplementor.getImplementor(plan, this).implement(plan);
   }
 
@@ -77,7 +79,7 @@ public class OneDBClient {
    */
   public Enumerator<Row> oneDBQuery(long planId) {
     Plan plan = QueryPlanPool.getPlan(planId);
-    // todo: support for choosing the appropritate rewriter
+    // todo: support for choosing the appropriate rewriter
     return new EnumerableDataSet(executeQueryPlan(plan));
   }
 }
