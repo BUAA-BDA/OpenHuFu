@@ -4,6 +4,7 @@ import com.google.common.collect.BoundType;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Range;
 import com.hufudb.onedb.core.data.TypeConverter;
+import com.hufudb.onedb.core.sql.rel.OneDBToEnumerableConverter;
 import com.hufudb.onedb.data.storage.utils.ModifierWrapper;
 import com.hufudb.onedb.expression.AggFuncType;
 import com.hufudb.onedb.expression.ExpressionFactory;
@@ -17,11 +18,13 @@ import com.hufudb.onedb.proto.OneDBPlan.JoinCondition;
 import com.hufudb.onedb.proto.OneDBPlan.JoinType;
 import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
 import com.hufudb.onedb.udf.UDFLoader;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import org.apache.calcite.rel.RelFieldCollation;
 import org.apache.calcite.rel.core.AggregateCall;
 import org.apache.calcite.rel.core.JoinInfo;
@@ -36,9 +39,14 @@ import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.validate.SqlUserDefinedFunction;
 import org.apache.calcite.util.NlsString;
 import org.apache.calcite.util.Sarg;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CalciteConverter {
-  private CalciteConverter() {}
+  private static final Logger LOG = LoggerFactory.getLogger(CalciteConverter.class);
+
+  private CalciteConverter() {
+  }
 
   public static Direction convert(RelFieldCollation.Direction direction) {
     switch (direction) {
@@ -74,7 +82,7 @@ public class CalciteConverter {
   }
 
   public static List<Expression> convert(List<Integer> groups, List<AggregateCall> aggs,
-      List<Expression> inputs) {
+                                         List<Expression> inputs) {
     ImmutableList.Builder<Expression> builder = ImmutableList.builder();
     List<Expression> inputRefs = ExpressionFactory.createInputRef(inputs);
     for (int group : groups) {
@@ -84,16 +92,19 @@ public class CalciteConverter {
     for (AggregateCall agg : aggs) {
       boolean distinct = agg.isDistinct();
       AggFuncType funcType = convert(agg.getAggregation().getKind());
+      // distinct aggregation has a AggFuncType reversed
       int funcTypeId = distinct ? -funcType.getId() : funcType.getId();
-      if (agg.getArgList().isEmpty()) {
-        builder.add(ExpressionFactory.createAggFunc(
-            TypeConverter.convert2OneDBType(agg.getType().getSqlTypeName()),
-            ModifierWrapper.deduceModifier(inputRefs), funcTypeId, ImmutableList.of()));
-      } else {
-        List<Expression> ins = ExpressionFactory.createInputRef(inputs, agg.getArgList());
-        builder.add(ExpressionFactory.createAggFunc(
-            TypeConverter.convert2OneDBType(agg.getType().getSqlTypeName()), funcTypeId, ins));
+      // AggregateCall.argList is empty means using (*)
+      List<Expression> ins = agg.getArgList().isEmpty() ?
+          ImmutableList.of() : ExpressionFactory.createInputRef(inputs, agg.getArgList());
+      Modifier modifier = ModifierWrapper.deduceModifier(inputRefs);
+      // if agg on private col(s) is allowed, the col is then protected instead of still private
+      if (AggFuncType.isAllowedOnPrivate(funcType.getId())) {
+        modifier = modifier.equals(Modifier.PRIVATE) ? Modifier.PROTECTED : modifier;
       }
+      builder.add(ExpressionFactory.createAggFunc(
+          TypeConverter.convert2OneDBType(agg.getType().getSqlTypeName()),
+          modifier, funcTypeId, ins));
     }
     return builder.build();
   }
@@ -165,7 +176,7 @@ public class CalciteConverter {
     }
 
     ExpressionBuilder(List<RexNode> exps, List<? extends RexNode> outputs,
-        List<Expression> inputs) {
+                      List<Expression> inputs) {
       this.outputs = outputs;
       this.locals = exps;
       this.inputs = inputs;
@@ -371,7 +382,7 @@ public class CalciteConverter {
     }
 
     public static Expression convertRange(Object left, Object right, BoundType leftBound,
-        BoundType rightBound, ColumnType cType, Expression in) {
+                                          BoundType rightBound, ColumnType cType, Expression in) {
       if (cType.equals(ColumnType.STRING)) {
         if (left instanceof NlsString) {
           left = ((NlsString) left).getValue();
@@ -416,7 +427,7 @@ public class CalciteConverter {
           call.operands.stream().map(r -> convert(r)).collect(Collectors.toList());
       switch (funcName) {
         case "abs":
-        // todo: add more scalar function here
+          // todo: add more scalar function here
           ColumnType type = TypeConverter.convert2OneDBType(call.getType().getSqlTypeName());
           return ExpressionFactory.createScalarFunc(type, function.getName(), eles);
         default:

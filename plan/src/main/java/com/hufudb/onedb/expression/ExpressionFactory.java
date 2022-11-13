@@ -2,6 +2,7 @@ package com.hufudb.onedb.expression;
 
 import java.util.Calendar;
 import java.util.List;
+
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.data.storage.utils.DateUtils;
@@ -14,7 +15,8 @@ import com.hufudb.onedb.proto.OneDBPlan.JoinType;
 import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
 
 public class ExpressionFactory {
-  private ExpressionFactory() {}
+  private ExpressionFactory() {
+  }
 
   public static Expression createInputRef(int ref, ColumnType type, Modifier modifier) {
     return Expression.newBuilder().setOpType(OperatorType.REF).setI32(ref).setOutType(type)
@@ -47,26 +49,26 @@ public class ExpressionFactory {
   }
 
   public static Expression createBinaryOperator(OperatorType opType, ColumnType type,
-      Expression left, Expression right) {
+                                                Expression left, Expression right) {
     return Expression.newBuilder().setOpType(opType).setOutType(type).addIn(left).addIn(right)
         .setModifier(ModifierWrapper.dominate(left.getModifier(), right.getModifier())).build();
   }
 
   public static Expression createUnaryOperator(OperatorType opType, ColumnType type,
-      Expression in) {
+                                               Expression in) {
     return Expression.newBuilder().setOpType(opType).setOutType(type).addIn(in)
         .setModifier(in.getModifier()).build();
   }
 
   public static Expression createMultiOperator(OperatorType opType, ColumnType type,
-      List<Expression> inputs) {
+                                               List<Expression> inputs) {
     Modifier mod = ModifierWrapper.deduceModifier(inputs);
     return Expression.newBuilder().setOpType(opType).setOutType(type).addAllIn(inputs)
         .setModifier(mod).build();
   }
 
   public static Expression createScalarFunc(ColumnType type, String funcName,
-      List<Expression> inputs) {
+                                            List<Expression> inputs) {
     Modifier mod = ModifierWrapper.deduceModifier(inputs);
     return Expression.newBuilder().setOpType(OperatorType.SCALAR_FUNC).setOutType(type)
         .setStr(funcName.toLowerCase()).addAllIn(inputs).setModifier(mod).build();
@@ -79,7 +81,7 @@ public class ExpressionFactory {
   }
 
   public static Expression createAggFunc(ColumnType type, Modifier mod, int funcId,
-      List<Expression> inputs) {
+                                         List<Expression> inputs) {
     return Expression.newBuilder().setOpType(OperatorType.AGG_FUNC).setOutType(type)
         .addAllIn(inputs).setModifier(mod).setI32(funcId).build();
   }
@@ -120,7 +122,7 @@ public class ExpressionFactory {
   }
 
   public static JoinCondition createJoinCondition(JoinType joinType, List<Integer> leftKeys,
-      List<Integer> rightKyes, Expression condition, Modifier modifier) {
+                                                  List<Integer> rightKyes, Expression condition, Modifier modifier) {
     JoinCondition.Builder builder = JoinCondition.newBuilder().setType(joinType)
         .addAllLeftKey(leftKeys).addAllRightKey(rightKyes).setModifier(modifier);
     if (condition != null) {

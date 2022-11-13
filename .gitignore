@@ -76,7 +76,9 @@ python/*.egg-info/
 # template files
 proto/bin/
 docker/owner/cert/
-release/demo/log
+release/demo/log/
+release/demo/cert/
+release/demo/stty.exe.stackdump
 
 # vscode
 .vscode/
