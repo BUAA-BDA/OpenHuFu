@@ -68,9 +68,7 @@ public class OneDBClient {
   }
 
   public DataSet executeQueryPlan(Plan plan) {
-    LOG.info("plan before rewrite:\n{}", plan);
     plan = plan.rewrite(rewriter);
-    LOG.info("plan after rewrite:\n{}", plan);
     return UserSideImplementor.getImplementor(plan, this).implement(plan);
   }
 

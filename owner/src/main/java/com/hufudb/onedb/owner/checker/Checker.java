@@ -3,8 +3,10 @@ package com.hufudb.onedb.owner.checker;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.data.schema.SchemaManager;
+import com.hufudb.onedb.expression.AggFuncType;
 import com.hufudb.onedb.plan.Plan;
 import com.hufudb.onedb.proto.OneDBData.Modifier;
 import com.hufudb.onedb.proto.OneDBPlan.Expression;
@@ -34,22 +36,48 @@ public class Checker {
     return ref.getModifier().ordinal() >= in.get(id).ordinal();
   }
 
-  static boolean checkExpression(Expression exp, List<Modifier> in) {
-    if (exp.getOpType().equals(OperatorType.REF)) {
-      return checkRef(exp, in);
-    } else if (exp.getOpType().equals(OperatorType.LITERAL)) {
-      return true;
-    }
-    Modifier outModifier = exp.getModifier();
-    for (Expression e : exp.getInList()) {
+  static boolean checkAgg(Expression agg, List<Modifier> in) {
+    Modifier outModifier = agg.getModifier();
+    for (Expression e : agg.getInList()) {
       if (!checkExpression(e, in)) {
         return false;
       }
+
+      if (AggFuncType.isAllowedOnPrivate(agg.getI32())) {
+        // if count on private cols, we allow it output a protected
+        if (outModifier.equals(Modifier.PROTECTED) &&
+            e.getModifier().equals(Modifier.PRIVATE)) {
+          return true;
+        }
+      }
+
       if (!dominate(outModifier, e.getModifier())) {
         return false;
       }
     }
     return true;
+  }
+
+  static boolean checkExpression(Expression exp, List<Modifier> in) {
+    switch (exp.getOpType()) {
+      case REF:
+        return checkRef(exp, in);
+      case LITERAL:
+        return true;
+      case AGG_FUNC:
+        return checkAgg(exp, in);
+      default:
+        Modifier outModifier = exp.getModifier();
+        for (Expression e : exp.getInList()) {
+          if (!checkExpression(e, in)) {
+            return false;
+          }
+          if (!dominate(outModifier, e.getModifier())) {
+            return false;
+          }
+        }
+        return true;
+    }
   }
 
   static boolean checkPlan(Plan plan, List<Modifier> in) {

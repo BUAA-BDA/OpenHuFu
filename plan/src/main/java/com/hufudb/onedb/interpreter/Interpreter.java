@@ -250,7 +250,7 @@ public class Interpreter {
       case SCALAR_FUNC:
         return calScalarFunc(row, e);
       default:
-        throw new UnsupportedOperationException("operator not support in intereperter");
+        throw new UnsupportedOperationException(String.format("operator %s not support in interpreter", type));
     }
   }
 

@@ -106,6 +106,7 @@ public class BasicRewriter implements Rewriter {
   private Expression convertAvg(Expression agg, List<Expression> localAggs,
       Map<Integer, Expression> groupMap) {
     if (!AggFuncType.isDistinct(agg.getI32())) {
+      // add a sum layer above sum
       Expression localAvgSum = ExpressionFactory.createAggFunc(agg.getOutType(), agg.getModifier(),
           AggFuncType.SUM.getId(), agg.getInList());
       int localAvgSumRef = localAggs.size();

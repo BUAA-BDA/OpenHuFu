@@ -51,4 +51,8 @@ public enum AggFuncType {
   public static boolean isDistinct(int id) {
     return id < 0;
   }
+
+  public static boolean isAllowedOnPrivate(int id) {
+    return id == AVG.id || id == COUNT.id ||id == SUM.id;
+  }
 }

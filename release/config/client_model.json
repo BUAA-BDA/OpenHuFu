@@ -50,15 +50,15 @@
       ]
     },
     {
-      "tableName": "st_pro_3",
+      "tableName": "st_mod",
       "localTables": [
         {
           "endpoint": "localhost:12345",
-          "localName": "st_pro_3"
+          "localName": "st_mod"
         },
         {
           "endpoint": "localhost:12346",
-          "localName": "st_pro_3"
+          "localName": "st_mod"
         }
       ]
     },

@@ -56,12 +56,12 @@
     },
     {
       "actualName": "student",
-      "publishedName": "st_pro_3",
+      "publishedName": "st_mod",
       "publishedColumns": [
         {
           "name": "name",
           "type": "STRING",
-          "modifier": "protected",
+          "modifier": "public",
           "columnId": 0
         },
         {
@@ -73,13 +73,13 @@
         {
           "name": "age",
           "type": "INT",
-          "modifier": "protected",
+          "modifier": "private",
           "columnId": 2
         },
         {
           "name": "dept_name",
           "type": "STRING",
-          "modifier": "public",
+          "modifier": "hidden",
           "columnId": 3
         }
       ]
