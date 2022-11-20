@@ -27,6 +27,7 @@ jobs:
       with:
         name: Hu-Fu-release
         path: release
+        retention-days: 3
   test:
     needs: build
     runs-on: ubuntu-latest
@@ -48,6 +49,7 @@ jobs:
       with:
         name: Jacaco-report
         path: coverage/target/site/jacoco-aggregate
+        retention-days: 3
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3.1.0
       with:
