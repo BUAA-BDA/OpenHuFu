@@ -1,11 +1,10 @@
 package com.hufudb.onedb.backend.service.impl;
 
-import com.hufudb.onedb.backend.entity.SqlRecord;
-import com.hufudb.onedb.backend.mapper.SqlRecordMapper;
+import com.hufudb.onedb.persistence.entity.SqlRecord;
+import com.hufudb.onedb.persistence.mapper.SqlRecordMapper;
 import com.hufudb.onedb.backend.service.SqlRecordService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.hufudb.onedb.backend.utils.Page;
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,7 +20,7 @@ import java.util.List;
 @Service
 public class SqlRecordServiceImpl extends ServiceImpl<SqlRecordMapper, SqlRecord> implements SqlRecordService {
 
-    @Autowired
+    @Resource
     SqlRecordMapper sqlRecordMapper;
 
     @Override
@@ -34,7 +33,7 @@ public class SqlRecordServiceImpl extends ServiceImpl<SqlRecordMapper, SqlRecord
         SqlRecord sqlRecord = new SqlRecord();
         sqlRecord.setContext(context);
         sqlRecord.setUserName(userName);
-        sqlRecordMapper.insertRecord(sqlRecord);
+        sqlRecordMapper.insert(sqlRecord);
         return sqlRecord.getId();
     }
 

@@ -79,6 +79,7 @@ docker/owner/cert/
 release/demo/log/
 release/demo/cert/
 release/demo/stty.exe.stackdump
+release/log
 
 # vscode
 .vscode/

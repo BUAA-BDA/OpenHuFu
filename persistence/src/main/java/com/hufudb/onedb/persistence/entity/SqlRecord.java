@@ -1,4 +1,4 @@
-package com.hufudb.onedb.backend.entity;
+package com.hufudb.onedb.persistence.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;

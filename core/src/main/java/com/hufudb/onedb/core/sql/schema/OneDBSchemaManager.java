@@ -110,7 +110,7 @@ public class OneDBSchemaManager extends AbstractSchema {
       }
       LOG.info("Add owner {}", endpoint);
     } catch (Exception e) {
-      LOG.warn("Fail to add owner {}: {}", endpoint, e.getMessage());
+      LOG.warn("Fail to add owner {}", endpoint, e);
     }
     return client;
   }

@@ -60,7 +60,7 @@ public class OwnerClient {
       OwnerInfo proto = blockingStub.getOwnerInfo(GeneralRequest.newBuilder().build());
       return OneDBOwnerInfo.fromProto(proto);
     } catch (StatusRuntimeException e) {
-      LOG.error("RPC failed in getOwnerInfo: {}", e.getStatus());
+      LOG.error("RPC failed in getOwnerInfo: {}", e);
       throw new RuntimeException("Fail to connect to owner " + endpoint);
     }
   }

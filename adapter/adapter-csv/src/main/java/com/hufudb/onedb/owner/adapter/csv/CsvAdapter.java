@@ -37,7 +37,7 @@ public class CsvAdapter implements Adapter {
     try {
       loadTables(csvDir);
     } catch (IOException e) {
-      e.printStackTrace();
+      LOG.error("Load tables error", e);
     }
   }
 
@@ -54,7 +54,7 @@ public class CsvAdapter implements Adapter {
                 tables.put(tableName, table);
                 schemaManager.addLocalTable(TableSchema.of(tableName, table.getSchema()));
               } catch (IOException e) {
-                e.printStackTrace();
+                LOG.error("Parse file: {} error", file.getFileName(), e);
               }
             });
       }

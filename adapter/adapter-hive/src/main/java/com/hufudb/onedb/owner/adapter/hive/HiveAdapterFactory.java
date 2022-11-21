@@ -17,7 +17,7 @@ public class HiveAdapterFactory implements AdapterFactory {
     try {
       Class.forName("org.apache.hive.jdbc.HiveDriver");
     } catch (Exception e) {
-      e.printStackTrace();
+      LOG.error("Find class for org.apache.hive.jdbc.HiveDriver error", e);
     }
   }
 
@@ -29,8 +29,7 @@ public class HiveAdapterFactory implements AdapterFactory {
       Statement statement = connection.createStatement();
       return new HiveAdapter(config.catalog, connection, statement, new HiveTypeConverter(), new BasicTranslator(getType()));
     } catch (Exception e) {
-      LOG.error("Fail to connect to {}: {}", config.url, e.getMessage());
-      e.printStackTrace();
+      LOG.error("Fail to connect to {}", config.url, e);
       return null;
     }
   }

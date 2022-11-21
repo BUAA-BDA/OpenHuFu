@@ -1,21 +1,29 @@
 package com.hufudb.onedb.backend.controller;
 
+import com.hufudb.onedb.backend.service.OwnerInfoService;
+import com.hufudb.onedb.backend.utils.Page;
+import com.hufudb.onedb.backend.utils.PageUtils;
+import com.hufudb.onedb.backend.entity.request.RecordRequest;
+import com.hufudb.onedb.backend.utils.TestPing;
+import com.hufudb.onedb.persistence.entity.OwnerInfo;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 import com.hufudb.onedb.backend.service.SqlRecordService;
-import com.hufudb.onedb.backend.utils.PojoResultSet;
-import com.hufudb.onedb.backend.utils.Request;
+import com.hufudb.onedb.backend.entity.response.PojoResultSet;
+import com.hufudb.onedb.backend.entity.request.Request;
 import com.hufudb.onedb.core.table.GlobalTableConfig;
 import com.hufudb.onedb.core.table.OneDBTableSchema;
 import com.hufudb.onedb.core.table.utils.PojoGlobalTableSchema;
 import com.hufudb.onedb.data.schema.TableSchema;
 import com.hufudb.onedb.data.schema.utils.PojoTableSchema;
 import com.hufudb.onedb.user.OneDB;
+import javax.annotation.Resource;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,9 +40,11 @@ public class UserController {
   @Value("${owner.enable:false}")
   private boolean hasOwner;
 
-  @Autowired
+  @Resource
   private SqlRecordService sqlRecordService;
 
+  @Resource
+  OwnerInfoService ownerInfoService;
   UserController(OneDB service) {
     this.onedb = service;
   }
@@ -67,6 +77,31 @@ public class UserController {
     List<TableSchema> schemas = onedb.getOwnerTableSchema(endpoint);
     LOG.info("get local table {} from owner {}", schemas, endpoint);
     return PojoTableSchema.from(schemas);
+  }
+
+  @PostMapping("/owner/searchowner")
+  Page<OwnerInfo> query(@RequestBody RecordRequest request) {
+//    String context = request.context == null ? ".*" : request.context;
+//    String status = request.status == null ? ".*" : request.status;
+//    String order = "id ASC";
+//    return PageUtils.getPage(()->ownerInfoService.selectOwner(context, status), pageId, pageSize, order);
+    Set<String> endpoints = onedb.getEndpoints();
+    List<OwnerInfo> owners = new ArrayList<>();
+    Long id = 1L;
+    for (String endpoint : endpoints) {
+      OwnerInfo ownerInfo = new OwnerInfo();
+      ownerInfo.setId(id++);
+      ownerInfo.setAddress(endpoint);
+      Long tableNum = Long.valueOf(onedb.getOwnerTableSchema(endpoint).size());
+      ownerInfo.setTableNum(tableNum);
+      ownerInfo.setStatus(TestPing.alive(endpoint) ? "connected" : "disconneted");
+      if ((request.context != null && endpoint.indexOf(request.context) == -1) ||
+          (StringUtils.isNotBlank(request.status) && !ownerInfo.getStatus().equals(request.status))) {
+        continue;
+      }
+      owners.add(ownerInfo);
+    }
+    return PageUtils.getPage(owners, request.pageId, request.pageSize);
   }
 
   // for global tables

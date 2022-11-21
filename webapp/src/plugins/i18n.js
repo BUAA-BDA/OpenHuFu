@@ -1,6 +1,6 @@
 import { createI18n } from 'vue-i18n'
 
-function getLocalLanguage() {
+export function getLocalLanguage() {
     const myLocale = localStorage.getItem('my_locale')
     if (myLocale) {
         return myLocale

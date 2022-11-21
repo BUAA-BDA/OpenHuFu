@@ -1,4 +1,4 @@
-package com.hufudb.onedb.backend.utils;
+package com.hufudb.onedb.backend.entity.response;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;

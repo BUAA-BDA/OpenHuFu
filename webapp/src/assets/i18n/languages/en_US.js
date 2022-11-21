@@ -10,8 +10,8 @@ module.exports =  {
         setting: "Setting"
     },
     editor: {
-        noConnection: "No Connection",
-        connectingToBackend: "Connecting to Backend",
+        disConnected: "DisConnected",
+        connected: "Connected",
         failToConnectBackend: "Fail to Connect Backend",
         owners: "Owners",
         noOwner: "No Owner",
@@ -36,8 +36,7 @@ module.exports =  {
         selectComponentTables: "Select Component Tables",
         localTable: "Local Table",
         publishedTable: "Published Table",
-        schema: "schema",
-        owners: "owners",
+        schema: "Schema",
     },
     operation: {
         pleaseInput: "Please Input",
@@ -62,14 +61,14 @@ module.exports =  {
         port: "Port",
         ip: "IP",
         status: "Status",
-        tables: "Tables",
+        tables: "Published Table",
         operation: "Operation",
-        delete: "delete",
+        delete: "Delete",
         connected: "Online",
         disconnected: "Offline",
-        address: "address",
-        pleaseadd: "add a new owner",
-        pleaseaddaddress: "Please input address"
+        address: "Address",
+        newOwner: "New Owner",
+        addAddress: "Please input owner address"
     },
     datasource: {
         datasourceType: "DataSource Type",

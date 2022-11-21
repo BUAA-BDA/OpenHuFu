@@ -1,6 +1,6 @@
 <template>
   <div class="datasource">
-    <el-form :model="form" label-width="120px" :span="8">
+    <el-form :model="form" label-width="130px" :span="8">
       <el-form-item :label="$t('datasource.datasourceType')">
         <el-select v-model="form.datasourceType"
                    :placeholder="$t('datasource.chooseDatasourceType')"
@@ -11,7 +11,7 @@
           <el-option label="Kylin" value="Kylin"/>
           <el-option label="Mysql" value="Mysql"/>
           <el-option label="PostGIS" value="PostGIS"/>
-          <el-option label="PostgreSQL" value="PostgreSQL"/>
+          <el-option label="PostgreSQL" value="PostgreSQL" selected/>
           <el-option label="SQLLite" value="SQLLite"/>
           <el-option label="CSV" value="CSV"/>
           <el-option label="JSON" value="JSON"/>
@@ -61,26 +61,61 @@ export default {
   data() {
     return {
       form: reactive({
-        dataSourceType: '',
-        jdbcUrl: '',
-        username: '',
-        password: '',
+        datasourceType: 'Hive',
+        jdbcUrl: 'jdbc:postgresql://localhost:13101/postgres',
+        username: 'postgres',
+        password: 'onedb',
         tables: ref()
       }),
       data: [
         {
           value: '1',
-          label: 'Level one 1',
+          label: 'student',
           children: [],
         },
         {
           value: '2',
-          label: 'Level one 2',
+          label: 'taxi',
           children: [],
         },
         {
           value: '3',
-          label: 'Level one 3',
+          label: 'lineitem',
+          children: [],
+        },
+        {
+          value: '4',
+          label: 'partsupp',
+          children: [],
+        },
+        {
+          value: '5',
+          label: 'nation',
+          children: [],
+        },
+        {
+          value: '6',
+          label: 'part',
+          children: [],
+        },
+        {
+          value: '7',
+          label: 'supplier',
+          children: [],
+        },
+        {
+          value: '8',
+          label: 'orders',
+          children: [],
+        },
+        {
+          value: '9',
+          label: 'region',
+          children: [],
+        },
+        {
+          value: '10',
+          label: 'customer',
           children: [],
         },
       ]
