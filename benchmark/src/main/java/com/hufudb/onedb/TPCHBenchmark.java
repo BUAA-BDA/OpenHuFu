@@ -104,7 +104,6 @@ public class TPCHBenchmark {
     }
   }
 
-
   @Benchmark
   @Fork(0)
   @Warmup(iterations = 2)
@@ -121,7 +120,6 @@ public class TPCHBenchmark {
       e.printStackTrace();
     }
   }
-
 
   @Benchmark
   @Fork(0)
@@ -225,3 +223,6 @@ public class TPCHBenchmark {
     }
   }
 }
+
+
+

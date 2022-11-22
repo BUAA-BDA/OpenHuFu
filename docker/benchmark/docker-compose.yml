@@ -6,9 +6,13 @@ services:
     container_name: benchmark
     working_dir: /usr/src/benchmark
     restart: "no"
-    command: bash benchmark.sh
+    command: bash benchmark.sh $NAME
+    environment:
+      - ONEDB_ROOT=/usr/src/benchmark/
+      - NAME=${NAME}
     volumes:
       - $PWD/../../benchmark:/usr/src/benchmark
+      - $PWD/../../release/udf:/usr/src/benchmark/udf
     networks:
       - public_tpch
 

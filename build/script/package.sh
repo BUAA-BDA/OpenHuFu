@@ -44,6 +44,8 @@ else
     cp backend/target/backend*.jar ./release/bin/backend.jar
   elif [ $1 == "core" ]; then
     buildCoreModule
+  elif [ $1 == "benchmark" ]; then
+    mvn install -Pdocker -T 0.5C -Dmaven.test.skip=true -pl $1
   elif [ $1 == "user" ]; then
     mvn install -Pdocker -T 0.5C -Dmaven.test.skip=true -pl $1
     cp user/target/*-with-dependencies.jar ./release/bin/onedb_user_client.jar
