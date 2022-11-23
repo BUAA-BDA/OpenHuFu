@@ -48,5 +48,12 @@
         }
       ]
     }
-  ]
+  ],
+  "license": {
+    "subject": "license3",
+    "publicAlias": "publicCert",
+    "storePass": "public_password1234",
+    "licensePath": "./license/license3.lic",
+    "publicKeysStorePath": "./license/publicCerts.keystore"
+  }
 }
