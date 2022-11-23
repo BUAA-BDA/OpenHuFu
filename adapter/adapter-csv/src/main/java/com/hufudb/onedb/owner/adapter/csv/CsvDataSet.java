@@ -42,7 +42,7 @@ public class CsvDataSet implements DataSet {
     try {
       csvParser.close();
     } catch (IOException e) {
-      e.printStackTrace();
+      LOG.error("Close csvParser error", e);
     }
   }
 

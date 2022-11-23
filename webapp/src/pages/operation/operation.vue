@@ -1,71 +1,72 @@
 <template>
-  <div class="search-bar">
-    <div class="search-bar2">
-      <a class="my-pad">{{ $t("operation.context") }}:</a>
-      <el-input
-          v-model="recordContext"
-          :placeholder="$t('operation.pleaseInput')"
-          clearable
-          style="width:300px;">
-      </el-input>
-    </div>
-    <div class="search-bar2">
-      <a class="my-pad">{{ $t("operation.status") }}:</a>
-      <el-select
-          v-model="recordStatus"
-          :placeholder="$t('operation.pleaseSelect')"
-          text-align="center"
-          clearable
-          style="width:150px;">
-        <el-option
-            v-for="item in allStatus"
-            :key="$t(item.name)"
-            :label="$t(item.name)"
-            :value="$t(item.value)"
+  <div class="operation">
+    <div class="search-bar">
+      <div class="search-bar2">
+        <a class="my-pad">{{ $t("operation.context") }}:</a>
+        <el-input
+            v-model="recordContext"
+            :placeholder="$t('operation.pleaseInput')"
+            clearable
+            style="width:300px;">
+        </el-input>
+      </div>
+      <div class="search-bar2">
+        <a class="my-pad">{{ $t("operation.status") }}:</a>
+        <el-select
+            v-model="recordStatus"
+            :placeholder="$t('operation.pleaseSelect')"
+            text-align="center"
+            clearable
+            style="width:150px">
+          <el-option
+              v-for="item in allStatus"
+              :key="$t(item.name)"
+              :label="$t(item.name)"
+              :value="item.value"
 
-        />
-      </el-select>
+          />
+        </el-select>
+      </div>
+      <div class="search-bar2">
+        <el-button
+            type="primary"
+            @click="search">
+          {{ $t('operation.query') }}
+        </el-button>
+        <el-button
+            type="primary"
+            @click="clearContextInput">
+          {{ $t('operation.reset') }}
+        </el-button>
+      </div>
     </div>
-    <div class="search-bar2">
-      <el-button
-          type="primary"
-          @click="search">
-        {{ $t('operation.query') }}
-      </el-button>
-      <el-button
-          type="primary"
-          @click="clearContextInput">
-        {{ $t('operation.reset') }}
-      </el-button>
+    <div class="">
+      <el-table :data="tableData" stripe
+                class="result-table"
+                style="overflow-y:auto">
+        <template v-slot:empty>
+          {{ $t('operation.noData') }}
+        </template>
+        <el-table-column prop="id" min-width='3%' :label="$t('operation.id')">
+        </el-table-column>
+        <el-table-column prop="context" min-width='20%' :label="$t('operation.context')">
+        </el-table-column>
+        <el-table-column prop="userName" min-width='5%' :label="$t('operation.username')">
+        </el-table-column>
+        <el-table-column prop="status" min-width='5%' :label="$t('operation.status')" :formatter="format2">
+        </el-table-column>
+        <el-table-column prop="startTime" min-width='10%' :label="$t('operation.subTime')">
+        </el-table-column>
+        <el-table-column prop="endTime" min-width='10%' :label="$t('operation.execTime')" :formatter="format1">
+        </el-table-column>
+      </el-table>
     </div>
-  </div>
-  <div>
-    <el-table :data="tableData" stripe
-              height="450px"
-              class="result-table"
-              max-height="450px">
-      <template v-slot:empty>
-        {{ $t('operation.noData') }}
-      </template>
-      <el-table-column prop="id" :label="$t('operation.id')">
-      </el-table-column>
-      <el-table-column prop="context" :label="$t('operation.context')">
-      </el-table-column>
-      <el-table-column prop="userName" :label="$t('operation.username')">
-      </el-table-column>
-      <el-table-column prop="status" :label="$t('operation.status')" :formatter="format2">
-      </el-table-column>
-      <el-table-column prop="startTime" :label="$t('operation.subTime')">
-      </el-table-column>
-      <el-table-column prop="endTime" :label="$t('operation.execTime')" :formatter="format1">
-      </el-table-column>
-    </el-table>
-  </div>
-  <div class="search-bar">
-    <el-pagination text-align="center" @size-change="sizeChange" @current-change="currentChange"
-                   :current-page="pageNow" :page-size="size" :page-sizes="[10]"
-                   layout="total, prev, pager, next, jumper" :total="total">
-    </el-pagination>
+    <div class="search-bar">
+      <el-pagination text-align="center" @size-change="sizeChange" @current-change="currentChange"
+                     :current-page="pageNow" :page-size="size" :page-sizes="[5, 10, 15, 20]"
+                     layout="total, sizes, prev, pager, next, jumper" :total="total">
+      </el-pagination>
+    </div>
   </div>
 </template>
 
@@ -75,8 +76,7 @@ import axios from "axios";
 
 export default {
   name: 'OperationPage',
-  components: {
-  },
+  components: {},
   mounted() {
     this.refresh();
   },
@@ -117,24 +117,20 @@ export default {
       let date1, date2, execTime;
       date1 = new Date(row.startTime);
       date2 = new Date(row.endTime);
-      execTime = date2-date1;
+      execTime = date2 - date1;
       let s = 1000;
       let m = s * 60;
       let h = m * 60;
       let d = h * 24;
       if (execTime > d) {
-        return parseInt(execTime/d) + "d " + parseInt((execTime % d)/h) + "h";
-      }
-      else if (execTime > h) {
-        return parseInt(execTime/h) + "h " + parseInt((execTime % h)/m) + "m";
-      }
-      else if (execTime > m) {
-        return parseInt(execTime/m) + "m " + parseInt((execTime % m)/s) + "s";
-      }
-      else if (execTime > s) {
-        return parseInt(execTime/s) + "s " + parseInt(execTime % s) + "ms";
-      }
-      else {
+        return parseInt(execTime / d) + "d " + parseInt((execTime % d) / h) + "h";
+      } else if (execTime > h) {
+        return parseInt(execTime / h) + "h " + parseInt((execTime % h) / m) + "m";
+      } else if (execTime > m) {
+        return parseInt(execTime / m) + "m " + parseInt((execTime % m) / s) + "s";
+      } else if (execTime > s) {
+        return parseInt(execTime / s) + "s " + parseInt(execTime % s) + "ms";
+      } else {
         return execTime + "ms";
       }
     },
@@ -162,8 +158,8 @@ export default {
     getQueryRecord() {
       axios
           .post("/sqlRecord/query", {
-            context: (this.recordContext.length == 0)?null: this.recordContext,
-            status: (this.recordStatus == 0)?null: this.recordStatus,
+            context: (this.recordContext.length == 0) ? null : this.recordContext,
+            status: (this.recordStatus == 0) ? null : this.recordStatus,
             pageId: this.pageNow,
             pageSize: this.size
           })
@@ -195,6 +191,10 @@ export default {
 .my-pad {
   padding-right: 20px;
 }
+.operation {
+  margin-left: 20px;
+  margin-right: 20px;
+}
 .search-bar {
   display: flex;
   justify-content: space-around;
@@ -204,6 +204,7 @@ export default {
   background-color: white;
   padding: 5px 10px;
 }
+
 .search-bar2 {
   display: flex;
   justify-content: space-evenly;

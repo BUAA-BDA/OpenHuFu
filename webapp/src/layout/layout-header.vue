@@ -10,7 +10,8 @@
       text-color="#ffffff"
       active-text-color="#ffd04b"
   >
-    <img class="logo" src="../assets/images/hufu-logo.svg" alt="金融大数据" />
+
+    <img class ="logo" src="../assets/images/hufu-logo.svg" alt="金融大数据" />
     <el-menu-item :index="navItem.path"  v-for="navItem in navItems" :key="navItem.name" class="flex-left">
       <template #title>
         <el-icon>
@@ -36,7 +37,8 @@
 import {defineComponent} from 'vue'
 import {Menu, Edit, Operation, Compass, Setting, Reading} from '@element-plus/icons-vue'
 import {ElMessage} from 'element-plus'
-import router from '../router'
+import zh from 'element-plus/lib/locale/lang/zh-cn'
+import en from 'element-plus/lib/locale/lang/en'
 
 const handleCommand = (command) => {
   ElMessage(`click on item ${command}`)
@@ -56,11 +58,11 @@ export default defineComponent({
   data: () => {
     return {
       navItems: [
-        {
-          icon: 'Menu',
-          name: 'menu.overview',
-          path: '/overview'
-        },
+        // {
+        //   icon: 'Menu',
+        //   name: 'menu.overview',
+        //   path: '/overview'
+        // },
         {
           icon: 'Edit',
           name: 'menu.editor',
@@ -71,11 +73,11 @@ export default defineComponent({
           name: 'menu.operation',
           path: '/operation'
         },
-        {
-          icon: 'Compass',
-          name: 'menu.datasource',
-          path: '/datasource'
-        },
+        // {
+        //   icon: 'Compass',
+        //   name: 'menu.datasource',
+        //   path: '/datasource'
+        // },
         {
           icon: 'Setting',
           name: 'menu.setting',
@@ -115,13 +117,13 @@ export default defineComponent({
 .logo{
   width:40px;
   height:40px;
-  position: fixed;
+  /*position: fixed;*/
   float:left;
-  left:10px;
-  top:12px;
+  padding-left:20px;
+  padding-top:12px;
 }
 .flex-left {
-  left:50px;
+  left:10px;
 }
 .flex-right {
   flex-grow: 20;

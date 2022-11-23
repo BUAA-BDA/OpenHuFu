@@ -93,7 +93,7 @@ public class UserSideImplementor implements PlanImplementor {
           LOG.error("Error in owner side query");
         }
       }
-    } catch (InterruptedException | ExecutionException e) {
+    } catch (Exception e) { // NOSONAR
       LOG.error("Error in owner side query", e);
     }
     return concurrentDataSet;
@@ -188,7 +188,7 @@ public class UserSideImplementor implements PlanImplementor {
           LOG.error("error in leafQuery");
         }
       }
-    } catch (ExecutionException | InterruptedException e) {
+    } catch (Exception e) { //NOSONAR
       LOG.error("Error in owner side query", e);
     }
     return concurrentDataSet;

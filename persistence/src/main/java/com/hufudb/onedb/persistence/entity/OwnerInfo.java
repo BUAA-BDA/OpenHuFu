@@ -1,4 +1,4 @@
-package com.hufudb.onedb.backend.entity;
+package com.hufudb.onedb.persistence.entity;
 
 import java.io.Serializable;
 
@@ -12,7 +12,7 @@ import lombok.EqualsAndHashCode;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author fzh
@@ -23,7 +23,7 @@ import lombok.EqualsAndHashCode;
 @TableName("owner")
 public class OwnerInfo extends Model<OwnerInfo>{
     private static final long serialVersionUID = 1L;
-    
+
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
@@ -43,7 +43,7 @@ public class OwnerInfo extends Model<OwnerInfo>{
     public Long getId() {
         return id;
     }
-    
+
     public String getAddress(){
         return address;
     }

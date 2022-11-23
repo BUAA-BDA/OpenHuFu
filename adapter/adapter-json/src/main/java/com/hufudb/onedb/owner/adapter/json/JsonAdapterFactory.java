@@ -41,7 +41,7 @@ public class JsonAdapterFactory implements AdapterFactory {
         jsonSrcURLs.add(jsonSrc.toURI().toURL());
         LOG.info("Add JAR {}", jsonSrc.getAbsolutePath());
       } catch (Exception e) {
-        e.printStackTrace();
+        LOG.error("Fail to deal with json src: {}", jsonSrc.getAbsolutePath(), e);
       }
     }
     ClassLoader jsonSrcClassLoader = new URLClassLoader(jsonSrcURLs.toArray(new URL[0]), JsonSrcFactory.class.getClassLoader());

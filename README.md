@@ -127,10 +127,10 @@ The configuration is located in `release/conf/` as `server[x].json`, the details
 - tables: predefined local table schemas that can be obtained by query user
     - actualName: the actual name of the table in the database system
     - publishedName: the table name published to the outside, query users can use the name to query this table
-    - publishedColumns: columns informations
+    - publishedColumns: columns information
         - name: the column name published to the outside
         - type: the column type published to the outside (for now, it needs to be consistent with the actual type)
-        - modifier: security level(public, protected and hidden)
+        - modifier: security level(public, protected, private and hidden)
         - columnId: the ordinal number of the corresponding column in the actual table
 
 

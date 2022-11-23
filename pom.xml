@@ -25,6 +25,7 @@
     <module>benchmark</module>
     <module>backend</module>
     <module>coverage</module>
+    <module>persistence</module>
   </modules>
 
   <properties>

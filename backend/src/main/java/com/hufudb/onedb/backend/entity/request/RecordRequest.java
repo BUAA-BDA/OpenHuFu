@@ -1,4 +1,4 @@
-package com.hufudb.onedb.backend.utils;
+package com.hufudb.onedb.backend.entity.request;
 
 public class RecordRequest {
 

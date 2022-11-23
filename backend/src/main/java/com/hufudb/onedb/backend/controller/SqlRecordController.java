@@ -1,11 +1,11 @@
 package com.hufudb.onedb.backend.controller;
 
 
-import com.hufudb.onedb.backend.entity.SqlRecord;
+import com.hufudb.onedb.persistence.entity.SqlRecord;
 import com.hufudb.onedb.backend.service.SqlRecordService;
 import com.hufudb.onedb.backend.utils.Page;
 import com.hufudb.onedb.backend.utils.PageUtils;
-import com.hufudb.onedb.backend.utils.RecordRequest;
+import com.hufudb.onedb.backend.entity.request.RecordRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

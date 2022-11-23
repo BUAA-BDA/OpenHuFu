@@ -32,8 +32,12 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OneDB {
+
+  protected final static Logger LOG = LoggerFactory.getLogger(OneDB.class);
   private CalciteConnection calciteConnection;
   private OneDBSchemaManager schema;
   private Connection connection;
@@ -61,7 +65,7 @@ public class OneDB {
                   rootSchema, "onedb", new HashMap<String, Object>());
       rootSchema.add("onedb", schema);
     } catch (Exception e) {
-      e.printStackTrace();
+      LOG.error("Create onedb error", e);
     }
   }
 
@@ -89,7 +93,7 @@ public class OneDB {
       final String configPath = cmd.getOptionValue("config", "config/user.json");
       setupCLI(configPath);
     } catch (Exception e) {
-      e.printStackTrace();
+      LOG.error("Setup cli error", e);
     }
   }
 
@@ -98,7 +102,7 @@ public class OneDB {
       Statement statement = connection.createStatement();
       return statement.executeQuery(sql);
     } catch (SQLException e) {
-      e.printStackTrace();
+      LOG.error("Execute query error", e);
     }
     return null;
   }
@@ -111,7 +115,7 @@ public class OneDB {
     try {
       connection.close();
     } catch (SQLException e) {
-      e.printStackTrace();
+      LOG.error("Close connection error", e);
     }
   }
 

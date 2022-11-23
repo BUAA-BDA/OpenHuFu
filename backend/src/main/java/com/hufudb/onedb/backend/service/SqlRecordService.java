@@ -1,6 +1,6 @@
 package com.hufudb.onedb.backend.service;
 
-import com.hufudb.onedb.backend.entity.SqlRecord;
+import com.hufudb.onedb.persistence.entity.SqlRecord;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;

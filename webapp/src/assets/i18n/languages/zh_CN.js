@@ -10,8 +10,8 @@ module.exports =  {
         setting: "设置"
     },
     editor: {
-        noConnection: "未连接",
-        connectingToBackend: "已连接",
+        disConnected: "未连接",
+        connected: "已连接",
         failToConnectBackend: "连接失败",
         owners: "数据拥有方",
         noOwner: "无数据拥有方",
@@ -62,14 +62,14 @@ module.exports =  {
         port: "端口",
         ip: "IP地址",
         status: "状态",
-        tables: "表数",
+        tables: "已发布表",
         operation: "操作",
         delete: "删除",
         connected: "在线",
         disconnected: "离线",
         address: "地址",
-        pleaseadd: "添加数据拥有方",
-        pleaseaddaddress: "请输入用户IP地址"
+        newOwner: "增加数据拥有方",
+        addAddress: "请输入用户IP地址"
     },
     datasource: {
         datasourceType: "数据源类型",

@@ -5,7 +5,7 @@
         <el-header class="top-bar connect-info" v-if="connectState == 0">
           <span>
             <font-awesome-icon icon="circle-exclamation" class="prefix-icon" />
-            {{ $t("editor.noConnection") }}
+            {{ $t("editor.disConnected") }}
           </span>
         </el-header>
         <el-header class="top-bar connect-info" v-if="connectState == 1">
@@ -14,7 +14,7 @@
                 icon="spinner"
                 class="prefix-icon rotate-element"
             />
-            {{ $t("editor.connectingToBackend") }}
+            {{ $t("editor.connected") }}
           </span>
         </el-header>
         <el-header class="top-bar connect-info" v-if="connectState == 2">
@@ -24,7 +24,7 @@
                 class="prefix-icon icon-button"
                 @click="refreshAll()"
             />
-            {{ $t("editor.connectingToBackend") }}
+            {{ $t("editor.connected") }}
           </span>
         </el-header>
         <el-header class="top-bar connect-info" v-if="connectState == 3">
@@ -42,7 +42,7 @@
               </div>
             </template>
             <div v-if="connectState != 2" class="collapse-placeholder">
-              <span> {{ $t("editor.noConnection") }} </span>
+              <span> {{ $t("editor.disConnected") }} </span>
             </div>
             <div
                 v-if="connectState == 2 && owners.length == 0"
@@ -144,7 +144,7 @@
               </div>
             </template>
             <div v-if="connectState != 2" class="collapse-placeholder">
-              <span> {{ $t("editor.noConnection") }}</span>
+              <span> {{ $t("editor.disConnected") }}</span>
             </div>
             <div
                 v-if="connectState == 2 && globalTables.length == 0"
@@ -245,7 +245,7 @@
               </div>
             </template>
             <div v-if="connectState != 2" class="collapse-placeholder">
-              <span> {{ $t("editor.noConnection") }} </span>
+              <span> {{ $t("editor.disConnected") }} </span>
             </div>
             <el-tree
                 v-else
@@ -590,7 +590,6 @@ export default {
     EditorSub,
   },
   mounted() {
-    this.refreshOwnerTree();
     this.refreshGlobalTableTree();
     this.refreshLocalTableTree();
     this.connectRemote();
@@ -1191,16 +1190,10 @@ export default {
   justify-content: space-around;
 }
 .horizontal-tabs .el-tabs__header {
-  margin-bottom: 10;
+  margin-bottom: 10px;
 }
 .prefix-icon {
   margin: 0 8px 0 0;
-}
-.hufu-logo {
-  width: 80%;
-  padding: 10px;
-  max-width: 250px;
-  min-width: 150px;
 }
 .left-pane .group-form {
   padding: 5px 10px;

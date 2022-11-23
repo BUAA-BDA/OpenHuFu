@@ -78,7 +78,7 @@ public class TPCHBenchmark {
       }
       try {
         Thread.sleep(3);
-      } catch (Exception e) {
+      } catch (Exception e) { //NOSONAR
         LOG.error("Exception caught during setup", e);
       }
       List<String> endpoints =
@@ -118,7 +118,7 @@ public class TPCHBenchmark {
       while (resultSet.next()) {
       }
     } catch (SQLException e) {
-      e.printStackTrace();
+      LOG.error("Fail to test aggregate", e);
     }
   }
 
@@ -140,7 +140,7 @@ public class TPCHBenchmark {
       while (resultSet.next()) {
       }
     } catch (SQLException e) {
-      e.printStackTrace();
+      LOG.error("Fail to test group by", e);
     }
   }
 
@@ -160,7 +160,7 @@ public class TPCHBenchmark {
       while (resultSet.next()) {
       }
     } catch (SQLException e) {
-      e.printStackTrace();
+      LOG.error("Fail to test sort limit", e);
     }
   }
 
@@ -181,7 +181,7 @@ public class TPCHBenchmark {
       }
       LOG.debug("multiway join get {} rows", count);
     } catch (SQLException e) {
-      e.printStackTrace();
+      LOG.error("Fail to test multi join", e);
     }
   }
 
@@ -201,7 +201,7 @@ public class TPCHBenchmark {
       }
       LOG.debug("equal join get {} rows", count);
     } catch (SQLException e) {
-      e.printStackTrace();
+      LOG.error("Fail to test equal join", e);
     }
   }
 
@@ -221,7 +221,7 @@ public class TPCHBenchmark {
       }
       LOG.debug("equal join get {} rows", count);
     } catch (SQLException e) {
-      e.printStackTrace();
+      LOG.error("Fail to test hashpsi join", e);
     }
   }
 }

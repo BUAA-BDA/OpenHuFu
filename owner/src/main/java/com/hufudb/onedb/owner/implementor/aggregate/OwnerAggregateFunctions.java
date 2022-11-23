@@ -96,8 +96,7 @@ public class OwnerAggregateFunctions {
             throw new UnsupportedOperationException("Unsupported type for secretsharing sum");
         }
       } catch (ProtocolException e) {
-        LOG.error("Error when executing secretsharing: {}", e.getMessage());
-        e.printStackTrace();
+        LOG.error("Error when executing secretsharing");
         return null;
       }
     }
@@ -148,8 +147,7 @@ public class OwnerAggregateFunctions {
           return OneDBCodec.decodeInt(res);
         }
       } catch (ProtocolException e) {
-        LOG.error("Error when executing GMW: {}", e.getMessage());
-        e.printStackTrace();
+        LOG.error("Error when executing GMW", e);
         return null;
       }
     }

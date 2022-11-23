@@ -2,12 +2,12 @@ package com.hufudb.onedb.backend.service.impl;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.hufudb.onedb.backend.entity.OwnerInfo;
-import com.hufudb.onedb.backend.mapper.OwnerInfoMapper;
+import com.hufudb.onedb.persistence.entity.OwnerInfo;
+import com.hufudb.onedb.persistence.mapper.OwnerInfoMapper;
 import com.hufudb.onedb.backend.service.OwnerInfoService;
 
 /**
@@ -21,7 +21,7 @@ import com.hufudb.onedb.backend.service.OwnerInfoService;
 @Service
 public class OwnerInfoServerImpl extends ServiceImpl<OwnerInfoMapper, OwnerInfo> implements OwnerInfoService{
 
-    @Autowired
+    @Resource
     OwnerInfoMapper ownerMapper;
 
     @Override
