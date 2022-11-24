@@ -17,6 +17,7 @@ import com.hufudb.onedb.owner.adapter.Adapter;
 import com.hufudb.onedb.owner.adapter.AdapterConfig;
 import com.hufudb.onedb.owner.adapter.AdapterFactory;
 import com.hufudb.onedb.owner.adapter.AdapterLoader;
+import com.hufudb.onedb.owner.license.LicenseVerifyParam;
 import com.hufudb.onedb.proto.OneDBService.OwnerInfo;
 import com.hufudb.onedb.rpc.grpc.OneDBOwnerInfo;
 import com.hufudb.onedb.rpc.grpc.OneDBRpc;
@@ -39,6 +40,7 @@ public class OwnerConfigFile {
   public List<PojoPublishedTableSchema> tables;
   public AdapterConfig adapterconfig;
   public List<LibraryConfig> libraryconfigs;
+  public LicenseVerifyParam license;
 
   public OwnerConfigFile(int id, int port, int threadnum, String hostname, String privatekeypath,
       String certchainpath, String trustcertpath) {

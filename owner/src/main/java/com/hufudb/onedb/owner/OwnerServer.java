@@ -1,5 +1,7 @@
 package com.hufudb.onedb.owner;
 
+import com.hufudb.onedb.owner.license.LicenseVerify;
+import com.hufudb.onedb.owner.license.LicenseVerifyParam;
 import io.grpc.BindableService;
 import io.grpc.Grpc;
 import io.grpc.Server;
@@ -93,6 +95,7 @@ public class OwnerServer {
     Gson gson = new Gson();
     Reader reader = Files.newBufferedReader(Paths.get(configPath));
     OwnerConfigFile config = gson.fromJson(reader, OwnerConfigFile.class);
+    // licenseInstall(config.license);
     return new OwnerServer(config.generateConfig());
   }
 
@@ -110,6 +113,19 @@ public class OwnerServer {
       server.blockUntilShutdown();
     } catch (Exception e) { // NOSONAR
       LOG.error("Error when start owner server", e);
+      System.exit(1);
+    }
+  }
+
+  public static void licenseInstall(LicenseVerifyParam param) {
+    LOG.info("License Install Begin");
+    try {
+      LicenseVerify licenseVerify = new LicenseVerify();
+      licenseVerify.install(param);
+      LOG.info("License Install End");
+    } catch (Exception e) {
+      LOG.error("License Install Failed!",e);
+      LOG.error("Error when start owner server!", e);
       System.exit(1);
     }
   }
