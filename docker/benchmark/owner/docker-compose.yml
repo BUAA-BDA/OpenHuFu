@@ -2,7 +2,7 @@ version: '3.3'
 
 services:
   tpchowner1:
-    image: maven:3.8-openjdk-11
+    image: maven:3.8.1-openjdk-17
     container_name: tpchowner1
     working_dir: /usr/src/mymvn
     restart: "no"
@@ -22,7 +22,7 @@ services:
       - 12101:12345
 
   tpchowner2:
-    image: maven:3.8-openjdk-11
+    image: maven:3.8.1-openjdk-17
     container_name: tpchowner2
     working_dir: /usr/src/mymvn
     restart: "no"
@@ -42,7 +42,7 @@ services:
       - 12102:12345
 
   tpchowner3:
-    image: maven:3.8-openjdk-11
+    image: maven:3.8.1-openjdk-17
     container_name: tpchowner3
     working_dir: /usr/src/mymvn
     restart: "no"
