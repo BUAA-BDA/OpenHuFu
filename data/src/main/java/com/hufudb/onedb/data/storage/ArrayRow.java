@@ -37,9 +37,9 @@ public class ArrayRow implements Row, Serializable {
         return false;
       }
       for (int i = 0; i < size; ++i) {
-        if (!get(i).equals(r.get(i))) {
-          return false;
-        }
+        if (get(i) == null || r.get(i) == null) {
+          if (get(i) != r.get(i)) return false;
+        } else if (!get(i).equals(r.get(i))) return false;
       }
       return true;
     } else {
@@ -80,19 +80,19 @@ public class ArrayRow implements Row, Serializable {
     private Builder(int size) {
       values = new Object[size];
     }
-  
+
     public void set(int index, Object value) {
       values[index] = value;
     }
-  
+
     public ArrayRow build() {
       return new ArrayRow(values);
     }
-  
+
     public void reset() {
       values = new Object[values.length];
     }
-  
+
     public int size() {
       return values.length;
     }

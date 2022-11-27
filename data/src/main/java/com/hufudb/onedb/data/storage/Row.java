@@ -10,6 +10,9 @@ public interface Row {
     }
     final int size = r1.size();
     for (int i = 0; i < size; ++i) {
+      if(r1.get(i) == null || r2.get(i) == null) {
+        if(r1.get(i) != r2.get(i)) return false;
+      }
       if (!r1.get(i).equals(r2.get(i))) {
         return false;
       }
