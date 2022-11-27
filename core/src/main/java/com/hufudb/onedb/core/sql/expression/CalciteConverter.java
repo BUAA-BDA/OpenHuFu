@@ -37,6 +37,7 @@ import org.apache.calcite.rex.RexNode;
 import org.apache.calcite.rex.RexProgram;
 import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.validate.SqlUserDefinedFunction;
+import org.apache.calcite.util.DateString;
 import org.apache.calcite.util.NlsString;
 import org.apache.calcite.util.Sarg;
 import org.slf4j.Logger;
@@ -77,6 +78,7 @@ public class CalciteConverter {
       case SUM:
         return AggFuncType.SUM;
       default:
+        LOG.error("{} is unsupported by OneDB", aggType);
         throw new UnsupportedOperationException("Unsupported aggregate function type");
     }
   }
@@ -356,8 +358,22 @@ public class CalciteConverter {
                 r.upperBoundType(), ColumnType.INT, in));
             break;
           case DATE:
+            Object lowerEndpoint = r.lowerEndpoint() instanceof DateString ? 
+                ((DateString) r.lowerEndpoint()).toCalendar():r.lowerEndpoint();
+            Object upperEndpoint = r.upperEndpoint() instanceof DateString ?
+                ((DateString) r.upperEndpoint()).toCalendar():r.upperEndpoint();
+            
+            rangeExps.add(convertRange(lowerEndpoint, upperEndpoint, r.lowerBoundType(),
+                r.upperBoundType(), ColumnType.DATE, in));
+            break;
           case TIME:
+            rangeExps.add(convertRange(r.lowerEndpoint(), r.upperEndpoint(), r.lowerBoundType(),
+                r.upperBoundType(), ColumnType.TIME, in));
+            break;
           case TIMESTAMP:
+            rangeExps.add(convertRange(r.lowerEndpoint(), r.upperEndpoint(), r.lowerBoundType(),
+                r.upperBoundType(), ColumnType.TIMESTAMP, in));
+            break;
           case LONG:
             rangeExps.add(convertRange(r.lowerEndpoint(), r.upperEndpoint(), r.lowerBoundType(),
                 r.upperBoundType(), ColumnType.LONG, in));

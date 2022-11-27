@@ -1,0 +1,154 @@
+{
+  "owners": [
+    {
+      "endpoint": "localhost:12101"
+    },
+    {
+      "endpoint": "localhost:12102"
+    },
+    {
+      "endpoint": "localhost:12103"
+    }
+  ],
+  "tables": [
+    {
+      "tablename": "region",
+      "localtables": [
+        {
+          "endpoint": "localhost:12101",
+          "localname": "region"
+        }
+      ]
+    },
+    {
+      "tablename": "nation",
+      "localtables": [
+        {
+          "endpoint": "localhost:12101",
+          "localname": "nation"
+        }
+      ]
+    },
+    {
+      "tablename": "partsupp",
+      "localtables": [
+        {
+          "endpoint": "localhost:12101",
+          "localname": "partsupp"
+        },
+        {
+          "endpoint": "localhost:12102",
+          "localname": "partsupp"
+        },
+        {
+          "endpoint": "localhost:12103",
+          "localname": "partsupp"
+        }
+      ]
+    },
+    {
+      "tablename": "customer",
+      "localtables": [
+        {
+          "endpoint": "localhost:12101",
+          "localname": "customer"
+        },
+        {
+          "endpoint": "localhost:12102",
+          "localname": "customer"
+        },
+        {
+          "endpoint": "localhost:12103",
+          "localname": "customer"
+        }
+      ]
+    },
+    {
+      "tablename": "lineitem",
+      "localtables": [
+        {
+          "endpoint": "localhost:12101",
+          "localname": "lineitem"
+        },
+        {
+          "endpoint": "localhost:12102",
+          "localname": "lineitem"
+        },
+        {
+          "endpoint": "localhost:12103",
+          "localname": "lineitem"
+        }
+      ]
+    },
+    {
+      "tablename": "orders",
+      "localtables": [
+        {
+          "endpoint": "localhost:12101",
+          "localname": "orders"
+        },
+        {
+          "endpoint": "localhost:12102",
+          "localname": "orders"
+        },
+        {
+          "endpoint": "localhost:12103",
+          "localname": "orders"
+        }
+      ]
+    },
+    {
+      "tablename": "part",
+      "localtables": [
+        {
+          "endpoint": "localhost:12101",
+          "localname": "part"
+        },
+        {
+          "endpoint": "localhost:12102",
+          "localname": "part"
+        },
+        {
+          "endpoint": "localhost:12103",
+          "localname": "part"
+        }
+      ]
+    },
+    {
+      "tablename": "supplier",
+      "localtables": [
+        {
+          "endpoint": "localhost:12101",
+          "localname": "supplier"
+        }
+      ]
+    },
+    {
+      "tablename": "partsupp",
+      "localtables": [
+        {
+          "endpoint": "localhost:12102",
+          "localname": "partsupp"
+        }
+      ]
+    },
+    {
+      "tablename": "supplier_p",
+      "localtables": [
+        {
+          "endpoint": "localhost:12101",
+          "localname": "supplier_p"
+        }
+      ]
+    },
+    {
+      "tablename": "partsupp_p",
+      "localtables": [
+        {
+          "endpoint": "localhost:12102",
+          "localname": "partsupp_p"
+        }
+      ]
+    }
+  ]
+}
