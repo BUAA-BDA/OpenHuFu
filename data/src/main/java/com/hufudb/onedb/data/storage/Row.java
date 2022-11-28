@@ -1,5 +1,7 @@
 package com.hufudb.onedb.data.storage;
 
+import com.hufudb.onedb.data.storage.utils.CompareUtils;
+
 public interface Row {
   Object get(int columnIndex);
   int size();
@@ -10,10 +12,7 @@ public interface Row {
     }
     final int size = r1.size();
     for (int i = 0; i < size; ++i) {
-      if(r1.get(i) == null || r2.get(i) == null) {
-        if(r1.get(i) != r2.get(i)) return false;
-      }
-      if (!r1.get(i).equals(r2.get(i))) {
+      if (!CompareUtils.equal(r1.get(i), r2.get(i))) {
         return false;
       }
     }

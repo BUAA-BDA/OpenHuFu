@@ -2,6 +2,7 @@ package com.hufudb.onedb;
 
 import com.csvreader.CsvReader;
 import com.hufudb.onedb.data.storage.ArrayRow;
+import com.hufudb.onedb.data.storage.utils.CompareUtils;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import java.io.IOException;
 import java.net.URL;
@@ -24,7 +25,9 @@ public class ResultDataSet {
     int compareResult = 0;
     assert row1.size() == row2.size();
     for (int i = 0; i < row1.size(); i++) {
-      compareResult = ((Comparable) row1.get(i)).compareTo((Comparable) row2.get(i));
+      Object r1e = row1.get(i);
+      Object r2e = row2.get(i);
+      compareResult = CompareUtils.compare(r1e, r2e);
       if ((row1.get(i) instanceof Float) || (row1.get(i) instanceof Double)) {
         double x = (Double) row1.get(i);
         double y = (Double) row2.get(i);
