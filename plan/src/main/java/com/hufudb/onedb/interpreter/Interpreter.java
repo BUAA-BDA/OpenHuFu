@@ -12,6 +12,7 @@ import com.hufudb.onedb.data.storage.FilterDataSet;
 import com.hufudb.onedb.data.storage.JoinDataSet;
 import com.hufudb.onedb.data.storage.MapDataSet;
 import com.hufudb.onedb.data.storage.Row;
+import com.hufudb.onedb.data.storage.utils.CompareUtils;
 import com.hufudb.onedb.expression.AggregateFunctions;
 import com.hufudb.onedb.expression.ExpressionUtils;
 import com.hufudb.onedb.expression.GroupAggregator;
@@ -374,7 +375,7 @@ public class Interpreter {
       return null;
     }
     ColumnType dType = dominate(inputs.get(0).getOutType(), inputs.get(1).getOutType());
-    final int cmp = ((Comparable) cast(dType, left)).compareTo((Comparable) cast(dType, right));
+    final int cmp = CompareUtils.compare(cast(dType,left), cast(dType, right));
     switch (type) {
       case GT:
         return cmp > 0;

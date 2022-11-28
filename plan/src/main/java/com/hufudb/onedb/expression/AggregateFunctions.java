@@ -14,6 +14,8 @@ import com.hufudb.onedb.data.storage.Row;
 import com.hufudb.onedb.interpreter.Interpreter;
 import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AggregateFunctions {
 
@@ -268,7 +270,7 @@ public class AggregateFunctions {
 
     @Override
     public Comparable aggregate() {
-      // todo: consider no value condition
+      if(maxValue == MIN) return null;
       return maxValue;
     }
 
@@ -311,7 +313,7 @@ public class AggregateFunctions {
 
     @Override
     public Comparable aggregate() {
-      // todo: consider no value condition
+      if (minValue == MAX) return null;
       return minValue;
     }
 
