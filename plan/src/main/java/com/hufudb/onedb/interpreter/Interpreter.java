@@ -12,21 +12,25 @@ import com.hufudb.onedb.data.storage.FilterDataSet;
 import com.hufudb.onedb.data.storage.JoinDataSet;
 import com.hufudb.onedb.data.storage.MapDataSet;
 import com.hufudb.onedb.data.storage.Row;
+import com.hufudb.onedb.data.storage.utils.CompareUtils;
 import com.hufudb.onedb.expression.AggregateFunctions;
 import com.hufudb.onedb.expression.ExpressionUtils;
 import com.hufudb.onedb.expression.GroupAggregator;
 import com.hufudb.onedb.expression.ScalarFuncType;
 import com.hufudb.onedb.expression.SingleAggregator;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
+import com.hufudb.onedb.proto.OneDBPlan;
 import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import com.hufudb.onedb.proto.OneDBPlan.JoinCondition;
 import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
 import com.hufudb.onedb.udf.UDFLoader;
+
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -148,11 +152,14 @@ public class Interpreter {
     final Schema left;
     final Schema right;
 
+    final OneDBPlan.JoinType joinType;
+
     InterpretiveMatcher(JoinCondition joinCond, Schema left, Schema right) {
       // todo: support left/right/outer join
       this.leftKeys = joinCond.getLeftKeyList();
       this.rightKeys = joinCond.getRightKeyList();
       this.condition = joinCond.getCondition();
+      this.joinType = joinCond.getType();
       this.left = left;
       this.right = right;
     }
@@ -163,15 +170,24 @@ public class Interpreter {
       for (int i = 0; i < size; ++i) {
         int lk = leftKeys.get(i);
         int rk = rightKeys.get(i);
-        if (!r1.get(lk).equals(r2.get(rk))) {
+        Object le = r1.get(lk);
+        Object re = r2.get(rk);
+        // todo: consider left/right/outer join
+        if (le == null) {
+          return false;
+        }
+        if (re == null) {
+          return false;
+        }
+        if (!re.equals(le)) {
           return false;
         }
       }
-      Row row = new MergedRow(r1, r2, left.size(), left.size() + right.size());
       if (condition.getOpType().equals(OperatorType.NONE)) {
         return true;
       } else {
         // todo: consider null case
+        Row row = new MergedRow(r1, r2, left.size(), left.size() + right.size());
         return (boolean) implement(row, condition);
       }
     }
@@ -359,7 +375,7 @@ public class Interpreter {
       return null;
     }
     ColumnType dType = dominate(inputs.get(0).getOutType(), inputs.get(1).getOutType());
-    final int cmp = ((Comparable) cast(dType, left)).compareTo((Comparable) cast(dType, right));
+    final int cmp = CompareUtils.compare(cast(dType,left), cast(dType, right));
     switch (type) {
       case GT:
         return cmp > 0;

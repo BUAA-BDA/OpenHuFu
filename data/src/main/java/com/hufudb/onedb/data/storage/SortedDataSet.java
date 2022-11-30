@@ -2,6 +2,7 @@ package com.hufudb.onedb.data.storage;
 
 import java.util.List;
 import com.hufudb.onedb.data.schema.Schema;
+import com.hufudb.onedb.data.storage.utils.CompareUtils;
 import com.hufudb.onedb.proto.OneDBPlan.Collation;
 import com.hufudb.onedb.proto.OneDBPlan.Direction;
 
@@ -44,8 +45,7 @@ public class SortedDataSet implements MaterializedDataSet {
         case TIME:
         case TIMESTAMP:
           // TODO:
-          compareResult =
-              ((Comparable) r1.get(coll.getRef())).compareTo((Comparable) r2.get(coll.getRef()));
+          compareResult = CompareUtils.compare(r1.get(coll.getRef()),r2.get(coll.getRef()));
           if (coll.getDirection().equals(Direction.DESC)) {
             compareResult = -compareResult;
           }

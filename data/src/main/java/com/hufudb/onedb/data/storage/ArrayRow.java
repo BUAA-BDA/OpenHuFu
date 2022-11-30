@@ -1,5 +1,7 @@
 package com.hufudb.onedb.data.storage;
 
+import com.hufudb.onedb.data.storage.utils.CompareUtils;
+
 import java.io.Serializable;
 import java.util.Arrays;
 
@@ -37,7 +39,7 @@ public class ArrayRow implements Row, Serializable {
         return false;
       }
       for (int i = 0; i < size; ++i) {
-        if (!get(i).equals(r.get(i))) {
+        if (!CompareUtils.equal(get(i), r.get(i))) {
           return false;
         }
       }
@@ -80,19 +82,19 @@ public class ArrayRow implements Row, Serializable {
     private Builder(int size) {
       values = new Object[size];
     }
-  
+
     public void set(int index, Object value) {
       values[index] = value;
     }
-  
+
     public ArrayRow build() {
       return new ArrayRow(values);
     }
-  
+
     public void reset() {
       values = new Object[values.length];
     }
-  
+
     public int size() {
       return values.length;
     }
