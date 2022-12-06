@@ -97,6 +97,8 @@ public class OneDB {
     }
   }
 
+  // TODO need to be removed, the statement cannot be closed outside the function call
+  @Deprecated
   public ResultSet executeQuery(String sql) {
     try {
       Statement statement = connection.createStatement();
@@ -107,13 +109,18 @@ public class OneDB {
     return null;
   }
 
+  // Recommend
+  public Statement createStatement() throws SQLException {
+    return connection.createStatement();
+  }
+
   public DataSet executeQuery(Plan plan) {
     return schema.query(plan);
   }
 
   public void close() {
     try {
-      connection.close();
+      calciteConnection.close();
     } catch (SQLException e) {
       LOG.error("Close connection error", e);
     }

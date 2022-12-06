@@ -1,6 +1,7 @@
 package com.hufudb.onedb.core.client;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hufudb.onedb.core.config.OneDBConfig;
 import com.hufudb.onedb.core.data.EnumerableDataSet;
 import com.hufudb.onedb.core.implementor.UserSideImplementor;
@@ -25,15 +26,19 @@ import org.apache.commons.lang3.tuple.Pair;
  * client for all DB
  */
 public class OneDBClient {
+
   private static final Logger LOG = LoggerFactory.getLogger(OneDBClient.class);
   private final OneDBSchemaManager schemaManager;
   final ExecutorService threadPool;
   private final AtomicInteger queryId;
   private final Rewriter rewriter;
+  private String threadPoolNameFormat = "OneDBClient-threadpool-%d";
 
   public OneDBClient(OneDBSchemaManager schemaManager) {
     this.schemaManager = schemaManager;
-    this.threadPool = Executors.newFixedThreadPool(OneDBConfig.CLIENT_THREAD_NUM);
+    this.threadPool = Executors.newFixedThreadPool(OneDBConfig.CLIENT_THREAD_NUM,
+        new ThreadFactoryBuilder().setNameFormat(threadPoolNameFormat).setDaemon(false)
+            .build());
     this.queryId = new AtomicInteger(0);
     this.rewriter = new BasicRewriter(this);
   }
