@@ -32,10 +32,60 @@ enum Modifier {
   UNSUPPORT = 100;
 }
 
+enum Sensitivity {
+  PLAIN = 0;
+  SENSITIVE = 1;
+  SECRET = 2;
+}
+
+enum MethodType {
+  MAINTAIN = 0;
+  REPLACE = 1;
+  MASK = 2;
+  NUMBER_FLOOR = 3;
+}
+
+message Maintain {
+  MethodType type = 1;
+}
+
+message Replace {
+  MethodType type = 1;
+  string fromStr = 2;
+  string toStr = 3;
+}
+
+message Mask {
+  MethodType type = 1;
+  int64 begin = 2;
+  int64 end = 3;
+  string str = 4;
+}
+
+message NumberFloor {
+  MethodType type = 1;
+  int32 place = 2;
+}
+
+message Method {
+  oneof method {
+    Maintain maintain = 1;
+    Replace replace = 2;
+    Mask mask = 3;
+    NumberFloor number_floor = 4;
+  }
+}
+
+message Desensitize {
+  Sensitivity sensitivity = 1;
+  Method method = 2;
+}
+
 message ColumnDesc {
   string name = 1;
   ColumnType type = 2;
   Modifier modifier = 3;
+  Desensitize desensitize = 4;
 }
 
 message SchemaProto {

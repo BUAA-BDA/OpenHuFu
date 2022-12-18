@@ -1,5 +1,8 @@
 package com.hufudb.onedb.owner;
 
+import com.google.gson.GsonBuilder;
+import com.hufudb.onedb.data.method.MethodDeserializer;
+import com.hufudb.onedb.data.schema.utils.PojoMethod;
 import com.hufudb.onedb.owner.license.LicenseVerify;
 import com.hufudb.onedb.owner.license.LicenseVerifyParam;
 import io.grpc.BindableService;
@@ -92,7 +95,9 @@ public class OwnerServer {
   }
 
   public static OwnerServer create(String configPath) throws IOException {
-    Gson gson = new Gson();
+    Gson gson = new GsonBuilder()
+            .registerTypeAdapter(PojoMethod.class, new MethodDeserializer())
+            .create();
     Reader reader = Files.newBufferedReader(Paths.get(configPath));
     OwnerConfigFile config = gson.fromJson(reader, OwnerConfigFile.class);
     // licenseInstall(config.license);

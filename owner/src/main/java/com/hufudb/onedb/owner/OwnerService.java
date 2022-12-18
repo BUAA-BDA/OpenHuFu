@@ -54,6 +54,7 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
     this.schemaManager = this.adapter.getSchemaManager();
     this.libraries = config.librarys;
     initPublishedTable(config.tables);
+    schemaManager.checkDesensitization();
   }
 
   @Override

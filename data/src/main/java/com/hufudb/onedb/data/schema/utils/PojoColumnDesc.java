@@ -15,6 +15,7 @@ public class PojoColumnDesc {
   public ModifierWrapper modifier;
   @SerializedName(value = "columnId", alternate = { "columnid", "column_id" })
   public int columnId;
+  public PojoDesensitize desensitize;
 
   public PojoColumnDesc() {}
 
@@ -42,6 +43,7 @@ public class PojoColumnDesc {
     pcol.name = col.getName();
     pcol.type = ColumnTypeWrapper.of(col.getType());
     pcol.modifier = ModifierWrapper.of(col.getModifier());
+    pcol.desensitize = PojoDesensitize.fromDesensitize(col.getDesensitize());
     return pcol;
   }
 
@@ -52,5 +54,12 @@ public class PojoColumnDesc {
   public ColumnDesc toColumnDesc() {
     return ColumnDesc.newBuilder().setName(name).setType(getType()).setModifier(getModifier())
         .build();
+  }
+
+  public ColumnDesc DtoColumnDesc() {
+    desensitize = desensitize == null ? PojoDesensitize.desensitizeDefault() : desensitize;
+    type = type == null ? ColumnTypeWrapper.UNKOWN : type;
+    return  ColumnDesc.newBuilder().setName(name).setType(getType()).setDesensitize(desensitize.toDesensitize())
+            .build();
   }
 }
