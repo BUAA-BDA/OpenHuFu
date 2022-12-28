@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import com.google.common.collect.ImmutableMap;
+import com.hufudb.onedb.data.schema.utils.PojoActualTableSchema;
 import com.hufudb.onedb.data.schema.utils.PojoPublishedTableSchema;
 import com.hufudb.onedb.mpc.ProtocolExecutor;
 import com.hufudb.onedb.mpc.ProtocolFactory;
@@ -38,6 +39,7 @@ public class OwnerConfigFile {
   public String certchainpath;
   public String trustcertpath;
   public List<PojoPublishedTableSchema> tables;
+  public List<PojoActualTableSchema> actualTables;
   public AdapterConfig adapterconfig;
   public List<LibraryConfig> libraryconfigs;
   public LicenseVerifyParam license;
@@ -132,9 +134,11 @@ public class OwnerConfigFile {
     } else {
       config.acrossOwnerRpc = new OneDBRpc(config.party, config.threadPool);
     }
+    config.actualTables = actualTables;
     config.adapter = getAdapter(adapterconfig);
     config.librarys = getLibrary();
     config.tables = tables;
+    config.adapter.getSchemaManager().initDesensitization(config.actualTables);
     return config;
   }
 }

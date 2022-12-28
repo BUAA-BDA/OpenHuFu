@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
+import com.hufudb.onedb.data.method.DesensitizeFactory;
 import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.proto.OneDBData.ColumnDesc;
 
@@ -13,10 +14,17 @@ import com.hufudb.onedb.proto.OneDBData.ColumnDesc;
 public class ResultDataSet implements DataSet {
   final protected Schema schema;
   final protected ResultSet result;
-
+  final protected Schema desensitizationSchema;
 
   public ResultDataSet(Schema schema, ResultSet result) {
     this.schema = schema;
+    this.result = result;
+    this.desensitizationSchema = null;
+  }
+
+  public ResultDataSet(Schema schema, Schema desensitizationSchema, ResultSet result) {
+    this.schema = schema;
+    this.desensitizationSchema = desensitizationSchema;
     this.result = result;
   }
 
@@ -129,7 +137,11 @@ public class ResultDataSet implements DataSet {
     @Override
     public Object get(int columnIndex) {
       try {
-        return getters.get(columnIndex).get();
+        Object val = getters.get(columnIndex).get();
+        if (desensitizationSchema != null && val != null) {
+          val =  DesensitizeFactory.implement(val, desensitizationSchema.getColumnDesc(columnIndex));
+        }
+        return val;
       } catch (Exception e) {
         LOG.error("Error in get of ResultDataSet: {}", e.getMessage());
         return null;

@@ -2,6 +2,8 @@ package com.hufudb.onedb.data.schema;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.hufudb.onedb.proto.OneDBData.Desensitize;
 import com.hufudb.onedb.proto.OneDBData.ColumnDesc;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBData.Modifier;
@@ -42,6 +44,10 @@ public class Schema {
 
   public ColumnType getType(int id) {
     return schema.getColumnDesc(id).getType();
+  }
+
+  public Desensitize getDesensitize(int id) {
+    return schema.getColumnDesc(id).getDesensitize();
   }
 
   public ColumnDesc getColumnDesc(int id) {

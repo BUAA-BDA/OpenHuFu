@@ -1,6 +1,7 @@
 package com.hufudb.onedb.data.schema;
 
 import com.google.common.collect.ImmutableMap;
+import com.hufudb.onedb.proto.OneDBData;
 import com.hufudb.onedb.proto.OneDBData.ColumnDesc;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBData.Modifier;
@@ -82,6 +83,15 @@ public class TableSchema {
 
   public int getColumnIndex(String name) {
     return columnIndex.get(name);
+  }
+
+  public OneDBData.Desensitize getDesensitize(String name) {
+    Integer index = getColumnIndex(name);
+    if (index != null) {
+      return schema.getDesensitize(index);
+    } else {
+      return null;
+    }
   }
 
   public int size() {

@@ -145,6 +145,58 @@
       ]
     }
   ],
+  "actualTables": [
+    {
+      "actualName": "student",
+      "actualColumns": [
+        {
+          "name": "name",
+          "desensitize": {
+            "sensitivity": "SENSITIVE",
+            "method" : {
+              "type" : "REPLACE",
+              "fromStr": "o",
+              "toStr": "####"
+            }
+          }
+        },
+        {
+          "name": "score",
+          "desensitize": {
+            "sensitivity": "SENSITIVE",
+            "method" : {
+              "type" : "REPLACE",
+              "fromStr": "o",
+              "toStr": "####"
+            }
+          }
+        },
+        {
+          "name": "age",
+          "type": "INT",
+          "desensitize": {
+            "sensitivity": "SENSITIVE",
+            "method": {
+              "type" : "NUMBER_FLOOR",
+              "place": 1
+            }
+          }
+        },
+        {
+          "name": "dept_name",
+          "desensitize": {
+            "sensitivity": "SENSITIVE",
+            "method" : {
+              "type" : "MASK",
+              "begin": 1,
+              "end": 4,
+              "str": "%%%%%%%"
+            }
+          }
+        }
+      ]
+    }
+  ],
   "license": {
     "subject": "license1",
     "publicAlias": "publicCert",
