@@ -1,5 +1,6 @@
-package com.hufudb.onedb.data.method;
+package com.hufudb.onedb.data.desensitize.utils;
 
+import com.hufudb.onedb.data.storage.utils.MethodTypeWrapper;
 import com.hufudb.onedb.data.schema.utils.PojoMethod;
 import com.hufudb.onedb.proto.OneDBData;
 
@@ -32,40 +33,40 @@ public class NumberFloor extends PojoMethod {
         OneDBData.NumberFloor numberFloor = method.getNumberFloor();
         int place = numberFloor.getPlace();
         if (columnDesc.getType() == OneDBData.ColumnType.INT) {
-            return numberFloor32(val, place);
+            return numberFloor32((Integer) val, place);
         }
         if (columnDesc.getType() == OneDBData.ColumnType.LONG) {
-            return numberFloor64(val, place);
+            return numberFloor64((Long) val, place);
         }
         return null;
     }
 
-    public static Object numberFloor32(Object val, int place) {
+    public static Integer numberFloor32(Integer val, int place) {
         long p = 1L;
         for (int i = 0; i < place; i++) {
             p = p * 10;
         }
-        long tmp = ((Integer) val).longValue();
+        long tmp = (val).longValue();
         int rt;
         if (tmp < p) {
             rt = 0;
         } else {
-            rt = (Integer) val - (int) (tmp % p);
+            rt = val - (int) (tmp % p);
         }
         return rt;
     }
 
-    public static Object numberFloor64(Object val, int place) {
+    public static Long numberFloor64(Long val, int place) {
         long p = 1L;
         for (int i = 0; i < place; i++) {
             p = p * 10;
         }
-        long tmp = (Long) val;
+        long tmp = val;
         long rt;
         if (tmp < p) {
             rt = 0L;
         } else {
-            rt = (Long) val - (tmp % p);
+            rt = val - (tmp % p);
         }
         return rt;
     }

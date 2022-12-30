@@ -1,6 +1,7 @@
 package com.hufudb.onedb.data.schema.utils;
 
-import com.hufudb.onedb.data.method.*;
+import com.hufudb.onedb.data.desensitize.utils.*;
+import com.hufudb.onedb.data.storage.utils.MethodTypeWrapper;
 import com.hufudb.onedb.proto.OneDBData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class PojoMethod {
+public class PojoMethod {
     public MethodTypeWrapper type;
     protected List<OneDBData.ColumnType> allowedTypes = new ArrayList<>();
     private static final Logger LOG = LoggerFactory.getLogger(PojoMethod.class);
@@ -25,6 +26,8 @@ public abstract class PojoMethod {
                 return new Mask(MethodTypeWrapper.MASK, method.getMask().getBegin(), method.getMask().getEnd(), method.getMask().getStr());
             case NUMBER_FLOOR:
                 return new NumberFloor(MethodTypeWrapper.NUMBER_FLOOR, method.getNumberFloor().getPlace());
+            case DATE_FLOOR:
+                return new DateFloor(MethodTypeWrapper.Date_FLOOR, method.getDateFloor().getFloor());
             case MAINTAIN:
             default:
                 return new Maintain(MethodTypeWrapper.MAINTAIN);
@@ -41,6 +44,10 @@ public abstract class PojoMethod {
 
     public void setType(MethodTypeWrapper type) {
         this.type = type;
+    }
+
+    public static PojoMethod methodDefault() {
+        return PojoMethod.fromColumnMethod(OneDBData.Method.newBuilder().build());
     }
 
     public Object implement(Object val, OneDBData.ColumnDesc columnDesc, OneDBData.Method method) {

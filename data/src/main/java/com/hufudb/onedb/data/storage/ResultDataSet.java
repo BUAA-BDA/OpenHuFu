@@ -4,7 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
-import com.hufudb.onedb.data.method.DesensitizeFactory;
+import com.hufudb.onedb.data.desensitize.DesensitizeFactory;
 import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.proto.OneDBData.ColumnDesc;
 

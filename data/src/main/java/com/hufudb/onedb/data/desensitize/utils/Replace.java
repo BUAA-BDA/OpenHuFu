@@ -1,5 +1,6 @@
-package com.hufudb.onedb.data.method;
+package com.hufudb.onedb.data.desensitize.utils;
 
+import com.hufudb.onedb.data.storage.utils.MethodTypeWrapper;
 import com.hufudb.onedb.data.schema.utils.PojoMethod;
 import com.hufudb.onedb.proto.OneDBData;
 

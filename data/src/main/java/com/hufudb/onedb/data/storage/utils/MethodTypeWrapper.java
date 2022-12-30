@@ -1,4 +1,4 @@
-package com.hufudb.onedb.data.method;
+package com.hufudb.onedb.data.storage.utils;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.annotations.SerializedName;
@@ -16,7 +16,10 @@ public enum MethodTypeWrapper {
     MASK("MASK", OneDBData.MethodType.MASK),
 
     @SerializedName(value = "NUMBER_FLOOR", alternate = "{numberFloor, number_floor}")
-    NUMBER_FLOOR("NUMBER_FLOOR", OneDBData.MethodType.NUMBER_FLOOR);
+    NUMBER_FLOOR("NUMBER_FLOOR", OneDBData.MethodType.NUMBER_FLOOR),
+
+    @SerializedName(value = "DATE_FLOOR", alternate = "{dateFloor, date_floor}")
+    Date_FLOOR("NUMBER_FLOOR", OneDBData.MethodType.DATE_FLOOR);
 
     private final static ImmutableMap<Integer, MethodTypeWrapper> MAP;
 

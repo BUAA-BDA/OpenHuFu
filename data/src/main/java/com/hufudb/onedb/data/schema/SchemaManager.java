@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.google.common.collect.ImmutableList;
-import com.hufudb.onedb.data.method.DesensitizeFactory;
+import com.hufudb.onedb.data.desensitize.DesensitizeFactory;
 import com.hufudb.onedb.data.schema.utils.PojoActualTableSchema;
 import com.hufudb.onedb.data.schema.utils.PojoColumnDesc;
 import com.hufudb.onedb.data.schema.utils.PojoPublishedTableSchema;

@@ -21,6 +21,7 @@ public class PojoDesensitize {
     }
 
     public OneDBData.Desensitize toDesensitize() {
+        method  = method == null ? PojoMethod.methodDefault() : method;
         return OneDBData.Desensitize.newBuilder().setSensitivity(getSensitivity()).setMethod(method.toMethod()).build();
     }
 

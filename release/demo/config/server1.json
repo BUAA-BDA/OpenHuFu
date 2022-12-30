@@ -195,6 +195,47 @@
           }
         }
       ]
+    },
+    {
+      "actualName": "taxi",
+      "actualColumns": [
+        {
+          "name": "license",
+          "desensitize": {
+            "sensitivity": "SECRET"
+          }
+        },
+        {
+          "name": "cur_date",
+          "desensitize": {
+            "sensitivity": "SECRET",
+            "method" : {
+              "type" : "DATE_FLOOR",
+              "floor": "year"
+            }
+          }
+        },
+        {
+          "name": "cur_time",
+          "desensitize": {
+            "sensitivity": "SECRET",
+            "method": {
+              "type": "DATE_FLOOR",
+              "floor": "minute"
+            }
+          }
+        },
+        {
+          "name": "time_stamp",
+          "desensitize": {
+            "sensitivity": "SECRET",
+            "method" : {
+              "type" : "DATE_FLOOR",
+              "floor": "month"
+            }
+          }
+        }
+      ]
     }
   ],
   "license": {

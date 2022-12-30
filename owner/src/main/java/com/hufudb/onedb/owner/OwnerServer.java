@@ -1,7 +1,7 @@
 package com.hufudb.onedb.owner;
 
 import com.google.gson.GsonBuilder;
-import com.hufudb.onedb.data.method.MethodDeserializer;
+import com.hufudb.onedb.data.desensitize.MethodDeserializer;
 import com.hufudb.onedb.data.schema.utils.PojoMethod;
 import com.hufudb.onedb.owner.license.LicenseVerify;
 import com.hufudb.onedb.owner.license.LicenseVerifyParam;
