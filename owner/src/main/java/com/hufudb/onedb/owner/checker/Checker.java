@@ -1,16 +1,20 @@
 package com.hufudb.onedb.owner.checker;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.data.schema.SchemaManager;
+import com.hufudb.onedb.data.schema.TableSchema;
+import com.hufudb.onedb.desensitize.ExpSensitivity;
 import com.hufudb.onedb.expression.AggFuncType;
 import com.hufudb.onedb.plan.Plan;
+import com.hufudb.onedb.proto.OneDBData;
 import com.hufudb.onedb.proto.OneDBData.Modifier;
 import com.hufudb.onedb.proto.OneDBPlan.Expression;
-import com.hufudb.onedb.proto.OneDBPlan.OperatorType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,6 +98,60 @@ public class Checker {
     return true;
   }
 
+  static ExpSensitivity checkDesensitizeExp(Expression exp, TableSchema desensitizeTable) {
+    ExpSensitivity rt = ExpSensitivity.PLAIN;
+    switch (exp.getOpType()) {
+      case REF:
+        OneDBData.Desensitize desensitize = desensitizeTable.getDesensitize(exp.getI32());
+        if (desensitize.getSensitivity() != OneDBData.Sensitivity.PLAIN) {
+          rt = ExpSensitivity.SINGLE_SENSITIVE;
+        }
+        break;
+      case LITERAL:
+        break;
+      case AGG_FUNC:
+        break;
+      case PLUS:
+      case MINUS:
+      case TIMES:
+      case DIVIDE:
+      case MOD:
+      case GT:
+      case GE:
+      case LT:
+      case LE:
+      case EQ:
+      case NE:
+      case AND:
+      case OR:
+      case LIKE:
+        assert exp.getInList().size() == 2;
+        ArrayList<ExpSensitivity> expSensitivities = new ArrayList<>();
+        Map<ExpSensitivity, Integer> map = new HashMap<>();
+        for (Expression e : exp.getInList()) {
+          ExpSensitivity tmp = checkDesensitizeExp(e, desensitizeTable);
+          if (map.get(tmp) == null) {
+            map.put(tmp, 1);
+          } else {
+            map.put(tmp, map.get(tmp));
+          }
+        }
+        rt = ExpSensitivity.ExpressionConvert.convertBinary(map);
+    }
+    if (rt == ExpSensitivity.ERROR) {
+      throw new RuntimeException(String.format("%s  Can't desensitize", exp));
+    }
+    return rt;
+  }
+
+  static void checkDesensitize(Plan plan, SchemaManager manager) {
+    TableSchema desensitizeTable =  manager.getDesensitizationMap().get(manager.getActualTableName(plan.getTableName()));
+    for (Expression exp : plan.getWhereExps()) {
+      checkDesensitizeExp(exp, desensitizeTable);
+    }
+    return;
+  }
+
   public static boolean check(Plan plan, SchemaManager manager) {
     List<Modifier> in = ImmutableList.of();
     switch (plan.getPlanType()) {
@@ -124,6 +182,7 @@ public class Checker {
         LOG.warn("Find unsupported plan type {}", plan.getPlanType());
         throw new RuntimeException("Unsupported plan type");
     }
+    checkDesensitize(plan, manager);
     return checkPlan(plan, in);
   }
 }

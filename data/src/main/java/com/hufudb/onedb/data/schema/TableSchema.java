@@ -94,6 +94,10 @@ public class TableSchema {
     }
   }
 
+  public OneDBData.Desensitize getDesensitize(int index) {
+    return schema.getDesensitize(index);
+  }
+
   public int size() {
     return schema.size();
   }
