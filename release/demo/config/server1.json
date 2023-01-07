@@ -161,17 +161,6 @@
           }
         },
         {
-          "name": "score",
-          "desensitize": {
-            "sensitivity": "SENSITIVE",
-            "method" : {
-              "type" : "REPLACE",
-              "fromStr": "o",
-              "toStr": "####"
-            }
-          }
-        },
-        {
           "name": "age",
           "type": "INT",
           "desensitize": {
@@ -180,6 +169,12 @@
               "type" : "NUMBER_FLOOR",
               "place": 1
             }
+          }
+        },
+        {
+          "name": "score",
+          "desensitize": {
+            "sensitivity": "PLAIN"
           }
         },
         {

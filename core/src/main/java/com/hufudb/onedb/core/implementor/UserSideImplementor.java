@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+
+import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.core.client.OneDBClient;
 import com.hufudb.onedb.core.client.OwnerClient;
 import com.hufudb.onedb.core.sql.plan.PlanUtils;
@@ -26,6 +28,9 @@ import com.hufudb.onedb.proto.OneDBData.Modifier;
 import com.hufudb.onedb.proto.OneDBPlan.PlanType;
 import com.hufudb.onedb.proto.OneDBPlan.QueryPlanProto;
 import org.apache.commons.lang3.tuple.Pair;
+
+import static com.hufudb.onedb.proto.OneDBPlan.PlanType.BINARY;
+import static com.hufudb.onedb.proto.OneDBPlan.PlanType.ROOT;
 
 public class UserSideImplementor implements PlanImplementor {
 
@@ -57,7 +62,7 @@ public class UserSideImplementor implements PlanImplementor {
       case UNARY:
       case BINARY:
         // todo: refinement needed
-        return !modifier.equals(Modifier.PUBLIC);
+        return client.getOwnerSize() == 1 || !modifier.equals(Modifier.PUBLIC);
       default:
         LOG.error("Unsupport plan type {}", type);
         throw new UnsupportedOperationException();
@@ -103,6 +108,9 @@ public class UserSideImplementor implements PlanImplementor {
   public DataSet implement(Plan plan) {
     if (isMultiParty(plan)) {
       // implement on owner side
+      if (client.getOwnerSize() == 1) {
+        return singleOwnerQuery(plan);
+      }
       return ownerSideQuery(plan);
     } else {
       // implement on user side
@@ -156,6 +164,40 @@ public class UserSideImplementor implements PlanImplementor {
       input = LimitDataSet.limit(input, unary.getOffset(), unary.getFetch());
     }
     return input;
+  }
+
+  public DataSet singleOwnerQuery(Plan plan) {
+    LOG.info("In singleOwnerQuery");
+    Pair<OwnerClient, QueryPlanProto> planProtoPair = PlanUtils.generateOwnerPlans(client, plan).get(0);
+    Callable<Boolean> task = null;
+    MultiSourceDataSet concurrentDataSet = new MultiSourceDataSet(plan.getOutSchema(), 1);
+    task = () -> {
+      final Producer producer = concurrentDataSet.newProducer();
+      try {
+        Iterator<DataSetProto> it = planProtoPair.getKey().query(planProtoPair.getValue());
+        while (it.hasNext()) {
+          LOG.debug("get dataset from owner {}", planProtoPair.getKey().getEndpoint());
+          producer.add(it.next());
+        }
+        return true;
+      } catch (Exception e) {
+        e.printStackTrace();
+        return false;
+      } finally {
+        producer.finish();
+      }
+    };
+    try {
+      List<Future<Boolean>> statusList = client.getThreadPool().invokeAll(ImmutableList.of(task));
+      for (Future<Boolean> status : statusList) {
+        if (!status.get()) {
+          LOG.error("error in leafQuery");
+        }
+      }
+    } catch (Exception e) { //NOSONAR
+      LOG.error("Error in owner side query", e);
+    }
+    return concurrentDataSet;
   }
 
   @Override

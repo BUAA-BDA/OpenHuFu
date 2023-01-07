@@ -19,7 +19,7 @@ public class DesensitizeFactory {
                 break;
             case SECRET:
                 rt = null;
-
+                break;
         }
         return rt;
     }

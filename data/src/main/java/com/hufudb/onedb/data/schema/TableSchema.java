@@ -86,12 +86,11 @@ public class TableSchema {
   }
 
   public OneDBData.Desensitize getDesensitize(String name) {
-    Integer index = getColumnIndex(name);
-    if (index != null) {
-      return schema.getDesensitize(index);
-    } else {
-      return null;
+    if (!this.columnIndex.containsKey(name)) {
+      return OneDBData.Desensitize.getDefaultInstance();
     }
+    int index = getColumnIndex(name);
+    return schema.getDesensitize(index);
   }
 
   public OneDBData.Desensitize getDesensitize(int index) {

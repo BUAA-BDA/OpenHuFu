@@ -40,7 +40,6 @@ public class Replace extends PojoMethod {
     @Override
     public String implement(Object val, OneDBData.ColumnDesc columnDesc, OneDBData.Method method) {
         OneDBData.Replace replace = method.getReplace();
-        String colName = columnDesc.getName();
         if (columnDesc.getType() == OneDBData.ColumnType.STRING) {
             return ((String)val).replaceAll(replace.getFromStr(), replace.getToStr());
         }

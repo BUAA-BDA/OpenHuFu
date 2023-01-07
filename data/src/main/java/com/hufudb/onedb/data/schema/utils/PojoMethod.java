@@ -1,6 +1,10 @@
 package com.hufudb.onedb.data.schema.utils;
 
-import com.hufudb.onedb.data.desensitize.utils.*;
+import com.hufudb.onedb.data.desensitize.utils.Maintain;
+import com.hufudb.onedb.data.desensitize.utils.Replace;
+import com.hufudb.onedb.data.desensitize.utils.Mask;
+import com.hufudb.onedb.data.desensitize.utils.DateFloor;
+import com.hufudb.onedb.data.desensitize.utils.NumberFloor;
 import com.hufudb.onedb.data.storage.utils.MethodTypeWrapper;
 import com.hufudb.onedb.proto.OneDBData;
 import org.slf4j.Logger;

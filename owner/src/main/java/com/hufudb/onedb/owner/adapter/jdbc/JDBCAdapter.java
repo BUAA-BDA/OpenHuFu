@@ -147,11 +147,23 @@ public abstract class JDBCAdapter implements Adapter {
     return sql.toString();
   }
 
+  public static String getTableName(ResultSet rs) throws SQLException {
+    String tableName = "";
+    for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
+      String columnTable = rs.getMetaData().getTableName(i);
+      if (columnTable != null && !columnTable.equals("")) {
+        tableName = columnTable;
+        break;
+      }
+    }
+    return tableName;
+  }
+
   protected DataSet executeSQL(String sql, Schema schema) {
     try {
       ResultSet rs = statement.executeQuery(sql);
-      String table = rs.getMetaData().getTableName(1);
-      Schema desensitizationSchema = desensitize(rs, schema, table);
+      String tableName = getTableName(rs);
+      Schema desensitizationSchema = desensitize(rs, schema, tableName);
       LOG.info("Execute {}", sql);
       return new ResultDataSet(schema, desensitizationSchema, rs);
     } catch (SQLException e) {

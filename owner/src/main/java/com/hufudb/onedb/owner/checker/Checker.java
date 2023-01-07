@@ -9,11 +9,14 @@ import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableList;
 import com.hufudb.onedb.data.schema.SchemaManager;
 import com.hufudb.onedb.data.schema.TableSchema;
-import com.hufudb.onedb.desensitize.ExpSensitivity;
+import com.hufudb.onedb.desensitize.ExpSensitivityConvert;
 import com.hufudb.onedb.expression.AggFuncType;
+import com.hufudb.onedb.expression.ExpressionFactory;
 import com.hufudb.onedb.plan.Plan;
 import com.hufudb.onedb.proto.OneDBData;
 import com.hufudb.onedb.proto.OneDBData.Modifier;
+import com.hufudb.onedb.proto.OneDBPlan.JoinCondition;
+import com.hufudb.onedb.proto.OneDBPlan.ExpSensitivity;
 import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,60 +101,6 @@ public class Checker {
     return true;
   }
 
-  static ExpSensitivity checkDesensitizeExp(Expression exp, TableSchema desensitizeTable) {
-    ExpSensitivity rt = ExpSensitivity.PLAIN;
-    switch (exp.getOpType()) {
-      case REF:
-        OneDBData.Desensitize desensitize = desensitizeTable.getDesensitize(exp.getI32());
-        if (desensitize.getSensitivity() != OneDBData.Sensitivity.PLAIN) {
-          rt = ExpSensitivity.SINGLE_SENSITIVE;
-        }
-        break;
-      case LITERAL:
-        break;
-      case AGG_FUNC:
-        break;
-      case PLUS:
-      case MINUS:
-      case TIMES:
-      case DIVIDE:
-      case MOD:
-      case GT:
-      case GE:
-      case LT:
-      case LE:
-      case EQ:
-      case NE:
-      case AND:
-      case OR:
-      case LIKE:
-        assert exp.getInList().size() == 2;
-        ArrayList<ExpSensitivity> expSensitivities = new ArrayList<>();
-        Map<ExpSensitivity, Integer> map = new HashMap<>();
-        for (Expression e : exp.getInList()) {
-          ExpSensitivity tmp = checkDesensitizeExp(e, desensitizeTable);
-          if (map.get(tmp) == null) {
-            map.put(tmp, 1);
-          } else {
-            map.put(tmp, map.get(tmp));
-          }
-        }
-        rt = ExpSensitivity.ExpressionConvert.convertBinary(map);
-    }
-    if (rt == ExpSensitivity.ERROR) {
-      throw new RuntimeException(String.format("%s  Can't desensitize", exp));
-    }
-    return rt;
-  }
-
-  static void checkDesensitize(Plan plan, SchemaManager manager) {
-    TableSchema desensitizeTable =  manager.getDesensitizationMap().get(manager.getActualTableName(plan.getTableName()));
-    for (Expression exp : plan.getWhereExps()) {
-      checkDesensitizeExp(exp, desensitizeTable);
-    }
-    return;
-  }
-
   public static boolean check(Plan plan, SchemaManager manager) {
     List<Modifier> in = ImmutableList.of();
     switch (plan.getPlanType()) {
@@ -182,7 +131,156 @@ public class Checker {
         LOG.warn("Find unsupported plan type {}", plan.getPlanType());
         throw new RuntimeException("Unsupported plan type");
     }
-    checkDesensitize(plan, manager);
     return checkPlan(plan, in);
+  }
+
+  public static void checkJoinCond(JoinCondition joinCondition, List<Expression> leftInputs, List<Expression> rightInputs) {
+    for (int key : joinCondition.getLeftKeyList()) {
+      Expression keyExp = leftInputs.get(key);
+      if (keyExp.getSensitivity() != ExpSensitivity.NONE_SENSITIVE) {
+        throw new RuntimeException(String.format("\nJoinCondition:%sLeft key is sensitive, can't do join", joinCondition));
+      }
+    }
+    for (int key : joinCondition.getRightKeyList()) {
+      Expression keyExp = rightInputs.get(key);
+      if (keyExp.getSensitivity() != ExpSensitivity.NONE_SENSITIVE) {
+        throw new RuntimeException(String.format("\nJoinCondition:%sRight key is sensitive, can't do join", joinCondition));
+      }
+    }
+  }
+
+  public static Expression sensitivityExp(Expression exp, SchemaManager manager, Plan plan, List<Expression> allInputs) {
+    Expression rt = ExpressionFactory.addSensitivity(exp, ExpSensitivity.NONE_SENSITIVE);
+    switch (exp.getOpType()) {
+      case REF:
+        if (allInputs == null) {
+          TableSchema desensitizeTable = manager.getDesensitizationMap().get(manager.getActualTableName(plan.getTableName()));
+          String refName = manager.getPublishedSchema(plan.getTableName()).getName(exp.getI32());
+          OneDBData.Desensitize desensitize = desensitizeTable.getDesensitize(refName);
+          if (desensitize.getSensitivity() != OneDBData.Sensitivity.PLAIN) {
+            rt = ExpressionFactory.addSensitivity(exp, ExpSensitivity.SINGLE_SENSITIVE);
+          }
+        } else {
+          ExpSensitivity expSensitivity = allInputs.get(exp.getI32()).getSensitivity();
+          if (expSensitivity != ExpSensitivity.NONE_SENSITIVE) {
+            rt = ExpressionFactory.addSensitivity(exp, ExpSensitivity.SINGLE_SENSITIVE);
+          }
+        }
+        break;
+      case LITERAL:
+        break;
+      case PLUS:
+      case MINUS:
+      case TIMES:
+      case DIVIDE:
+      case MOD:
+      case GT:
+      case GE:
+      case LT:
+      case LE:
+      case EQ:
+      case NE:
+      case AND:
+      case OR:
+      case LIKE:
+        assert exp.getInList().size() == 2;
+        Map<ExpSensitivity, Integer> map = new HashMap<>();
+        List<Expression> ins = new ArrayList<>();
+        for (Expression e : exp.getInList()) {
+          ExpSensitivity tmp = sensitivityExp(e, manager, plan, allInputs).getSensitivity();
+          ins.add(exp);
+          map.merge(tmp, 1, Integer::sum);
+        }
+        rt = ExpressionFactory.addSensitivity(exp, ExpSensitivityConvert.convertBinary(map), ins);
+        break;
+
+      case AS:
+      case NOT:
+      case PLUS_PRE:
+      case MINUS_PRE:
+      case IS_NULL:
+      case IS_NOT_NULL:
+        assert exp.getInList().size() == 1;
+        rt =  sensitivityExp(exp.getIn(0), manager, plan, allInputs);
+        break;
+
+      case AGG_FUNC:
+        Expression tmp = sensitivityExp(exp.getIn(0), manager, plan, allInputs);
+        rt = ExpressionFactory.addSensitivity(exp, ExpSensitivityConvert.convertAggFunctions(tmp.getSensitivity(), exp.getI32()));
+        break;
+    }
+    if (rt.getSensitivity() == ExpSensitivity.ERROR) {
+      throw new RuntimeException(String.format("%s  Can't desensitize", exp));
+    }
+    return rt;
+  }
+
+  public static void sensitivityExps(SchemaManager manager, Plan plan) {
+    ArrayList<Expression> expList = new ArrayList<>();
+    for (Expression exp : plan.getSelectExps()) {
+      Expression expression = ExpressionFactory.addSensitivity(exp, sensitivityExp(exp, manager, plan, null).getSensitivity());
+      expList.add(expression);
+    }
+    plan.setSelectExps(expList);
+    expList = new ArrayList<>();
+    for (Expression exp : plan.getWhereExps()) {
+      Expression expression = ExpressionFactory.addSensitivity(exp, sensitivityExp(exp, manager, plan, null).getSensitivity());
+      expList.add(expression);
+    }
+    plan.setWhereExps(expList);
+    expList = new ArrayList<>();
+    for (Expression exp : plan.getAggExps()) {
+      Expression expression = ExpressionFactory.addSensitivity(exp, sensitivityExp(exp, manager, plan, null).getSensitivity());
+      expList.add(expression);
+    }
+    plan.setAggExps(expList);
+  }
+
+
+  public static void sensitivityExps(SchemaManager manager, Plan plan, List<Expression> allInputs) {
+    ArrayList<Expression> expList = new ArrayList<>();
+    for (Expression exp : plan.getSelectExps()) {
+      Expression expression = ExpressionFactory.addSensitivity(exp, sensitivityExp(exp, manager, plan, allInputs).getSensitivity());
+      expList.add(expression);
+    }
+    plan.setSelectExps(expList);
+    expList = new ArrayList<>();
+    for (Expression exp : plan.getWhereExps()) {
+      Expression expression = ExpressionFactory.addSensitivity(exp, sensitivityExp(exp, manager, plan, allInputs).getSensitivity());
+      expList.add(expression);
+    }
+    plan.setWhereExps(expList);
+    expList = new ArrayList<>();
+    for (Expression exp : plan.getAggExps()) {
+      Expression expression = ExpressionFactory.addSensitivity(exp, sensitivityExp(exp, manager, plan, allInputs).getSensitivity());
+      expList.add(expression);
+    }
+    plan.setAggExps(expList);
+  }
+
+  public static void checkSensitivity(Plan plan, SchemaManager manager) {
+    switch (plan.getPlanType()) {
+      case LEAF:
+        sensitivityExps(manager, plan);
+        break;
+      case UNARY:
+        checkSensitivity(plan.getChildren().get(0), manager);
+        List<Expression> inputs = plan.getChildren().get(0).getOutExpressions();
+        sensitivityExps(manager, plan, inputs);
+        break;
+      case BINARY:
+        checkSensitivity(plan.getChildren().get(0), manager);
+        checkSensitivity(plan.getChildren().get(1), manager);
+        List<Expression> leftInputs = plan.getChildren().get(0).getOutExpressions();
+        List<Expression> rightInputs = plan.getChildren().get(1).getOutExpressions();
+        List<Expression> allInputs = new ArrayList<>();
+        allInputs.addAll(leftInputs);
+        allInputs.addAll(rightInputs);
+        sensitivityExps(manager, plan, allInputs);
+        checkJoinCond(plan.getJoinCond(), leftInputs, rightInputs);
+        break;
+      case EMPTY:
+        break;
+    }
   }
 }
