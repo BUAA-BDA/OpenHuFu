@@ -27,6 +27,8 @@ public class OwnerConfig {
   public List<PojoActualTableSchema> actualTables;
   public Map<ProtocolType, ProtocolExecutor> librarys;
 
+  public boolean singleOwner;
+
   public OwnerConfig() {}
 
   public OwnerConfig(Party party, int port, String hostname, ExecutorService threadPool,

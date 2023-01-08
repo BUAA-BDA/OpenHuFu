@@ -13,7 +13,9 @@ public class DateFloor extends PojoMethod {
 
     public String floor;
 
-    public DateFloor() {}
+    public DateFloor() {
+        super.type = MethodTypeWrapper.DATE_FLOOR;
+    }
 
     public DateFloor(MethodTypeWrapper type, String floor) {
         super(type);

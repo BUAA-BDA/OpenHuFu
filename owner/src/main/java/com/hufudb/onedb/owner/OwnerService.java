@@ -51,7 +51,7 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
     this.endpoint = String.format("%s:%d", config.hostname, config.port);
     this.ownerSideRpc = config.acrossOwnerRpc;
     this.adapter = config.adapter;
-    this.implementor = new OwnerSideImplementor(ownerSideRpc, adapter, threadPool);
+    this.implementor = new OwnerSideImplementor(ownerSideRpc, adapter, threadPool, config.singleOwner);
     this.schemaManager = this.adapter.getSchemaManager();
     this.libraries = config.librarys;
     initPublishedTable(config.tables);

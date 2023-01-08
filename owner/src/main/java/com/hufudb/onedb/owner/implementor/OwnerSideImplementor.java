@@ -26,10 +26,13 @@ public class OwnerSideImplementor implements PlanImplementor {
   Adapter dataSourceAdapter;
   ExecutorService threadPool;
 
-  public OwnerSideImplementor(Rpc rpc, Adapter adapter, ExecutorService threadPool) {
+  boolean singleOwner;
+
+  public OwnerSideImplementor(Rpc rpc, Adapter adapter, ExecutorService threadPool, boolean singleOwner) {
     this.rpc = rpc;
     this.dataSourceAdapter = adapter;
     this.threadPool = threadPool;
+    this.singleOwner = singleOwner;
   }
 
   @Override
@@ -39,7 +42,7 @@ public class OwnerSideImplementor implements PlanImplementor {
 
   @Override
   public DataSet binaryQuery(BinaryPlan binary) {
-    if (true) {
+    if (singleOwner) {
       return singleOwnerBinaryQuery(binary);
     }
     List<Plan> children = binary.getChildren();

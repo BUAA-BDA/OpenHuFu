@@ -963,7 +963,7 @@ export default {
           this.column.desensitize.method = this.date_floor;
           break;
       }
-      if (this.column.desensitize.sensitivity == "PAIN" || this.column.desensitize.sensitivity == "SECRET") {
+      if (this.column.desensitize.sensitivity == "PLAIN" || this.column.desensitize.sensitivity == "SECRET") {
         this.maintain.type = "MAINTAIN";
         this.column.desensitize.method = this.maintain;
       }

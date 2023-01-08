@@ -43,6 +43,7 @@ public class OwnerConfigFile {
   public AdapterConfig adapterconfig;
   public List<LibraryConfig> libraryconfigs;
   public LicenseVerifyParam license;
+  public boolean singleOwner = false;
 
   public OwnerConfigFile(int id, int port, int threadnum, String hostname, String privatekeypath,
       String certchainpath, String trustcertpath) {
@@ -139,6 +140,7 @@ public class OwnerConfigFile {
     config.librarys = getLibrary();
     config.tables = tables;
     config.adapter.getSchemaManager().initDesensitization(config.actualTables);
+    config.singleOwner = singleOwner;
     return config;
   }
 }

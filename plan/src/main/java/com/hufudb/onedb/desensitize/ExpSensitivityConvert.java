@@ -56,37 +56,4 @@ public class ExpSensitivityConvert {
             }
         }
     }
-
-    public static Expression toProto(Expression exp, ExpSensitivity expSensitivity) {
-        Expression.Builder builder = Expression.newBuilder();
-        builder.setOpType(exp.getOpType());
-        builder.setOutType(exp.getOutType());
-        builder.addAllIn(exp.getInList());
-        builder.setModifier(exp.getModifier());
-        builder.setSensitivity(expSensitivity);
-        switch (builder.getValueCase()) {
-            case B:
-                builder.setB(exp.getB());
-                break;
-            case I32:
-                builder.setI32(exp.getI32());
-                break;
-            case I64:
-                builder.setI64(exp.getI64());
-                break;
-            case F32:
-                builder.setF32(exp.getF32());
-                break;
-            case F64:
-                builder.setF64(exp.getF64());
-                break;
-            case STR:
-                builder.setStr(exp.getStr());
-                break;
-            case BLOB:
-                builder.setBlob(exp.getBlob());
-                break;
-        }
-        return builder.build();
-    }
 }

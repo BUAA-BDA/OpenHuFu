@@ -239,5 +239,6 @@
     "storePass": "public_password1234",
     "licensePath": "./license/license1.lic",
     "publicKeysStorePath": "./license/publicCerts.keystore"
-  }
+  },
+  "singleOwner": true
 }
