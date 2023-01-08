@@ -38,6 +38,47 @@ module.exports =  {
         publishedTable: "已发布的表",
         schema: "模式",
         owners: "数据拥有方",
+        confirmDesensitization: "确定修改此列的脱敏方法么？",
+        tableName: "表名",
+        colName: "列名",
+        colType: "列类型",
+        colSensitivity: "列敏感度",
+        methodType: "脱敏方法",
+        sensitivity: {
+            plain: "明文",
+            sensitive: "敏感",
+            secret: "绝密"
+        },
+        maintain: {
+            type: "保持"
+        },
+        mask: {
+            type: "掩码",
+            begin: "起始",
+            end: "终止",
+            str: "掩码字符"
+        },
+        replace: {
+            type: "替换",
+            fromStr: "源字符串",
+            toStr: "目的字符串"
+        },
+        number_floor: {
+            type: "整数模糊低位",
+            place: "模糊位数"
+        },
+        date_floor: {
+            type: "时间模糊低位",
+            floor: "模糊单位"
+        },
+        time: {
+            year: "年",
+            month: "月",
+            day: "日",
+            hour: "时",
+            minute: "分",
+            second: "秒"
+        }
     },
     operation: {
         pleaseInput: "请输入",
@@ -55,7 +96,8 @@ module.exports =  {
         username: "用户名",
         subTime: "提交时间",
         execTime: "执行时长",
-        noData: "无记录"
+        noData: "无记录",
+        updateDesensitization: "更新并提交"
     },
     setting:{
         id: "ID",

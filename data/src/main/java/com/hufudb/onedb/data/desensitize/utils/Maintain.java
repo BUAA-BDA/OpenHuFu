@@ -6,6 +6,8 @@ import com.hufudb.onedb.proto.OneDBData;
 
 public class Maintain extends PojoMethod {
 
+    public Maintain() {}
+
     public Maintain(MethodTypeWrapper type) {
         super(type);
     }

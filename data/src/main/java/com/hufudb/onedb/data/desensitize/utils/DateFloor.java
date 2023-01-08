@@ -13,6 +13,8 @@ public class DateFloor extends PojoMethod {
 
     public String floor;
 
+    public DateFloor() {}
+
     public DateFloor(MethodTypeWrapper type, String floor) {
         super(type);
         this.floor = floor;
@@ -43,11 +45,11 @@ public class DateFloor extends PojoMethod {
         if (columnDesc.getType() == OneDBData.ColumnType.DATE) {
             return dateFloor((Date) val, floor);
         }
-        if (columnDesc.getType() == OneDBData.ColumnType.TIMESTAMP) {
-            return timestampFloor((Timestamp) val, floor);
-        }
         if (columnDesc.getType() == OneDBData.ColumnType.TIME) {
             return timeFloor((Time) val, floor);
+        }
+        if (columnDesc.getType() == OneDBData.ColumnType.TIMESTAMP) {
+            return timestampFloor((Timestamp) val, floor);
         }
         return null;
     }
@@ -72,7 +74,27 @@ public class DateFloor extends PojoMethod {
         }
         return val;
     }
-    
+
+    public static Time timeFloor(Time val, String floor) {
+        if (null == floor) {
+            return null;
+        }
+        Calendar calendar = Calendar.getInstance();
+        switch (floor) {
+            case "hour":
+                calendar.setTime(val);
+                val = new Time(calendar.get(Calendar.HOUR), 0, 0);
+                break;
+            case "minute":
+                calendar.setTime(val);
+                val = new Time(calendar.get(Calendar.HOUR), calendar.get(Calendar.MINUTE), 0);
+                break;
+            default:
+                val = null;
+        }
+        return val;
+    }
+
     public static Timestamp timestampFloor(Timestamp val, String floor) {
         if (null == floor) {
             return null;
@@ -109,26 +131,6 @@ public class DateFloor extends PojoMethod {
                 val = new Timestamp(calendar.get(Calendar.YEAR) - 1900, calendar.get(Calendar.MONTH),
                         calendar.get(Calendar.DATE), calendar.get(Calendar.HOUR), calendar.get(Calendar.MINUTE),
                         calendar.get(Calendar.SECOND), 0);
-                break;
-            default:
-                val = null;
-        }
-        return val;
-    }
-
-    private static Time timeFloor(Time val, String floor) {
-        if (null == floor) {
-            return null;
-        }
-        Calendar calendar = Calendar.getInstance();
-        switch (floor) {
-            case "hour":
-                calendar.setTime(val);
-                val = new Time(calendar.get(Calendar.HOUR), 0, 0);
-                break;
-            case "minute":
-                calendar.setTime(val);
-                val = new Time(calendar.get(Calendar.HOUR), calendar.get(Calendar.MINUTE), 0);
                 break;
             default:
                 val = null;

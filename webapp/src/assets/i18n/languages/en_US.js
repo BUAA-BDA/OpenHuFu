@@ -37,6 +37,47 @@ module.exports =  {
         localTable: "Local Table",
         publishedTable: "Published Table",
         schema: "Schema",
+        confirmDesensitization: "Are you sure to update this column's desensitization method?",
+        tableName: "Name of Table",
+        colName: "Name of Column",
+        colType: "Type of Column",
+        colSensitivity: "Sensitivity of Column",
+        methodType: "Type of Method",
+        sensitivity: {
+            plain: "PLAIN",
+            sensitive: "SENSITIVE",
+            secret: "SECRET"
+        },
+        maintain: {
+          type: "MAINTAIN"
+        },
+        mask: {
+            type: "MASK",
+            begin: "Begin Index",
+            end: "End Index",
+            str: "Mask Character"
+        },
+        replace: {
+            type: "REPLACE",
+            fromStr: "From String",
+            toStr: "To String"
+        },
+        number_floor: {
+            type: "NUMBER_FLOOR",
+            place: "Int Place"
+        },
+        date_floor: {
+            type: "DATE_FLOOR",
+            floor: "Date Floor"
+        },
+        time: {
+            year: "year",
+            month: "month",
+            day: "day",
+            hour: "hour",
+            minute: "minute",
+            second: "second"
+        }
     },
     operation: {
         pleaseInput: "Please Input",
@@ -54,7 +95,8 @@ module.exports =  {
         username: "Username",
         subTime: "Submit Time",
         execTime: "Execution Time",
-        noData: "No Data"
+        noData: "No Data",
+        updateDesensitization: "Update"
     },
     setting:{
         id: "ID",

@@ -1,7 +1,7 @@
 package com.hufudb.onedb.data.schema;
 
 import com.google.common.collect.ImmutableMap;
-import com.hufudb.onedb.proto.OneDBData;
+import com.hufudb.onedb.proto.OneDBData.Desensitize;
 import com.hufudb.onedb.proto.OneDBData.ColumnDesc;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBData.Modifier;
@@ -85,15 +85,15 @@ public class TableSchema {
     return columnIndex.get(name);
   }
 
-  public OneDBData.Desensitize getDesensitize(String name) {
+  public Desensitize getDesensitize(String name) {
     if (!this.columnIndex.containsKey(name)) {
-      return OneDBData.Desensitize.getDefaultInstance();
+      return Desensitize.getDefaultInstance();
     }
     int index = getColumnIndex(name);
     return schema.getDesensitize(index);
   }
 
-  public OneDBData.Desensitize getDesensitize(int index) {
+  public Desensitize getDesensitize(int index) {
     return schema.getDesensitize(index);
   }
 
@@ -136,6 +136,15 @@ public class TableSchema {
       }
       columnIndex.put(name, builder.size());
       builder.add(name, type, modifier);
+      return this;
+    }
+
+    public Builder add(String name, ColumnType type, Desensitize desensitize) {
+      if (columnIndex.containsKey(name)) {
+        throw new RuntimeException("column " + name + " already exist");
+      }
+      columnIndex.put(name, builder.size());
+      builder.add(name, type, desensitize);
       return this;
     }
 

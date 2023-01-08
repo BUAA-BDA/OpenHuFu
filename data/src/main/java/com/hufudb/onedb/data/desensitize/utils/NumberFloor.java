@@ -8,6 +8,8 @@ public class NumberFloor extends PojoMethod {
 
     public int place;
 
+    public NumberFloor() {}
+
     public NumberFloor(MethodTypeWrapper type, int place) {
         super(type);
         this.place = place;

@@ -8,6 +8,8 @@ public class Replace extends PojoMethod {
     public String fromStr;
     public String toStr;
 
+    public Replace() {}
+
     public Replace(MethodTypeWrapper type, String fromStr, String toStr) {
         super(type);
         this.fromStr = fromStr;

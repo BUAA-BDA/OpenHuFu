@@ -7,6 +7,8 @@ public class PojoDesensitize {
     public SensitivityWrapper sensitivity;
     public PojoMethod method;
 
+    public PojoDesensitize() {}
+
     public PojoDesensitize(SensitivityWrapper sensitivity, PojoMethod method) {
         this.sensitivity = sensitivity;
         this.method = method;
@@ -26,6 +28,6 @@ public class PojoDesensitize {
     }
 
     public static PojoDesensitize desensitizeDefault() {
-        return PojoDesensitize.fromDesensitize(OneDBData.Desensitize.newBuilder().setMethod(OneDBData.Method.newBuilder().setMaintain(OneDBData.Maintain.newBuilder().setType(OneDBData.MethodType.MAINTAIN))).build());
+        return PojoDesensitize.fromDesensitize(OneDBData.Desensitize.newBuilder().setSensitivity(OneDBData.Sensitivity.PLAIN).setMethod(OneDBData.Method.newBuilder().setMaintain(OneDBData.Maintain.newBuilder().setType(OneDBData.MethodType.MAINTAIN))).build());
     }
 }

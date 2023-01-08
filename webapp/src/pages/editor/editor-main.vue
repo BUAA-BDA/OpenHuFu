@@ -1,4 +1,84 @@
 <template>
+  <el-dialog
+      v-model="dialogVisible"
+      title="Change desensitize method"
+      width="30%"
+      :before-close="handleClose"
+  >
+    <el-form label-width="auto" label-position="left" style="margin: 10% 12% 0 12%;">
+      <el-form-item :label="$t('editor.tableName')">
+        <el-input v-model="tableName" disabled/>
+      </el-form-item>
+      <el-form-item :label="$t('editor.colName')">
+        <el-input v-model="column.name" disabled/>
+      </el-form-item>
+      <el-form-item :label="$t('editor.colType')">
+        <el-input v-model="column.type" disabled/>
+      </el-form-item>
+
+      <el-form-item :label="$t('editor.colSensitivity')">
+        <el-select v-model="column.desensitize.sensitivity" class="m-2" placeholder="Select">
+          <el-option
+              v-for="item in sensitivityOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item v-if="column.desensitize.sensitivity == 'SENSITIVE'" :label="$t('editor.methodType')">
+        <el-select v-model="column.desensitize.method.type" class="m-2" placeholder="Select">
+          <el-option
+              v-for="item in methodOptions[column.type]"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+          />
+        </el-select>
+      </el-form-item>
+
+      <div v-if="column.desensitize.sensitivity == 'SENSITIVE'">
+        <el-form-item v-if="column.desensitize.method.type == 'MASK'" :label="$t('editor.mask.begin')">
+          <el-input type="number" v-model="mask.begin"></el-input>
+        </el-form-item>
+        <el-form-item v-if="column.desensitize.method.type == 'MASK'" :label="$t('editor.mask.end')">
+          <el-input type="number" v-model="mask.end"></el-input>
+        </el-form-item>
+        <el-form-item v-if="column.desensitize.method.type == 'MASK'" :label="$t('editor.mask.str')">
+          <el-input v-model="mask.str"></el-input>
+        </el-form-item>
+
+        <el-form-item v-if="column.desensitize.method.type == 'REPLACE'" :label="$t('editor.replace.fromStr')">
+          <el-input v-model="replace.fromStr"></el-input>
+        </el-form-item>
+        <el-form-item v-if="column.desensitize.method.type == 'REPLACE'" :label="$t('editor.replace.toStr')">
+          <el-input v-model="replace.toStr"></el-input>
+        </el-form-item>
+
+        <el-form-item v-if="column.desensitize.method.type == 'NUMBER_FLOOR'" :label="$t('editor.number_floor.place')">
+          <el-input type="number" v-model="number_floor.place"></el-input>
+        </el-form-item>
+
+        <el-form-item v-if="column.desensitize.method.type == 'DATE_FLOOR'" :label="$t('editor.date_floor.floor')">
+          <el-select v-model="date_floor.floor" class="m-2" placeholder="Select">
+            <el-option
+                v-for="item in dateFloorOptions[column.type]"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+      </div>
+    </el-form>
+
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="handleClose" type="primary">{{$t('operation.updateDesensitization')}}</el-button>
+      </span>
+    </template>
+
+  </el-dialog>
   <splitpanes class="app-container" id="app">
     <pane class="left-pane">
       <el-scrollbar>
@@ -297,6 +377,26 @@
                       >
                         {{ data.modifier }}
                       </el-tag>
+                      <el-tag
+                          @click="changeDesensitization(data, node)"
+                          v-if="data.desensitize"
+                          class="mx-1 info-tag"
+                          type="primary"
+                          effect="plain"
+                          round
+                      >
+                        {{ data.desensitize.sensitivity }}
+                      </el-tag>
+                      <el-tag
+                          @click="changeDesensitization(data, node)"
+                          v-if="data.desensitize && data.desensitize.sensitivity == 'SENSITIVE'"
+                          class="mx-1 info-tag"
+                          type="success"
+                          effect="plain"
+                          round
+                      >
+                        {{ data.desensitize.method.type}}
+                      </el-tag>
                     </span>
                   </span>
                   <font-awesome-icon
@@ -530,6 +630,8 @@ import "splitpanes/dist/splitpanes.css";
 import axios from "axios";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import EditorSub from "@/pages/editor/editor-sub.vue";
+import { ElMessageBox } from 'element-plus';
+import {ref} from "vue";
 import {
   faTable,
   faTableColumns,
@@ -595,6 +697,26 @@ export default {
     this.connectRemote();
   },
   data() {
+    const dialogVisible = ref(false)
+    const handleClose = (done) => {
+      ElMessageBox.confirm(this.$t('editor.confirmDesensitization'), {
+        beforeClose: (action, instance, done) =>  {
+          if (action === 'confirm') {
+            this.updateDesensitization();
+            done()
+          } else {
+            this.dialogVisible = ref(false);
+            done()
+          }
+        }
+      })
+          .then(() => {
+            done()
+          })
+          .catch(() => {
+            // catch error
+          })
+    }
     return {
       connectState: 0, // 0: no_connection, 1: connecting, 2: connected, 3: connect_fail
       hasOwner: false,
@@ -657,9 +779,246 @@ export default {
           label: "PRIVATE",
         },
       ],
+      sensitivityOptions: [
+        {
+          value: "PLAIN",
+          label: this.$t('editor.sensitivity.plain'),
+        },
+        {
+          value: "SENSITIVE",
+          label: this.$t('editor.sensitivity.sensitive'),
+        },
+        {
+          value: "SECRET",
+          label: this.$t('editor.sensitivity.secret'),
+        }
+      ],
+      methodOptions: {
+        "INT" : [
+          {
+            value: "MAINTAIN",
+            label: this.$t('editor.maintain.type'),
+          },
+          {
+            value: "NUMBER_FLOOR",
+            label: this.$t('editor.number_floor.type'),
+          }
+        ],
+        "STRING": [
+          {
+            value: "MAINTAIN",
+            label: this.$t('editor.maintain.type'),
+          },
+          {
+            value: "MASK",
+            label: this.$t('editor.mask.type'),
+          },
+          {
+            value: "REPLACE",
+            label: this.$t('editor.replace.type'),
+          }
+        ],
+        "DATE": [
+          {
+            value: "MAINTAIN",
+            label: this.$t('editor.maintain.type'),
+          },
+          {
+            value: "DATE_FLOOR",
+            label: this.$t('editor.date_floor.type'),
+          }
+        ],
+        "TIME": [
+          {
+            value: "MAINTAIN",
+            label: this.$t('editor.maintain.type'),
+          },
+          {
+            value: "DATE_FLOOR",
+            label: this.$t('editor.date_floor.type'),
+          }
+        ],
+        "TIMESTAMP": [
+          {
+            value: "MAINTAIN",
+            label: this.$t('editor.maintain.type'),
+          },
+          {
+            value: "DATE_FLOOR",
+            label: this.$t('editor.date_floor.type'),
+          }
+        ],
+      },
+      dateFloorOptions: {
+        "DATE": [
+          {
+            value: "year",
+            label: this.$t('editor.time.year'),
+          },
+          {
+            value: "month",
+            label: this.$t('editor.time.month'),
+          }
+        ],
+        "TIME": [
+          {
+            value: "hour",
+            label: this.$t('editor.time.hour'),
+          },
+          {
+            value: "minute",
+            label: this.$t('editor.time.minute'),
+          }
+        ],
+        "TIMESTAMP": [
+          {
+            value: "year",
+            label: this.$t('editor.time.year'),
+          },
+          {
+            value: "month",
+            label: this.$t('editor.time.month'),
+          },
+          {
+            value: "day",
+            label: this.$t('editor.time.day'),
+          },
+          {
+            value: "hour",
+            label: this.$t('editor.time.hour'),
+          },
+          {
+            value: "minute",
+            label: this.$t('editor.time.minute'),
+          },
+          {
+            value: "second",
+            label: this.$t('editor.time.second'),
+          },
+        ]
+      },
+      maintain: {
+        type: ""
+      },
+      mask: {
+        type: "",
+        begin: 0,
+        end: 0,
+        str: ""
+      },
+      replace: {
+        type: "",
+        fromStr: "",
+        toStr: ""
+      },
+      date_floor: {
+        type: "",
+        floor: ""
+      },
+      number_floor: {
+        type: "",
+        place: 0
+      },
+      dialogVisible,
+      handleClose,
+      tableName: "",
+      column: {
+        name: "",
+        type: "",
+        modifier: "",
+        desensitize: {
+          sensitivity: "",
+          method: {
+            type: ""
+          }
+        }
+      }
     };
   },
   methods: {
+    updateDesensitization() {
+      let type = this.column.desensitize.method.type;
+      switch (type) {
+        case "MAINTAIN":
+          this.maintain.type = type;
+          this.column.desensitize.method = this.maintain;
+          break;
+        case "MASK":
+          this.mask.type = type;
+          this.mask.begin = parseInt(this.mask.begin);
+          this.mask.end = parseInt(this.mask.end);
+          this.column.desensitize.method = this.mask;
+          break;
+        case "REPLACE":
+          this.replace.type = type;
+          this.column.desensitize.method = this.replace;
+          break;
+        case "NUMBER_FLOOR":
+          this.number_floor.type = type;
+          this.number_floor.place = parseInt(this.number_floor.place);
+          this.column.desensitize.method = this.number_floor;
+          break;
+        case "DATE_FLOOR":
+          this.date_floor.type = type;
+          this.column.desensitize.method = this.date_floor;
+          break;
+      }
+      if (this.column.desensitize.sensitivity == "PAIN" || this.column.desensitize.sensitivity == "SECRET") {
+        this.maintain.type = "MAINTAIN";
+        this.column.desensitize.method = this.maintain;
+      }
+      console.log(this.column)
+      axios
+          .post('/owner/updateDesensitize', {tableName: this.tableName, columnDesc: this.column})
+          .then(() => {
+            this.dialogVisible = ref(false);
+            this.tableName = "";
+            this.column.name = "";
+            this.column.type = "";
+            this.column.modifier = "";
+            this.column.desensitize.sensitivity = "";
+            this.column.desensitize.method = {};
+            this.refreshLocalTableTree();
+          })
+          .catch(() => {
+            window.alert(`Fail to update desensitize: ${this.column.name} in ${this.tableName}`);
+          })
+    },
+    changeDesensitization(data, node) {
+      console.log(data)
+      this.dialogVisible = ref(true);
+      this.column.name = data.label;
+      this.column.type = data.type;
+      this.column.modifier = "HIDDEN";
+      this.column.desensitize.sensitivity = data.desensitize.sensitivity;
+      this.column.desensitize.method.type = data.desensitize.method.type;
+      switch (data.desensitize.method.type) {
+        case "MAINTAIN":
+          //this.column.desensitize.method = this.maintain;
+          break;
+        case "MASK":
+          this.mask.begin = data.desensitize.method.begin;
+          this.mask.end = data.desensitize.method.end;
+          this.mask.str = data.desensitize.method.str;
+          //this.column.desensitize.method = this.mask;
+          break;
+        case "REPLACE":
+          this.replace.fromStr = data.desensitize.method.fromStr;
+          this.replace.toStr = data.desensitize.method.toStr;
+          //this.column.desensitize.method = this.replace;
+          break;
+        case "NUMBER_FLOOR":
+          this.number_floor.place = data.desensitize.method.place;
+          //this.column.desensitize.method = this.number_floor;
+          break;
+        case "DATE_FLOOR":
+          this.date_floor.floor = data.desensitize.method.floor;
+          //this.column.desensitize.method = this.date_floor;
+          break;
+      }
+      console.info(this.column);
+      this.tableName = node.parent.data.label;
+    },
     connectRemote() {
       this.connectState = 1;
       axios
@@ -809,6 +1168,7 @@ export default {
                   id: table.name + column.name,
                   label: column.name,
                   type: column.type,
+                  desensitize: column.desensitize,
                   children: [],
                 });
               });
@@ -1303,5 +1663,8 @@ export default {
 }
 .rotate-element {
   animation: spin 2s infinite;
+}
+.dialog-footer button:first-child {
+  margin-right: 10px;
 }
 </style>

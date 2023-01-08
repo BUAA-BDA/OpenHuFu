@@ -1,5 +1,6 @@
 package com.hufudb.onedb.owner;
 
+import com.hufudb.onedb.data.schema.utils.PojoColumnDesc;
 import com.hufudb.onedb.owner.adapter.Adapter;
 import com.hufudb.onedb.owner.checker.Checker;
 import com.hufudb.onedb.owner.config.OwnerConfig;
@@ -170,6 +171,10 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
   public boolean changeCatalog(String catalog) {
     LOG.error("change catalog operation is not supported in your database");
     return false;
+  }
+
+  public void updateDesensitize(String tableName, PojoColumnDesc columnDesc) {
+    schemaManager.updateDesensitize(tableName, columnDesc);
   }
 
   protected void shutdown() {

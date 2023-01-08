@@ -19,7 +19,7 @@ public enum MethodTypeWrapper {
     NUMBER_FLOOR("NUMBER_FLOOR", OneDBData.MethodType.NUMBER_FLOOR),
 
     @SerializedName(value = "DATE_FLOOR", alternate = "{dateFloor, date_floor}")
-    Date_FLOOR("NUMBER_FLOOR", OneDBData.MethodType.DATE_FLOOR);
+    DATE_FLOOR("NUMBER_FLOOR", OneDBData.MethodType.DATE_FLOOR);
 
     private final static ImmutableMap<Integer, MethodTypeWrapper> MAP;
 

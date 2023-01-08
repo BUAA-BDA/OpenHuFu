@@ -9,6 +9,8 @@ public class Mask extends PojoMethod {
     public long end;
     public String str;
 
+    public Mask() {}
+
     public Mask(MethodTypeWrapper type, long begin, long end, String str) {
         super(type);
         this.begin = begin;
