@@ -147,15 +147,17 @@ public class SchemaManager {
   }
 
   public void initDesensitization(List<PojoActualTableSchema> actualTables) {
-    for (PojoActualTableSchema actualTable : actualTables) {
-      String name = actualTable.getActualName();
-      List<ColumnDesc> columnDescs = new ArrayList<>();
-      for (PojoColumnDesc columnDesc : actualTable.getActualColumns()) {
-        columnDescs.add(columnDesc.DtoColumnDesc());
-      }
-      TableSchema schema = TableSchema.of(name, columnDescs);
-      if (!desensitizationMap.containsKey(name)) {
-        desensitizationMap.put(name, schema);
+    if (actualTables != null) {
+      for (PojoActualTableSchema actualTable : actualTables) {
+        String name = actualTable.getActualName();
+        List<ColumnDesc> columnDescs = new ArrayList<>();
+        for (PojoColumnDesc columnDesc : actualTable.getActualColumns()) {
+          columnDescs.add(columnDesc.DtoColumnDesc());
+        }
+        TableSchema schema = TableSchema.of(name, columnDescs);
+        if (!desensitizationMap.containsKey(name)) {
+          desensitizationMap.put(name, schema);
+        }
       }
     }
     addLocalTableSensitivity();
