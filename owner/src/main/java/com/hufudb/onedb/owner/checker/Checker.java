@@ -205,9 +205,11 @@ public class Checker {
         break;
 
       case AGG_FUNC:
-        Expression tmp = sensitivityExp(exp.getIn(0), manager, plan, allInputs);
-        rt = ExpressionFactory.addSensitivity(exp, ExpSensitivityConvert.convertAggFunctions(tmp.getSensitivity(), exp.getI32()));
-        break;
+        if (exp.getI32() != 1) {
+          Expression tmp = sensitivityExp(exp.getIn(0), manager, plan, allInputs);
+          rt = ExpressionFactory.addSensitivity(exp, ExpSensitivityConvert.convertAggFunctions(tmp.getSensitivity(), exp.getI32()));
+          break;
+        }
     }
     if (rt.getSensitivity() == ExpSensitivity.ERROR) {
       throw new RuntimeException(String.format("%s  Can't desensitize", exp));
