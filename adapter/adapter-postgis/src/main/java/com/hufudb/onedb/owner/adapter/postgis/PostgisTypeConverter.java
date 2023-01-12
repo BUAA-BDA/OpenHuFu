@@ -3,8 +3,9 @@ package com.hufudb.onedb.owner.adapter.postgis;
 import com.hufudb.onedb.owner.adapter.AdapterTypeConverter;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 
-public class PostgisTypeConverter implements AdapterTypeConverter {
-  public ColumnType convert(String typeName) {
+public class PostgisTypeConverter extends AdapterTypeConverter {
+  @Override
+  public ColumnType convert(int type, String typeName) {
     switch (typeName) {
       case "real":
       case "float4":

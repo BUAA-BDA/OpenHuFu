@@ -82,7 +82,7 @@ public class OneDBSchemaManager extends AbstractSchema {
       }
       addOwnerTLS(endpoint, cred);
     } catch (IOException e) {
-      LOG.error("Fail to create channel credentials: {}", e.getMessage());
+      LOG.error("Fail to create channel credentials.", e);
       addOwnerTLS(endpoint, null);
     }
   }

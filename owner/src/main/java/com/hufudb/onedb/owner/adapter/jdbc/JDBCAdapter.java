@@ -107,13 +107,13 @@ public abstract class JDBCAdapter implements Adapter {
       TableSchemaBuilder.setTableName(tableName);
       while (rc.next()) {
         String columnName = rc.getString("COLUMN_NAME");
-        TableSchemaBuilder.add(columnName, converter.convert(rc.getString("TYPE_NAME")),
+        TableSchemaBuilder.add(columnName, converter.convert(rc.getType(), rc.getString("TYPE_NAME")),
                 Desensitize.newBuilder().setSensitivity(Sensitivity.PLAIN).setMethod(Method.newBuilder().setMaintain(Maintain.newBuilder())).build());
       }
       rc.close();
       return TableSchemaBuilder.build();
     } catch (Exception e) {
-      LOG.error("Error when load TableSchema of {}: ", tableName, e.getMessage());
+      LOG.error("Error when load TableSchema of {}: ", tableName, e);
       return null;
     }
   }
