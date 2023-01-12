@@ -1,11 +1,17 @@
-package com.hufudb.onedb.data.method;
+package com.hufudb.onedb.data.desensitize.utils;
 
+import com.hufudb.onedb.data.storage.utils.MethodTypeWrapper;
 import com.hufudb.onedb.data.schema.utils.PojoMethod;
+import com.hufudb.onedb.data.storage.utils.SensitivityWrapper;
 import com.hufudb.onedb.proto.OneDBData;
 
 public class Replace extends PojoMethod {
     public String fromStr;
     public String toStr;
+
+    public Replace() {
+        super.type = MethodTypeWrapper.REPLACE;
+    }
 
     public Replace(MethodTypeWrapper type, String fromStr, String toStr) {
         super(type);
@@ -39,7 +45,6 @@ public class Replace extends PojoMethod {
     @Override
     public String implement(Object val, OneDBData.ColumnDesc columnDesc, OneDBData.Method method) {
         OneDBData.Replace replace = method.getReplace();
-        String colName = columnDesc.getName();
         if (columnDesc.getType() == OneDBData.ColumnType.STRING) {
             return ((String)val).replaceAll(replace.getFromStr(), replace.getToStr());
         }

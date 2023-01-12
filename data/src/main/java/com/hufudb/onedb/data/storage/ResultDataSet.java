@@ -4,8 +4,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
-import com.hufudb.onedb.data.method.DesensitizeFactory;
+import com.hufudb.onedb.data.desensitize.DesensitizeFactory;
 import com.hufudb.onedb.data.schema.Schema;
+import com.hufudb.onedb.proto.OneDBData;
 import com.hufudb.onedb.proto.OneDBData.ColumnDesc;
 
 /**
@@ -111,6 +112,14 @@ public class ResultDataSet implements DataSet {
     } catch (SQLException e) {
       LOG.error("Fail to close ResultSet in ResultDatSet: {}", e.getMessage());
     }
+  }
+
+  public OneDBData.DataSetProto toProto() {
+    ProtoDataSet.Builder builder = ProtoDataSet.newBuilder(getSchema());
+    while (this.getIterator().next()) {
+      builder.addRow(this.getIterator());
+    }
+    return builder.buildProto();
   }
 
   public interface Getter<T> {

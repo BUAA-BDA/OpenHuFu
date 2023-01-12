@@ -5,13 +5,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.google.common.collect.ImmutableList;
-import com.hufudb.onedb.data.method.DesensitizeFactory;
+import com.hufudb.onedb.data.desensitize.DesensitizeFactory;
 import com.hufudb.onedb.data.schema.utils.PojoActualTableSchema;
 import com.hufudb.onedb.data.schema.utils.PojoColumnDesc;
+import com.hufudb.onedb.data.schema.utils.PojoDesensitize;
 import com.hufudb.onedb.data.schema.utils.PojoPublishedTableSchema;
-import com.hufudb.onedb.proto.OneDBData;
+import com.hufudb.onedb.proto.OneDBData.Desensitize;
 import com.hufudb.onedb.proto.OneDBData.ColumnDesc;
 import com.hufudb.onedb.proto.OneDBData.Modifier;
+import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +27,7 @@ public class SchemaManager {
 
   final Map<String, TableSchema> actualTableSchemaMap;
   final Map<String, PublishedTableSchema> publishedTableSchemaMap;
-  final Map<String, TableSchema> desensitizationMap;
+  Map<String, TableSchema> desensitizationMap;
 
   public SchemaManager() {
     actualTableSchemaMap = new ConcurrentHashMap<>();
@@ -145,21 +147,70 @@ public class SchemaManager {
   }
 
   public void initDesensitization(List<PojoActualTableSchema> actualTables) {
-    for (PojoActualTableSchema actualTable : actualTables) {
-      String name = actualTable.getActualName();
-      List<ColumnDesc> columnDescs = new ArrayList<>();
-      for (PojoColumnDesc columnDesc : actualTable.getActualColumns()) {
-        columnDescs.add(columnDesc.DtoColumnDesc());
+    if (actualTables != null) {
+      for (PojoActualTableSchema actualTable : actualTables) {
+        String name = actualTable.getActualName();
+        List<ColumnDesc> columnDescs = new ArrayList<>();
+        for (PojoColumnDesc columnDesc : actualTable.getActualColumns()) {
+          columnDescs.add(columnDesc.DtoColumnDesc());
+        }
+        TableSchema schema = TableSchema.of(name, columnDescs);
+        if (!desensitizationMap.containsKey(name)) {
+          desensitizationMap.put(name, schema);
+        }
       }
-      TableSchema schema = TableSchema.of(name, columnDescs);
-      if (!desensitizationMap.containsKey(name)) {
-        desensitizationMap.put(name, schema);
+    }
+    addLocalTableSensitivity();
+    desensitizationMap = actualTableSchemaMap;
+  }
+
+  public void addLocalTableSensitivity() {
+    for (String table : this.actualTableSchemaMap.keySet()) {
+      TableSchema actualTable = actualTableSchemaMap.get(table);
+      if (desensitizationMap.containsKey(table)) {
+        TableSchema desensitizeTable = desensitizationMap.get(table);
+        List<ColumnDesc> deColumnDescs = new ArrayList<>();
+        for (ColumnDesc columnDesc : actualTable.getSchema().getColumnDescs()) {
+          ColumnDesc tmp = columnDesc;
+          String colName = columnDesc.getName();
+          ColumnType type = columnDesc.getType();
+          Modifier modifier = columnDesc.getModifier();
+          Desensitize desensitize = desensitizeTable.getDesensitize(colName);
+          if (desensitize != null) {
+            tmp = ColumnDesc.newBuilder().setName(colName).setType(type).setModifier(modifier).setDesensitize(desensitize).build();
+          }
+          deColumnDescs.add(tmp);
+          actualTableSchemaMap.remove(table);
+          actualTableSchemaMap.put(table, TableSchema.of(table, deColumnDescs));
+        }
       }
     }
   }
 
   public Map<String, TableSchema> getDesensitizationMap() {
-    return desensitizationMap;
+    return actualTableSchemaMap;
+  }
+
+  public void updateDesensitize(String tableName, PojoColumnDesc columnDesc) {
+    try {
+      TableSchema actualTable = this.getLocalTable(tableName);
+      actualTableSchemaMap.remove(tableName, actualTableSchemaMap.get(tableName));
+      String name = columnDesc.name;
+      PojoDesensitize desensitize = columnDesc.desensitize;
+      List<ColumnDesc> columnDescs = new ArrayList<>();
+      for (int index = 0; index < actualTable.schema.getColumnDescs().size(); index++) {
+        if (index != actualTable.getColumnIndex(name)) {
+          columnDescs.add(actualTable.schema.getColumnDesc(index));
+        } else {
+          ColumnDesc originCol = actualTable.schema.getColumnDesc(index);
+          columnDescs.add(ColumnDesc.newBuilder().setName(name).setType(originCol.getType()).setDesensitize(desensitize.toDesensitize()).build());
+        }
+      }
+      actualTable = TableSchema.of(tableName, columnDescs);
+      actualTableSchemaMap.put(tableName, actualTable);
+    } catch (Exception e) {
+      LOG.error(String.valueOf(e));
+    }
   }
 
   public void checkDesensitization() {
@@ -168,9 +219,9 @@ public class SchemaManager {
       TableSchema actualTable = actualTableSchemaMap.get(tableName);
       for (ColumnDesc columnDesc : entry.getValue().getSchema().getColumnDescs()) {
         String colName = columnDesc.getName();
-        OneDBData.ColumnType localType = actualTable.getSchema().getType(actualTable.getColumnIndex(colName));
-        OneDBData.ColumnType desensitizationType = columnDesc.getType();
-        OneDBData.Desensitize desensitize = columnDesc.getDesensitize();
+        ColumnType localType = actualTable.getSchema().getType(actualTable.getColumnIndex(colName));
+        ColumnType desensitizationType = columnDesc.getType();
+        Desensitize desensitize = columnDesc.getDesensitize();
         DesensitizeFactory.check(localType, desensitizationType, desensitize.getMethod());
       }
     }

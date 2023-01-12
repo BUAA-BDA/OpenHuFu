@@ -1,5 +1,6 @@
 package com.hufudb.onedb.owner;
 
+import com.hufudb.onedb.data.schema.utils.PojoColumnDesc;
 import com.hufudb.onedb.owner.adapter.Adapter;
 import com.hufudb.onedb.owner.checker.Checker;
 import com.hufudb.onedb.owner.config.OwnerConfig;
@@ -50,7 +51,7 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
     this.endpoint = String.format("%s:%d", config.hostname, config.port);
     this.ownerSideRpc = config.acrossOwnerRpc;
     this.adapter = config.adapter;
-    this.implementor = new OwnerSideImplementor(ownerSideRpc, adapter, threadPool);
+    this.implementor = new OwnerSideImplementor(ownerSideRpc, adapter, threadPool, config.singleOwner);
     this.schemaManager = this.adapter.getSchemaManager();
     this.libraries = config.librarys;
     initPublishedTable(config.tables);
@@ -61,6 +62,8 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
   public void query(QueryPlanProto request, StreamObserver<DataSetProto> responseObserver) {
     Plan plan = Plan.fromProto(request);
     LOG.info("receives plan:\n{}", plan);
+    Checker.checkSensitivity(plan, schemaManager);
+    LOG.info("add sensitivity plan:\n{}", plan);
     if (!Checker.check(plan, schemaManager)) {
       LOG.warn("Check fail for plan {}", request.toString());
       responseObserver.onCompleted();
@@ -168,6 +171,10 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
   public boolean changeCatalog(String catalog) {
     LOG.error("change catalog operation is not supported in your database");
     return false;
+  }
+
+  public void updateDesensitize(String tableName, PojoColumnDesc columnDesc) {
+    schemaManager.updateDesensitize(tableName, columnDesc);
   }
 
   protected void shutdown() {

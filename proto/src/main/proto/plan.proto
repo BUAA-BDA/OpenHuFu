@@ -54,19 +54,27 @@ enum JoinType {
   SEMI = 4;
 }
 
+enum ExpSensitivity {
+  NONE_SENSITIVE = 0;
+  SINGLE_SENSITIVE = 1;
+  MULTI_SENSITIVE = 2;
+  ERROR = 3;
+}
+
 message Expression {
   OperatorType opType = 1;
   ColumnType outType = 2;
   repeated Expression in = 3;
   Modifier modifier = 4;
+  ExpSensitivity sensitivity = 5;
   oneof value {
-    bool b = 5;
-    int32 i32 = 6;
-    int64 i64 = 7;
-    float f32 = 8;
-    double f64 = 9;
-    string str = 10;
-    bytes blob = 11;
+    bool b = 6;
+    int32 i32 = 7;
+    int64 i64 = 8;
+    float f32 = 9;
+    double f64 = 10;
+    string str = 11;
+    bytes blob = 12;
   }
 }
 

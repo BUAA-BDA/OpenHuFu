@@ -2,6 +2,7 @@ package com.hufudb.onedb.backend.controller;
 
 import java.util.List;
 
+import com.hufudb.onedb.backend.entity.request.DesensitizeRequest;
 import com.hufudb.onedb.data.schema.utils.PojoPublishedTableSchema;
 import com.hufudb.onedb.data.schema.utils.PojoTableSchema;
 import com.hufudb.onedb.owner.OwnerServer;
@@ -50,5 +51,9 @@ public class OwnerController {
   void dropPublishedTable(@PathVariable String name) {
     service.dropPublishedTable(name);
   }
-  
+
+  @PostMapping("/owner/updateDesensitize")
+  void updateDesensitize(@RequestBody DesensitizeRequest desensitizeRequest) {
+    service.updateDesensitize(desensitizeRequest.tableName, desensitizeRequest.columnDesc);
+  }
 }

@@ -72,6 +72,10 @@ public class OneDBClient {
     return table != null ? table.getTableList() : ImmutableList.of();
   }
 
+  public int getOwnerSize() {
+    return schemaManager.getEndpoints().size();
+  }
+
   public DataSet executeQueryPlan(Plan plan) {
     plan = plan.rewrite(rewriter);
     return UserSideImplementor.getImplementor(plan, this).implement(plan);

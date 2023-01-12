@@ -112,8 +112,16 @@ public class PlanUtils {
     builder.setTaskInfo(taskInfo);
     QueryPlanProto leftPlaceholder = new EmptyPlan(left.getOutExpressions()).toProto();
     QueryPlanProto rightPlaceholder = new EmptyPlan(right.getOutExpressions()).toProto();
-    // for owners from left
     builder.setJoinInfo(plan.getJoinCond().toBuilder().build());
+    // single owner
+    if (client.getOwnerSize() == 1) {
+      QueryPlanProto context = builder.addChildren(0, leftPlan.get(0).getValue())
+              .addChildren(1, rightPlan.get(0).getValue()).build();
+      leftPlan.get(0).setValue(context);
+      ownerPlan.add(leftPlan.get(0));
+      return ownerPlan;
+    }
+    // for owners from left
     for (Pair<OwnerClient, QueryPlanProto> p : leftPlan) {
       QueryPlanProto context = builder.addChildren(0, p.getValue())
           .addChildren(1, rightPlaceholder).build();

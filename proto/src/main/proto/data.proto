@@ -43,6 +43,7 @@ enum MethodType {
   REPLACE = 1;
   MASK = 2;
   NUMBER_FLOOR = 3;
+  DATE_FLOOR = 4;
 }
 
 message Maintain {
@@ -67,12 +68,18 @@ message NumberFloor {
   int32 place = 2;
 }
 
+message DateFloor {
+  MethodType type = 1;
+  string floor = 2;
+}
+
 message Method {
   oneof method {
     Maintain maintain = 1;
     Replace replace = 2;
     Mask mask = 3;
     NumberFloor number_floor = 4;
+    DateFloor date_floor = 5;
   }
 }
 

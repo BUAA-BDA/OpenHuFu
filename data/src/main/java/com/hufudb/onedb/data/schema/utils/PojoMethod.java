@@ -1,6 +1,13 @@
 package com.hufudb.onedb.data.schema.utils;
 
-import com.hufudb.onedb.data.method.*;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.hufudb.onedb.data.desensitize.utils.Maintain;
+import com.hufudb.onedb.data.desensitize.utils.Replace;
+import com.hufudb.onedb.data.desensitize.utils.Mask;
+import com.hufudb.onedb.data.desensitize.utils.DateFloor;
+import com.hufudb.onedb.data.desensitize.utils.NumberFloor;
+import com.hufudb.onedb.data.storage.utils.MethodTypeWrapper;
 import com.hufudb.onedb.proto.OneDBData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,10 +15,24 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class PojoMethod {
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.EXISTING_PROPERTY,
+        property = PojoMethod.DISCRIMINATOR)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = Maintain.class, name = "MAINTAIN"),
+        @JsonSubTypes.Type(value = Mask.class, name = "MASK"),
+        @JsonSubTypes.Type(value = Replace.class, name = "REPLACE"),
+        @JsonSubTypes.Type(value = NumberFloor.class, name = "NUMBER_FLOOR"),
+        @JsonSubTypes.Type(value = DateFloor.class, name = "DATE_FLOOR")
+})
+public class PojoMethod {
+    public static final String DISCRIMINATOR = "type";
     public MethodTypeWrapper type;
     protected List<OneDBData.ColumnType> allowedTypes = new ArrayList<>();
     private static final Logger LOG = LoggerFactory.getLogger(PojoMethod.class);
+
+    public PojoMethod() {}
 
     public PojoMethod(MethodTypeWrapper type) {
         this.type = type;
@@ -25,6 +46,8 @@ public abstract class PojoMethod {
                 return new Mask(MethodTypeWrapper.MASK, method.getMask().getBegin(), method.getMask().getEnd(), method.getMask().getStr());
             case NUMBER_FLOOR:
                 return new NumberFloor(MethodTypeWrapper.NUMBER_FLOOR, method.getNumberFloor().getPlace());
+            case DATE_FLOOR:
+                return new DateFloor(MethodTypeWrapper.DATE_FLOOR, method.getDateFloor().getFloor());
             case MAINTAIN:
             default:
                 return new Maintain(MethodTypeWrapper.MAINTAIN);
@@ -41,6 +64,10 @@ public abstract class PojoMethod {
 
     public void setType(MethodTypeWrapper type) {
         this.type = type;
+    }
+
+    public static PojoMethod methodDefault() {
+        return PojoMethod.fromColumnMethod(OneDBData.Method.newBuilder().build());
     }
 
     public Object implement(Object val, OneDBData.ColumnDesc columnDesc, OneDBData.Method method) {

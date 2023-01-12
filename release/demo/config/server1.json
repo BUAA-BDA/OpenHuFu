@@ -161,17 +161,6 @@
           }
         },
         {
-          "name": "score",
-          "desensitize": {
-            "sensitivity": "SENSITIVE",
-            "method" : {
-              "type" : "REPLACE",
-              "fromStr": "o",
-              "toStr": "####"
-            }
-          }
-        },
-        {
           "name": "age",
           "type": "INT",
           "desensitize": {
@@ -180,6 +169,12 @@
               "type" : "NUMBER_FLOOR",
               "place": 1
             }
+          }
+        },
+        {
+          "name": "score",
+          "desensitize": {
+            "sensitivity": "PLAIN"
           }
         },
         {
@@ -195,6 +190,47 @@
           }
         }
       ]
+    },
+    {
+      "actualName": "taxi",
+      "actualColumns": [
+        {
+          "name": "license",
+          "desensitize": {
+            "sensitivity": "SECRET"
+          }
+        },
+        {
+          "name": "cur_date",
+          "desensitize": {
+            "sensitivity": "SECRET",
+            "method" : {
+              "type" : "DATE_FLOOR",
+              "floor": "year"
+            }
+          }
+        },
+        {
+          "name": "cur_time",
+          "desensitize": {
+            "sensitivity": "SECRET",
+            "method": {
+              "type": "DATE_FLOOR",
+              "floor": "minute"
+            }
+          }
+        },
+        {
+          "name": "time_stamp",
+          "desensitize": {
+            "sensitivity": "SECRET",
+            "method" : {
+              "type" : "DATE_FLOOR",
+              "floor": "month"
+            }
+          }
+        }
+      ]
     }
   ],
   "license": {
@@ -203,5 +239,6 @@
     "storePass": "public_password1234",
     "licensePath": "./license/license1.lic",
     "publicKeysStorePath": "./license/publicCerts.keystore"
-  }
+  },
+  "singleOwner": true
 }

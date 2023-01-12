@@ -1,20 +1,13 @@
-package com.hufudb.onedb.data.method;
+package com.hufudb.onedb.data.desensitize;
 
 import com.hufudb.onedb.data.schema.utils.PojoMethod;
-import com.hufudb.onedb.data.storage.Row;
 import com.hufudb.onedb.proto.OneDBData;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 public class DesensitizeFactory {
 
     public static Object implement(Object val, OneDBData.ColumnDesc columnDesc) {
         Object rt = val;
         OneDBData.Desensitize desensitize = columnDesc.getDesensitize();
-        if (desensitize == null) {
-            return rt;
-        }
         OneDBData.Sensitivity sensitivity = desensitize.getSensitivity();
         OneDBData.Method method = desensitize.getMethod();
         PojoMethod pojoMethod = PojoMethod.fromColumnMethod(method);
@@ -25,7 +18,8 @@ public class DesensitizeFactory {
                 rt = pojoMethod.implement(val, columnDesc, method);
                 break;
             case SECRET:
-
+                rt = null;
+                break;
         }
         return rt;
     }

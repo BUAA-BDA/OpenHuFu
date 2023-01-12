@@ -110,6 +110,12 @@ public class Schema {
       return this;
     }
 
+    public Builder add(String name, ColumnType type, Desensitize desensitize) {
+      builder
+              .addColumnDesc(ColumnDesc.newBuilder().setName(name).setType(type).setDesensitize(desensitize));
+      return this;
+    }
+
     public Builder add(ColumnDesc columnDesc) {
       builder.addColumnDesc(columnDesc);
       return this;

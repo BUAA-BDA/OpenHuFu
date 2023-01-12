@@ -4,6 +4,10 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import com.hufudb.onedb.data.storage.DataSet;
 import com.hufudb.onedb.data.storage.EmptyDataSet;
+import com.hufudb.onedb.data.storage.MultiSourceDataSet;
+import com.hufudb.onedb.data.storage.ResultDataSet;
+import com.hufudb.onedb.data.storage.SortedDataSet;
+import com.hufudb.onedb.data.storage.LimitDataSet;
 import com.hufudb.onedb.implementor.PlanImplementor;
 import com.hufudb.onedb.interpreter.Interpreter;
 import com.hufudb.onedb.mpc.ProtocolException;
@@ -22,10 +26,13 @@ public class OwnerSideImplementor implements PlanImplementor {
   Adapter dataSourceAdapter;
   ExecutorService threadPool;
 
-  public OwnerSideImplementor(Rpc rpc, Adapter adapter, ExecutorService threadPool) {
+  boolean singleOwner;
+
+  public OwnerSideImplementor(Rpc rpc, Adapter adapter, ExecutorService threadPool, boolean singleOwner) {
     this.rpc = rpc;
     this.dataSourceAdapter = adapter;
     this.threadPool = threadPool;
+    this.singleOwner = singleOwner;
   }
 
   @Override
@@ -35,6 +42,9 @@ public class OwnerSideImplementor implements PlanImplementor {
 
   @Override
   public DataSet binaryQuery(BinaryPlan binary) {
+    if (singleOwner) {
+      return singleOwnerBinaryQuery(binary);
+    }
     List<Plan> children = binary.getChildren();
     assert children.size() == 2;
     Plan left = children.get(0);
@@ -63,6 +73,46 @@ public class OwnerSideImplementor implements PlanImplementor {
       LOG.error("Error in HashPSIJoin: {}", e.getMessage());
       return EmptyDataSet.INSTANCE;
     }
+  }
+
+  public DataSet singleOwnerBinaryQuery(BinaryPlan binary) {
+    List<Plan> children = binary.getChildren();
+    assert children.size() == 2;
+    Plan left = children.get(0);
+    Plan right = children.get(1);
+    DataSet leftResult = implement(left);
+    if (leftResult instanceof ResultDataSet) {
+      MultiSourceDataSet leftData = new MultiSourceDataSet(left.getOutSchema(), 1);
+      final MultiSourceDataSet.Producer producer = leftData.newProducer();
+      producer.add(((ResultDataSet) leftResult).toProto());
+      producer.finish();
+      leftResult = leftData;
+    }
+    DataSet rightResult = implement(right);
+    if (rightResult instanceof ResultDataSet) {
+      MultiSourceDataSet rightData = new MultiSourceDataSet(right.getOutSchema(), 1);
+      final MultiSourceDataSet.Producer producer = rightData.newProducer();
+      producer.add(((ResultDataSet) rightResult).toProto());
+      producer.finish();
+      rightResult = rightData;
+    }
+    DataSet result = Interpreter.join(leftResult, rightResult, binary.getJoinCond());
+    if (!binary.getWhereExps().isEmpty()) {
+      result = Interpreter.filter(result, binary.getWhereExps());
+    }
+    if (!binary.getSelectExps().isEmpty()) {
+      result = Interpreter.map(result, binary.getSelectExps());
+    }
+    if (!binary.getAggExps().isEmpty()) {
+      result = Interpreter.aggregate(result, binary.getGroups(), binary.getAggExps());
+    }
+    if (!binary.getOrders().isEmpty()) {
+      result = SortedDataSet.sort(result, binary.getOrders());
+    }
+    if (binary.getFetch() > 0 || binary.getOffset() > 0) {
+      result = LimitDataSet.limit(result, binary.getOffset(), binary.getFetch());
+    }
+    return result;
   }
 
   @Override

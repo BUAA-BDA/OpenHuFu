@@ -15,8 +15,13 @@ import com.hufudb.onedb.data.storage.ResultDataSet;
 import com.hufudb.onedb.expression.Translator;
 import com.hufudb.onedb.data.schema.Schema;
 import com.hufudb.onedb.data.schema.SchemaManager;
-import com.hufudb.onedb.proto.OneDBData;
+import com.hufudb.onedb.proto.OneDBData.Sensitivity;
+import com.hufudb.onedb.proto.OneDBData.Maintain;
+import com.hufudb.onedb.proto.OneDBData.Method;
 import com.hufudb.onedb.proto.OneDBData.Desensitize;
+import com.hufudb.onedb.proto.OneDBData.ColumnDesc;
+import com.hufudb.onedb.proto.OneDBData.Modifier;
+import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBPlan.PlanType;
 import com.hufudb.onedb.data.schema.TableSchema;
 import com.hufudb.onedb.owner.adapter.Adapter;
@@ -102,7 +107,8 @@ public abstract class JDBCAdapter implements Adapter {
       TableSchemaBuilder.setTableName(tableName);
       while (rc.next()) {
         String columnName = rc.getString("COLUMN_NAME");
-        TableSchemaBuilder.add(columnName, converter.convert(rc.getString("TYPE_NAME")));
+        TableSchemaBuilder.add(columnName, converter.convert(rc.getString("TYPE_NAME")),
+                Desensitize.newBuilder().setSensitivity(Sensitivity.PLAIN).setMethod(Method.newBuilder().setMaintain(Maintain.newBuilder())).build());
       }
       rc.close();
       return TableSchemaBuilder.build();
@@ -147,11 +153,23 @@ public abstract class JDBCAdapter implements Adapter {
     return sql.toString();
   }
 
+  public static String getTableName(ResultSet rs) throws SQLException {
+    String tableName = "";
+    for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
+      String columnTable = rs.getMetaData().getTableName(i);
+      if (columnTable != null && !columnTable.equals("")) {
+        tableName = columnTable;
+        break;
+      }
+    }
+    return tableName;
+  }
+
   protected DataSet executeSQL(String sql, Schema schema) {
     try {
       ResultSet rs = statement.executeQuery(sql);
-      String table = rs.getMetaData().getTableName(1);
-      Schema desensitizationSchema = desensitize(rs, schema, table);
+      String tableName = getTableName(rs);
+      Schema desensitizationSchema = desensitize(rs, schema, tableName);
       LOG.info("Execute {}", sql);
       return new ResultDataSet(schema, desensitizationSchema, rs);
     } catch (SQLException e) {
@@ -167,13 +185,13 @@ public abstract class JDBCAdapter implements Adapter {
     }
     ResultSetMetaData resultSetMetaData = rs.getMetaData();
     int colCount = resultSetMetaData.getColumnCount();
-    List<OneDBData.ColumnDesc> columnDescs = new ArrayList<>();
+    List<ColumnDesc> columnDescs = new ArrayList<>();
     for (int i = 0; i < colCount; i++) {
       String colName = resultSetMetaData.getColumnName(i+1);
       Desensitize desensitize = desensitizationTable.getDesensitize(colName);
-      OneDBData.ColumnType colType = schema.getType(i);
-      OneDBData.Modifier modifier = schema.getModifier(i);
-      columnDescs.add(OneDBData.ColumnDesc.newBuilder().setName(colName).setType(colType).setModifier(modifier).setDesensitize(desensitize).build());
+      ColumnType colType = schema.getType(i);
+      Modifier modifier = schema.getModifier(i);
+      columnDescs.add(ColumnDesc.newBuilder().setName(colName).setType(colType).setModifier(modifier).setDesensitize(desensitize).build());
     }
     return Schema.fromColumnDesc(columnDescs);
   }

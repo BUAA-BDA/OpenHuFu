@@ -9,6 +9,7 @@ import com.hufudb.onedb.data.storage.utils.DateUtils;
 import com.hufudb.onedb.data.storage.utils.ModifierWrapper;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 import com.hufudb.onedb.proto.OneDBData.Modifier;
+import com.hufudb.onedb.proto.OneDBPlan;
 import com.hufudb.onedb.proto.OneDBPlan.Expression;
 import com.hufudb.onedb.proto.OneDBPlan.JoinCondition;
 import com.hufudb.onedb.proto.OneDBPlan.JoinType;
@@ -127,6 +128,72 @@ public class ExpressionFactory {
         .addAllLeftKey(leftKeys).addAllRightKey(rightKyes).setModifier(modifier);
     if (condition != null) {
       builder.setCondition(condition);
+    }
+    return builder.build();
+  }
+
+  public static Expression addSensitivity(Expression exp, OneDBPlan.ExpSensitivity expSensitivity) {
+    Expression.Builder builder = Expression.newBuilder();
+    builder.setOpType(exp.getOpType());
+    builder.setOutType(exp.getOutType());
+    builder.addAllIn(exp.getInList());
+    builder.setModifier(exp.getModifier());
+    builder.setSensitivity(expSensitivity);
+    switch (exp.getValueCase()) {
+      case B:
+        builder.setB(exp.getB());
+        break;
+      case I32:
+        builder.setI32(exp.getI32());
+        break;
+      case I64:
+        builder.setI64(exp.getI64());
+        break;
+      case F32:
+        builder.setF32(exp.getF32());
+        break;
+      case F64:
+        builder.setF64(exp.getI64());
+        break;
+      case STR:
+        builder.setStr(exp.getStr());
+        break;
+      case BLOB:
+        builder.setBlob(exp.getBlob());
+        break;
+    }
+    return builder.build();
+  }
+
+  public static Expression addSensitivity(Expression exp, OneDBPlan.ExpSensitivity expSensitivity, List<Expression> ins) {
+    Expression.Builder builder = Expression.newBuilder();
+    builder.setOpType(exp.getOpType());
+    builder.setOutType(exp.getOutType());
+    builder.addAllIn(ins);
+    builder.setModifier(exp.getModifier());
+    builder.setSensitivity(expSensitivity);
+    switch (exp.getValueCase()) {
+      case B:
+        builder.setB(exp.getB());
+        break;
+      case I32:
+        builder.setI32(exp.getI32());
+        break;
+      case I64:
+        builder.setI64(exp.getI64());
+        break;
+      case F32:
+        builder.setF32(exp.getF32());
+        break;
+      case F64:
+        builder.setF64(exp.getI64());
+        break;
+      case STR:
+        builder.setStr(exp.getStr());
+        break;
+      case BLOB:
+        builder.setBlob(exp.getBlob());
+        break;
     }
     return builder.build();
   }

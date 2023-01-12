@@ -1,14 +1,17 @@
-package com.hufudb.onedb.data.method;
+package com.hufudb.onedb.data.desensitize.utils;
 
+import com.hufudb.onedb.data.storage.utils.MethodTypeWrapper;
 import com.hufudb.onedb.data.schema.utils.PojoMethod;
 import com.hufudb.onedb.proto.OneDBData;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Mask extends PojoMethod {
     public long begin;
     public long end;
     public String str;
+
+    public Mask() {
+        super.type = MethodTypeWrapper.MASK;
+    }
 
     public Mask(MethodTypeWrapper type, long begin, long end, String str) {
         super(type);

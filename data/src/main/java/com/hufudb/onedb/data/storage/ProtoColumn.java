@@ -195,6 +195,15 @@ public class ProtoColumn implements Column {
           case BLOB:
             appender.append(new byte[0]);
             break;
+          case DATE:
+            appender.append(new Date(0));
+            break;
+          case TIME:
+            appender.append(new Time(0));
+            break;
+          case TIMESTAMP:
+            appender.append(new Timestamp(0));
+            break;
           default:
             appender.append(0);
         }
