@@ -1,7 +1,28 @@
 package com.hufudb.onedb.owner.adapter;
 
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
+import java.sql.Types;
 
-public interface AdapterTypeConverter {
-  ColumnType convert(String typeName);
+public abstract class AdapterTypeConverter {
+  public ColumnType convert(int type, String typeName) {
+    switch (type) {
+      case Types.BOOLEAN:
+        return ColumnType.BOOLEAN;
+      case Types.INTEGER:
+        return ColumnType.INT;
+      case Types.BIGINT:
+        return ColumnType.LONG;
+      case Types.FLOAT:
+        return ColumnType.FLOAT;
+      case Types.DOUBLE:
+      case Types.NUMERIC:
+        return ColumnType.DOUBLE;
+      case Types.BLOB:
+        return ColumnType.BLOB;
+      case Types.CHAR:
+      case Types.VARCHAR:
+      default:
+        return ColumnType.STRING;
+    }
+  }
 }

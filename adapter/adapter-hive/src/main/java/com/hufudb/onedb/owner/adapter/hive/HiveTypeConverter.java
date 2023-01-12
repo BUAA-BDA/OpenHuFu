@@ -3,8 +3,10 @@ package com.hufudb.onedb.owner.adapter.hive;
 import com.hufudb.onedb.owner.adapter.AdapterTypeConverter;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 
-public class HiveTypeConverter implements AdapterTypeConverter {
-  public ColumnType convert(String typeName) {
+public class HiveTypeConverter extends AdapterTypeConverter {
+
+  @Override
+  public ColumnType convert(int type, String typeName) {
     switch (typeName) {
       case "FLOAT":
         return ColumnType.FLOAT;

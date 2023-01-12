@@ -3,8 +3,9 @@ package com.hufudb.onedb.owner.adapter.sqlite;
 import com.hufudb.onedb.owner.adapter.AdapterTypeConverter;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 
-public class SqliteTypeConverter implements AdapterTypeConverter {
-  public ColumnType convert(String typeName) {
+public class SqliteTypeConverter extends AdapterTypeConverter {
+  @Override
+  public ColumnType convert(int type, String typeName) {
     switch (typeName) {
       case "FLOAT":
       case "REAL":

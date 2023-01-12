@@ -26,6 +26,7 @@ function buildCoreModule() {
   cp udf/spatial-udf/target/*-with-dependencies.jar ./release/udf/scalar/spatial_udf.jar
   cp adapter/adapter-postgresql/target/*-with-dependencies.jar ./release/adapter/adapter_postgresql.jar
   cp adapter/adapter-mysql/target/*-with-dependencies.jar ./release/adapter/adapter_mysql.jar
+  cp adapter/adapter-oracle/target/*-with-dependencies.jar ./release/adapter/adapter_oracle.jar
   cp adapter/adapter-sqlite/target/*-with-dependencies.jar ./release/adapter/adapter_sqlite.jar
   cp adapter/adapter-csv/target/*-with-dependencies.jar ./release/adapter/adapter_csv.jar
   cp adapter/adapter-json/target/*-with-dependencies.jar ./release/adapter/adapter_json.jar

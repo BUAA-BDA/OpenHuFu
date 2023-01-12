@@ -3,10 +3,11 @@ package com.hufudb.onedb.owner.adapter.kylin;
 import com.hufudb.onedb.owner.adapter.AdapterTypeConverter;
 import com.hufudb.onedb.proto.OneDBData.ColumnType;
 
-public class KylinTypeConverter implements AdapterTypeConverter {
+public class KylinTypeConverter extends AdapterTypeConverter {
 
   // reference https://kylin.apache.org/cn/docs31/tutorial/sql_reference.html#datatype
-  public ColumnType convert(String typeName) {
+  @Override
+  public ColumnType convert(int type, String typeName) {
     switch (typeName) {
       case "FLOAT":
       case "REAL":
