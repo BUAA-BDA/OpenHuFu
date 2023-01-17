@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.google.common.collect.ImmutableList;
-import com.hufudb.onedb.data.desensitize.DesensitizeFactory;
 import com.hufudb.onedb.data.schema.utils.PojoActualTableSchema;
 import com.hufudb.onedb.data.schema.utils.PojoColumnDesc;
 import com.hufudb.onedb.data.schema.utils.PojoDesensitize;
@@ -25,9 +24,9 @@ import org.slf4j.LoggerFactory;
 public class SchemaManager {
   private static final Logger LOG = LoggerFactory.getLogger(SchemaManager.class);
 
-  final Map<String, TableSchema> actualTableSchemaMap;
+  public final Map<String, TableSchema> actualTableSchemaMap;
   final Map<String, PublishedTableSchema> publishedTableSchemaMap;
-  Map<String, TableSchema> desensitizationMap;
+  public Map<String, TableSchema> desensitizationMap;
 
   public SchemaManager() {
     actualTableSchemaMap = new ConcurrentHashMap<>();
@@ -213,18 +212,6 @@ public class SchemaManager {
     }
   }
 
-  public void checkDesensitization() {
-    for (Map.Entry<String, TableSchema> entry : desensitizationMap.entrySet()) {
-      String tableName = entry.getKey();
-      TableSchema actualTable = actualTableSchemaMap.get(tableName);
-      for (ColumnDesc columnDesc : entry.getValue().getSchema().getColumnDescs()) {
-        String colName = columnDesc.getName();
-        ColumnType localType = actualTable.getSchema().getType(actualTable.getColumnIndex(colName));
-        ColumnType desensitizationType = columnDesc.getType();
-        Desensitize desensitize = columnDesc.getDesensitize();
-        DesensitizeFactory.check(localType, desensitizationType, desensitize.getMethod());
-      }
-    }
-  }
+
 }
 

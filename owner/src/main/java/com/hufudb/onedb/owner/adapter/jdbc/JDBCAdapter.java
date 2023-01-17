@@ -27,8 +27,10 @@ import com.hufudb.onedb.data.schema.TableSchema;
 import com.hufudb.onedb.owner.adapter.Adapter;
 import com.hufudb.onedb.owner.adapter.AdapterTypeConverter;
 import com.hufudb.onedb.plan.Plan;
+import factory.DesensitizeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import storage.DesensitizeDataset;
 
 /**
  * Base adapter for datasource with jdbc support
@@ -50,6 +52,7 @@ public abstract class JDBCAdapter implements Adapter {
     this.statement = statement;
     this.converter = converter;
     this.schemaManager = new SchemaManager();
+    DesensitizeFactory.setSchemaManager(this.schemaManager);
     this.translator = new JDBCTranslator(translator);
     loadAllTableSchema();
   }
@@ -171,7 +174,7 @@ public abstract class JDBCAdapter implements Adapter {
       String tableName = getTableName(rs);
       Schema desensitizationSchema = desensitize(rs, schema, tableName);
       LOG.info("Execute {}", sql);
-      return new ResultDataSet(schema, desensitizationSchema, rs);
+      return new DesensitizeDataset(schema, desensitizationSchema, rs);
     } catch (SQLException e) {
       LOG.error("Fail to execute SQL [{}]: {}", sql, e.getMessage());
       return EmptyDataSet.INSTANCE;

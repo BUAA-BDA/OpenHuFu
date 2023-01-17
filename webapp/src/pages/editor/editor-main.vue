@@ -379,7 +379,7 @@
                       </el-tag>
                       <el-tag
                           @click="changeDesensitization(data, node)"
-                          v-if="data.desensitize"
+                          v-if="data.desensitize && desensitizeFlag"
                           class="mx-1 info-tag"
                           type="primary"
                           effect="plain"
@@ -389,7 +389,7 @@
                       </el-tag>
                       <el-tag
                           @click="changeDesensitization(data, node)"
-                          v-if="data.desensitize && data.desensitize.sensitivity == 'SENSITIVE'"
+                          v-if="data.desensitize && data.desensitize.sensitivity == 'SENSITIVE' && desensitizeFlag"
                           class="mx-1 info-tag"
                           type="success"
                           effect="plain"
@@ -601,6 +601,10 @@
                 <font-awesome-icon icon="circle-play" class="prefix-icon" />
                 Run
               </el-button>
+              <span style="margin-left: 4%">
+                Desensitize:
+              </span>
+              <el-switch v-model="desensitizeFlag" active-text="Open" inactive-text="Close" @click="updateDesensitizationFlag" />
             </div>
             <el-empty v-if="resultTable.length == 0" description="No Result" />
             <el-table
@@ -695,6 +699,7 @@ export default {
     this.refreshGlobalTableTree();
     this.refreshLocalTableTree();
     this.connectRemote();
+    this.updateDesensitizationFlag()
   },
   data() {
     const dialogVisible = ref(false)
@@ -932,10 +937,20 @@ export default {
             type: ""
           }
         }
-      }
+      },
+      desensitizeFlag: ref(false),
     };
   },
   methods: {
+    updateDesensitizationFlag() {
+      axios
+          .post('/owner/updateDesensitizeFlag', {desensitizeFlag: this.desensitizeFlag})
+          .then((response) => {
+          })
+          .catch(() => {
+            window.alert(`Fail to update desensitize flag`);
+          })
+    },
     updateDesensitization() {
       let type = this.column.desensitize.method.type;
       switch (type) {

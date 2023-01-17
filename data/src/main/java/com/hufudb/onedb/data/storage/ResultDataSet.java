@@ -4,9 +4,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
-import com.hufudb.onedb.data.desensitize.DesensitizeFactory;
 import com.hufudb.onedb.data.schema.Schema;
-import com.hufudb.onedb.proto.OneDBData;
+import com.hufudb.onedb.proto.OneDBData.DataSetProto;
 import com.hufudb.onedb.proto.OneDBData.ColumnDesc;
 
 /**
@@ -114,7 +113,7 @@ public class ResultDataSet implements DataSet {
     }
   }
 
-  public OneDBData.DataSetProto toProto() {
+  public DataSetProto toProto() {
     ProtoDataSet.Builder builder = ProtoDataSet.newBuilder(getSchema());
     while (this.getIterator().next()) {
       builder.addRow(this.getIterator());
@@ -127,7 +126,7 @@ public class ResultDataSet implements DataSet {
   }
 
   protected class ResultIterator implements DataSetIterator {
-    List<Getter> getters;
+    protected List<Getter> getters;
 
     protected ResultIterator(List<Getter> getters) {
       this.getters = getters;
@@ -146,11 +145,7 @@ public class ResultDataSet implements DataSet {
     @Override
     public Object get(int columnIndex) {
       try {
-        Object val = getters.get(columnIndex).get();
-        if (desensitizationSchema != null && val != null) {
-          val =  DesensitizeFactory.implement(val, desensitizationSchema.getColumnDesc(columnIndex));
-        }
-        return val;
+        return getters.get(columnIndex).get();
       } catch (Exception e) {
         LOG.error("Error in get of ResultDataSet: {}", e.getMessage());
         return null;

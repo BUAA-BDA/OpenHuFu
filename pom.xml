@@ -26,6 +26,7 @@
     <module>backend</module>
     <module>coverage</module>
     <module>persistence</module>
+      <module>desensitize</module>
   </modules>
 
   <properties>

@@ -2,12 +2,14 @@ package com.hufudb.onedb.backend.controller;
 
 import java.util.List;
 
+import com.hufudb.onedb.backend.entity.request.DFlagRequest;
 import com.hufudb.onedb.backend.entity.request.DesensitizeRequest;
 import com.hufudb.onedb.data.schema.utils.PojoPublishedTableSchema;
 import com.hufudb.onedb.data.schema.utils.PojoTableSchema;
 import com.hufudb.onedb.owner.OwnerServer;
 import com.hufudb.onedb.owner.OwnerService;
 
+import factory.DesensitizeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -56,4 +58,11 @@ public class OwnerController {
   void updateDesensitize(@RequestBody DesensitizeRequest desensitizeRequest) {
     service.updateDesensitize(desensitizeRequest.tableName, desensitizeRequest.columnDesc);
   }
+
+  @PostMapping("/owner/updateDesensitizeFlag")
+  void updateDesensitizeFlag(@RequestBody DFlagRequest request) {
+    System.out.println(request.desensitizeFlag);
+    DesensitizeFactory.setDesensitize(request.desensitizeFlag);
+  }
+
 }

@@ -26,6 +26,7 @@ import com.hufudb.onedb.proto.OneDBPlan.QueryPlanProto;
 import com.hufudb.onedb.proto.OneDBService.GeneralRequest;
 import com.hufudb.onedb.proto.OneDBService.GeneralResponse;
 import com.hufudb.onedb.proto.OneDBService.OwnerInfo;
+import factory.DesensitizeFactory;
 import io.grpc.stub.StreamObserver;
 import java.util.List;
 import java.util.Map;
@@ -55,14 +56,14 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
     this.schemaManager = this.adapter.getSchemaManager();
     this.libraries = config.librarys;
     initPublishedTable(config.tables);
-    schemaManager.checkDesensitization();
   }
 
   @Override
   public void query(QueryPlanProto request, StreamObserver<DataSetProto> responseObserver) {
     Plan plan = Plan.fromProto(request);
     LOG.info("receives plan:\n{}", plan);
-    Checker.checkSensitivity(plan, schemaManager);
+    DesensitizeFactory.checkDesensitization();
+    DesensitizeFactory.checkSensitivity(plan);
     LOG.info("add sensitivity plan:\n{}", plan);
     if (!Checker.check(plan, schemaManager)) {
       LOG.warn("Check fail for plan {}", request.toString());
