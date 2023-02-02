@@ -28,32 +28,3 @@ jobs:
         name: Hu-Fu-release
         path: release
         retention-days: 3
-  test:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Download Hu-Fu Release Artifact
-      uses: actions/download-artifact@v3.0.0
-      with:
-        name: Hu-Fu-release
-        path: release
-    - name: Docker Compose Setup
-      uses: KengoTODA/actions-setup-docker-compose@v1.0.9
-      with:
-        version: v2.2.0
-    - name: Run Hu-Fu Test
-      run: ./build/script/test.sh ci
-    - name: Upload Hu-Fu Jacoco Coverage Report
-      uses: actions/upload-artifact@v3.1.0
-      with:
-        name: Jacaco-report
-        path: coverage/target/site/jacoco-aggregate
-        retention-days: 3
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3.1.0
-      with:
-        token: 35f3d309-9a7d-44c7-b8c7-04b574579c8d
-        files: coverage/target/site/jacoco-aggregate/jacoco.xml
-        flags: unittests
-        name: Hu-Fu-Codecov

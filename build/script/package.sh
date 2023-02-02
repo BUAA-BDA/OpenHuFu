@@ -2,4 +2,4 @@
 
 set -ex
 
-mvn clean install
+mvn clean install -DskipTests

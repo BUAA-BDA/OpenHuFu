@@ -7,7 +7,6 @@ With its help, we can quickly take the experiment and get the performance of our
 
 ## Data Generate
 1. TCP-H
-2. SNAP(TODO)
 
 ## Data Query Language
 1. Plan
