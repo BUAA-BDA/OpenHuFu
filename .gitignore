@@ -1,5 +1,28 @@
 # Compiled class file
 *.class
+target
+
+# STS #
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# IntelliJ IDEA #
+.idea
+*.iws
+*.iml
+*.ipr
+
+# NetBeans #
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
 
 # Log file
 *.log
@@ -38,10 +61,42 @@ yarn-error.log*
 pnpm-debug.log*
 
 # Editor directories and files
-.idea
-.vscode
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# python
+
+python/dist/
+python/pyonedb.egg-info/
+python/*.egg-info/
+
+# template files
+proto/bin/
+docker/owner/cert/
+release/demo/log/
+release/demo/cert/
+release/demo/stty.exe.stackdump
+release/log
+
+# vscode
+.vscode/
+
+#frontdn resource
+
+webapp/node_modules
+webapp/dist
+webapp/dist_electron
+backend/src/main/resources/static
+
+# Log files
+webapp/npm-debug.log*
+webapp/yarn-debug.log*
+webapp/yarn-error.log*
+webapp/pnpm-debug.log*
+
+# benchmark files
+benchmark/jmh.out
+docker/benchmark/database/data

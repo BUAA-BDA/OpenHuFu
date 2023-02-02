@@ -1,0 +1,68 @@
+image: "docker/compose:1.28.5"
+
+services:
+  - docker:dind
+
+stages:
+  - build
+  - test
+  - coverage
+
+build:
+  stage: build
+  script:
+    - cd docker/build
+    - docker-compose up
+  artifacts:
+    paths:
+      - release/
+    expire_in: 20 minutes
+
+test:
+  stage: test
+  needs: ["build"]
+  dependencies:
+    - build
+  before_script:
+    - sh test.sh clean_ci
+  script:
+    - sh test.sh ci
+  after_script:
+    - sh test.sh clean_ci
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - rpc/target/surefire-reports/TEST-*.xml
+        - mpc/target/surefire-reports/TEST-*.xml
+        - data/target/surefire-reports/TEST-*.xml
+        - plan/target/surefire-reports/TEST-*.xml
+        - owner/target/surefire-reports/TEST-*.xml
+        - user/target/surefire-reports/TEST-*.xml
+    paths:
+      - coverage/target/site/*
+    expire_in: 2 day
+
+coverage:
+  stage: coverage
+  image: registry.gitlab.com/haynes/jacoco2cobertura:1.0.7
+  script:
+    - cat coverage/target/site/jacoco-aggregate/index.html
+    - 'python /opt/cover2cover.py coverage/target/site/jacoco-aggregate/jacoco.xml 
+              $CI_PROJECT_DIR/rpc/src/main/java/
+              $CI_PROJECT_DIR/mpc/src/main/java/
+              $CI_PROJECT_DIR/data/src/main/java/
+              $CI_PROJECT_DIR/plan/src/main/java/
+              $CI_PROJECT_DIR/owner/src/main/java/
+              $CI_PROJECT_DIR/user/src/main/java/
+              > coverage/target/site/coverage.xml'
+  needs: ["test"]
+  dependencies:
+    - test
+  coverage: '/Total.*?([0-9]{1,3})%/'
+  artifacts:
+    expire_in: 2 day
+    reports:
+      cobertura: coverage/target/site/coverage.xml
+    paths:
+      - coverage/target/site/jacoco-aggregate/index.html
