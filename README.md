@@ -4,7 +4,7 @@ OpenHuFu is a multi party computation framework used for data query benchmarks.
 It provides flexibility for researchers to quickly implement their algorithms.
 With its help, we can quickly take the experiment and get the performance of our algorithms.
 
-## Building Hu-Fu from Source
+## Building OpenHuFu from Source
 
 Prerequistes:
 
