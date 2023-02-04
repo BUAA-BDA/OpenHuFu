@@ -1,12 +1,12 @@
 # OpenHuFu
 
 OpenHuFu is a multi party computation framework used for data query benchmarks.
-It provides flexibility for researchers to quickly implement their algorithms.
+It provides flexibility for researchers to quickly implement their algorithms, such as secret sharing, garbled circuit and oblivious transfer.
 With its help, we can quickly take the experiment and get the performance of our algorithms.
 
 ## Building OpenHuFu from Source
 
-Prerequistes:
+prerequisites:
 
 - Linux
 - Java 11
@@ -20,34 +20,37 @@ cd OpenHuFu
 ./build/script/package.sh
 ```
 
-Hu-Fu is now installed in `release`
+OpenHuFu is now installed in `release`
 
-//todo
 
-## Data Generate
+## Data Generation
 
-1. TCP-H
-
+[TCP-H](https://www.tpc.org/tpch/)
+### How to use it
 ```cmd
 cd dataset/TPC-H V3.0.1/dbgen
 cp makefile.suite makefile
 make
 cd scripts
-bash generateData.sh dst x y #其中dst是目标文件夹，x是数据库数量（整数），y是每个数据库的数据量（整数，单位为G）
+# dst is the target folder, x is the number of database，y is the volume of each database
+bash generateData.sh dst x y
 ```
 
-## Running OpenHuFu (demo)
+## Configuration File
+### OwnerSide
 
-//todo
+### UserSide
+
+
+## Running OpenHuFu
+
 
 
 
 ## Data Query Language
 
 1. Plan
-2. DSL(Domain Specific Language): Easy to define and parse, takes time to design
-3. Function Call: Hard to describe query
-4. SQL
+2. Function Call: Hard to describe query
 
 ## Query Type
 
@@ -61,10 +64,12 @@ bash generateData.sh dst x y #其中dst是目标文件夹，x是数据库数量�
 * Sort
 * Limit
 * Common table expressions
-* Spatial Query(TODO):
+* Spatial Queries:
   * range query
-  * knn
-  * skyline
+  * range counting
+  * knn query
+  * distance join
+  * knn join
 
 ## Evaluation Metrics
 
