@@ -9,7 +9,7 @@ import com.hufudb.openhufu.proto.OpenHuFuData.ColumnType;
 import com.hufudb.openhufu.proto.OpenHuFuData.Modifier;
 
 public class PojoSchema {
-  public List<PojoColumnDesc> columns;
+  public List<com.hufudb.openhufu.data.schema.utils.PojoColumnDesc> columns;
 
   public static PojoSchema fromColumns(List<ColumnDesc> descs) {
     PojoSchema pschema = new PojoSchema();
