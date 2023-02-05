@@ -1,6 +1,6 @@
 package com.hufudb.openhufu.core.sql.plan;
 
-import com.hufudb.openhufu.core.client.FQClient;
+import com.hufudb.openhufu.core.client.OpenHuFuClient;
 import com.hufudb.openhufu.core.client.OwnerClient;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,7 @@ import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 public class PlanUtils {
-  public static List<Pair<OwnerClient, QueryPlanProto>> generateOwnerPlans(FQClient client, Plan plan) {
+  public static List<Pair<OwnerClient, QueryPlanProto>> generateOwnerPlans(OpenHuFuClient client, Plan plan) {
     PlanType type = plan.getPlanType();
     switch(type) {
       case ROOT:
@@ -29,7 +29,7 @@ public class PlanUtils {
     }
   }
 
-  public static List<Pair<OwnerClient, QueryPlanProto>> generateLeafOwnerPlans(FQClient client, Plan plan) {
+  public static List<Pair<OwnerClient, QueryPlanProto>> generateLeafOwnerPlans(OpenHuFuClient client, Plan plan) {
     QueryPlanProto.Builder builder =
     QueryPlanProto.newBuilder().setType(PlanType.LEAF)
         .addAllSelectExp(plan.getSelectExps()).setFetch(plan.getFetch()).setOffset(plan.getOffset());
@@ -54,7 +54,7 @@ public class PlanUtils {
     return ownerContext;
   }
 
-  public static List<Pair<OwnerClient, QueryPlanProto>> generateUnaryOwnerPlans(FQClient client, Plan plan) {
+  public static List<Pair<OwnerClient, QueryPlanProto>> generateUnaryOwnerPlans(OpenHuFuClient client, Plan plan) {
     QueryPlanProto.Builder builder = QueryPlanProto.newBuilder().setType(PlanType.UNARY).setFetch(plan.getFetch()).setOffset(plan.getOffset());
     if (!plan.getSelectExps().isEmpty()) {
       builder.addAllSelectExp(plan.getSelectExps());
@@ -83,7 +83,7 @@ public class PlanUtils {
     return ownerPlan;
   }
 
-  public static List<Pair<OwnerClient, QueryPlanProto>> generateBinaryOwnerPlans(FQClient client, Plan plan) {
+  public static List<Pair<OwnerClient, QueryPlanProto>> generateBinaryOwnerPlans(OpenHuFuClient client, Plan plan) {
     QueryPlanProto.Builder builder = QueryPlanProto.newBuilder().setType(PlanType.BINARY).setFetch(plan.getFetch()).setOffset(plan.getOffset());
     if (!plan.getSelectExps().isEmpty()) {
       builder.addAllSelectExp(plan.getSelectExps());

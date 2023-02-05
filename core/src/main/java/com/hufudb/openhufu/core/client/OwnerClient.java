@@ -3,7 +3,7 @@ package com.hufudb.openhufu.core.client;
 import com.hufudb.openhufu.core.utils.EmptyIterator;
 import com.hufudb.openhufu.data.schema.Schema;
 import com.hufudb.openhufu.data.schema.TableSchema;
-import com.hufudb.openhufu.rpc.grpc.FQOwnerInfo;
+import com.hufudb.openhufu.rpc.grpc.OpenHuFuOwnerInfo;
 import com.hufudb.openhufu.rpc.Party;
 import com.hufudb.openhufu.proto.ServiceGrpc;
 import com.hufudb.openhufu.proto.OpenHuFuData.DataSetProto;
@@ -58,7 +58,7 @@ public class OwnerClient {
   public Party getOwnerInfo() {
     try {
       OwnerInfo proto = blockingStub.getOwnerInfo(GeneralRequest.newBuilder().build());
-      return FQOwnerInfo.fromProto(proto);
+      return OpenHuFuOwnerInfo.fromProto(proto);
     } catch (StatusRuntimeException e) {
       LOG.error("RPC failed in getOwnerInfo: {}", e);
       throw new RuntimeException("Fail to connect to owner " + endpoint);

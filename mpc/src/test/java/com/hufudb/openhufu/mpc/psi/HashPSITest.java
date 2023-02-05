@@ -16,9 +16,9 @@ import com.hufudb.openhufu.mpc.codec.OpenHuFuCodec;
 import com.hufudb.openhufu.mpc.random.BasicRandom;
 import com.hufudb.openhufu.mpc.random.OpenHuFuRandom;
 import com.hufudb.openhufu.rpc.Party;
-import com.hufudb.openhufu.rpc.grpc.FQOwnerInfo;
-import com.hufudb.openhufu.rpc.grpc.FQRpcManager;
-import com.hufudb.openhufu.rpc.grpc.FQRpc;
+import com.hufudb.openhufu.rpc.grpc.OpenHuFuOwnerInfo;
+import com.hufudb.openhufu.rpc.grpc.OpenHuFuRpcManager;
+import com.hufudb.openhufu.rpc.grpc.OpenHuFuRpc;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -50,8 +50,8 @@ public class HashPSITest {
     return randomData.build();
   }
 
-  private FQRpc rpc0;
-  private FQRpc rpc1;
+  private OpenHuFuRpc rpc0;
+  private OpenHuFuRpc rpc1;
   private HashPSI psi0;
   private HashPSI psi1;
 
@@ -59,15 +59,15 @@ public class HashPSITest {
   public void setUp() throws IOException {
     String ownerName0 = InProcessServerBuilder.generateName();
     String ownerName1 = InProcessServerBuilder.generateName();
-    Party owner0 = new FQOwnerInfo(0, ownerName0);
-    Party owner1 = new FQOwnerInfo(1, ownerName1);
+    Party owner0 = new OpenHuFuOwnerInfo(0, ownerName0);
+    Party owner1 = new OpenHuFuOwnerInfo(1, ownerName1);
     List<Party> parties = ImmutableList.of(owner0, owner1);
     List<Channel> channels = Arrays.asList(
         grpcCleanup.register(InProcessChannelBuilder.forName(ownerName0).directExecutor().build()),
         grpcCleanup.register(InProcessChannelBuilder.forName(ownerName1).directExecutor().build()));
-    FQRpcManager manager = new FQRpcManager(parties, channels);
-    rpc0 = (FQRpc) manager.getRpc(0);
-    rpc1 = (FQRpc) manager.getRpc(1);
+    OpenHuFuRpcManager manager = new OpenHuFuRpcManager(parties, channels);
+    rpc0 = (OpenHuFuRpc) manager.getRpc(0);
+    rpc1 = (OpenHuFuRpc) manager.getRpc(1);
     grpcCleanup.register(InProcessServerBuilder.forName(ownerName0).directExecutor()
     .addService(rpc0.getgRpcService()).build().start());
     grpcCleanup.register(InProcessServerBuilder.forName(ownerName1).directExecutor()

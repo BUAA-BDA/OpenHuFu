@@ -29,7 +29,7 @@ public class LibraryLoaderTest {
 
   @Test
   public void testLoadEmptyProtocolLibrary() {
-    String openhufuRoot = System.getenv("ONEDB_ROOT");
+    String openhufuRoot = System.getenv("OPENHUFU_ROOT");
     Path libDir = Paths.get(openhufuRoot, "lib");
     Map<ProtocolType, ProtocolFactory> factories =
         LibraryLoader.loadProtocolLibrary(libDir.toString());
@@ -42,7 +42,7 @@ public class LibraryLoaderTest {
   @Ignore
   @Test
   public void testLoadProtocolLibrary() throws InterruptedException, ExecutionException {
-    String openhufuRoot = System.getenv("ONEDB_ROOT");
+    String openhufuRoot = System.getenv("OPENHUFU_ROOT");
     Path libDir = Paths.get(openhufuRoot, "lib");
     Map<ProtocolType, ProtocolFactory> factories =
         LibraryLoader.loadProtocolLibrary(libDir.toString());

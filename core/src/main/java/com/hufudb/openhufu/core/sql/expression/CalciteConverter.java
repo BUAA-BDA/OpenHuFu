@@ -104,7 +104,7 @@ public class CalciteConverter {
         modifier = modifier.equals(Modifier.PRIVATE) ? Modifier.PROTECTED : modifier;
       }
       builder.add(ExpressionFactory.createAggFunc(
-          TypeConverter.convert2OneDBType(agg.getType().getSqlTypeName()),
+          TypeConverter.convert2OpenHuFuType(agg.getType().getSqlTypeName()),
           modifier, funcTypeId, ins));
     }
     return builder.build();
@@ -150,7 +150,7 @@ public class CalciteConverter {
   }
 
   public static Expression convertLiteral(RexLiteral literal) {
-    ColumnType type = TypeConverter.convert2OneDBType(literal.getTypeName());
+    ColumnType type = TypeConverter.convert2OpenHuFuType(literal.getTypeName());
     switch (type) {
       // NOTE:  rely on calcite unstable api in RexLiteral.java, check this when calcite update
       case DATE:
@@ -289,7 +289,7 @@ public class CalciteConverter {
       }
       Expression left = convert(call.operands.get(0));
       Expression right = convert(call.operands.get(1));
-      ColumnType type = TypeConverter.convert2OneDBType(call.getType().getSqlTypeName());
+      ColumnType type = TypeConverter.convert2OpenHuFuType(call.getType().getSqlTypeName());
       return ExpressionFactory.createBinaryOperator(op, type, left, right);
     }
 
@@ -321,7 +321,7 @@ public class CalciteConverter {
         default:
           throw new RuntimeException("can't translate " + call);
       }
-      ColumnType type = TypeConverter.convert2OneDBType(call.getType().getSqlTypeName());
+      ColumnType type = TypeConverter.convert2OpenHuFuType(call.getType().getSqlTypeName());
       return ExpressionFactory.createUnaryOperator(op, type, in);
     }
 
@@ -333,7 +333,7 @@ public class CalciteConverter {
       OperatorType op = OperatorType.CASE;
       List<Expression> eles =
           call.operands.stream().map(c -> convert(c)).collect(Collectors.toList());
-      ColumnType type = TypeConverter.convert2OneDBType(call.getType().getSqlTypeName());
+      ColumnType type = TypeConverter.convert2OpenHuFuType(call.getType().getSqlTypeName());
       return ExpressionFactory.createMultiOperator(op, type, eles);
     }
 
@@ -341,7 +341,7 @@ public class CalciteConverter {
       Expression in = convert(call.operands.get(0));
       RexLiteral ranges = (RexLiteral) call.operands.get(1);
       return convertRangeSet((Sarg) ranges.getValue2(),
-          TypeConverter.convert2OneDBType(ranges.getType().getSqlTypeName()), in);
+          TypeConverter.convert2OpenHuFuType(ranges.getType().getSqlTypeName()), in);
     }
 
     public static Expression convertRangeSet(Sarg sarg, ColumnType type, Expression in) {
@@ -443,7 +443,7 @@ public class CalciteConverter {
       switch (funcName) {
         case "abs":
           // todo: add more scalar function here
-          ColumnType type = TypeConverter.convert2OneDBType(call.getType().getSqlTypeName());
+          ColumnType type = TypeConverter.convert2OpenHuFuType(call.getType().getSqlTypeName());
           return ExpressionFactory.createScalarFunc(type, function.getName(), eles);
         default:
           if (!UDFLoader.scalarUDFs.containsKey(function.getName())) {
