@@ -1,7 +1,7 @@
 package com.hufudb.openhufu.core.zk.watcher;
 
-import com.hufudb.openhufu.core.sql.schema.FQSchemaManager;
-import com.hufudb.openhufu.core.zk.FQZkClient;
+import com.hufudb.openhufu.core.sql.schema.OpenHuFuSchemaManager;
+import com.hufudb.openhufu.core.zk.OpenHuFuZkClient;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -12,9 +12,9 @@ import org.apache.zookeeper.Watcher.Event.KeeperState;
 import org.apache.zookeeper.ZooKeeper;
 
 public class SchemaWatcher extends ZkWatcher {
-  private final FQZkClient zkClient;
+  private final OpenHuFuZkClient zkClient;
 
-  public SchemaWatcher(FQSchemaManager schema, ZooKeeper zk, String path, FQZkClient zkClient) {
+  public SchemaWatcher(OpenHuFuSchemaManager schema, ZooKeeper zk, String path, OpenHuFuZkClient zkClient) {
     super(schema, zk, path);
     this.zkClient = zkClient;
   }

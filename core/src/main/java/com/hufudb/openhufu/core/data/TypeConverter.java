@@ -34,7 +34,7 @@ public class TypeConverter {
     }
   }
 
-  public static ColumnType convert2OneDBType(SqlTypeName type) {
+  public static ColumnType convert2OpenHuFuType(SqlTypeName type) {
     switch (type) {
       case VARCHAR:
       case CHAR:
@@ -78,7 +78,7 @@ public class TypeConverter {
     }
   }
 
-  public static ColumnType convert2OneDBType(int sqlType) {
+  public static ColumnType convert2OpenHuFuType(int sqlType) {
     switch (sqlType) {
       case Types.VARCHAR:
         return ColumnType.STRING;

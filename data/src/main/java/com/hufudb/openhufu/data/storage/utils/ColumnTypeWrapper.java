@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName;
 import com.hufudb.openhufu.proto.OpenHuFuData.ColumnType;
 
 /**
- * Wrapper for protocol buffer @OneDBData.ColumnType
+ * Wrapper for protocol buffer @OpenHuFuData.ColumnType
  */
 public enum ColumnTypeWrapper {
   @SerializedName("UNKOWN")

@@ -1,6 +1,6 @@
 package com.hufudb.openhufu.core.zk;
 
-import com.hufudb.openhufu.core.config.FQConfig;
+import com.hufudb.openhufu.core.config.OpenHuFuConfig;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +18,7 @@ public class DBZkClient extends ZkClient {
       throws IOException, KeeperException, InterruptedException {
     super(servers, zkRootPath);
     this.dbRootPath = buildPath(endpointRootPath, endpoint);
-    this.zk = new ZooKeeper(servers, FQConfig.ZK_TIME_OUT, this, false);
+    this.zk = new ZooKeeper(servers, OpenHuFuConfig.ZK_TIME_OUT, this, false);
     zk.addAuthInfo("digest", digest);
     DB_AUTH = new ArrayList<>();
     DB_AUTH.addAll(Ids.READ_ACL_UNSAFE);

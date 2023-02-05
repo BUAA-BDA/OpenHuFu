@@ -7,7 +7,7 @@ import com.hufudb.openhufu.proto.OpenHuFuData.Modifier;
 import com.hufudb.openhufu.proto.OpenHuFuPlan.Expression;
 
 /**
- * Wrapper for protocol buffer enum @OneDBData.Modifier
+ * Wrapper for protocol buffer enum @OpenHuFuData.Modifier
  */
 public enum ModifierWrapper {
   // columns marked as hide are invisible to client and other dataServers

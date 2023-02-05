@@ -1,7 +1,7 @@
 package com.hufudb.openhufu.core.table.utils;
 
 import com.hufudb.openhufu.core.table.LocalTableConfig;
-import com.hufudb.openhufu.core.table.FQTableSchema;
+import com.hufudb.openhufu.core.table.OpenHuFuTableSchema;
 import com.hufudb.openhufu.data.schema.utils.PojoSchema;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,7 @@ public class PojoGlobalTableSchema {
 
   public PojoGlobalTableSchema() {}
 
-  public static PojoGlobalTableSchema from(FQTableSchema info) {
+  public static PojoGlobalTableSchema from(OpenHuFuTableSchema info) {
     PojoGlobalTableSchema sinfo = new PojoGlobalTableSchema();
     sinfo.setName(info.getName());
     sinfo.setSchema(PojoSchema.fromSchema(info.getSchema()));
@@ -21,9 +21,9 @@ public class PojoGlobalTableSchema {
     return sinfo;
   }
 
-  public static List<PojoGlobalTableSchema> from(List<FQTableSchema> info) {
+  public static List<PojoGlobalTableSchema> from(List<OpenHuFuTableSchema> info) {
     List<PojoGlobalTableSchema> sinfo = new ArrayList<>();
-    for (FQTableSchema i : info) {
+    for (OpenHuFuTableSchema i : info) {
       sinfo.add(PojoGlobalTableSchema.from(i));
     }
     return sinfo;

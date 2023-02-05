@@ -1,6 +1,6 @@
 package com.hufudb.openhufu.core.rewriter;
 
-import com.hufudb.openhufu.core.client.FQClient;
+import com.hufudb.openhufu.core.client.OpenHuFuClient;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -19,9 +19,9 @@ import com.hufudb.openhufu.proto.OpenHuFuPlan.OperatorType;
 import com.hufudb.openhufu.rewriter.Rewriter;
 
 public class BasicRewriter implements Rewriter {
-  final FQClient client;
+  final OpenHuFuClient client;
 
-  public BasicRewriter(FQClient client) {
+  public BasicRewriter(OpenHuFuClient client) {
     this.client = client;
   }
 
