@@ -1,7 +1,7 @@
 package com.hufudb.openhufu.core.zk.watcher;
 
-import com.hufudb.openhufu.core.sql.schema.FQSchemaManager;
-import com.hufudb.openhufu.core.table.FQTableSchema;
+import com.hufudb.openhufu.core.sql.schema.OpenHuFuSchemaManager;
+import com.hufudb.openhufu.core.table.OpenHuFuTableSchema;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.zookeeper.WatchedEvent;
@@ -14,9 +14,9 @@ import org.apache.zookeeper.ZooKeeper;
  * dynamically add and remove local table according to zk
  */
 public class GlobalTableWatcher extends ZkWatcher {
-  private final FQTableSchema tableInfo;
+  private final OpenHuFuTableSchema tableInfo;
 
-  public GlobalTableWatcher(FQSchemaManager schema, ZooKeeper zk, String path) {
+  public GlobalTableWatcher(OpenHuFuSchemaManager schema, ZooKeeper zk, String path) {
     super(schema, zk, path);
     String[] dic = path.split("/");
     String tableName = dic[dic.length - 1];

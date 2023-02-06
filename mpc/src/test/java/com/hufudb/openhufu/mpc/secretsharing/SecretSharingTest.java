@@ -21,9 +21,9 @@ import com.google.common.collect.ImmutableList;
 import com.hufudb.openhufu.proto.OpenHuFuData.ColumnType;
 import com.hufudb.openhufu.proto.OpenHuFuPlan.OperatorType;
 import com.hufudb.openhufu.rpc.Party;
-import com.hufudb.openhufu.rpc.grpc.FQOwnerInfo;
-import com.hufudb.openhufu.rpc.grpc.FQRpc;
-import com.hufudb.openhufu.rpc.grpc.FQRpcManager;
+import com.hufudb.openhufu.rpc.grpc.OpenHuFuOwnerInfo;
+import com.hufudb.openhufu.rpc.grpc.OpenHuFuRpc;
+import com.hufudb.openhufu.rpc.grpc.OpenHuFuRpcManager;
 import io.grpc.Channel;
 import io.grpc.Server;
 import io.grpc.inprocess.InProcessChannelBuilder;
@@ -36,7 +36,7 @@ public class SecretSharingTest {
   @Rule
   public final GrpcCleanupRule grpcCleanup = new GrpcCleanupRule();
 
-  FQRpcManager manager;
+  OpenHuFuRpcManager manager;
   ExecutorService threadpool = Executors.newFixedThreadPool(5);
 
   @Before
@@ -46,11 +46,11 @@ public class SecretSharingTest {
     String ownerName2 = InProcessServerBuilder.generateName();
     String ownerName3 = InProcessServerBuilder.generateName();
     String ownerName4 = InProcessServerBuilder.generateName();
-    Party owner0 = new FQOwnerInfo(0, ownerName0);
-    Party owner1 = new FQOwnerInfo(1, ownerName1);
-    Party owner2 = new FQOwnerInfo(2, ownerName2);
-    Party owner3 = new FQOwnerInfo(3, ownerName3);
-    Party owner4 = new FQOwnerInfo(4, ownerName4);
+    Party owner0 = new OpenHuFuOwnerInfo(0, ownerName0);
+    Party owner1 = new OpenHuFuOwnerInfo(1, ownerName1);
+    Party owner2 = new OpenHuFuOwnerInfo(2, ownerName2);
+    Party owner3 = new OpenHuFuOwnerInfo(3, ownerName3);
+    Party owner4 = new OpenHuFuOwnerInfo(4, ownerName4);
     List<Party> parties = ImmutableList.of(owner0, owner1, owner2, owner3, owner4);
     List<Channel> channels = Arrays.asList(
         grpcCleanup.register(InProcessChannelBuilder.forName(ownerName0).directExecutor().build()),
@@ -58,12 +58,12 @@ public class SecretSharingTest {
         grpcCleanup.register(InProcessChannelBuilder.forName(ownerName2).directExecutor().build()),
         grpcCleanup.register(InProcessChannelBuilder.forName(ownerName3).directExecutor().build()),
         grpcCleanup.register(InProcessChannelBuilder.forName(ownerName4).directExecutor().build()));
-    manager = new FQRpcManager(parties, channels);
-    FQRpc rpc0 = (FQRpc) manager.getRpc(0);
-    FQRpc rpc1 = (FQRpc) manager.getRpc(1);
-    FQRpc rpc2 = (FQRpc) manager.getRpc(2);
-    FQRpc rpc3 = (FQRpc) manager.getRpc(3);
-    FQRpc rpc4 = (FQRpc) manager.getRpc(4);
+    manager = new OpenHuFuRpcManager(parties, channels);
+    OpenHuFuRpc rpc0 = (OpenHuFuRpc) manager.getRpc(0);
+    OpenHuFuRpc rpc1 = (OpenHuFuRpc) manager.getRpc(1);
+    OpenHuFuRpc rpc2 = (OpenHuFuRpc) manager.getRpc(2);
+    OpenHuFuRpc rpc3 = (OpenHuFuRpc) manager.getRpc(3);
+    OpenHuFuRpc rpc4 = (OpenHuFuRpc) manager.getRpc(4);
     rpc0.connect();
     rpc1.connect();
     rpc2.connect();
@@ -126,12 +126,12 @@ public class SecretSharingTest {
   @Test
   public void testSecretSharing() throws InterruptedException, ExecutionException {
     Random random = new Random();
-    FQRpc rpc0 = (FQRpc) manager.getRpc(0);
-    FQRpc rpc1 = (FQRpc) manager.getRpc(1);
-    FQRpc rpc2 = (FQRpc) manager.getRpc(2);
-    FQRpc rpc3 = (FQRpc) manager.getRpc(3);
-    FQRpc rpc4 = (FQRpc) manager.getRpc(4);
-    List<FQRpc> rpcs = ImmutableList.of(rpc0, rpc1, rpc2, rpc3, rpc4);
+    OpenHuFuRpc rpc0 = (OpenHuFuRpc) manager.getRpc(0);
+    OpenHuFuRpc rpc1 = (OpenHuFuRpc) manager.getRpc(1);
+    OpenHuFuRpc rpc2 = (OpenHuFuRpc) manager.getRpc(2);
+    OpenHuFuRpc rpc3 = (OpenHuFuRpc) manager.getRpc(3);
+    OpenHuFuRpc rpc4 = (OpenHuFuRpc) manager.getRpc(4);
+    List<OpenHuFuRpc> rpcs = ImmutableList.of(rpc0, rpc1, rpc2, rpc3, rpc4);
     List<SecretSharing> executors =
         rpcs.stream().map(rpc -> new SecretSharing(rpc)).collect(Collectors.toList());
     testCaseLong(0L, executors, ImmutableList.of(1L, 2L, 3L, 4L, 5L));

@@ -1,6 +1,6 @@
 package com.hufudb.openhufu.core.implementor;
 
-import com.hufudb.openhufu.core.client.FQClient;
+import com.hufudb.openhufu.core.client.OpenHuFuClient;
 import com.hufudb.openhufu.core.client.OwnerClient;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -28,13 +28,13 @@ import org.apache.commons.lang3.tuple.Pair;
 
 public class UserSideImplementor implements PlanImplementor {
 
-  protected final FQClient client;
+  protected final OpenHuFuClient client;
 
-  protected UserSideImplementor(FQClient client) {
+  protected UserSideImplementor(OpenHuFuClient client) {
     this.client = client;
   }
 
-  public static PlanImplementor getImplementor(Plan plan, FQClient client) {
+  public static PlanImplementor getImplementor(Plan plan, OpenHuFuClient client) {
     switch (plan.getPlanModifier()) {
       case PUBLIC:
       case PROTECTED:
