@@ -375,7 +375,7 @@ public class Interpreter {
       return null;
     }
     ColumnType dType = dominate(inputs.get(0).getOutType(), inputs.get(1).getOutType());
-    final int cmp = CompareUtils.compare(cast(dType,left), cast(dType, right));
+    final int cmp = CompareUtils.compareTo(cast(dType,left), cast(dType, right));
     switch (type) {
       case GT:
         return cmp > 0;
