@@ -13,7 +13,7 @@ public interface Row {
     }
     final int size = r1.size();
     for (int i = 0; i < size; ++i) {
-      if (!CompareUtils.equal(r1.get(i), r2.get(i))) {
+      if (!CompareUtils.equalTo(r1.get(i), r2.get(i))) {
         return false;
       }
     }
