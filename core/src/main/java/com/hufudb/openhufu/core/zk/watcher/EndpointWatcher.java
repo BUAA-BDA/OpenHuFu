@@ -1,6 +1,6 @@
 package com.hufudb.openhufu.core.zk.watcher;
 
-import com.hufudb.openhufu.core.sql.schema.FQSchemaManager;
+import com.hufudb.openhufu.core.sql.schema.OpenHuFuSchemaManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -11,7 +11,7 @@ import org.apache.zookeeper.ZooKeeper;
 
 public class EndpointWatcher extends ZkWatcher {
 
-  public EndpointWatcher(FQSchemaManager schema, ZooKeeper zk, String path) {
+  public EndpointWatcher(OpenHuFuSchemaManager schema, ZooKeeper zk, String path) {
     super(schema, zk, path);
   }
 

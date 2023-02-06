@@ -22,7 +22,7 @@ public class UDFLoader {
   public static Map<String, ScalarUDF> scalarUDFs;
 
   static {
-    Path libDir = Paths.get(System.getenv("ONEDB_ROOT"), "udf", "scalar");
+    Path libDir = Paths.get(System.getenv("OPENHUFU_ROOT"), "udf", "scalar");
     scalarUDFs = UDFLoader.loadScalarUDF(libDir.toString());
   }
 

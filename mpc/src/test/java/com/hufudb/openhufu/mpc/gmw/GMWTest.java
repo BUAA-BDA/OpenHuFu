@@ -14,9 +14,9 @@ import com.hufudb.openhufu.mpc.ot.PublicKeyOT;
 import com.hufudb.openhufu.mpc.random.BasicRandom;
 import com.hufudb.openhufu.mpc.random.OpenHuFuRandom;
 import com.hufudb.openhufu.rpc.Party;
-import com.hufudb.openhufu.rpc.grpc.FQOwnerInfo;
-import com.hufudb.openhufu.rpc.grpc.FQRpc;
-import com.hufudb.openhufu.rpc.grpc.FQRpcManager;
+import com.hufudb.openhufu.rpc.grpc.OpenHuFuOwnerInfo;
+import com.hufudb.openhufu.rpc.grpc.OpenHuFuRpc;
+import com.hufudb.openhufu.rpc.grpc.OpenHuFuRpcManager;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,8 +42,8 @@ public class GMWTest {
     try {
       String ownerName0 = InProcessServerBuilder.generateName();
       String ownerName1 = InProcessServerBuilder.generateName();
-      Party owner0 = new FQOwnerInfo(0, ownerName0);
-      Party owner1 = new FQOwnerInfo(1, ownerName1);
+      Party owner0 = new OpenHuFuOwnerInfo(0, ownerName0);
+      Party owner1 = new OpenHuFuOwnerInfo(1, ownerName1);
       List<Party> parties = ImmutableList.of(
         owner0, owner1
       );
@@ -51,9 +51,9 @@ public class GMWTest {
         grpcCleanup.register(InProcessChannelBuilder.forName(ownerName0).directExecutor().build()),
         grpcCleanup.register(InProcessChannelBuilder.forName(ownerName1).directExecutor().build())
       );
-      FQRpcManager manager = new FQRpcManager(parties, channels);
-      FQRpc rpc0 = (FQRpc) manager.getRpc(0);
-      FQRpc rpc1 = (FQRpc) manager.getRpc(1);
+      OpenHuFuRpcManager manager = new OpenHuFuRpcManager(parties, channels);
+      OpenHuFuRpc rpc0 = (OpenHuFuRpc) manager.getRpc(0);
+      OpenHuFuRpc rpc1 = (OpenHuFuRpc) manager.getRpc(1);
       Server server0 = InProcessServerBuilder.forName(ownerName0).directExecutor().addService(rpc0.getgRpcService()).build().start();
       Server server1 = InProcessServerBuilder.forName(ownerName1).directExecutor().addService(rpc1.getgRpcService()).build().start();
       grpcCleanup.register(server0);

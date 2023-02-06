@@ -1,6 +1,6 @@
 package com.hufudb.openhufu.core.zk;
 
-import com.hufudb.openhufu.core.config.FQConfig;
+import com.hufudb.openhufu.core.config.OpenHuFuConfig;
 import java.io.IOException;
 import java.util.List;
 import org.apache.zookeeper.CreateMode;
@@ -26,7 +26,7 @@ public abstract class ZkClient implements Watcher {
     this.endpointRootPath = zkRootPath + "/endpoint";
     this.schemaRootPath = zkRootPath + "/schema";
     try {
-      this.zk = new ZooKeeper(servers, FQConfig.ZK_TIME_OUT, this);
+      this.zk = new ZooKeeper(servers, OpenHuFuConfig.ZK_TIME_OUT, this);
       initRootPath();
     } catch (IOException e) {
       LOG.error("Error when init ZkClient", e);

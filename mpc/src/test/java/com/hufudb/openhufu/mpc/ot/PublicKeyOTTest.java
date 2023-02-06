@@ -2,9 +2,9 @@ package com.hufudb.openhufu.mpc.ot;
 
 import static org.junit.Assert.assertEquals;
 
-import com.hufudb.openhufu.rpc.grpc.FQOwnerInfo;
-import com.hufudb.openhufu.rpc.grpc.FQRpc;
-import com.hufudb.openhufu.rpc.grpc.FQRpcManager;
+import com.hufudb.openhufu.rpc.grpc.OpenHuFuOwnerInfo;
+import com.hufudb.openhufu.rpc.grpc.OpenHuFuRpc;
+import com.hufudb.openhufu.rpc.grpc.OpenHuFuRpcManager;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -32,9 +32,9 @@ public class PublicKeyOTTest {
   @Rule
   public final GrpcCleanupRule grpcCleanup = new GrpcCleanupRule();
 
-  FQRpcManager manager;
-  FQRpc rpc0;
-  FQRpc rpc1;
+  OpenHuFuRpcManager manager;
+  OpenHuFuRpc rpc0;
+  OpenHuFuRpc rpc1;
   Server server0;
   Server server1;
   PublicKeyOT otSender;
@@ -59,8 +59,8 @@ public class PublicKeyOTTest {
     try {
       String ownerName0 = InProcessServerBuilder.generateName();
       String ownerName1 = InProcessServerBuilder.generateName();
-      Party owner0 = new FQOwnerInfo(0, ownerName0);
-      Party owner1 = new FQOwnerInfo(1, ownerName1);
+      Party owner0 = new OpenHuFuOwnerInfo(0, ownerName0);
+      Party owner1 = new OpenHuFuOwnerInfo(1, ownerName1);
       List<Party> parties = ImmutableList.of(
         owner0, owner1
       );
@@ -68,9 +68,9 @@ public class PublicKeyOTTest {
         grpcCleanup.register(InProcessChannelBuilder.forName(ownerName0).directExecutor().build()),
         grpcCleanup.register(InProcessChannelBuilder.forName(ownerName1).directExecutor().build())
       );
-      manager = new FQRpcManager(parties, channels);
-      rpc0 = (FQRpc) manager.getRpc(0);
-      rpc1 = (FQRpc) manager.getRpc(1);
+      manager = new OpenHuFuRpcManager(parties, channels);
+      rpc0 = (OpenHuFuRpc) manager.getRpc(0);
+      rpc1 = (OpenHuFuRpc) manager.getRpc(1);
       server0 = InProcessServerBuilder.forName(ownerName0).directExecutor().addService(rpc0.getgRpcService()).build().start();
       server1 = InProcessServerBuilder.forName(ownerName1).directExecutor().addService(rpc1.getgRpcService()).build().start();
       grpcCleanup.register(server0);
