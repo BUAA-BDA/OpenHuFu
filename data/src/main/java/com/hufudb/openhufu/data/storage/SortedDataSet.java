@@ -45,7 +45,7 @@ public class SortedDataSet implements MaterializedDataSet {
         case TIME:
         case TIMESTAMP:
           // TODO:
-          compareResult = CompareUtils.compare(r1.get(coll.getRef()),r2.get(coll.getRef()));
+          compareResult = CompareUtils.compareTo(r1.get(coll.getRef()),r2.get(coll.getRef()));
           if (coll.getDirection().equals(Direction.DESC)) {
             compareResult = -compareResult;
           }

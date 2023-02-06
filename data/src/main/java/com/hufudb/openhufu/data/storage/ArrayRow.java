@@ -39,7 +39,7 @@ public class ArrayRow implements Row, Serializable {
         return false;
       }
       for (int i = 0; i < size; ++i) {
-        if (!CompareUtils.equal(get(i), r.get(i))) {
+        if (!CompareUtils.equalTo(get(i), r.get(i))) {
           return false;
         }
       }
