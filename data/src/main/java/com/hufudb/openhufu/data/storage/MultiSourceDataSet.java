@@ -67,9 +67,11 @@ public class MultiSourceDataSet implements DataSet {
     } else {
       // wait for productor
       try {
-        cond.await(timeout, TimeUnit.MILLISECONDS);
+        if(!cond.await(timeout, TimeUnit.MILLISECONDS)) {
+          LOG.error("Next Timeout in multi source dataset");
+        }
       } catch (InterruptedException e) { //NOSONAR
-        LOG.error("Next failed in mutlisource dataset", e);
+        LOG.error("Next failed in multi source dataset", e);
         lock.unlock();
         return false;
       }
