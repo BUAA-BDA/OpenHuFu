@@ -6,8 +6,6 @@ import com.hufudb.openhufu.core.sql.schema.OpenHuFuSchemaFactory.OwnerInfo;
 import com.hufudb.openhufu.core.table.OpenHuFuTableSchema;
 import com.hufudb.openhufu.core.sql.enumerator.OpenHuFuEnumerator;
 import com.hufudb.openhufu.core.sql.rel.OpenHuFuTable;
-import com.hufudb.openhufu.core.zk.OpenHuFuZkClient;
-import com.hufudb.openhufu.core.zk.ZkConfig;
 import com.hufudb.openhufu.data.schema.Schema;
 import com.hufudb.openhufu.data.storage.DataSet;
 import com.hufudb.openhufu.plan.Plan;
@@ -41,15 +39,13 @@ public class OpenHuFuSchemaManager extends AbstractSchema {
   private final Map<String, Table> tableMap;
   private final Map<String, OwnerClient> ownerMap;
   private final OpenHuFuClient client;
-  private final OpenHuFuZkClient zkClient;
   private final int userId;
 
-  public OpenHuFuSchemaManager(List<Map<String, Object>> tables, SchemaPlus schema, ZkConfig zkConfig) {
+  public OpenHuFuSchemaManager(List<Map<String, Object>> tables, SchemaPlus schema) {
     this.parentSchema = schema;
     this.tableMap = new ConcurrentHashMap<>();
     this.ownerMap = new ConcurrentHashMap<>();
     this.client = new OpenHuFuClient(this);
-    this.zkClient = new OpenHuFuZkClient(zkConfig, this);
     this.userId = 0;
   }
 
@@ -58,7 +54,6 @@ public class OpenHuFuSchemaManager extends AbstractSchema {
     this.tableMap = new ConcurrentHashMap<>();
     this.ownerMap = new ConcurrentHashMap<>();
     this.client = new OpenHuFuClient(this);
-    this.zkClient = null;
     this.userId = userId;
     for (OwnerInfo owner : owners) {
       addOwner(owner.getEndpoint(), owner.getTrustCertPath());
