@@ -31,7 +31,7 @@ public class AdapterLoader {
         adapterURLs.add(adapter.toURI().toURL());
         LOG.info("Add JAR {}", adapter.getAbsolutePath());
       } catch (Exception e) {
-        e.printStackTrace();
+        LOG.info("Add JAR {} error", adapter.getAbsolutePath(), e);
       }
     }
     ClassLoader adapterClassLoader = new URLClassLoader(adapterURLs.toArray(new URL[0]), AdapterFactory.class.getClassLoader());

@@ -69,8 +69,7 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
       output.stream();
       output.close();
     } catch (Exception e) {
-      LOG.error("Error in query");
-      e.printStackTrace();
+      LOG.error("Error in query", e);
     }
   }
 

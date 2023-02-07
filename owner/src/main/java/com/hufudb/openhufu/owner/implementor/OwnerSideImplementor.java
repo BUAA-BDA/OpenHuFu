@@ -85,8 +85,7 @@ public class OwnerSideImplementor implements PlanImplementor {
     try {
       return dataSourceAdapter.query(leaf);
     } catch (Exception e) {
-      LOG.error("Error when execute query on Database");
-      e.printStackTrace();
+      LOG.error("Error when execute query on Database", e);
       return EmptyDataSet.INSTANCE;
     }
   }

@@ -30,7 +30,7 @@ public class LibraryLoader {
         libURLs.add(libJar.toURI().toURL());
         LOG.info("Add JAR {}", libJar.getAbsolutePath());
       } catch (Exception e) {
-        e.printStackTrace();
+        LOG.error("Add JAR {} error", libJar.getAbsolutePath(), e);
       }
     }
     ClassLoader libClassLoader = new URLClassLoader(libURLs.toArray(new URL[0]), ProtocolFactory.class.getClassLoader());

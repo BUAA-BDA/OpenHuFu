@@ -180,8 +180,7 @@ public class GMW extends RpcProtocolExecutor {
           f.get();
         }
       } catch (Exception e) { // NOSONAR
-        LOG.error("Error when evaluate circuit in GMW: {}", e.getMessage());
-        e.printStackTrace();
+        LOG.error("Error when evaluate circuit in GMW", e);
       }
     }
   }
