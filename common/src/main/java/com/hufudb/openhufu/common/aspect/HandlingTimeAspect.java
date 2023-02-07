@@ -1,4 +1,4 @@
-package com.hufudb.openhufu.benchmark.annotation;
+package com.hufudb.openhufu.common.aspect;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -8,7 +8,7 @@ import org.aspectj.lang.annotation.Pointcut;
 
 @Aspect
 public class HandlingTimeAspect {
-  @Pointcut("(execution(* *(..)) && @annotation(HandlingTime))")
+  @Pointcut("(execution(* *(..)) && @annotation(com.hufudb.openhufu.common.aspect.HandlingTime))")
   private void operationLog() {
   }
 
