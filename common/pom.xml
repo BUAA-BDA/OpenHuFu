@@ -17,6 +17,10 @@
 
   <dependencies>
     <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.aspectj</groupId>
       <artifactId>aspectjrt</artifactId>
       <version>1.8.9</version>
@@ -39,7 +43,6 @@
           <target>11</target>
         </configuration>
       </plugin>
-      <!--使用原生的AspectJ必须添加如下插件，否则{@code @AspectJ}注解不会生效-->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>aspectj-maven-plugin</artifactId>

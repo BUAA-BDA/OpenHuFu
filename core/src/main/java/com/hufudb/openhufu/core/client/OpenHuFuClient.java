@@ -2,6 +2,7 @@ package com.hufudb.openhufu.core.client;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.hufudb.openhufu.common.metrics.aspect.HandlingTime;
 import com.hufudb.openhufu.core.config.OpenHuFuConfig;
 import com.hufudb.openhufu.core.data.EnumerableDataSet;
 import com.hufudb.openhufu.core.implementor.UserSideImplementor;
@@ -72,6 +73,7 @@ public class OpenHuFuClient {
     return table != null ? table.getTableList() : ImmutableList.of();
   }
 
+  @HandlingTime(name = "total-time")
   public DataSet executeQueryPlan(Plan plan) {
     plan = plan.rewrite(rewriter);
     return UserSideImplementor.getImplementor(plan, this).implement(plan);
