@@ -7,23 +7,23 @@ import java.util.Map;
  * @author yang.song
  * @date 2/7/23 8:28 PM
  */
-public enum OpenHuFuErrorCode implements BaseErrorCode {
+public enum ErrorCode implements BaseErrorCode {
 
   INTERNAL_SERVER_ERROR(10001),
   ;
 
 
   private final int errorCode;
-  private static final Map<Integer, OpenHuFuErrorCode> errorCodeMap;
+  private static final Map<Integer, ErrorCode> errorCodeMap;
 
   static {
     errorCodeMap = new HashMap<>();
-    for (OpenHuFuErrorCode error : OpenHuFuErrorCode.values()) {
+    for (ErrorCode error : ErrorCode.values()) {
       errorCodeMap.put(error.getErrorCode(), error);
     }
   }
 
-  OpenHuFuErrorCode(int errorCode) {
+  ErrorCode(int errorCode) {
     this.errorCode = errorCode;
   }
 
@@ -32,7 +32,7 @@ public enum OpenHuFuErrorCode implements BaseErrorCode {
     return errorCode;
   }
 
-  public static OpenHuFuErrorCode getVal(int errorCode) {
+  public static ErrorCode getVal(int errorCode) {
     return errorCodeMap.get(errorCode);
   }
 
