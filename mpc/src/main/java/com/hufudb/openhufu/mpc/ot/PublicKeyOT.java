@@ -79,8 +79,7 @@ public class PublicKeyOT extends RpcProtocolExecutor {
         encryptedSecrets.add(elgamal.encrypt((byte[]) secrets.get(i)));
       }
     } catch (Exception e) {
-      LOG.error("Error when encrypting: {}", e.getMessage());
-      e.printStackTrace();
+      LOG.error("Error when encrypting", e);
       return null;
     }
     DataPacketHeader outHeader = new DataPacketHeader(header.getTaskId(), header.getPtoId(), 2,
