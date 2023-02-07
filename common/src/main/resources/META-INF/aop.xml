@@ -1,6 +1,6 @@
 <aspectj>
   <aspects>
-    <aspect name="com.hufudb.openhufu.benchmark.annotation.HandlingTimeAspect" />
+    <aspect name="com.hufudb.openhufu.common.aspect.HandlingTimeAspect" />
   </aspects>
   <weaver options="-verbose -showWeaveInfo -debug">
     <!-- only weave classes in our application-specific packages -->

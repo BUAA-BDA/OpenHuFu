@@ -1,13 +1,13 @@
 package com.hufudb.openhufu.mpc.elgamal;
 
 import com.hufudb.openhufu.mpc.codec.OpenHuFuCodec;
+import java.security.SecureRandom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class Elgamal {
   private static final Logger LOG = LoggerFactory.getLogger(Elgamal.class);
@@ -15,7 +15,7 @@ public class Elgamal {
   private final static int BYTE_LENGTH = 8;
   private final static String P = "126535388605402049049542973700958236539328315496910854523023592117026468516051843151824028176566406798134663925084909684138624303619004726680611032556927207945968721000140659332734488248277781125853940159849610018715048962115920834878804577144091376289374425091008279570513505570480918437693088952695686351367";
   private final static String G = "81248327123767948489976358691257319856321336397871450007082941210606545541618675883159315182973073472812273343241856124199389453023888448799933381897136941917208747028694565238655230858624623713754823869315162707332688928226163297833184607020661600543366919364959232770876947639319489546634455970916393673686";
-  private final static Random rnd = new Random();
+  private final static SecureRandom rnd = new SecureRandom();
   private final BigInteger p;
   private final BigInteger g;
   private final BigInteger h;

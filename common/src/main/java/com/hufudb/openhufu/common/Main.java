@@ -1,4 +1,6 @@
-package com.hufudb.openhufu.benchmark;
+package com.hufudb.openhufu.common;
+
+import com.hufudb.openhufu.common.aspect.Student;
 
 /**
  * @author yang.song
