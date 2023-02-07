@@ -1,6 +1,5 @@
 package com.hufudb.openhufu.core.sql.schema;
 
-import com.hufudb.openhufu.core.zk.ZkConfig;
 import com.hufudb.openhufu.udf.ScalarUDF;
 import com.hufudb.openhufu.udf.UDFLoader;
 import java.util.ArrayList;
@@ -49,19 +48,8 @@ public class OpenHuFuSchemaFactory implements SchemaFactory {
       tableObjs.addAll((List) operand.get("tables"));
     }
     addUDF(parentSchema);
-    ZkConfig zkConfig = new ZkConfig();
-    zkConfig.servers = (String) operand.get("zookeeper");
-    zkConfig.schemaName = (String) operand.get("schema");
-    zkConfig.zkRoot = (String) operand.get("zkroot");
-    zkConfig.user = (String) operand.get("user");
-    zkConfig.passwd = (String) operand.get("passwd");
-    if (zkConfig.valid()) {
-      LOG.info("Use Zk");
-      return new OpenHuFuSchemaManager(tableObjs, parentSchema, zkConfig);
-    } else {
-      LOG.info("Use model");
-      return new OpenHuFuSchemaManager(owners, tableObjs, parentSchema, userId);
-    }
+    LOG.info("Use model");
+    return new OpenHuFuSchemaManager(owners, tableObjs, parentSchema, userId);
   }
 
   static class OwnerInfo {
