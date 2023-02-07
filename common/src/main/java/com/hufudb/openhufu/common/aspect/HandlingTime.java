@@ -1,4 +1,4 @@
-package com.hufudb.openhufu.benchmark.annotation;
+package com.hufudb.openhufu.common.aspect;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

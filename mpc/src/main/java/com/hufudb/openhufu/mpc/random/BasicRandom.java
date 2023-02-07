@@ -1,12 +1,12 @@
 package com.hufudb.openhufu.mpc.random;
 
-import java.util.Random;
+import java.security.SecureRandom;
 
 public class BasicRandom implements OpenHuFuRandom {
-  final Random random;
+  final SecureRandom random;
 
   public BasicRandom() {
-    random = new Random(System.currentTimeMillis());
+    random = new SecureRandom();
   }
 
   @Override

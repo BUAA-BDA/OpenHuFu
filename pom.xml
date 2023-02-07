@@ -14,6 +14,7 @@
   <modules>
     <module>adapter</module>
     <module>benchmark</module>
+    <module>common</module>
     <module>core</module>
     <module>data</module>
     <module>mpc</module>
