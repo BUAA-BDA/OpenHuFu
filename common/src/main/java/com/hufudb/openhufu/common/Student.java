@@ -1,6 +1,6 @@
-package com.hufudb.openhufu.benchmark;
+package com.hufudb.openhufu.common.aspect;
 
-import com.hufudb.openhufu.benchmark.annotation.HandlingTime;
+import com.hufudb.openhufu.common.aspect.HandlingTime;
 
 /**
  * @author yang.song
