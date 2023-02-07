@@ -44,7 +44,7 @@ public class OpenHuFuToEnumerableConverter extends ConverterImpl implements Enum
     try {
       oImplementor.visitChild((OpenHuFuRel) getInput());
     } catch (Exception e) {
-      e.printStackTrace();
+      LOG.error("EnumerableConverter child rel node visit error", e);
     }
     return implement(implementor, oImplementor, pref);
   }

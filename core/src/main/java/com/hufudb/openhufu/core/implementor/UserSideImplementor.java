@@ -78,7 +78,7 @@ public class UserSideImplementor implements PlanImplementor {
           }
           return true;
         } catch (Exception e) {
-          e.printStackTrace();
+          LOG.error("Error occur while fetching data from owner", e);
           return false;
         } finally {
           producer.finish();
@@ -173,7 +173,7 @@ public class UserSideImplementor implements PlanImplementor {
           }
           return true;
         } catch (Exception e) {
-          e.printStackTrace();
+          LOG.error("Error occur while fetching data from owner", e);
           return false;
         } finally {
           producer.finish();
