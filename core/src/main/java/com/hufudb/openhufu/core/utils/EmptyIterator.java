@@ -1,6 +1,7 @@
 package com.hufudb.openhufu.core.utils;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 public class EmptyIterator<E> implements Iterator<E> {
 
@@ -11,6 +12,6 @@ public class EmptyIterator<E> implements Iterator<E> {
 
   @Override
   public E next() {
-    return null;
+    throw new NoSuchElementException();
   }
 }

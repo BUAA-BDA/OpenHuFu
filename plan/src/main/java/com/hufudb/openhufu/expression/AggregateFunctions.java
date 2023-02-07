@@ -403,6 +403,6 @@ public class AggregateFunctions {
         : comparable instanceof BigInteger ? new BigDecimal((BigInteger) comparable)
             : comparable instanceof Long || comparable instanceof Integer
                 || comparable instanceof Short ? new BigDecimal(((Number) comparable).longValue())
-                : new BigDecimal(((Number) comparable).doubleValue());
+                : BigDecimal.valueOf(((Number) comparable).doubleValue());
   }
 }

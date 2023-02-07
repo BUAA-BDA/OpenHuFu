@@ -41,7 +41,7 @@ public class BitArray {
   }
 
   public boolean get(int i) {
-    return (bits[i >> 3] & (1 << (i & 0x7))) != 0;
+    return (bits[i >> 3] & ((1 << (i & 0x7)) & 0xff)) != 0;
   }
 
   public int size() {
