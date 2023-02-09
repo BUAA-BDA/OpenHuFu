@@ -67,12 +67,6 @@ pnpm-debug.log*
 *.sln
 *.sw?
 
-# python
-
-python/dist/
-python/pyopenhufu.egg-info/
-python/*.egg-info/
-
 # template files
 proto/bin/
 docker/owner/cert/
@@ -84,19 +78,11 @@ release/log
 # vscode
 .vscode/
 
-#frontdn resource
-
-webapp/node_modules
-webapp/dist
-webapp/dist_electron
-backend/src/main/resources/static
-
 # Log files
-webapp/npm-debug.log*
-webapp/yarn-debug.log*
-webapp/yarn-error.log*
-webapp/pnpm-debug.log*
 
 # benchmark files
 benchmark/jmh.out
 docker/benchmark/database/data
+
+# dataset
+dataset/TPC-H V3.0.1
