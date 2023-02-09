@@ -92,7 +92,7 @@ bash generateData.sh dst x y
 **Other helpful related work from our group is listed below:**
 
 1. **Efficient Approximate Range Aggregation Over Large-Scale Spatial Data Federation.**
-*Yexuan Shi, Yongxin Tong, Yuxiang Zeng, Zimu Zhou, Bolin Ding, Lei Chen.* Proc. VLDB Endow. 15(6): 1159-1172 (2022). \[[paper](https://hufudb.com/static/paper/2022/TKDE2022_Efficient%20Approximate%20Range%20Aggregation%20over%20Large-scale%20Spatial%20Data%20Federation.pdf)\] \[[bibtex](https://dblp.org/rec/journals/tkde/ShiTZZDC23.html?view=bibtex)\]
+*Yexuan Shi, Yongxin Tong, Yuxiang Zeng, Zimu Zhou, Bolin Ding, Lei Chen.* IEEE Trans. Knowl. Data Eng. 35(1): 418-430 (2023). \[[paper](https://hufudb.com/static/paper/2022/TKDE2022_Efficient%20Approximate%20Range%20Aggregation%20over%20Large-scale%20Spatial%20Data%20Federation.pdf)\] \[[bibtex](https://dblp.org/rec/journals/tkde/ShiTZZDC23.html?view=bibtex)\]
 
 1. **Hu-Fu: A Data Federation System for Secure Spatial Queries.**
 *Xuchen Pan, Yongxin Tong, Chunbo Xue, Zimu Zhou, Junping Du, Yuxiang Zeng, Yexuan Shi, Xiaofei Zhang, Lei Chen, Yi Xu, Ke Xu, Weifeng Lv.* Proc. VLDB Endow. 15(12): 3582-3585 (2022). \[[paper](https://www.vldb.org/pvldb/vol15/p3582-tong.pdf)\] \[[bibtex](https://dblp.org/rec/journals/pvldb/PanTXZDZSZCXXL22.html?view=bibtex)\]
@@ -102,6 +102,9 @@ bash generateData.sh dst x y
 
 1. **Fed-LTD: Towards Cross-Platform Ride Hailing via Federated Learning to Dispatch.**
 *Yansheng Wang, Yongxin Tong, Zimu Zhou, Ziyao Ren, Yi Xu, Guobin Wu, Weifeng Lv.* KDD 2022. \[[paper](https://doi.org/10.1145/3534678.3539047)\] \[[bibtex](https://dblp.org/rec/conf/kdd/WangTZRXWL22.html?view=bibtex)\]
+
+1. **Efficient and Secure Skyline Queries over Vertical Data Federation.**
+*Yuanyuan Zhang, Yexuan Shi, Zimu Zhou, Chunbo Xue, Yi Xu, Ke Xu, Junping Du.* IEEE Trans. Knowl. Data Eng. (2022). \[[paper](https://doi.org/10.1109/TKDE.2022.3222415)\] \[[bibtex](https://ieeexplore.ieee.org/document/9950625)\]
 
 1. **Federated Topic Discovery: A Semantic Consistent Approach.**
 *Yexuan Shi, Yongxin Tong, Zhiyang Su, Di Jiang, Zimu Zhou, Wenbin Zhang.* IEEE Intell. Syst. 36(5): 96-103 (2021). \[[paper](https://doi.org/10.1109/MIS.2020.3033459)\] \[[bibtex](https://dblp.org/rec/journals/expert/ShiTSJZZ21.html?view=bibtex)\]
