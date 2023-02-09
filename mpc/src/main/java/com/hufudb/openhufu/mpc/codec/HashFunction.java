@@ -35,6 +35,7 @@ public enum HashFunction {
     return name;
   }
 
+  @Override
   public String toString() {
     return name;
   }
