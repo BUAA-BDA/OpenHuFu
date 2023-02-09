@@ -52,7 +52,7 @@ bash generateData.sh dst x y
 ## Data Query Language
 
 1. Plan
-2. Function Call: Hard to describe query
+2. Function Call
 
 ## Query Type
 
