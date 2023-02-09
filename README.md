@@ -8,7 +8,7 @@ With its help, we can quickly conduct the experimental evaluation and obtain the
 
 ## Building OpenHuFu from Source
 
-prerequisites:
+Prerequisites:
 
 - Linux
 - Java 11
