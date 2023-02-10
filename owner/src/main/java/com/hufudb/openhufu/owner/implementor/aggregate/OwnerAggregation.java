@@ -1,12 +1,10 @@
 package com.hufudb.openhufu.owner.implementor.aggregate;
 
+import com.hufudb.openhufu.expression.AggFuncType;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-import com.google.common.collect.ImmutableList;
 import com.hufudb.openhufu.data.function.AggregateFunction;
 import com.hufudb.openhufu.data.schema.Schema;
 import com.hufudb.openhufu.data.storage.AggDataSet;
@@ -18,6 +16,7 @@ import com.hufudb.openhufu.expression.ExpressionFactory;
 import com.hufudb.openhufu.expression.ExpressionUtils;
 import com.hufudb.openhufu.expression.SingleAggregator;
 import com.hufudb.openhufu.interpreter.Interpreter;
+import com.hufudb.openhufu.owner.implementor.OwnerImplementorFactory;
 import com.hufudb.openhufu.proto.OpenHuFuData.ColumnType;
 import com.hufudb.openhufu.proto.OpenHuFuPlan;
 import com.hufudb.openhufu.proto.OpenHuFuPlan.Expression;
@@ -28,6 +27,14 @@ import org.slf4j.LoggerFactory;
 
 public class OwnerAggregation {
   static final Logger LOG = LoggerFactory.getLogger(OwnerAggregation.class);
+
+  public static AggregateFunction getAggregateFunc(Expression exp, Rpc rpc, ExecutorService threadPool, TaskInfo taskInfo) {
+    if (exp.getOpType().equals(OpenHuFuPlan.OperatorType.AGG_FUNC)) {
+      return OwnerImplementorFactory.getAggregationFunction(AggFuncType.of(exp.getI32()), exp, rpc, threadPool, taskInfo);
+    } else {
+      throw new UnsupportedOperationException("Just support single aggregate function");
+    }
+  }
 
   public static DataSet aggregate(DataSet input, List<Integer> groups, List<Expression> aggs, List<ColumnType> types, Rpc rpc, ExecutorService threadPool, TaskInfo taskInfo) {
     List<AggregateFunction<Row, Comparable>> aggFunctions = new ArrayList<>();
@@ -43,7 +50,7 @@ public class OwnerAggregation {
     for (Expression exp : aggs) {
       if (exp.getInCount() == 1) {
         int ref = interAggs.size();
-        aggFunctions.add(OwnerAggregateFunctions.getAggregateFunc(exp, rpc, threadPool, taskInfo));
+        aggFunctions.add(getAggregateFunc(exp, rpc, threadPool, taskInfo));
         aggTypes.add(exp.getOutType());
         interAggs.add(exp);
         finalSelects.add(ExpressionFactory.createInputRef(ref, exp.getOutType(), exp.getModifier()));
@@ -54,7 +61,7 @@ public class OwnerAggregation {
         //  what if there is DIVIDE(DIVIDE(SUM(), SUM()), 3)?
         for (Expression inner : exp.getInList()) {
           int ref = interAggs.size();
-          aggFunctions.add(OwnerAggregateFunctions.getAggregateFunc(inner, rpc, threadPool, taskInfo));
+          aggFunctions.add(getAggregateFunc(inner, rpc, threadPool, taskInfo));
           aggTypes.add(exp.getOutType());
 
           Expression inputRef = ExpressionFactory.createInputRef(ref, inner.getOutType(), inner.getModifier());
