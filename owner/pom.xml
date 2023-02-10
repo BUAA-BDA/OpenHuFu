@@ -17,6 +17,11 @@
   <dependencies>
     <dependency>
       <groupId>com.hufudb.openhufu</groupId>
+      <artifactId>openhufu-common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.hufudb.openhufu</groupId>
       <artifactId>openhufu-plan</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -46,6 +51,11 @@
       <groupId>io.grpc</groupId>
       <artifactId>grpc-testing</artifactId>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <version>1.30</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
