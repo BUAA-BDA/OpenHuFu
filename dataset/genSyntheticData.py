@@ -31,7 +31,7 @@ class randomGenerator(baseGenerator):
 
 	def gen(self, n):
 		ret = [0] * n
-		for i in xrange(n):
+		for i in range(n):
 			x = randint(-self.mx, self.mx)
 			ret[i] = x
 		return ret
@@ -44,7 +44,7 @@ class normalGenerator(baseGenerator):
 
 	def gen(self, n, lb = None, rb = None):
 		ret = np.random.normal(self.mu, self.sigma, n)
-		for i in xrange(n):
+		for i in range(n):
 			if lb is not None and ret[i]<lb:
 				ret[i] = lb
 			if rb is not None and ret[i]>rb:
@@ -66,7 +66,7 @@ class uniformGenerator(baseGenerator):
 
 	def gen(self, n, lb = None, rb = None):
 		ret = np.random.uniform(self.low, self.high, n)
-		for i in xrange(n):
+		for i in range(n):
 			if lb is not None and ret[i]<lb:
 				ret[i] = lb
 			if rb is not None and ret[i]>rb:
@@ -86,7 +86,7 @@ class expGenerator(baseGenerator):
 
 	def gen(self, n, lb = None, rb = None):
 		ret = np.random.exponential(self.mu, n)
-		for i in xrange(n):
+		for i in range(n):
 			if lb is not None and ret[i]<lb:
 				ret[i] = lb
 			if rb is not None and ret[i]>rb:
@@ -99,11 +99,11 @@ class expGenerator(baseGenerator):
 def genPoints(gtor, n):
 	points = []
 	vals = []
-	for j in xrange(CFR.dim):
+	for j in range(CFR.dim):
 		vals.append(gtor.gen(n))
-	for i in xrange(n):
+	for i in range(n):
 		tmp = []
-		for j in xrange(CFR.dim):
+		for j in range(CFR.dim):
 			tmp.append(vals[j][i])
 		points.append(tuple(tmp))
 	ret = list(set(points))
@@ -113,14 +113,14 @@ def genSkewedPoints(gtor, n):
 	alpha = 2
 	points = []
 	vals = []
-	for j in xrange(CFR.dim):
+	for j in range(CFR.dim):
 		if j==0:
 			vals.append(map(int, gtor.gen(n)))
 		else:
 			vals.append(map(lambda x:int(x)**alpha, gtor.gen(n)))
-	for i in xrange(n):
+	for i in range(n):
 		tmp = []
-		for j in xrange(CFR.dim):
+		for j in range(CFR.dim):
 			tmp.append(vals[j][i])
 		points.append(tuple(tmp))
 	ret = list(set(points))
@@ -135,7 +135,7 @@ def genSynData(points, desPath, prefix, n):
 	desFileName = os.path.join(tmpFilePath, desFileName)
 	with open(desFileName, "w") as fout:
 		fout.write("%d\n" % (len(points)))
-		for i in xrange(len(points)):
+		for i in range(len(points)):
 			fout.write(" ".join(map(str, points[i]))+"\n")
 	
 def genBeta(alpha, n):
@@ -145,21 +145,21 @@ def genBeta(alpha, n):
 	P = [0.0] * base;
 	sum = 0.0;
 	
-	for i in xrange(base):
+	for i in range(base):
 		P[i] = dx / (lnk * (beg + i*dx))
 		sum += P[i]
 	
-	for i in xrange(base):
+	for i in range(base):
 		P[i] /= sum;
 		if i>0: 
 			P[i] += P[i-1]
 		
 	
 	retList = []
-	for j in xrange(n):
+	for j in range(n):
 		ret = alpha;
 		randf = randint(0, base*10-1) / (base*10.0)
-		for i in xrange(base):
+		for i in range(base):
 			if randf <= P[i]:
 				ret = beg + i * dx
 				break
@@ -176,7 +176,7 @@ def genParameter(desPath):
 	if not os.path.exists(tmpFilePath):
 		os.mkdir(tmpFilePath)		
 	betas = genBeta(k, CFR.caseN)
-	for i in xrange(CFR.caseN):
+	for i in range(CFR.caseN):
 		desFileName = "data_%02d.txt" % (i)
 		desFileName = os.path.join(tmpFilePath, desFileName)
 		with open(desFileName, "w") as fout:
@@ -216,7 +216,7 @@ def genSynDataSet(desPath, caseN):
 	genParameter(desPath)
 	
 def exp0():
-	desPath = "synData"
+	desPath = "dataset/SynData"
 	genSynDataSet(desPath, CFR.caseN)
 	
 	
