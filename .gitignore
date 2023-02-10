@@ -86,3 +86,4 @@ docker/benchmark/database/data
 
 # dataset
 dataset/TPC-H V3.0.1
+!dataset/newyork-taxi.zip
