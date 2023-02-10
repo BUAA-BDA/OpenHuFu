@@ -14,14 +14,18 @@ With its help, we can quickly conduct the experimental evaluation and obtain the
 
 Prerequisites:
 
-- Linux
+- Linux or MacOS
 - Java 11
 - Maven (version at least 3.5.2)
+- Python3 (generate spatial data)
 
-Run the following commands
-
-```cmd
+Run the following commands:
+1. Clone the OpenHuFu repository:
+``` cmd
 git clone https://github.com/BUAA-BDA/OpenHuFu.git
+```
+2. Build OpenHuFu:
+``` cmd
 cd OpenHuFu
 ./build/script/package.sh
 ```
@@ -30,16 +34,45 @@ OpenHuFu is now installed in `release`
 
 
 ## Data Generation
-
-[TCP-H](https://www.tpc.org/tpch/)
-### How to use it
+### Relational data: [TCP-H](https://www.tpc.org/tpch/)
+#### How to use it:
 ```cmd
+./build/script/extract_tpc_h.sh
+
 cd dataset/TPC-H V3.0.1/dbgen
 cp makefile.suite makefile
 make
 cd scripts
+
 # dst is the target folder, x is the number of database，y is the volume of each database
 bash generateData.sh dst x y
+```
+### Spatial data
+Spatial sample data: `dataset/newyork-taxi-sample.data`:
+
+#### How to use it
+
+Configuration in `dataset/genSyntheticData.sh`:
+``` python
+class constForSyn():
+    caseN = 10
+	Range = 10**7
+	dim = 2
+	mu = 0.5 * Range
+	sigma = 0.10 * Range
+	pointFiles = ["uni", "nor", "exp", "skew"]
+	numList = [5*10**3, 10**4, 5*10**4, 10**5, 5*10**5, 10**6, 5*10**6]
+	alpha = 2
+	
+def exp0():	
+    # desPath is the target folder of generated data
+    desPath = "dataset/SynData"
+
+```
+Generate spatial data:
+```shell
+pip3 install numpy
+python3 dataset/genSyntheticData.py
 ```
 
 ## Configuration File
@@ -48,10 +81,36 @@ bash generateData.sh dst x y
 ### UserSide
 
 
-## Running OpenHuFu
+## Developing procedure
 
-
-
+### Test
+1. Develop your algorithms
+   1. Aggregate:
+   ``` java
+      class extends com.hufudb.openhufu.owner.implementor.aggregate.OwnerAggregateFunction
+      /** The class must contains a constructor function with parameters:
+      *** (OpenHuFuPlan.Expression agg, Rpc rpc, ExecutorService threadPool, OpenHuFuPlan.TaskInfo taskInfo)
+      **/ 
+   ```
+   2. Join:
+   ``` java
+   ```
+2. Set the algorithm for the query(example in owner.yaml):
+``` yaml
+openhufu:
+    implementor:
+      aggregate:
+        sum: com.hufudb.openhufu.owner.implementor.aggregate.sum.SecretSharingSum
+        count: null
+        max: null
+        min: null
+        avg: null
+      join: com.hufudb.openhufu.owner.implementor.join.HashJoin
+```
+3. Run benchmark
+```shell
+./build/script/benchmark.sh
+```
 
 ## Data Query Language
 
