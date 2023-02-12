@@ -28,12 +28,12 @@ git clone https://github.com/BUAA-BDA/OpenHuFu.git
 2. Build:
 ``` cmd
 cd OpenHuFu
-./build/script/package.sh
+./scripts/build/package.sh
 ```
 
 OpenHuFu is now installed in `release`
 
-### <span style="color:red">Notes</span>
+### Notes
 If you use Macs with Apple Silicon Chips(ARM), you need to add this to `settings.xml`(maven settings file):
 ``` xml
 <profiles>
@@ -53,7 +53,7 @@ If you use Macs with Apple Silicon Chips(ARM), you need to add this to `settings
 ### Relational data: [TCP-H](https://www.tpc.org/tpch/)
 #### How to use it:
 ```cmd
-./build/script/extract_tpc_h.sh
+./scripts/test/extract_tpc_h.sh
 
 cd dataset/TPC-H V3.0.1/dbgen
 cp makefile.suite makefile
@@ -124,7 +124,7 @@ openhufu:
 ```
 3. Run benchmark
 ```shell
-./build/script/benchmark.sh
+./scripts/test/benchmark.sh
 ```
 
 ## Data Query Language
