@@ -22,7 +22,7 @@ jobs:
       with:
         node-version: '16'
     - name: Build with Maven
-      run: ./build/script/package.sh
+      run: ./scripts/build/package.sh
     - name: Upload Hu-Fu Release Artifact
       uses: actions/upload-artifact@v3.1.0
       with:
