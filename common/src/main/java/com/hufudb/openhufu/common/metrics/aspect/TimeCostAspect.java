@@ -2,7 +2,8 @@ package com.hufudb.openhufu.common.metrics.aspect;
 
 import com.hufudb.openhufu.common.exception.ErrorCode;
 import com.hufudb.openhufu.common.exception.OpenHuFuException;
-import com.hufudb.openhufu.common.metrics.time.TimeManager;
+import com.hufudb.openhufu.common.metrics.time.TimeCostManager;
+import com.hufudb.openhufu.common.enums.TimeTerm;
 import org.apache.commons.lang3.time.StopWatch;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
@@ -17,26 +18,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Aspect
-public class HandlingTimeAspect {
+public class TimeCostAspect {
 
   private static final Logger
-      LOG = LoggerFactory.getLogger(HandlingTimeAspect.class);
+      LOG = LoggerFactory.getLogger(TimeCostAspect.class);
 
-  @Pointcut("(execution(* *(..)) && @annotation(com.hufudb.openhufu.common.metrics.aspect.HandlingTime))")
-  private void operationLog() {
+  @Pointcut("(execution(* *(..)) && @annotation(com.hufudb.openhufu.common.metrics.aspect.TimeCost))")
+  private void operationCost() {
   }
 
-  @Around("operationLog()")
+  @Around("operationCost()")
   public Object handlingTimeAround(ProceedingJoinPoint joinPoint) {
     try {
+      TimeTerm term = getAnnotation(joinPoint).term();
+      LOG.info("Start watching {}.", term);
       StopWatch stopWatch = new StopWatch();
       stopWatch.start();
       Object proceed = joinPoint.proceed();
       stopWatch.stop();
-      TimeManager.addTimeInfo(getAnnotation(joinPoint).name(),
+      TimeCostManager.addTimeCostInfo(term,
           stopWatch.getTime(TimeUnit.MILLISECONDS));
-      System.out.println(getAnnotation(joinPoint).name());
-      System.out.println(stopWatch.getTime(TimeUnit.MILLISECONDS));
+      LOG.info("Stop watching {}. Time costs: {}ms.", term, stopWatch.getTime(TimeUnit.MILLISECONDS));
       return proceed;
     } catch (Throwable throwable) {
       LOG.error("Exception occur while calculating execution time");
@@ -44,12 +46,12 @@ public class HandlingTimeAspect {
     }
   }
 
-  public HandlingTime getAnnotation(ProceedingJoinPoint point) {
+  public TimeCost getAnnotation(ProceedingJoinPoint point) {
     Signature signature = point.getSignature();
     MethodSignature methodSignature = (MethodSignature) signature;
     Method method = methodSignature.getMethod();
     if (method != null) {
-      return method.getAnnotation(HandlingTime.class);
+      return method.getAnnotation(TimeCost.class);
     }
     return null;
   }

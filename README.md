@@ -10,21 +10,22 @@ OpenHuFu is an open-sourced system for efficient and secure query processing on 
 It provides flexibility for researchers to quickly implement their algorithms for processing federated queries with SMC techniques, such as secret sharing, garbled circuit and oblivious transfer.
 With its help, we can quickly conduct the experimental evaluation and obtain the performance of the designed algorithms over benchmark datasets.
 
-## Building OpenHuFu from Source
+## Compile OpenHuFu from Source Code
 
-Prerequisites:
+### Prerequisites:
 
 - Linux or MacOS
 - Java 11
 - Maven (version at least 3.5.2)
 - Python3 (generate spatial data)
 
+### Build OpenHuFu
 Run the following commands:
-1. Clone the OpenHuFu repository:
+1. Clone OpenHuFu repository:
 ``` cmd
 git clone https://github.com/BUAA-BDA/OpenHuFu.git
 ```
-2. Build OpenHuFu:
+2. Build:
 ``` cmd
 cd OpenHuFu
 ./build/script/package.sh
@@ -32,6 +33,21 @@ cd OpenHuFu
 
 OpenHuFu is now installed in `release`
 
+### <span style="color:red">Notes</span>
+If you use Macs with Apple Silicon Chips(ARM), you need to add this to `settings.xml`(maven settings file):
+``` xml
+<profiles>
+    <profile>
+      <id>apple-silicon</id>
+      <properties>
+        <os.detected.classifier>osx-x86_64</os.detected.classifier>
+      </properties>
+    </profile>
+</profiles>
+<activeProfiles>
+    <activeProfile>apple-silicon</activeProfile>
+</activeProfiles>
+```
 
 ## Data Generation
 ### Relational data: [TCP-H](https://www.tpc.org/tpch/)
@@ -81,9 +97,8 @@ python3 dataset/genSyntheticData.py
 ### UserSide
 
 
-## Developing procedure
+## Development procedure
 
-### Test
 1. Develop your algorithms
    1. Aggregate:
    ``` java
@@ -117,7 +132,7 @@ openhufu:
 1. Plan
 2. Function Call
 
-## Query Type
+## Supported Query Types
 
 * Filter
 * Projection
@@ -140,10 +155,10 @@ openhufu:
 
 * Communication Cost
 * Running Time
-  * Data Access Time
+  * Total Query Time
+  * Local Query Time
   * Encryption Time
   * Decryption Time
-  * Query Time
 
 ## Related Work
 
