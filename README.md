@@ -19,13 +19,17 @@ With its help, we can quickly conduct the experimental evaluation and obtain the
 - Maven (version at least 3.5.2)
 - C++ (generate TPC-H data)
 - Python3 (generate spatial data)
+- Git & Git LFS
 
 ### Build OpenHuFu
 Run the following commands:
 1. Clone OpenHuFu repository:
 ``` cmd
 git clone https://github.com/BUAA-BDA/OpenHuFu.git
+cd OpenHuFu
+git lfs pull
 ```
+
 2. Build:
 ``` cmd
 cd OpenHuFu
