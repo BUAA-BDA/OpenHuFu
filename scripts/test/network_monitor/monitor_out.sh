@@ -1,1 +1,5 @@
-sudo iptables -nvt filter -L OUTPUT
+#!/bin/bash
+
+set -ex
+
+iptables -nvt filter -L OUTPUT

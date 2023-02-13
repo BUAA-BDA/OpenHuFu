@@ -2,6 +2,8 @@ package com.hufudb.openhufu.benchmark;
 
 import com.hufudb.openhufu.core.sql.schema.OpenHuFuSchemaManager;
 import com.hufudb.openhufu.data.storage.DataSet;
+import com.hufudb.openhufu.expression.ExpressionFactory;
+import com.hufudb.openhufu.plan.LeafPlan;
 import com.hufudb.openhufu.plan.Plan;
 import com.hufudb.openhufu.plan.RootPlan;
 import java.io.IOException;
@@ -55,8 +57,12 @@ public class OpenHuFuBenchmark {
   @Fork(0)
   @Warmup(iterations = 2)
   @Measurement(iterations = 5)
-  public void testAggregate() {
-    Plan plan = new RootPlan();
+  public void testSelect() {
+    String tableName = "student_pub_share";
+    LeafPlan plan = new LeafPlan();
+    plan.setTableName(tableName);
+    plan.setSelectExps(ExpressionFactory
+        .createInputRef(state.manager.getSchema(tableName)));
     DataSet dataSet = state.manager.query(plan);
     dataSet.close();
   }
