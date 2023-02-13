@@ -102,37 +102,6 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>aspectj-maven-plugin</artifactId>
-        <version>1.14.0</version>
-        <configuration>
-          <source>${maven.compiler.source}</source>
-          <target>${maven.compiler.target}</target>
-          <complianceLevel>11</complianceLevel>
-          <showWeaveInfo>true</showWeaveInfo>
-          <verbose>true</verbose>
-          <Xlint>ignore</Xlint>
-          <encoding>UTF-8</encoding>
-          <includes>
-            <include>**/Student.java</include>
-            <include>**/Main.java</include>
-          </includes>
-          <aspectLibraries>
-            <aspectLibrary>
-              <groupId>com.hufudb.openhufu</groupId>
-              <artifactId>openhufu-common</artifactId>
-            </aspectLibrary>
-          </aspectLibraries>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>compile</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
   </build>
 </project>
