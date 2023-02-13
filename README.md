@@ -17,6 +17,7 @@ With its help, we can quickly conduct the experimental evaluation and obtain the
 - Linux or MacOS
 - Java 11
 - Maven (version at least 3.5.2)
+- C++ (generate TPC-H data)
 - Python3 (generate spatial data)
 
 ### Build OpenHuFu
@@ -53,22 +54,21 @@ If you use Macs with Apple Silicon Chips(ARM), you need to add this to `settings
 ### Relational data: [TCP-H](https://www.tpc.org/tpch/)
 #### How to use it:
 ```cmd
-./scripts/test/extract_tpc_h.sh
+bash scripts/test/extract_tpc_h.sh
 
 cd dataset/TPC-H V3.0.1/dbgen
 cp makefile.suite makefile
 make
-cd scripts
 
 # dst is the target folder, x is the number of database，y is the volume of each database
-bash generateData.sh dst x y
+bash scripts/test/generateData.sh dst x y
 ```
 ### Spatial data
 Spatial sample data: `dataset/newyork-taxi-sample.data`:
 
 #### How to use it
 
-Configuration in `dataset/genSyntheticData.sh`:
+Configuration in `scripts/test/genSyntheticData.py`:
 ``` python
 class constForSyn():
     caseN = 10
@@ -100,16 +100,17 @@ python3 dataset/genSyntheticData.py
 ## Development procedure
 
 1. Develop your algorithms
-   1. Aggregate:
-   ``` java
-      class extends com.hufudb.openhufu.owner.implementor.aggregate.OwnerAggregateFunction
-      /** The class must contains a constructor function with parameters:
-      *** (OpenHuFuPlan.Expression agg, Rpc rpc, ExecutorService threadPool, OpenHuFuPlan.TaskInfo taskInfo)
-      **/ 
-   ```
-   2. Join:
-   ``` java
-   ```
+* Aggregate:
+``` java
+  class extends com.hufudb.openhufu.owner.implementor.aggregate.OwnerAggregateFunction
+  /** 
+   *  The class must contains a constructor function with parameters:
+   *  (OpenHuFuPlan.Expression agg, Rpc rpc, ExecutorService threadPool, OpenHuFuPlan.TaskInfo taskInfo)
+   */ 
+```
+* Join:
+``` java
+```
 2. Set the algorithm for the query(example in owner.yaml):
 ``` yaml
 openhufu:
@@ -122,9 +123,26 @@ openhufu:
         avg: null
       join: com.hufudb.openhufu.owner.implementor.join.HashJoin
 ```
-3. Run benchmark
+3. Running benchmarks
 ```shell
 ./scripts/test/benchmark.sh
+```
+
+4. Evaluating communication cost
+
+Before running benchmarks on OpenHuFu, you can follow the instructions to evaluate communication cost of the query:
+
+* Monitoring the port
+``` shell
+# run the shell script as root
+# 8888 is the port number 
+sudo bash scripts/test/network_mmonitor/start.sh 8888
+```
+
+* Calculating the communication cost
+``` shell
+# run the shell script as root
+sudo bash scripts/test/network_mmonitor/monitor.sh
 ```
 
 ## Data Query Language

@@ -3,13 +3,11 @@ stop() {
   sudo iptables -D OUTPUT -p tcp --sport $1
 }
 
-stop 12345
-stop 12346
-stop 12347
-stop 12348
-stop 12349
-stop 12350
-stop 12351
-stop 12352
-stop 12353
-stop 12354
+if [ ! -n "$1" ];then
+  echo "Port cannot be empty!"
+  echo "You can use the following command to stop the monitor: sudo bash stop.sh 8888"
+  exit
+fi
+export PORT=$1
+echo "Monitoring port: "  ${PORT}
+stop ${PORT}

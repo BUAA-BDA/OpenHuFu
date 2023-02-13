@@ -13,7 +13,7 @@
 
   <properties>
     <uberjar.name>benchmarks</uberjar.name>
-    <jmh.version>1.0</jmh.version>
+    <jmh.version>1.23</jmh.version>
     <javac.target>11</javac.target>
   </properties>
 
