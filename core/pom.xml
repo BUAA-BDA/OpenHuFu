@@ -115,8 +115,7 @@
           <Xlint>ignore</Xlint>
           <encoding>UTF-8</encoding>
           <includes>
-            <include>**/Student.java</include>
-            <include>**/Main.java</include>
+            <include>**/OpenHuFuClient.java</include>
           </includes>
           <aspectLibraries>
             <aspectLibrary>
