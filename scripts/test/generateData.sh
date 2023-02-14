@@ -1,40 +1,51 @@
-bash ./scripts/test/makeDir.sh $1 $2
-((totalSize = $2 * $3))
-echo "generating data, total size: $totalSize G"
+#!/bin/bash
+
+if [ $# -ne 2 ]; then
+  echo 'please input 2 params'
+  exit
+fi
+
+dstDir='./dataset/databases'
+databaseNum=$1
+dataSize=$2
+mkdir ./dataset/databases
+bash ./scripts/test/makeDir.sh $dstDir $databaseNum
+((totalSize = databaseNum * dataSize))
+echo "generating data, total size: $totalSize M"
 cd ./dataset/TPC-H\ V3.0.1/dbgen/
 ./dbgen -f -s $totalSize
-
+cd ../../..
 pwd
 i=0
-while ((i < $2))
+while ((i < $databaseNum))
 do
 	echo "separating data, running for database$i"
-	((a = i * 150000 + 1))
-	((b = (i + 1) * 150000))
-	sed -n "$a,$b"p ./customer.tbl | sed 's/.$//' > $1/database$i/customer.tbl
+	((a = i * 150 + 1))
+	((b = (i + 1) * 150))
+	sed -n "$a,$b"p ./dataset/TPC-H\ V3.0.1/dbgen/customer.tbl | sed 's/.$//' > $dstDir/database$i/customer.tbl
 
-	((a = i * 6000000 + 1))
-	((b = (i + 1) * 6000000))
-	sed -n "$a,$b"p ./lineitem.tbl | sed 's/.$//' > $1/database$i/lineitem.tbl
+	((a = i * 6000 + 1))
+	((b = (i + 1) * 6000))
+	sed -n "$a,$b"p ./dataset/TPC-H\ V3.0.1/dbgen/lineitem.tbl | sed 's/.$//' > $dstDir/database$i/lineitem.tbl
 
-	((a = i * 6000000 + 1))
-	((b = (i + 1) * 6000000))
-	sed -n "$a,$b"p ./orders.tbl | sed 's/.$//' > $1/database$i/orders.tbl
+	((a = i * 6000 + 1))
+	((b = (i + 1) * 6000))
+	sed -n "$a,$b"p ./dataset/TPC-H\ V3.0.1/dbgen/orders.tbl | sed 's/.$//' > $dstDir/database$i/orders.tbl
 
-	((a = i * 200000 + 1))
-	((b = (i + 1) * 200000))
-	sed -n "$a,$b"p ./part.tbl | sed 's/.$//' > $1/database$i/part.tbl
+	((a = i * 200 + 1))
+	((b = (i + 1) * 200))
+	sed -n "$a,$b"p ./dataset/TPC-H\ V3.0.1/dbgen/part.tbl | sed 's/.$//' > $dstDir/database$i/part.tbl
 
-	((a = i * 800000 + 1))
-	((b = (i + 1) * 800000))
-	sed -n "$a,$b"p ./partsupp.tbl | sed 's/.$//' > $1/database$i/partsupp.tbl
+	((a = i * 800 + 1))
+	((b = (i + 1) * 800))
+	sed -n "$a,$b"p ./dataset/TPC-H\ V3.0.1/dbgen/partsupp.tbl | sed 's/.$//' > $dstDir/database$i/partsupp.tbl
 
-	((a = i * 10000 + 1))
-	((b = (i + 1) * 10000))
-	sed -n "$a,$b"p ./supplier.tbl | sed 's/.$//' > $1/database$i/supplier.tbl
+	((a = i * 10 + 1))
+	((b = (i + 1) * 10))
+	sed -n "$a,$b"p ./dataset/TPC-H\ V3.0.1/dbgen/supplier.tbl | sed 's/.$//' > $dstDir/database$i/supplier.tbl
 
-	sed 's/.$//' ./nation.tbl > $1/database$i/nation.tbl
-	sed 's/.$//' ./region.tbl > $1/database$i/region.tbl
+	sed 's/.$//' ./dataset/TPC-H\ V3.0.1/dbgen/nation.tbl > $dstDir/database$i/nation.tbl
+	sed 's/.$//' ./dataset/TPC-H\ V3.0.1/dbgen/region.tbl > $dstDir/database$i/region.tbl
 	((i++))
 done
-rm ./*.tbl
+rm ./dataset/TPC-H\ V3.0.1/dbgen/*.tbl
