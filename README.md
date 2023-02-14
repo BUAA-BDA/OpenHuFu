@@ -19,21 +19,25 @@ With its help, we can quickly conduct the experimental evaluation and obtain the
 - Maven (version at least 3.5.2)
 - C++ (generate TPC-H data)
 - Python3 (generate spatial data)
-- Git & Git LFS
+- Git & Git LFS (Git Large File Storage)
 
 ### Build OpenHuFu
 Run the following commands:
 1. Clone OpenHuFu repository:
-``` cmd
+``` shell
 git clone https://github.com/BUAA-BDA/OpenHuFu.git
+```
+2. Download big files from Git LFS(Large File Storage)
+``` shell
 cd OpenHuFu
-git lfs pull
+git lfs install --skip-smudge
+git lfs pull 
 ```
 
-2. Build:
-``` cmd
+3. Build:
+``` shell
 cd OpenHuFu
-./scripts/build/package.sh
+bash scripts/build/package.sh
 ```
 
 OpenHuFu is now installed in `release`
@@ -57,15 +61,15 @@ If you use Macs with Apple Silicon Chips(ARM), you need to add this to `settings
 ## Data Generation
 ### Relational data: [TCP-H](https://www.tpc.org/tpch/)
 #### How to use it:
-```cmd
+```shell
 bash scripts/test/extract_tpc_h.sh
 
 cd dataset/TPC-H V3.0.1/dbgen
 cp makefile.suite makefile
 make
 
-# dst is the target folder, x is the number of database，y is the volume of each database
-bash scripts/test/generateData.sh dst x y
+# x is the number of database，y is the volume of each database
+bash scripts/test/generateData.sh x y
 ```
 ### Spatial data
 Spatial sample data: `dataset/newyork-taxi-sample.data`:
@@ -90,7 +94,7 @@ def exp0():
 
 ```
 Generate spatial data:
-```shell
+``` shell
 pip3 install numpy
 python3 dataset/genSyntheticData.py
 ```
@@ -129,7 +133,7 @@ openhufu:
 ```
 3. Running benchmarks
 ```shell
-./scripts/test/benchmark.sh
+bash scripts/test/benchmark.sh
 ```
 
 4. Evaluating communication cost

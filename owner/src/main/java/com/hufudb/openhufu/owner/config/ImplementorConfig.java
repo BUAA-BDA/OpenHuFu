@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 public class ImplementorConfig {
 
@@ -47,7 +48,7 @@ public class ImplementorConfig {
   }
 
   private static void loadImplementorConfig() {
-    Yaml yaml = new Yaml();
+    Yaml yaml = new Yaml(new SafeConstructor());
     InputStream stream = ImplementorConfig.class.getClassLoader()
         .getResourceAsStream(implementorPath);
     config = yaml.load(stream);
