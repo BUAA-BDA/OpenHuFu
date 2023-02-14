@@ -66,7 +66,7 @@ do
 	echo "S_SUPPKEY | S_NAME | S_ADDRESS | S_NATIONKEY | S_PHONE | S_ACCTBAL | S_COMMENT" > $dstDir/database$i/supplier.csv
 	sed -n "$a,$b"p ./dataset/TPC-H\ V3.0.1/dbgen/supplier.tbl | sed 's/.$//' >> $dstDir/database$i/supplier.csv
 
-  echo "N_NATIONKEY | N_NAME | N_REGIONKEY | N_COMMENT" > $dstDir/database$i/nation.csv
+  	echo "N_NATIONKEY | N_NAME | N_REGIONKEY | N_COMMENT" > $dstDir/database$i/nation.csv
 	sed 's/.$//' ./dataset/TPC-H\ V3.0.1/dbgen/nation.tbl >> $dstDir/database$i/nation.csv
 
 	echo "R_REGIONKEY | R_NAME | R_COMMENT" > $dstDir/database$i/region.csv
