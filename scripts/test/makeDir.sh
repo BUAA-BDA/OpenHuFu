@@ -1,3 +1,7 @@
+#!/bin/bash
+
+set -e
+
 cd $1
 i=0
 while ((i < $2))
