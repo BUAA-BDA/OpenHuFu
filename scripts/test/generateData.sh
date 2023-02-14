@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 if [ $# -ne 2 ]; then
   echo 'please input 2 params'
   exit
@@ -8,8 +10,22 @@ fi
 dstDir='./dataset/databases'
 databaseNum=$1
 dataSize=$2
-mkdir ./dataset/databases
-bash ./scripts/test/makeDir.sh $dstDir $databaseNum
+
+if [ -d $dstDir ];
+then
+echo "delete existing dir"
+rm -rf $dstDir
+fi
+
+mkdir $dstDir
+
+i=0
+while ((i < databaseNum))
+do
+    mkdir $dstDir/database$i
+    ((i = i + 1))
+done
+
 ((totalSize = databaseNum * dataSize))
 echo "generating data, total size: $totalSize M"
 cd ./dataset/TPC-H\ V3.0.1/dbgen/
@@ -17,7 +33,7 @@ cd ./dataset/TPC-H\ V3.0.1/dbgen/
 cd ../../..
 pwd
 i=0
-while ((i < $databaseNum))
+while ((i < databaseNum))
 do
 	echo "separating data, running for database$i"
 	((a = i * 150 + 1))
@@ -46,6 +62,6 @@ do
 
 	sed 's/.$//' ./dataset/TPC-H\ V3.0.1/dbgen/nation.tbl > $dstDir/database$i/nation.tbl
 	sed 's/.$//' ./dataset/TPC-H\ V3.0.1/dbgen/region.tbl > $dstDir/database$i/region.tbl
-	((i++))
+	((i = i + 1))
 done
 rm ./dataset/TPC-H\ V3.0.1/dbgen/*.tbl
