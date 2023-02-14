@@ -11,9 +11,11 @@ dstDir='./dataset/databases'
 databaseNum=$1
 dataSize=$2
 
+echo "party: "$databaseNum", each data size: "$dataSize "MB"
+
 if [ -d $dstDir ];
 then
-echo "delete existing dir"
+echo "deleting existing dir"
 rm -rf $dstDir
 fi
 
@@ -26,9 +28,17 @@ do
     ((i = i + 1))
 done
 
-((totalSize = databaseNum * dataSize))
-echo "generating data, total size: $totalSize M"
+totalSize=$((databaseNum*dataSize))
+
+if [ $totalSize -lt 1000 ];
+then
+  totalSize=1
+else
+  totalSize=$((databaseNum*dataSize/1000))
+fi
+echo "generating data, total size: $totalSize G"
 cd ./dataset/TPC-H\ V3.0.1/dbgen/
+
 ./dbgen -f -s $totalSize
 cd ../../..
 pwd
@@ -66,7 +76,7 @@ do
 	echo "S_SUPPKEY | S_NAME | S_ADDRESS | S_NATIONKEY | S_PHONE | S_ACCTBAL | S_COMMENT" > $dstDir/database$i/supplier.csv
 	sed -n "$a,$b"p ./dataset/TPC-H\ V3.0.1/dbgen/supplier.tbl | sed 's/.$//' >> $dstDir/database$i/supplier.csv
 
-  	echo "N_NATIONKEY | N_NAME | N_REGIONKEY | N_COMMENT" > $dstDir/database$i/nation.csv
+  echo "N_NATIONKEY | N_NAME | N_REGIONKEY | N_COMMENT" > $dstDir/database$i/nation.csv
 	sed 's/.$//' ./dataset/TPC-H\ V3.0.1/dbgen/nation.tbl >> $dstDir/database$i/nation.csv
 
 	echo "R_REGIONKEY | R_NAME | R_COMMENT" > $dstDir/database$i/region.csv

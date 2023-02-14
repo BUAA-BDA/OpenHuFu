@@ -24,10 +24,13 @@ public class CsvTable {
   final String tableName;
   final Schema schema;
 
-  CsvTable(String tableName, Path path) throws IOException {
-    this.csvFormat = CSVFormat.RFC4180.builder().setDelimiter("|").setHeader().setSkipHeaderRecord(true)
+  final String delimiter;
+
+  CsvTable(String tableName, Path path, String delimiter) throws IOException {
+    this.csvFormat = CSVFormat.RFC4180.builder().setDelimiter(delimiter).setHeader().setSkipHeaderRecord(true)
         .setIgnoreSurroundingSpaces(true).setNullString("").build();
     Schema.Builder builder = Schema.newBuilder();
+    this.delimiter = delimiter;
     this.dataPath = path;
     this.tableName = tableName;
     CSVParser csvParser = CSVParser.parse(dataPath, StandardCharsets.UTF_8, csvFormat);
