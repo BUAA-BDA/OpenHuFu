@@ -68,8 +68,8 @@ cd dataset/TPC-H V3.0.1/dbgen
 cp makefile.suite makefile
 make
 
-# dst is the target folder, x is the number of database，y is the volume of each database
-bash scripts/test/generateData.sh dst x y
+# x is the number of database，y is the volume of each database
+bash scripts/test/generateData.sh x y
 ```
 ### Spatial data
 Spatial sample data: `dataset/newyork-taxi-sample.data`:
