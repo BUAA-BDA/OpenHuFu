@@ -5,6 +5,14 @@
       {
         "endpoint": "localhost:12345",
         "localName": "nation"
+      },
+      {
+        "endpoint": "localhost:12346",
+        "localName": "nation"
+      },
+      {
+        "endpoint": "localhost:12347",
+        "localName": "nation"
       }
     ]
   }
