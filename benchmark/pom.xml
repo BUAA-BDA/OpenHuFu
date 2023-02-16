@@ -20,7 +20,7 @@
   <dependencies>
     <dependency>
       <groupId>com.hufudb.openhufu</groupId>
-      <artifactId>openhufu-core</artifactId>
+      <artifactId>openhufu-owner</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -33,6 +33,11 @@
       <artifactId>jmh-generator-annprocess</artifactId>
       <version>${jmh.version}</version>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>javax.annotation</groupId>

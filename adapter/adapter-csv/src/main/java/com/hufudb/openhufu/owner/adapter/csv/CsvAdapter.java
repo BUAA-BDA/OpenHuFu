@@ -1,5 +1,6 @@
 package com.hufudb.openhufu.owner.adapter.csv;
 
+import com.hufudb.openhufu.owner.adapter.AdapterConfig;
 import com.hufudb.openhufu.plan.LeafPlan;
 import com.hufudb.openhufu.plan.Plan;
 import java.io.File;
@@ -32,17 +33,17 @@ public class CsvAdapter implements Adapter {
   final SchemaManager schemaManager;
   final Map<String, CsvTable> tables;
 
-  public CsvAdapter(String csvDir) {
+  public CsvAdapter(AdapterConfig config) {
     tables = new HashMap<>();
     schemaManager = new SchemaManager();
     try {
-      loadTables(csvDir);
+      loadTables(config.url, config.delimiter);
     } catch (IOException e) {
       LOG.error("Load tables error", e);
     }
   }
 
-  void loadTables(String csvDir) throws IOException {
+  void loadTables(String csvDir, String delimiter) throws IOException {
     File base = new File(csvDir);
     if (base.isDirectory()) {
       try (Stream<Path> stream = Files.list(base.toPath())) {
@@ -51,7 +52,7 @@ public class CsvAdapter implements Adapter {
               try {
                 String fileName = file.getFileName().toString();
                 String tableName = fileName.substring(0, fileName.length() - 4);
-                CsvTable table = new CsvTable(tableName, file);
+                CsvTable table = new CsvTable(tableName, file, delimiter);
                 tables.put(tableName, table);
                 schemaManager.addLocalTable(TableSchema.of(tableName, table.getSchema()));
               } catch (IOException e) {
@@ -62,7 +63,7 @@ public class CsvAdapter implements Adapter {
     } else if (base.getName().endsWith(".csv")) {
       String fileName = base.getName();
       String tableName = fileName.substring(0, fileName.length() - 4);
-      CsvTable table = new CsvTable(tableName, base.toPath());
+      CsvTable table = new CsvTable(tableName, base.toPath(), delimiter);
       tables.put(tableName, table);
       schemaManager.addLocalTable(TableSchema.of(tableName, table.getSchema()));
     }

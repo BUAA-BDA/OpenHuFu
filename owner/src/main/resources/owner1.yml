@@ -1,0 +1,10 @@
+owner:
+  config: ./config/owner1.json
+  implementor:
+    aggregate:
+      count: null
+      max: null
+      min: null
+      sum: com.hufudb.openhufu.owner.implementor.aggregate.sum.SecretSharingSum
+      avg: null
+    join: com.hufudb.openhufu.owner.implementor.join.HashJoin

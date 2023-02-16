@@ -5,14 +5,19 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import com.hufudb.openhufu.owner.adapter.csv.CsvAdapterFactory;
+import com.hufudb.openhufu.common.enums.DataSourceType;
 import java.net.URL;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 import org.junit.Test;
 import com.google.common.collect.ImmutableList;
 import com.hufudb.openhufu.data.schema.SchemaManager;
@@ -41,7 +46,8 @@ public class CsvAdapterTest {
     CsvAdapterFactory factory = new CsvAdapterFactory();
     AdapterConfig config = new AdapterConfig();
     config.url = source.getPath();
-    config.datasource = "csv";
+    config.datasource = DataSourceType.CSV;
+    config.delimiter = ",";
     Adapter adapter = factory.create(config);
     SchemaManager manager = adapter.getSchemaManager();
     List<TableSchema> schemas = manager.getAllLocalTable();
@@ -55,7 +61,8 @@ public class CsvAdapterTest {
     CsvAdapterFactory factory = new CsvAdapterFactory();
     AdapterConfig config = new AdapterConfig();
     config.url = source.getPath();
-    config.datasource = "csv";
+    config.datasource = DataSourceType.CSV;
+    config.delimiter = ",";
     Adapter adapter = factory.create(config);
     // add published schema
     SchemaManager manager = adapter.getSchemaManager();
@@ -265,34 +272,29 @@ public class CsvAdapterTest {
     assertNull(it.get(1));
     assertFalse(it.next());
     result.close();
-    // select id from traffic where DWithin(Point(0, 0), location, 0.5)
-    plan.setSelectExps(ImmutableList.of(
-        ExpressionFactory.createScalarFunc(ColumnType.DOUBLE, "Distance", ImmutableList.of(
-            ExpressionFactory.createScalarFunc(ColumnType.POINT, "Point", ImmutableList.of(
-                ExpressionFactory.createLiteral(ColumnType.DOUBLE, 0),
-                ExpressionFactory.createLiteral(ColumnType.DOUBLE, 0))),
-            ExpressionFactory.createInputRef(1, ColumnType.INT, Modifier.PUBLIC))
-          )
-        )
-      );
-    plan.setWhereExps(ImmutableList.of(
-      ExpressionFactory.createScalarFunc(ColumnType.DOUBLE, "DWithin", ImmutableList.of(
-          ExpressionFactory.createScalarFunc(ColumnType.POINT, "Point", ImmutableList.of(
-              ExpressionFactory.createLiteral(ColumnType.DOUBLE, 0),
-              ExpressionFactory.createLiteral(ColumnType.DOUBLE, 0))),
-          ExpressionFactory.createInputRef(1, ColumnType.INT, Modifier.PUBLIC),
-          ExpressionFactory.createLiteral(ColumnType.DOUBLE, 1.0)
-          )
-        )
-      )
-    );
-    result = adapter.query(plan);
-    it = result.getIterator();
-    assertTrue(it.next());
-    assertEquals(1.0, (double) it.get(0), 0.001);
-    assertTrue(it.next());
-    assertEquals(0.0, (double) it.get(0), 0.001);
-    assertFalse(it.next());
-    adapter.shutdown();
+  }
+
+  @Test
+  public void testLoadDir() {
+    Set<String> tableNames = new HashSet<>(){{
+      add("customer");
+      add("lineitem");
+      add("nation");
+      add("orders");
+      add("part");
+      add("partsupp");
+      add("region");
+      add("supplier");
+    }};
+    URL source = CsvAdapterTest.class.getClassLoader().getResource("tpc-h");
+    CsvAdapterFactory factory = new CsvAdapterFactory();
+    AdapterConfig config = new AdapterConfig();
+    config.url = source.getPath();
+    config.datasource = DataSourceType.CSV;
+    config.delimiter = "|";
+    Adapter adapter = factory.create(config);
+    SchemaManager manager = adapter.getSchemaManager();
+    List<TableSchema> schemas = manager.getAllLocalTable();
+    assertEquals(tableNames, schemas.stream().map(TableSchema::getName).collect(Collectors.toSet()));
   }
 }

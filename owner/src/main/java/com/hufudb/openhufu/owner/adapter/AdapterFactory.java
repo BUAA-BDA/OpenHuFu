@@ -1,13 +1,14 @@
 package com.hufudb.openhufu.owner.adapter;
 
+import com.hufudb.openhufu.common.enums.DataSourceType;
 import java.util.Map;
 
 public interface AdapterFactory {
   Adapter create(AdapterConfig config);
-  String getType();
+  DataSourceType getType();
 
   public static Adapter loadAdapter(AdapterConfig config, String adapterDir) {
-    Map<String, AdapterFactory> adapterFactories =
+    Map<DataSourceType, AdapterFactory> adapterFactories =
         AdapterLoader.loadAdapters(adapterDir);
     AdapterFactory factory = adapterFactories.get(config.datasource);
     if (factory == null) {

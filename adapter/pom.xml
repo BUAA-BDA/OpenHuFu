@@ -26,13 +26,11 @@
   </dependencies>
 
   <build>
-    <extensions>
-      <extension>
+    <plugins>
+      <plugin>
         <groupId>kr.motd.maven</groupId>
         <artifactId>os-maven-plugin</artifactId>
-      </extension>
-    </extensions>
-    <plugins>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>

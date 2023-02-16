@@ -87,5 +87,6 @@ docker/benchmark/database/data
 # dataset
 dataset/TPC-H V3.0.1
 dataset/SynData
+dataset/databases
 !dataset/newyork-taxi.zip
 !dataset/newyork-taxi-sample.txt

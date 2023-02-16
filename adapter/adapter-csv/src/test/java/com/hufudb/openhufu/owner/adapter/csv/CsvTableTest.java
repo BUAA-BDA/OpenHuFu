@@ -20,7 +20,7 @@ public class CsvTableTest {
   @Test
   public void testScanWithSchema() throws IOException {
     URL source = CsvTableTest.class.getClassLoader().getResource("data/test2.csv");
-    CsvTable table = new CsvTable("test2", Paths.get(source.getPath()));
+    CsvTable table = new CsvTable("test2", Paths.get(source.getPath()), ",");
     Schema.Builder builder = Schema.newBuilder();
     builder.add("Department", ColumnType.STRING, Modifier.PUBLIC);
     builder.add("Name", ColumnType.STRING, Modifier.PUBLIC);

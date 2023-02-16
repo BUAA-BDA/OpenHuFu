@@ -1,6 +1,7 @@
 package com.hufudb.openhufu.owner.adapter;
 
 import com.google.common.collect.ImmutableMap;
+import com.hufudb.openhufu.common.enums.DataSourceType;
 import java.io.File;
 import java.io.FileFilter;
 import java.net.URL;
@@ -17,7 +18,7 @@ public class AdapterLoader {
 
   private AdapterLoader() {}
 
-  public static Map<String, AdapterFactory> loadAdapters(String adapterDirectory) {
+  public static Map<DataSourceType, AdapterFactory> loadAdapters(String adapterDirectory) {
     LOG.info("Load adapter from {}", adapterDirectory);
     File adapters[]= new File(adapterDirectory).listFiles(new FileFilter() {
       @Override
@@ -36,7 +37,7 @@ public class AdapterLoader {
     }
     ClassLoader adapterClassLoader = new URLClassLoader(adapterURLs.toArray(new URL[0]), AdapterFactory.class.getClassLoader());
     ServiceLoader<AdapterFactory> adapterServices = ServiceLoader.load(AdapterFactory.class, adapterClassLoader);
-    ImmutableMap.Builder<String, AdapterFactory> adapterFactories = ImmutableMap.builder();
+    ImmutableMap.Builder<DataSourceType, AdapterFactory> adapterFactories = ImmutableMap.builder();
     for (AdapterFactory factory : adapterServices) {
       adapterFactories.put(factory.getType(), factory);
       LOG.info("get adapter factory {}", factory.getClass().getName());

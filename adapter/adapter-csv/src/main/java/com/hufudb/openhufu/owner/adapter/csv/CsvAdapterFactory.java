@@ -1,5 +1,6 @@
 package com.hufudb.openhufu.owner.adapter.csv;
 
+import com.hufudb.openhufu.common.enums.DataSourceType;
 import com.hufudb.openhufu.owner.adapter.AdapterFactory;
 import com.hufudb.openhufu.owner.adapter.Adapter;
 import com.hufudb.openhufu.owner.adapter.AdapterConfig;
@@ -15,9 +16,9 @@ public class CsvAdapterFactory implements AdapterFactory {
 
   @Override
   public Adapter create(AdapterConfig config) {
-    assert(config.datasource.equals("csv"));
+    assert(config.datasource == DataSourceType.CSV);
     try {
-      return new CsvAdapter(config.url);
+      return new CsvAdapter(config);
     } catch (Exception e) {
       LOG.error("Fail to create csv adapter: {}", config.url, e);
       return null;
@@ -25,7 +26,7 @@ public class CsvAdapterFactory implements AdapterFactory {
   }
 
   @Override
-  public String getType() {
-    return "csv";
+  public DataSourceType getType() {
+    return DataSourceType.CSV;
   }
 }
