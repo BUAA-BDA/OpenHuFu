@@ -13,8 +13,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class OpenHuFuSchemaFactory implements SchemaFactory {
-  public static final OpenHuFuSchemaFactory INSTANCE = new OpenHuFuSchemaFactory();
+
   private static final Logger LOG = LoggerFactory.getLogger(OpenHuFuSchemaFactory.class);
+
+  public static final OpenHuFuSchemaFactory INSTANCE = new OpenHuFuSchemaFactory();
 
   private OpenHuFuSchemaFactory() {}
 
@@ -47,7 +49,7 @@ public class OpenHuFuSchemaFactory implements SchemaFactory {
     if (operand.containsKey("tables")) {
       tableObjs.addAll((List) operand.get("tables"));
     }
-    addUDF(parentSchema);
+//    addUDF(parentSchema);
     LOG.info("Use model");
     return new OpenHuFuSchemaManager(owners, tableObjs, parentSchema, userId);
   }

@@ -6,11 +6,19 @@ package com.hufudb.openhufu.common.enums;
  */
 public enum DataSourceType {
 
-  CSV("csv");
+  CSV("CSV");
 
   DataSourceType(String type) {
     this.type = type;
   }
 
   String type;
+
+  public String getType() {
+    return type;
+  }
+
+  public void setType(String type) {
+    this.type = type;
+  }
 }

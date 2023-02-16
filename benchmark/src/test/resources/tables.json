@@ -1,0 +1,19 @@
+[
+  {
+    "tableName": "nation",
+    "localTables": [
+      {
+        "endpoint": "localhost:12345",
+        "localName": "nation"
+      },
+      {
+        "endpoint": "localhost:12346",
+        "localName": "nation"
+      },
+      {
+        "endpoint": "localhost:12346",
+        "localName": "nation"
+      }
+    ]
+  }
+]

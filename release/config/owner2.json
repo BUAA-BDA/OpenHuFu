@@ -1,0 +1,42 @@
+{
+  "id": 2,
+  "port": 12346,
+  "hostname": "localhost",
+  "adapterconfig": {
+    "datasource": "CSV",
+    "url": "../adapter/adapter-csv/src/test/resources/tpc-h",
+    "delimiter": "|"
+  },
+  "tables": [
+    {
+      "actualName": "nation",
+      "publishedName": "nation",
+      "publishedColumns": [
+        {
+          "name": "N_NATIONKEY",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 0
+        },
+        {
+          "name": "N_NAME",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 0
+        },
+        {
+          "name": "N_REGIONKEY",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 0
+        },
+        {
+          "name": "N_COMMENT",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 0
+        }
+      ]
+    }
+  ]
+}
