@@ -15,6 +15,11 @@
   <dependencies>
     <dependency>
       <groupId>com.hufudb.openhufu</groupId>
+      <artifactId>openhufu-common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.hufudb.openhufu</groupId>
       <artifactId>openhufu-proto</artifactId>
       <version>${project.version}</version>
     </dependency>
