@@ -17,7 +17,10 @@ public enum ErrorCode implements BaseErrorCode {
   IMPLEMENTOR_CONSTRUCTOR_NOT_FOUND(20003),
   IMPLEMENTOR_CREATE_FAILED(20004),
 
-  SETUP_FAILED(30001),
+  // udf error
+  UDF_LOAD_FAILED(30001),
+
+  SETUP_FAILED(90001),
   ;
 
 

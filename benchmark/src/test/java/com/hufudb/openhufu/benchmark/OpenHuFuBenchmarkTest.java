@@ -82,7 +82,7 @@ public class OpenHuFuBenchmarkTest {
       System.out.println();
       ++count;
     }
-    assertEquals(25, count);
+    assertEquals(75, count);
     dataset.close();
   }
 

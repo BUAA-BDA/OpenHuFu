@@ -24,9 +24,12 @@ import com.hufudb.openhufu.rpc.Rpc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HashEqualJoin {
+public class HashEqualJoin implements OwnerJoin {
   static final int MAX_SIZE = 1000;
   static final Logger LOG = LoggerFactory.getLogger(HashEqualJoin.class);
+
+  public HashEqualJoin() {
+  }
 
   static List<byte[]> encode(List<Integer> keys, DataSet dataSet) {
     ProtoRowDataSet keySets = ProtoRowDataSet.project(dataSet, keys);
@@ -38,7 +41,7 @@ public class HashEqualJoin {
         .collect(Collectors.toList());
   }
 
-  static MaterializedDataSet decode(List<byte[]> payload) {
+  MaterializedDataSet decode(List<byte[]> payload) {
     try {
       List<ProtoDataSet> dataSets = new ArrayList<>();
       for (byte[] b : payload) {
@@ -51,7 +54,9 @@ public class HashEqualJoin {
     }
   }
 
-  public static DataSet join(DataSet in, JoinCondition joinCond, boolean isLeft, Rpc rpc, TaskInfo taskInfo) throws ProtocolException {
+  @Override
+  public DataSet join(DataSet in, JoinCondition joinCond, boolean isLeft, Rpc rpc, TaskInfo taskInfo)
+      throws ProtocolException {
     if (joinCond.hasCondition()) {
       LOG.error("HashEqualJoin not support theta join");
       throw new UnsupportedOperationException("HashEqualJoin not support theta join");
@@ -100,14 +105,14 @@ public class HashEqualJoin {
     }
   }
 
-  static DataSet senderProcedure(MaterializedDataSet in, long taskId, int senderId, int receiverId,
+  DataSet senderProcedure(MaterializedDataSet in, long taskId, int senderId, int receiverId,
       Stream stream) throws ProtocolException {
     List<byte[]> inputs = encode(in);
     stream.run(taskId, ImmutableList.of(senderId, receiverId), inputs);
     return EmptyDataSet.INSTANCE;
   }
 
-  static DataSet receiverProcedure(MaterializedDataSet localDataSet, long taskId, int senderId, int receiverId,
+  DataSet receiverProcedure(MaterializedDataSet localDataSet, long taskId, int senderId, int receiverId,
       Stream stream) throws ProtocolException {
     List<byte[]> result = (List<byte[]>)
         stream.run(taskId, ImmutableList.of(senderId, receiverId), ImmutableList.of());

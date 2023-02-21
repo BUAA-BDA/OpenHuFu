@@ -2,10 +2,11 @@ package com.hufudb.openhufu.owner.implementor;
 
 import com.hufudb.openhufu.common.exception.ErrorCode;
 import com.hufudb.openhufu.common.exception.OpenHuFuException;
-import com.hufudb.openhufu.data.function.AggregateFunction;
 import com.hufudb.openhufu.expression.AggFuncType;
 import com.hufudb.openhufu.owner.config.ImplementorConfig;
+import com.hufudb.openhufu.owner.config.ImplementorConfig.Implementor;
 import com.hufudb.openhufu.owner.implementor.aggregate.OwnerAggregateFunction;
+import com.hufudb.openhufu.owner.implementor.join.OwnerJoin;
 import com.hufudb.openhufu.proto.OpenHuFuPlan;
 import com.hufudb.openhufu.rpc.Rpc;
 
@@ -16,27 +17,30 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 public class OwnerImplementorFactory {
+
   public static Map<AggFuncType, String> aggFuncType2ClassName;
+  public static String joinClassName;
 
   static {
     aggFuncType2ClassName = new HashMap<>();
-    aggFuncType2ClassName.put(AggFuncType.COUNT, ImplementorConfig.getImplementor(
-        ImplementorConfig.Implementor.AGG_COUNT));
-    aggFuncType2ClassName.put(AggFuncType.MAX, ImplementorConfig.getImplementor(
-        ImplementorConfig.Implementor.AGG_MAX));
-    aggFuncType2ClassName.put(AggFuncType.MIN, ImplementorConfig.getImplementor(
-        ImplementorConfig.Implementor.AGG_MIN));
-    aggFuncType2ClassName.put(AggFuncType.SUM, ImplementorConfig.getImplementor(
-        ImplementorConfig.Implementor.AGG_SUM));
-    aggFuncType2ClassName.put(AggFuncType.AVG, ImplementorConfig.getImplementor(
-        ImplementorConfig.Implementor.AGG_AVG));
+    aggFuncType2ClassName.put(AggFuncType.COUNT, ImplementorConfig.getImplementorClassName(
+        Implementor.AGG_COUNT));
+    aggFuncType2ClassName.put(AggFuncType.MAX, ImplementorConfig.getImplementorClassName(
+        Implementor.AGG_MAX));
+    aggFuncType2ClassName.put(AggFuncType.MIN, ImplementorConfig.getImplementorClassName(
+        Implementor.AGG_MIN));
+    aggFuncType2ClassName.put(AggFuncType.SUM, ImplementorConfig.getImplementorClassName(
+        Implementor.AGG_SUM));
+    aggFuncType2ClassName.put(AggFuncType.AVG, ImplementorConfig.getImplementorClassName(
+        Implementor.AGG_AVG));
+    joinClassName = ImplementorConfig.getImplementorClassName(Implementor.JOIN);
   }
 
   public static OwnerAggregateFunction getAggregationFunction(AggFuncType aggFuncType,
-                                                              OpenHuFuPlan.Expression agg,
-                                                              Rpc rpc,
-                                                              ExecutorService threadPool,
-                                                              OpenHuFuPlan.TaskInfo taskInfo) {
+      OpenHuFuPlan.Expression agg,
+      Rpc rpc,
+      ExecutorService threadPool,
+      OpenHuFuPlan.TaskInfo taskInfo) {
     String className = aggFuncType2ClassName.get(aggFuncType);
     try {
       Class clazz = Class.forName(className);
@@ -53,9 +57,22 @@ public class OwnerImplementorFactory {
 
   }
 
-  public static void main(String[] args) {
-    AggregateFunction aggregateFunction =
-        getAggregationFunction(AggFuncType.SUM, null, null, null, null);
-    System.out.println("1");
+  public static OwnerJoin getJoin() {
+    try {
+      Class clazz = Class.forName(joinClassName);
+      Constructor constructor =
+          clazz.getDeclaredConstructor();
+      return (OwnerJoin) constructor.newInstance();
+    } catch(ClassNotFoundException e){
+        throw new OpenHuFuException(e, ErrorCode.IMPLEMENTOR_CLASS_NOT_FOUND, joinClassName);
+      } catch(NoSuchMethodException e){
+        throw new OpenHuFuException(e, ErrorCode.IMPLEMENTOR_CONSTRUCTOR_NOT_FOUND, joinClassName);
+      } catch(InstantiationException | IllegalAccessException | InvocationTargetException e){
+        throw new OpenHuFuException(e, ErrorCode.IMPLEMENTOR_CREATE_FAILED, joinClassName);
+      }
+    }
+
+    public static void main (String[]args){
+      OwnerJoin ownerJoin = getJoin();
+    }
   }
-}

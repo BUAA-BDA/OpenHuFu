@@ -1,6 +1,8 @@
 package com.hufudb.openhufu.owner.user;
 
 import com.google.common.collect.ImmutableList;
+import com.hufudb.openhufu.common.exception.ErrorCode;
+import com.hufudb.openhufu.common.exception.OpenHuFuException;
 import com.hufudb.openhufu.core.client.OwnerClient;
 import com.hufudb.openhufu.core.sql.rel.OpenHuFuTable;
 import com.hufudb.openhufu.core.sql.schema.OpenHuFuSchemaFactory;
@@ -32,7 +34,7 @@ public class OpenHuFuUser {
                   rootSchema, "openhufu", new HashMap<String, Object>());
       rootSchema.add("openhufu", manager);
     } catch (Exception e) {
-      e.printStackTrace();
+      throw new OpenHuFuException(e, ErrorCode.INTERNAL_SERVER_ERROR);
     }
   }
 

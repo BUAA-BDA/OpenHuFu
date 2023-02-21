@@ -9,7 +9,6 @@ import com.hufudb.openhufu.interpreter.Interpreter;
 import com.hufudb.openhufu.mpc.ProtocolException;
 import com.hufudb.openhufu.owner.adapter.Adapter;
 import com.hufudb.openhufu.owner.implementor.aggregate.OwnerAggregation;
-import com.hufudb.openhufu.owner.implementor.join.HashEqualJoin;
 import com.hufudb.openhufu.plan.BinaryPlan;
 import com.hufudb.openhufu.plan.LeafPlan;
 import com.hufudb.openhufu.plan.Plan;
@@ -54,7 +53,7 @@ public class OwnerSideImplementor implements PlanImplementor {
     }
     try {
       DataSet result =
-          HashEqualJoin.join(in, binary.getJoinCond(), isLeft, rpc, binary.getTaskInfo());
+          OwnerImplementorFactory.getJoin().join(in, binary.getJoinCond(), isLeft, rpc, binary.getTaskInfo());
       if (!binary.getSelectExps().isEmpty()) {
         result = Interpreter.map(result, binary.getSelectExps());
       }

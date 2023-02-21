@@ -1,5 +1,7 @@
 package com.hufudb.openhufu.udf;
 
+import com.hufudb.openhufu.common.exception.ErrorCode;
+import com.hufudb.openhufu.common.exception.OpenHuFuException;
 import java.io.File;
 import java.io.FileFilter;
 import java.net.URL;
@@ -41,7 +43,7 @@ public class UDFLoader {
       try {
         udfURLs.add(udf.toURI().toURL());
       } catch (Exception e) {
-        e.printStackTrace();
+        throw new OpenHuFuException(e, ErrorCode.UDF_LOAD_FAILED, udf.toURI().getPath());
       }
     }
     ClassLoader udfClassLoader =

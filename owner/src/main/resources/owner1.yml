@@ -7,4 +7,4 @@ owner:
       min: null
       sum: com.hufudb.openhufu.owner.implementor.aggregate.sum.SecretSharingSum
       avg: null
-    join: com.hufudb.openhufu.owner.implementor.join.HashJoin
+    join: com.hufudb.openhufu.owner.implementor.join.HashEqualJoin
