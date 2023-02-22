@@ -38,5 +38,54 @@
         }
       ]
     }
+  ,
+    {
+      "actualName": "supplier",
+      "publishedName": "supplier",
+      "publishedColumns": [
+        {
+          "name": "S_SUPPKEY",
+          "type": "LONG",
+          "modifier": "hidden",
+          "columnId": 0
+        },
+        {
+          "name": "S_NAME",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 1
+        },
+        {
+          "name": "S_ADDRESS",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 2
+        },
+        {
+          "name": "S_NATIONKEY",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 3
+        },
+        {
+          "name": "S_PHONE",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 4
+        },
+        {
+          "name": "S_ACCTBAL",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 5
+        },
+        {
+          "name": "S_COMMENT",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId":6
+        }
+      ]
+    }
   ]
 }
