@@ -15,5 +15,22 @@
         "localName": "nation"
       }
     ]
+  },
+  {
+    "tableName": "supplier",
+    "localTables": [
+      {
+        "endpoint": "localhost:12345",
+        "localName": "supplier"
+      },
+      {
+        "endpoint": "localhost:12346",
+        "localName": "supplier"
+      },
+      {
+        "endpoint": "localhost:12346",
+        "localName": "supplier"
+      }
+    ]
   }
 ]
