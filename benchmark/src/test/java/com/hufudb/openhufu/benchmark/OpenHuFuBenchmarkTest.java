@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.hufudb.openhufu.benchmark.OpenHuFuBenchmark;
 import com.hufudb.openhufu.benchmark.enums.TPCHTableName;
 import com.hufudb.openhufu.core.table.GlobalTableConfig;
 import com.hufudb.openhufu.data.schema.Schema;
@@ -29,32 +28,18 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.hufudb.openhufu.plan.Plan;
 import com.hufudb.openhufu.proto.OpenHuFuPlan;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.Before; 
-import org.junit.After;
-import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.Measurement;
-import org.openjdk.jmh.annotations.Setup;
-import org.openjdk.jmh.annotations.Warmup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** 
-* OpenHuFuBenchmark Tester. 
-* 
-* @author <Authors name> 
-* @since <pre>2月 15, 2023</pre> 
-* @version 1.0 
-*/ 
 public class OpenHuFuBenchmarkTest {
   private static final Logger LOG = LoggerFactory.getLogger(OpenHuFuBenchmark.class);
   private static final OpenHuFuUser user = new OpenHuFuUser();
 
-  @Before
-  public void setUp() throws IOException {
+  @BeforeClass
+  public static void setUp() throws IOException {
 
     List<String> endpoints =
         new Gson().fromJson(Files.newBufferedReader(
@@ -353,10 +338,10 @@ public class OpenHuFuBenchmarkTest {
     LeafPlan plan = new LeafPlan();
     plan.setTableName(tableName);
     plan.setSelectExps(
-            ImmutableList.of(ExpressionFactory.createInputRef(0, ColumnType.STRING, Modifier.PUBLIC),
-                    ExpressionFactory.createInputRef(3, ColumnType.STRING, Modifier.PUBLIC)));
+            ImmutableList.of(ExpressionFactory.createInputRef(0, ColumnType.LONG, Modifier.PUBLIC),
+                    ExpressionFactory.createInputRef(3, ColumnType.LONG, Modifier.PUBLIC)));
     plan.setAggExps(ImmutableList.of(
-            ExpressionFactory.createAggFunc(ColumnType.STRING, Modifier.PUBLIC, AggFuncType.GROUPKEY.getId(),
+            ExpressionFactory.createAggFunc(ColumnType.LONG, Modifier.PUBLIC, AggFuncType.GROUPKEY.getId(),
                     ImmutableList
                             .of(ExpressionFactory.createInputRef(1, ColumnType.STRING, Modifier.PUBLIC))),
             ExpressionFactory.createAggFunc(ColumnType.LONG, Modifier.PUBLIC, AggFuncType.COUNT.getId(),
@@ -368,11 +353,11 @@ public class OpenHuFuBenchmarkTest {
     DataSet dataset = user.executeQuery(plan);
     DataSetIterator it = dataset.getIterator();
     it.next();
-    assertEquals(6, ((Number) it.get(1)).longValue());
-    assertEquals("17", it.get(0));
+    assertEquals(6L, it.get(1));
+    assertEquals(17L, it.get(0));
     it.next();
-    assertEquals(3, ((Number) it.get(1)).longValue());
-    assertEquals("5", it.get(0));
+    assertEquals(3L, it.get(1));
+    assertEquals(24L, it.get(0));
     dataset.close();
   }
 } 
