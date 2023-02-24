@@ -1,5 +1,39 @@
 [
   {
+    "tableName": "customer",
+    "localTables": [
+      {
+        "endpoint": "localhost:12345",
+        "localName": "customer"
+      },
+      {
+        "endpoint": "localhost:12346",
+        "localName": "customer"
+      },
+      {
+        "endpoint": "localhost:12347",
+        "localName": "customer"
+      }
+    ]
+  },
+  {
+    "tableName": "lineitem",
+    "localTables": [
+      {
+        "endpoint": "localhost:12345",
+        "localName": "lineitem"
+      },
+      {
+        "endpoint": "localhost:12346",
+        "localName": "lineitem"
+      },
+      {
+        "endpoint": "localhost:12347",
+        "localName": "lineitem"
+      }
+    ]
+  },
+  {
     "tableName": "nation",
     "localTables": [
       {
@@ -11,8 +45,76 @@
         "localName": "nation"
       },
       {
-        "endpoint": "localhost:12346",
+        "endpoint": "localhost:12347",
         "localName": "nation"
+      }
+    ]
+  },
+  {
+    "tableName": "orders",
+    "localTables": [
+      {
+        "endpoint": "localhost:12345",
+        "localName": "orders"
+      },
+      {
+        "endpoint": "localhost:12346",
+        "localName": "orders"
+      },
+      {
+        "endpoint": "localhost:12347",
+        "localName": "orders"
+      }
+    ]
+  },
+  {
+    "tableName": "part",
+    "localTables": [
+      {
+        "endpoint": "localhost:12345",
+        "localName": "part"
+      },
+      {
+        "endpoint": "localhost:12346",
+        "localName": "part"
+      },
+      {
+        "endpoint": "localhost:12347",
+        "localName": "part"
+      }
+    ]
+  },
+  {
+    "tableName": "partsupp",
+    "localTables": [
+      {
+        "endpoint": "localhost:12345",
+        "localName": "partsupp"
+      },
+      {
+        "endpoint": "localhost:12346",
+        "localName": "partsupp"
+      },
+      {
+        "endpoint": "localhost:12347",
+        "localName": "partsupp"
+      }
+    ]
+  },
+  {
+    "tableName": "region",
+    "localTables": [
+      {
+        "endpoint": "localhost:12345",
+        "localName": "region"
+      },
+      {
+        "endpoint": "localhost:12346",
+        "localName": "region"
+      },
+      {
+        "endpoint": "localhost:12347",
+        "localName": "region"
       }
     ]
   },
@@ -28,7 +130,7 @@
         "localName": "supplier"
       },
       {
-        "endpoint": "localhost:12346",
+        "endpoint": "localhost:12347",
         "localName": "supplier"
       }
     ]

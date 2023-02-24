@@ -9,6 +9,162 @@
   },
   "tables": [
     {
+      "actualName": "customer",
+      "publishedName": "customer",
+      "publishedColumns": [
+        {
+          "name": "C_CUSTKEY",
+          "type": "LONG",
+          "modifier": "hidden",
+          "columnId": 0
+        },
+        {
+          "name": "C_NAME",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 1
+        },
+        {
+          "name": "C_ADDRESS",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 2
+        },
+        {
+          "name": "C_NATIONKEY",
+          "type": "LONG",
+          "modifier": "hidden",
+          "columnId": 3
+        },
+        {
+          "name": "C_PHONE",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 4
+        },
+        {
+          "name": "C_ACCTBAL",
+          "type": "DOUBLE",
+          "modifier": "hidden",
+          "columnId": 5
+        },
+        {
+          "name": "C_MKTSEGMENT",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 6
+        },
+        {
+          "name": "C_COMMENT",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 7
+        }
+      ]
+    },
+    {
+      "actualName": "lineitem",
+      "publishedName": "lineitem",
+      "publishedColumns": [
+        {
+          "name": "L_ORDERKEY",
+          "type": "LONG",
+          "modifier": "hidden",
+          "columnId": 0
+        },
+        {
+          "name": "L_PARTKEY",
+          "type": "LONG",
+          "modifier": "hidden",
+          "columnId": 1
+        },
+        {
+          "name": "L_SUPPKEY",
+          "type": "LONG",
+          "modifier": "hidden",
+          "columnId": 2
+        },
+        {
+          "name": "L_LINENUMBER",
+          "type": "LONG",
+          "modifier": "hidden",
+          "columnId": 3
+        },
+        {
+          "name": "L_QUANTITY",
+          "type": "LONG",
+          "modifier": "hidden",
+          "columnId": 4
+        },
+        {
+          "name": "L_EXTENDEDPRICE",
+          "type": "DOUBLE",
+          "modifier": "hidden",
+          "columnId": 5
+        },
+        {
+          "name": "L_DISCOUNT",
+          "type": "DOUBLE",
+          "modifier": "hidden",
+          "columnId": 6
+        },
+        {
+          "name": "L_TAX",
+          "type": "DOUBLE",
+          "modifier": "hidden",
+          "columnId": 7
+        },
+        {
+          "name": "L_RETURNFLAG",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 8
+        },
+        {
+          "name": "L_LINESTATUS",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 9
+        },
+        {
+          "name": "L_SHIPDATE",
+          "type": "DATE",
+          "modifier": "hidden",
+          "columnId": 10
+        },
+        {
+          "name": "L_COMMITDATE",
+          "type": "DATE",
+          "modifier": "hidden",
+          "columnId": 11
+        },
+        {
+          "name": "L_RECEIPTDATE",
+          "type": "DATE",
+          "modifier": "hidden",
+          "columnId": 12
+        },
+        {
+          "name": "L_SHIPINSTRUCT",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 13
+        },
+        {
+          "name": "L_SHIPMODE",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 14
+        },
+        {
+          "name": "L_COMMENT",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 15
+        }
+      ]
+    },
+    {
       "actualName": "nation",
       "publishedName": "nation",
       "publishedColumns": [
@@ -22,23 +178,202 @@
           "name": "N_NAME",
           "type": "STRING",
           "modifier": "hidden",
-          "columnId": 0
+          "columnId": 1
         },
         {
           "name": "N_REGIONKEY",
           "type": "LONG",
           "modifier": "hidden",
-          "columnId": 0
+          "columnId": 2
         },
         {
           "name": "N_COMMENT",
           "type": "STRING",
           "modifier": "hidden",
-          "columnId": 0
+          "columnId": 3
         }
       ]
-    }
-  ,
+    },
+    {
+      "actualName": "orders",
+      "publishedName": "orders",
+      "publishedColumns": [
+        {
+          "name": "O_ORDERKEY",
+          "type": "LONG",
+          "modifier": "hidden",
+          "columnId": 0
+        },
+        {
+          "name": "O_CUSTKEY",
+          "type": "LONG",
+          "modifier": "hidden",
+          "columnId": 1
+        },
+        {
+          "name": "O_ORDERSTATUS",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 2
+        },
+        {
+          "name": "O_TOTALPRICE",
+          "type": "DOUBLE",
+          "modifier": "hidden",
+          "columnId": 3
+        },
+        {
+          "name": "O_ORDERDATE",
+          "type": "DATE",
+          "modifier": "hidden",
+          "columnId": 4
+        },
+        {
+          "name": "O_ORDER-PRIORITY",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 5
+        },
+        {
+          "name": "O_CLERK",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 6
+        },
+        {
+          "name": "O_SHIP-PRIORITY",
+          "type": "INT",
+          "modifier": "hidden",
+          "columnId": 7
+        },
+        {
+          "name": "O_COMMENT",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 8
+        }
+      ]
+    },
+    {
+      "actualName": "part",
+      "publishedName": "part",
+      "publishedColumns": [
+        {
+          "name": "P_PARTKEY",
+          "type": "LONG",
+          "modifier": "hidden",
+          "columnId": 0
+        },
+        {
+          "name": "P_NAME",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 1
+        },
+        {
+          "name": "P_MFGR",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 2
+        },
+        {
+          "name": "P_BRAND",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 3
+        },
+        {
+          "name": "P_TYPE",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 4
+        },
+        {
+          "name": "P_SIZE",
+          "type": "INT",
+          "modifier": "hidden",
+          "columnId": 5
+        },
+        {
+          "name": "P_CONTAINER",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 6
+        },
+        {
+          "name": "P_RETAILPRICE",
+          "type": "DOUBLE",
+          "modifier": "hidden",
+          "columnId": 7
+        },
+        {
+          "name": "P_COMMENT",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 8
+        }
+      ]
+    },
+    {
+      "actualName": "partsupp",
+      "publishedName": "partsupp",
+      "publishedColumns": [
+        {
+          "name": "PS_PARTKEY",
+          "type": "LONG",
+          "modifier": "hidden",
+          "columnId": 0
+        },
+        {
+          "name": "PS_SUPPKEY",
+          "type": "LONG",
+          "modifier": "hidden",
+          "columnId": 1
+        },
+        {
+          "name": "PS_AVAILQTY",
+          "type": "INT",
+          "modifier": "hidden",
+          "columnId": 2
+        },
+        {
+          "name": "PS_SUPPLYCOST",
+          "type": "DOUBLE",
+          "modifier": "hidden",
+          "columnId": 3
+        },
+        {
+          "name": "PS_COMMENT",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 4
+        }
+      ]
+    },
+    {
+      "actualName": "region",
+      "publishedName": "region",
+      "publishedColumns": [
+        {
+          "name": "R_REGIONKEY",
+          "type": "LONG",
+          "modifier": "hidden",
+          "columnId": 0
+        },
+        {
+          "name": "R_NAME",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 1
+        },
+        {
+          "name": "R_COMMENT",
+          "type": "STRING",
+          "modifier": "hidden",
+          "columnId": 2
+        }
+      ]
+    },
     {
       "actualName": "supplier",
       "publishedName": "supplier",
@@ -75,7 +410,7 @@
         },
         {
           "name": "S_ACCTBAL",
-          "type": "STRING",
+          "type": "DOUBLE",
           "modifier": "hidden",
           "columnId": 5
         },
@@ -83,7 +418,7 @@
           "name": "S_COMMENT",
           "type": "STRING",
           "modifier": "hidden",
-          "columnId":6
+          "columnId": 6
         }
       ]
     }
