@@ -1,5 +1,6 @@
 package com.hufudb.openhufu.owner.adapter.csv;
 
+import com.hufudb.openhufu.data.schema.utils.PojoColumnDesc;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -22,11 +23,10 @@ public class CsvTable {
   final Path dataPath;
   final CSVFormat csvFormat;
   final String tableName;
-  final Schema schema;
-
+  Schema schema;
   final String delimiter;
 
-  CsvTable(String tableName, Path path, String delimiter) throws IOException {
+  CsvTable(String tableName, Path path, String delimiter, List<PojoColumnDesc> columnDescs) throws IOException {
     this.csvFormat = CSVFormat.RFC4180.builder().setDelimiter(delimiter).setHeader().setSkipHeaderRecord(true)
         .setIgnoreSurroundingSpaces(true).setNullString("").build();
     Schema.Builder builder = Schema.newBuilder();
@@ -34,7 +34,9 @@ public class CsvTable {
     this.dataPath = path;
     this.tableName = tableName;
     CSVParser csvParser = CSVParser.parse(dataPath, StandardCharsets.UTF_8, csvFormat);
-    csvParser.getHeaderNames().forEach(col -> builder.add(col, ColumnType.STRING));
+    for (PojoColumnDesc column : columnDescs) {
+      builder.add(column.name, column.getType());
+    }
     csvParser.close();
     this.schema = builder.build();
   }
