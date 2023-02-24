@@ -1,24 +1,21 @@
 package com.hufudb.openhufu.data.schema.utils;
 
+import com.hufudb.openhufu.data.schema.TableSchema;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PojoTableSchema {
   public String name;
-  public List<PojoColumnDesc> columns;
+  public PojoSchema schema;
 
-  public String getName() {
-    return name;
+  public static PojoTableSchema from(TableSchema schema) {
+    PojoTableSchema pschema = new PojoTableSchema();
+    pschema.name = schema.getName();
+    pschema.schema = PojoSchema.fromSchema(schema.getSchema());
+    return pschema;
   }
 
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public List<PojoColumnDesc> getColumns() {
-    return columns;
-  }
-
-  public void setColumns(List<PojoColumnDesc> columns) {
-    this.columns = columns;
+  public static List<PojoTableSchema> from(List<TableSchema> schemas) {
+    return schemas.stream().map(sc -> from(sc)).collect(Collectors.toList());
   }
 }

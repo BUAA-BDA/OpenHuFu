@@ -524,13 +524,16 @@ public class Interpreter {
         return ((Number) value).intValue();
       case LONG:
         return ((Number) value).longValue();
+      case DATE:
+        return (Date) value;
+      case TIME:
+        return (Time) value;
+      case TIMESTAMP:
+        return (Timestamp) value;
       case FLOAT:
         return ((Number) value).floatValue();
       case DOUBLE:
         return ((Number) value).doubleValue();
-      case DATE:
-      case TIME:
-      case TIMESTAMP:
       default:
         return value;
     }

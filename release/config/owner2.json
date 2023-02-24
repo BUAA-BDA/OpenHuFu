@@ -5,74 +5,7 @@
   "adapterconfig": {
     "datasource": "CSV",
     "url": "../adapter/adapter-csv/src/test/resources/tpc-h",
-    "delimiter": "|",
-    "tables": [
-      {
-        "name": "nation",
-        "columns": [
-          {
-            "name": "N_NATIONKEY",
-            "type": "LONG",
-            "columnId": 0
-          },
-          {
-            "name": "N_NAME",
-            "type": "STRING",
-            "columnId": 1
-          },
-          {
-            "name": "N_REGIONKEY",
-            "type": "LONG",
-            "columnId": 2
-          },
-          {
-            "name": "N_COMMENT",
-            "type": "STRING",
-            "columnId": 3
-          }
-        ]
-      },
-      {
-        "name": "supplier",
-        "columns": [
-          {
-            "name": "S_SUPPKEY",
-            "type": "LONG",
-            "columnId": 0
-          },
-          {
-            "name": "S_NAME",
-            "type": "STRING",
-            "columnId": 1
-          },
-          {
-            "name": "S_ADDRESS",
-            "type": "STRING",
-            "columnId": 2
-          },
-          {
-            "name": "S_NATIONKEY",
-            "type": "STRING",
-            "columnId": 3
-          },
-          {
-            "name": "S_PHONE",
-            "type": "STRING",
-            "columnId": 4
-          },
-          {
-            "name": "S_ACCTBAL",
-            "type": "STRING",
-            "columnId": 5
-          },
-          {
-            "name": "S_COMMENT",
-            "type": "STRING",
-            "columnId": 6
-          }
-        ]
-      }
-    ]
+    "delimiter": "|"
   },
   "tables": [
     {
@@ -81,7 +14,7 @@
       "publishedColumns": [
         {
           "name": "N_NATIONKEY",
-          "type": "LONG",
+          "type": "STRING",
           "modifier": "hidden",
           "columnId": 0
         },
@@ -89,19 +22,19 @@
           "name": "N_NAME",
           "type": "STRING",
           "modifier": "hidden",
-          "columnId": 1
+          "columnId": 0
         },
         {
           "name": "N_REGIONKEY",
-          "type": "LONG",
+          "type": "STRING",
           "modifier": "hidden",
-          "columnId": 2
+          "columnId": 0
         },
         {
           "name": "N_COMMENT",
           "type": "STRING",
           "modifier": "hidden",
-          "columnId": 3
+          "columnId": 0
         }
       ]
     },
@@ -149,7 +82,7 @@
           "name": "S_COMMENT",
           "type": "STRING",
           "modifier": "hidden",
-          "columnId": 6
+          "columnId":6
         }
       ]
     }

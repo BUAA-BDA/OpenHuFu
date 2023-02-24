@@ -1,8 +1,5 @@
 package com.hufudb.openhufu.owner.adapter.csv;
 
-import com.hufudb.openhufu.common.exception.ErrorCode;
-import com.hufudb.openhufu.common.exception.OpenHuFuException;
-import com.hufudb.openhufu.data.schema.utils.PojoTableSchema;
 import com.hufudb.openhufu.owner.adapter.AdapterConfig;
 import com.hufudb.openhufu.plan.LeafPlan;
 import com.hufudb.openhufu.plan.Plan;
@@ -13,7 +10,6 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 import com.hufudb.openhufu.data.schema.Schema;
 import com.hufudb.openhufu.data.schema.SchemaManager;
@@ -32,7 +28,6 @@ import org.slf4j.LoggerFactory;
  * load all .csv file in csvDir
  */
 public class CsvAdapter implements Adapter {
-
   protected final static Logger LOG = LoggerFactory.getLogger(CsvAdapter.class);
 
   final SchemaManager schemaManager;
@@ -42,14 +37,13 @@ public class CsvAdapter implements Adapter {
     tables = new HashMap<>();
     schemaManager = new SchemaManager();
     try {
-      loadTables(config.url, config.delimiter, config.tables);
+      loadTables(config.url, config.delimiter);
     } catch (IOException e) {
       LOG.error("Load tables error", e);
     }
   }
 
-  void loadTables(String csvDir, String delimiter, List<PojoTableSchema> tableSchemas)
-      throws IOException {
+  void loadTables(String csvDir, String delimiter) throws IOException {
     File base = new File(csvDir);
     if (base.isDirectory()) {
       try (Stream<Path> stream = Files.list(base.toPath())) {
@@ -58,12 +52,7 @@ public class CsvAdapter implements Adapter {
               try {
                 String fileName = file.getFileName().toString();
                 String tableName = fileName.substring(0, fileName.length() - 4);
-                Optional<PojoTableSchema> optional =
-                    tableSchemas.stream().filter(table -> table.name.equals(tableName)).findFirst();
-                if (optional.isEmpty()) {
-                  throw new OpenHuFuException(ErrorCode.CSV_TABLE_CONFIG_MISS, tableName);
-                }
-                CsvTable table = new CsvTable(tableName, file, delimiter, optional.get().getColumns());
+                CsvTable table = new CsvTable(tableName, file, delimiter);
                 tables.put(tableName, table);
                 schemaManager.addLocalTable(TableSchema.of(tableName, table.getSchema()));
               } catch (IOException e) {
@@ -74,12 +63,7 @@ public class CsvAdapter implements Adapter {
     } else if (base.getName().endsWith(".csv")) {
       String fileName = base.getName();
       String tableName = fileName.substring(0, fileName.length() - 4);
-      Optional<PojoTableSchema> optional =
-          tableSchemas.stream().filter(table -> table.name.equals(tableName)).findFirst();
-      if (optional.isEmpty()) {
-        throw new OpenHuFuException(ErrorCode.CSV_TABLE_CONFIG_MISS, tableName);
-      }
-      CsvTable table = new CsvTable(tableName, base.toPath(), delimiter, optional.get().getColumns());
+      CsvTable table = new CsvTable(tableName, base.toPath(), delimiter);
       tables.put(tableName, table);
       schemaManager.addLocalTable(TableSchema.of(tableName, table.getSchema()));
     }

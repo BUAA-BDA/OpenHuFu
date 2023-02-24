@@ -71,7 +71,7 @@ public class OpenHuFuTable extends AbstractQueryableTable implements Translatabl
         LOG.warn("Table {} not exists in {}", fedMeta.localName, fedMeta.endpoint);
         continue;
       }
-      LOG.info("Table {} schema {} from {}", fedMeta.localName, schema,
+      LOG.info("Table {} schema {} from {}", fedMeta.localName, schema.toString(),
           fedMeta.endpoint);
       localInfos.add(Pair.of(client, TableSchema.of(fedMeta.localName, schema)));
     }
