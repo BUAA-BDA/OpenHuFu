@@ -19,5 +19,5 @@ elif [ $1 == "adapter" ]; then
 elif [ $1 == "benchmark" ]; then
   mvn install -T ${thread} -Dmaven.test.skip=true -pl $1
 else
-  echo "try: package.sh [core|backend|user|owner]"
+  echo "try: package.sh [owner|daapter|benchmark]"
 fi

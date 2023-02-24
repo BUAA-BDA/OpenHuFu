@@ -133,7 +133,7 @@ public class OpenHuFuBenchmarkTest {
     assertEquals(90, count);
     dataset.close();
   }
-@Test
+  @Test
   public void testLeftJoin() {
     String leftTableName = TPCHTableName.SUPPLIER.getName();
     LeafPlan leftPlan = new LeafPlan();
@@ -166,7 +166,7 @@ public class OpenHuFuBenchmarkTest {
     assertEquals(90, count);
     dataset.close();
   }
-@Test
+  @Test
   public void testRightJoin() {
     String leftTableName = TPCHTableName.SUPPLIER.getName();
     LeafPlan leftPlan = new LeafPlan();
@@ -199,7 +199,7 @@ public class OpenHuFuBenchmarkTest {
     assertEquals(138, count);
     dataset.close();
   }
-@Test
+  @Test
   public void testOuterJoin() {
     String leftTableName = TPCHTableName.SUPPLIER.getName();
     LeafPlan leftPlan = new LeafPlan();
@@ -267,7 +267,7 @@ public class OpenHuFuBenchmarkTest {
     assertEquals(90, count);
     dataset.close();
   }
-@Test
+  @Test
   public void testCount() {
     String tableName = TPCHTableName.SUPPLIER.getName();
     LeafPlan plan = new LeafPlan();

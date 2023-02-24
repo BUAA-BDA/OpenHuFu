@@ -14,7 +14,7 @@
       "publishedColumns": [
         {
           "name": "N_NATIONKEY",
-          "type": "STRING",
+          "type": "LONG",
           "modifier": "hidden",
           "columnId": 0
         },
@@ -26,7 +26,7 @@
         },
         {
           "name": "N_REGIONKEY",
-          "type": "STRING",
+          "type": "LONG",
           "modifier": "hidden",
           "columnId": 0
         },
@@ -63,7 +63,7 @@
         },
         {
           "name": "S_NATIONKEY",
-          "type": "STRING",
+          "type": "LONG",
           "modifier": "hidden",
           "columnId": 3
         },

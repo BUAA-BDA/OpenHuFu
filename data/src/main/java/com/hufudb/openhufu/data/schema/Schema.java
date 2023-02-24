@@ -69,7 +69,7 @@ public class Schema {
     return String.join("|",
         schema
             .getColumnDescList().stream().map(col -> String.format("%s:%s:%s", col.getName(),
-                col.getType().toString(), col.getModifier().toString()))
+                col.getType(), col.getModifier()))
             .collect(Collectors.toList()));
   }
 

@@ -8,6 +8,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import com.hufudb.openhufu.data.function.Mapper;
@@ -17,26 +18,41 @@ import com.hufudb.openhufu.data.storage.EmptyDataSet;
 import com.hufudb.openhufu.data.storage.MapDataSet;
 import com.hufudb.openhufu.data.storage.Point;
 import com.hufudb.openhufu.proto.OpenHuFuData.ColumnType;
+import org.apache.commons.csv.CSVRecord;
 
 public class CsvTable {
+
   final Path dataPath;
+  final Path schemaPath;
   final CSVFormat csvFormat;
   final String tableName;
   final Schema schema;
-
   final String delimiter;
 
-  CsvTable(String tableName, Path path, String delimiter) throws IOException {
-    this.csvFormat = CSVFormat.RFC4180.builder().setDelimiter(delimiter).setHeader().setSkipHeaderRecord(true)
-        .setIgnoreSurroundingSpaces(true).setNullString("").build();
-    Schema.Builder builder = Schema.newBuilder();
+  CsvTable(String tableName, Path schemaPath, Path dataPath, String delimiter) throws IOException {
+    this.csvFormat =
+        CSVFormat.RFC4180.builder().setDelimiter(delimiter).setHeader().setSkipHeaderRecord(true)
+            .setIgnoreSurroundingSpaces(true).setNullString("").build();
     this.delimiter = delimiter;
-    this.dataPath = path;
+    this.dataPath = dataPath;
+    this.schemaPath = schemaPath;
     this.tableName = tableName;
-    CSVParser csvParser = CSVParser.parse(dataPath, StandardCharsets.UTF_8, csvFormat);
-    csvParser.getHeaderNames().forEach(col -> builder.add(col, ColumnType.STRING));
+    this.schema = parseSchema(schemaPath);
+  }
+
+  Schema parseSchema(Path schemaPath) throws IOException {
+    CSVFormat schemaFormat =
+        CSVFormat.RFC4180.builder().setDelimiter(delimiter).setHeader().setSkipHeaderRecord(true)
+            .setIgnoreSurroundingSpaces(true).setNullString("").build();
+    Schema.Builder builder = Schema.newBuilder();
+    CSVParser csvParser = CSVParser.parse(schemaPath, StandardCharsets.UTF_8, schemaFormat);
+    CSVRecord record = csvParser.getRecords().get(0);
+    List<String> headers = csvParser.getHeaderNames();
+    for (int i = 0; i < headers.size(); i++) {
+      builder.add(headers.get(i), ColumnType.valueOf(record.get(i)));
+    }
     csvParser.close();
-    this.schema = builder.build();
+    return builder.build();
   }
 
   Schema getSchema() {
