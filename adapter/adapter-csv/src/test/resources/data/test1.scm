@@ -1,0 +1,2 @@
+age, workclass, fnlwgt, education, education-num, marital-status, occupation, relationship, race, sex, capital-gain, capital-loss, hours-per-week, native-country, income
+INT, STRING, LONG, STRING, INT, STRING, STRING, STRING, STRING, STRING, INT, INT, INT, STRING, STRING

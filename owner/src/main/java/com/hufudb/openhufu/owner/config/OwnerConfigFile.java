@@ -1,6 +1,8 @@
 package com.hufudb.openhufu.owner.config;
 
 import com.hufudb.openhufu.common.enums.DataSourceType;
+import com.hufudb.openhufu.common.exception.ErrorCode;
+import com.hufudb.openhufu.common.exception.OpenHuFuException;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -55,7 +57,14 @@ public class OwnerConfigFile {
   public OwnerConfigFile() {}
 
   public static Adapter getAdapter(AdapterConfig config) {
-    Path adapterDir = Paths.get(System.getenv("OPENHUFU_ROOT"), "adapter");
+    String openHuFuRoot = System.getenv("OPENHUFU_ROOT");
+    if (null == openHuFuRoot || openHuFuRoot.length() == 0) {
+      throw new OpenHuFuException(ErrorCode.OPENHUFU_ROOT_ENV_NOT_SET);
+    }
+    Path adapterDir = Paths.get(openHuFuRoot, "adapter");
+    if (!adapterDir.toFile().exists()) {
+      throw new OpenHuFuException(ErrorCode.ADAPTER_FOLDER_NOT_FOUND);
+    }
     Map<DataSourceType, AdapterFactory> adapterFactories =
         AdapterLoader.loadAdapters(adapterDir.toString());
     AdapterFactory factory = adapterFactories.get(config.datasource);
