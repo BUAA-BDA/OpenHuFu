@@ -166,7 +166,7 @@ public class OpenHuFuBenchmarkTest {
     assertEquals(90, count);
     dataset.close();
   }
-@Test
+  @Test
   public void testRightJoin() {
     String leftTableName = TPCHTableName.SUPPLIER.getName();
     LeafPlan leftPlan = new LeafPlan();
@@ -232,7 +232,6 @@ public class OpenHuFuBenchmarkTest {
     assertEquals(138, count);
     dataset.close();
   }
-
   @Test
   public void testSemiJoin() {
     //todo
@@ -268,7 +267,7 @@ public class OpenHuFuBenchmarkTest {
     assertEquals(90, count);
     dataset.close();
   }
-@Test
+  @Test
   public void testCount() {
     String tableName = TPCHTableName.SUPPLIER.getName();
     LeafPlan plan = new LeafPlan();
@@ -318,12 +317,11 @@ public class OpenHuFuBenchmarkTest {
 
   @Test
   public void testMax() {
-
     String tableName = TPCHTableName.SUPPLIER.getName();
     LeafPlan plan = new LeafPlan();
     plan.setTableName(tableName);
     plan.setAggExps(ImmutableList.of(
-            ExpressionFactory.createAggFunc(ColumnType.LONG, Modifier.PUBLIC, AggFuncType.MAX.getId(),
+            ExpressionFactory.createAggFunc(ColumnType.DOUBLE, Modifier.PUBLIC, AggFuncType.MAX.getId(),
                     ImmutableList.of(ExpressionFactory.createInputRef(0, ColumnType.LONG, Modifier.PUBLIC)))));
 
     DataSet dataset = user.executeQuery(plan);

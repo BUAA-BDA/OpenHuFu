@@ -20,6 +20,7 @@ public class OpenHuFuException extends RuntimeException implements BaseException
   }
 
   public OpenHuFuException(ErrorCode errorCode, Object... arguments) {
+    super(new Throwable());
     this.errorCode = errorCode;
     this.arguments = arguments;
   }

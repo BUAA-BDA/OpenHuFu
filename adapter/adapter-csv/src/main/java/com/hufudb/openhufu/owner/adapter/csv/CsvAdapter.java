@@ -2,10 +2,10 @@ package com.hufudb.openhufu.owner.adapter.csv;
 
 import com.hufudb.openhufu.common.exception.ErrorCode;
 import com.hufudb.openhufu.common.exception.OpenHuFuException;
-import com.hufudb.openhufu.data.schema.utils.PojoTableSchema;
 import com.hufudb.openhufu.owner.adapter.AdapterConfig;
 import com.hufudb.openhufu.plan.LeafPlan;
 import com.hufudb.openhufu.plan.Plan;
+import com.hufudb.openhufu.proto.OpenHuFuData.ColumnType;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,7 +13,8 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import com.hufudb.openhufu.data.schema.Schema;
 import com.hufudb.openhufu.data.schema.SchemaManager;
@@ -42,44 +43,30 @@ public class CsvAdapter implements Adapter {
     tables = new HashMap<>();
     schemaManager = new SchemaManager();
     try {
-      loadTables(config.url, config.delimiter, config.tables);
+      loadTables(config.url, config.delimiter);
     } catch (IOException e) {
       LOG.error("Load tables error", e);
     }
   }
 
-  void loadTables(String csvDir, String delimiter, List<PojoTableSchema> tableSchemas)
-      throws IOException {
+  void loadTables(String csvDir, String delimiter) throws IOException {
     File base = new File(csvDir);
-    if (base.isDirectory()) {
-      try (Stream<Path> stream = Files.list(base.toPath())) {
-        stream.filter(file -> !Files.isDirectory(file))
-            .filter(file -> file.toString().endsWith(".csv")).forEach(file -> {
-              try {
-                String fileName = file.getFileName().toString();
-                String tableName = fileName.substring(0, fileName.length() - 4);
-                Optional<PojoTableSchema> optional =
-                    tableSchemas.stream().filter(table -> table.name.equals(tableName)).findFirst();
-                if (optional.isEmpty()) {
-                  throw new OpenHuFuException(ErrorCode.CSV_TABLE_CONFIG_MISS, tableName);
-                }
-                CsvTable table = new CsvTable(tableName, file, delimiter, optional.get().getColumns());
-                tables.put(tableName, table);
-                schemaManager.addLocalTable(TableSchema.of(tableName, table.getSchema()));
-              } catch (IOException e) {
-                LOG.error("Parse file: {} error", file.getFileName(), e);
-              }
-            });
-      }
-    } else if (base.getName().endsWith(".csv")) {
-      String fileName = base.getName();
-      String tableName = fileName.substring(0, fileName.length() - 4);
-      Optional<PojoTableSchema> optional =
-          tableSchemas.stream().filter(table -> table.name.equals(tableName)).findFirst();
-      if (optional.isEmpty()) {
-        throw new OpenHuFuException(ErrorCode.CSV_TABLE_CONFIG_MISS, tableName);
-      }
-      CsvTable table = new CsvTable(tableName, base.toPath(), delimiter, optional.get().getColumns());
+    if (!base.exists()) {
+      throw new OpenHuFuException(ErrorCode.CSV_URL_NOT_EXISTS, csvDir);
+    }
+    if (!base.isDirectory()) {
+      throw new OpenHuFuException(ErrorCode.CSV_URL_IS_NOT_FOLDER, csvDir);
+    }
+    Map<String, Path> dataMap = Files.list(base.toPath()).filter(path -> path.toString().endsWith(".csv"))
+        .collect(Collectors.toMap(Path -> Path.getFileName().toString()
+            .substring(0, Path.getFileName().toString().length() - 4), Path -> Path));
+    Map<String, Path> schemaMap = Files.list(base.toPath()).filter(path -> path.toString().endsWith(".scm"))
+        .collect(Collectors.toMap(Path -> Path.getFileName().toString()
+            .substring(0, Path.getFileName().toString().length() - 4), Path -> Path));
+    for (Entry<String, Path> entry : schemaMap.entrySet()) {
+      String tableName = entry.getKey();
+      Path dataPath = dataMap.get(tableName);
+      CsvTable table = new CsvTable(tableName, entry.getValue(), dataPath, delimiter);
       tables.put(tableName, table);
       schemaManager.addLocalTable(TableSchema.of(tableName, table.getSchema()));
     }

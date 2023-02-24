@@ -1,8 +1,6 @@
 package com.hufudb.openhufu.owner.adapter;
 
 import com.hufudb.openhufu.common.enums.DataSourceType;
-import com.hufudb.openhufu.data.schema.utils.PojoTableSchema;
-import java.util.List;
 
 /**
  * Adapter configurations
@@ -16,8 +14,6 @@ public class AdapterConfig {
   public String delimiter;
   public String user;
   public String passwd;
-
-  public List<PojoTableSchema> tables;
 
   public AdapterConfig() {}
 
