@@ -63,7 +63,7 @@ public class OwnerConfigFile {
     }
     Path adapterDir = Paths.get(openHuFuRoot, "adapter");
     if (!adapterDir.toFile().exists()) {
-      throw new OpenHuFuException(ErrorCode.ADAPTER_FOLDER_NOT_FOUND);
+      throw new OpenHuFuException(ErrorCode.ADAPTER_FOLDER_NOT_FOUND, adapterDir);
     }
     Map<DataSourceType, AdapterFactory> adapterFactories =
         AdapterLoader.loadAdapters(adapterDir.toString());

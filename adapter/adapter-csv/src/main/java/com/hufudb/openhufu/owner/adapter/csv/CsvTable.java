@@ -1,5 +1,7 @@
 package com.hufudb.openhufu.owner.adapter.csv;
 
+import com.hufudb.openhufu.common.exception.ErrorCode;
+import com.hufudb.openhufu.common.exception.OpenHuFuException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -154,7 +156,7 @@ public class CsvTable {
           mappers.add(row -> row.get(actualColumnIdx));
           break;
         default:
-          throw new RuntimeException("Unsupport type for csv adapter");
+          throw new OpenHuFuException(ErrorCode.DATA_TYPE_NOT_SUPPORT, outType);
       }
     }
     try {
