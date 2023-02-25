@@ -6,7 +6,7 @@ package com.hufudb.openhufu.common.exception;
  */
 public interface BaseException {
 
-  public BaseErrorCode getErrorCode();
+  public ErrorCode getErrorCode();
 
   public Object[] getArguments();
 }

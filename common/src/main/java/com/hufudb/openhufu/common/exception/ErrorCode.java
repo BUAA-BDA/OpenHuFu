@@ -7,27 +7,33 @@ import java.util.Map;
  * @author yang.song
  * @date 2/7/23 8:28 PM
  */
-public enum ErrorCode implements BaseErrorCode {
+public enum ErrorCode {
 
-  INTERNAL_SERVER_ERROR(10001),
+  INTERNAL_SERVER_ERROR(10001, "internal server error"),
 
   // config error
-  IMPLEMENTOR_CONFIG_MISSING(20001),
-  IMPLEMENTOR_CLASS_NOT_FOUND(20002),
-  IMPLEMENTOR_CONSTRUCTOR_NOT_FOUND(20003),
-  IMPLEMENTOR_CREATE_FAILED(20004),
-
-  CSV_URL_NOT_EXISTS(20005),
-  CSV_URL_IS_NOT_FOLDER(20006),
+  OPENHUFU_ROOT_ENV_NOT_SET(20001, "environment variable OPENHUFU_ROOT not set"),
+  ADAPTER_FOLDER_NOT_FOUND(20002, "adapter folder:{} not found"),
+  IMPLEMENTOR_CONFIG_MISSING(20031, "implementor config: {} missing"),
+  IMPLEMENTOR_CLASS_NOT_FOUND(20032, "implementor class: {} not found"),
+  IMPLEMENTOR_CONSTRUCTOR_NOT_FOUND(20033, "implementor: {} constrictor not found"),
+  IMPLEMENTOR_CREATE_FAILED(20034, "implementor: {} create failed"),
+  CSV_URL_NOT_FOUND(20035, "csv url: {} not found"),
+  CSV_URL_IS_NOT_FOLDER(20036, "csv url: {} is not folder"),
 
   // udf error
-  UDF_LOAD_FAILED(30001),
+  UDF_LOAD_FAILED(30001, "udf: {} load failed"),
 
-  SETUP_FAILED(90001),
+  // data type error
+  DATA_TYPE_NOT_SUPPORT(40001, "data type: {} not support"),
+
+  SETUP_FAILED(90001, "setup failed"),
   ;
 
 
   private final int errorCode;
+  private final String desc;
+
   private static final Map<Integer, ErrorCode> errorCodeMap;
 
   static {
@@ -37,21 +43,21 @@ public enum ErrorCode implements BaseErrorCode {
     }
   }
 
-  ErrorCode(int errorCode) {
+  ErrorCode(int errorCode, String desc) {
     this.errorCode = errorCode;
+    this.desc = desc;
   }
 
-  @Override
   public int getErrorCode() {
     return errorCode;
+  }
+
+  public String getDesc() {
+    return desc;
   }
 
   public static ErrorCode getVal(int errorCode) {
     return errorCodeMap.get(errorCode);
   }
 
-  @Override
-  public String getMsgCode() {
-    return "exception." + name();
-  }
 }

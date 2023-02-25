@@ -90,11 +90,7 @@ public class TableSchema {
 
   @Override
   public String toString() {
-    return String.format("[%s](%s)", name, String.join("|",
-        schema.getColumnDescs()
-            .stream().map(col -> String.format("%s:%s", col.getName(),
-                col.getType()))
-            .collect(Collectors.toList())));
+    return String.format("[%s](%s)", name, schema);
   }
 
   public static class Builder {

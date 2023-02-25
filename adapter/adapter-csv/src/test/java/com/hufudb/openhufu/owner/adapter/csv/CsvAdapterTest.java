@@ -10,9 +10,7 @@ import java.net.URL;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -42,7 +40,7 @@ public class CsvAdapterTest {
 
   @Test
   public void testLoadSingleFile() {
-    URL source = CsvAdapterTest.class.getClassLoader().getResource("data/test1.csv");
+    URL source = CsvAdapterTest.class.getClassLoader().getResource("data");
     CsvAdapterFactory factory = new CsvAdapterFactory();
     AdapterConfig config = new AdapterConfig();
     config.url = source.getPath();
@@ -51,8 +49,14 @@ public class CsvAdapterTest {
     Adapter adapter = factory.create(config);
     SchemaManager manager = adapter.getSchemaManager();
     List<TableSchema> schemas = manager.getAllLocalTable();
-    assertEquals(1, schemas.size());
-    assertEquals("test1", schemas.get(0).getName());
+    assertEquals(4, schemas.size());
+    assertEquals(new HashSet<>() {{
+                   add("test1");
+                   add("test2");
+                   add("test3");
+                   add("test4");
+                 }},
+        schemas.stream().map(TableSchema::getName).collect(Collectors.toSet()));
   }
 
   @Test
@@ -92,8 +96,8 @@ public class CsvAdapterTest {
     t4.setActualName("test4");
     t4.setPublishedName("traffic");
     t4.setPublishedColumns(ImmutableList.of(
-      new PojoColumnDesc("id", ColumnTypeWrapper.INT, ModifierWrapper.PUBLIC, 0),
-      new PojoColumnDesc("location", ColumnTypeWrapper.POINT, ModifierWrapper.PUBLIC, 1)));
+        new PojoColumnDesc("id", ColumnTypeWrapper.INT, ModifierWrapper.PUBLIC, 0),
+        new PojoColumnDesc("location", ColumnTypeWrapper.POINT, ModifierWrapper.PUBLIC, 1)));
     manager.addPublishedTable(t1);
     manager.addPublishedTable(t2);
     manager.addPublishedTable(t3);
@@ -198,7 +202,7 @@ public class CsvAdapterTest {
     date.set(Calendar.YEAR, 2018);
     date.set(Calendar.MONTH, 8); // Note: calendar month starts with 0
     date.set(Calendar.DAY_OF_MONTH, 1);
-    Expression dateCmp = ExpressionFactory.createBinaryOperator(OperatorType.LT, ColumnType.BOOLEAN, 
+    Expression dateCmp = ExpressionFactory.createBinaryOperator(OperatorType.LT, ColumnType.BOOLEAN,
         ExpressionFactory.createInputRef(1, ColumnType.DATE, Modifier.PUBLIC),
         ExpressionFactory.createLiteral(ColumnType.DATE, date));
     plan.setWhereExps(ImmutableList.of(dateCmp));
@@ -218,7 +222,7 @@ public class CsvAdapterTest {
     time.set(Calendar.HOUR_OF_DAY, 10);
     time.set(Calendar.MINUTE, 14);
     time.set(Calendar.SECOND, 45);
-    Expression timeCmp = ExpressionFactory.createBinaryOperator(OperatorType.LT, ColumnType.BOOLEAN, 
+    Expression timeCmp = ExpressionFactory.createBinaryOperator(OperatorType.LT, ColumnType.BOOLEAN,
         ExpressionFactory.createInputRef(2, ColumnType.TIME, Modifier.PUBLIC),
         ExpressionFactory.createLiteral(ColumnType.TIME, time));
     plan.setWhereExps(ImmutableList.of(timeCmp));
@@ -241,9 +245,9 @@ public class CsvAdapterTest {
     ts.set(Calendar.HOUR_OF_DAY, 9);
     ts.set(Calendar.MINUTE, 5);
     ts.set(Calendar.SECOND, 10);
-    Expression tsCmp = ExpressionFactory.createBinaryOperator(OperatorType.GE, ColumnType.BOOLEAN, 
-    ExpressionFactory.createInputRef(3, ColumnType.TIMESTAMP, Modifier.PUBLIC),
-    ExpressionFactory.createLiteral(ColumnType.TIMESTAMP, ts));
+    Expression tsCmp = ExpressionFactory.createBinaryOperator(OperatorType.GE, ColumnType.BOOLEAN,
+        ExpressionFactory.createInputRef(3, ColumnType.TIMESTAMP, Modifier.PUBLIC),
+        ExpressionFactory.createLiteral(ColumnType.TIMESTAMP, ts));
     plan.setWhereExps(ImmutableList.of(tsCmp));
     result = adapter.query(plan);
     it = result.getIterator();
@@ -272,29 +276,5 @@ public class CsvAdapterTest {
     assertNull(it.get(1));
     assertFalse(it.next());
     result.close();
-  }
-
-  @Test
-  public void testLoadDir() {
-    Set<String> tableNames = new HashSet<>(){{
-      add("customer");
-      add("lineitem");
-      add("nation");
-      add("orders");
-      add("part");
-      add("partsupp");
-      add("region");
-      add("supplier");
-    }};
-    URL source = CsvAdapterTest.class.getClassLoader().getResource("tpc-h");
-    CsvAdapterFactory factory = new CsvAdapterFactory();
-    AdapterConfig config = new AdapterConfig();
-    config.url = source.getPath();
-    config.datasource = DataSourceType.CSV;
-    config.delimiter = "|";
-    Adapter adapter = factory.create(config);
-    SchemaManager manager = adapter.getSchemaManager();
-    List<TableSchema> schemas = manager.getAllLocalTable();
-    assertEquals(tableNames, schemas.stream().map(TableSchema::getName).collect(Collectors.toSet()));
   }
 }

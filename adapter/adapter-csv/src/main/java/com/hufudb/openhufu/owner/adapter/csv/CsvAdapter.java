@@ -5,7 +5,6 @@ import com.hufudb.openhufu.common.exception.OpenHuFuException;
 import com.hufudb.openhufu.owner.adapter.AdapterConfig;
 import com.hufudb.openhufu.plan.LeafPlan;
 import com.hufudb.openhufu.plan.Plan;
-import com.hufudb.openhufu.proto.OpenHuFuData.ColumnType;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import com.hufudb.openhufu.data.schema.Schema;
 import com.hufudb.openhufu.data.schema.SchemaManager;
 import com.hufudb.openhufu.data.schema.TableSchema;
@@ -52,7 +50,7 @@ public class CsvAdapter implements Adapter {
   void loadTables(String csvDir, String delimiter) throws IOException {
     File base = new File(csvDir);
     if (!base.exists()) {
-      throw new OpenHuFuException(ErrorCode.CSV_URL_NOT_EXISTS, csvDir);
+      throw new OpenHuFuException(ErrorCode.CSV_URL_NOT_FOUND, csvDir);
     }
     if (!base.isDirectory()) {
       throw new OpenHuFuException(ErrorCode.CSV_URL_IS_NOT_FOLDER, csvDir);

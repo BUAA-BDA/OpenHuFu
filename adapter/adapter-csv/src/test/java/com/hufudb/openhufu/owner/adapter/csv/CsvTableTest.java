@@ -19,8 +19,9 @@ import com.hufudb.openhufu.proto.OpenHuFuData.Modifier;
 public class CsvTableTest {
   @Test
   public void testScanWithSchema() throws IOException {
-    URL source = CsvTableTest.class.getClassLoader().getResource("data/test2.csv");
-    CsvTable table = new CsvTable("test2", null, Paths.get(source.getPath()), ",");
+    URL data = CsvTableTest.class.getClassLoader().getResource("data/test2.csv");
+    URL schema = CsvTableTest.class.getClassLoader().getResource("data/test2.scm");
+    CsvTable table = new CsvTable("test2", Paths.get(schema.getPath()), Paths.get(data.getPath()), ",");
     Schema.Builder builder = Schema.newBuilder();
     builder.add("Department", ColumnType.STRING, Modifier.PUBLIC);
     builder.add("Name", ColumnType.STRING, Modifier.PUBLIC);
