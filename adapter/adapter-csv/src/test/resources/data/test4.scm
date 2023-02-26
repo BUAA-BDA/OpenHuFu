@@ -1,0 +1,2 @@
+id,location
+INT, POINT

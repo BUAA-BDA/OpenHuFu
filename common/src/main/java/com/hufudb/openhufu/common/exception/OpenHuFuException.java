@@ -1,6 +1,7 @@
 package com.hufudb.openhufu.common.exception;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * @author yang.song
@@ -14,13 +15,13 @@ public class OpenHuFuException extends RuntimeException implements BaseException
   private final Object[] arguments;
 
   public OpenHuFuException(Throwable cause, ErrorCode errorCode, Object... arguments) {
-    super(cause);
+    super(ErrorFormatter.format(errorCode, arguments), cause);
     this.errorCode = errorCode;
     this.arguments = arguments;
   }
 
   public OpenHuFuException(ErrorCode errorCode, Object... arguments) {
-    super(new Throwable());
+    super(ErrorFormatter.format(errorCode, arguments));
     this.errorCode = errorCode;
     this.arguments = arguments;
   }
@@ -31,19 +32,6 @@ public class OpenHuFuException extends RuntimeException implements BaseException
 
   public Object[] getArguments() {
     return arguments;
-  }
-
-  @Override
-  public String toString() {
-    return "OpenHuFuException{" +
-        "errorCode=" + errorCode +
-        ", arguments=" + Arrays.toString(arguments) +
-        '}';
-  }
-
-  @Override
-  public synchronized Throwable fillInStackTrace() {
-    return this;
   }
 
 }

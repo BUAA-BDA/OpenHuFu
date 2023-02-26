@@ -4,7 +4,7 @@
   "hostname": "localhost",
   "adapterconfig": {
     "datasource": "CSV",
-    "url": "../adapter/adapter-csv/src/test/resources/tpc-h",
+    "url": "../dataset/sample/tpc-h",
     "delimiter": "|"
   },
   "tables": [
