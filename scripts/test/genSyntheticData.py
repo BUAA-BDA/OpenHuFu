@@ -118,7 +118,7 @@ def genPoints(gtor, n):
     return ret
 
 
-def genSynData(points, desPath, prefix, n):
+def genSynData(points, desPath, prefix, size, databaseID):
     csvFileName = "spatial.csv"
     scmFileName = "spatial.scm"
     csvFileName = os.path.join(desPath, csvFileName)
@@ -126,7 +126,7 @@ def genSynData(points, desPath, prefix, n):
     with open(csvFileName, "w") as fout:
         fout.write("S_ID | S_POINT\n")
         for i in range(len(points)):
-            fout.write(str(i) + " | (")
+            fout.write(str(size * databaseID + i) + " | (")
             fout.write(" ".join(map(str, points[i])))
             fout.write(")\n")
     with open(scmFileName, "w") as fout:
@@ -192,17 +192,17 @@ def genSynDataSet(desPath, prefix, databaseNum, dataSize):
             mu = CFR.mu
             gtor = uniformGenerator(CFR.Range * (-1), CFR.Range)
             points = genPoints(gtor, dataSize)
-            genSynData(points, ownerPath, prefix, dataSize)
+            genSynData(points, ownerPath, prefix, dataSize, i)
         elif prefix == "nor":
             mu, sig = CFR.mu, CFR.sigma
             gtor = normalGenerator(mu, sig)
             points = genPoints(gtor, dataSize)
-            genSynData(points, ownerPath, prefix, dataSize)
+            genSynData(points, ownerPath, prefix, dataSize, i)
         elif prefix == "exp":
             mu = CFR.mu
             gtor = expGenerator(mu)
             points = genPoints(gtor, dataSize)
-            genSynData(points, ownerPath, prefix, dataSize)
+            genSynData(points, ownerPath, prefix, dataSize, i)
         else:
             print("don't support: " + prefix)
             exit(0)
