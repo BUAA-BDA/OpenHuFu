@@ -1,0 +1,19 @@
+[
+  {
+    "tableName": "spatial",
+    "localTables": [
+      {
+        "endpoint": "localhost:12345",
+        "localName": "spatial"
+      },
+      {
+        "endpoint": "localhost:12346",
+        "localName": "spatial"
+      },
+      {
+        "endpoint": "localhost:12347",
+        "localName": "spatial"
+      }
+    ]
+  }
+]

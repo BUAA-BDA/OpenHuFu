@@ -1,0 +1,30 @@
+{
+  "id": 1,
+  "port": 12345,
+  "hostname": "localhost",
+  "adapterconfig": {
+    "datasource": "CSV",
+    "url": "../dataset/sample/spatial/database0",
+    "delimiter": "|"
+  },
+  "tables": [
+    {
+      "actualName": "spatial",
+      "publishedName": "spatial",
+      "publishedColumns": [
+        {
+          "name": "S_ID",
+          "type": "LONG",
+          "modifier": "hidden",
+          "columnId": 0
+        },
+        {
+          "name": "S_POINT",
+          "type": "POINT",
+          "modifier": "hidden",
+          "columnId": 1
+        }
+      ]
+    }
+  ]
+}
