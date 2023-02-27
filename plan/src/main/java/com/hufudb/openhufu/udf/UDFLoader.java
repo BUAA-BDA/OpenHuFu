@@ -32,12 +32,7 @@ public class UDFLoader {
 
   public static Map<String, ScalarUDF> loadScalarUDF(String scalarUDFDirectory) {
     LOG.info("Load scalar udf from {}", scalarUDFDirectory);
-    File udfs[] = new File(scalarUDFDirectory).listFiles(new FileFilter() {
-      @Override
-      public boolean accept(File file) {
-        return file.getName().endsWith(".jar");
-      }
-    });
+    File udfs[] = new File(scalarUDFDirectory).listFiles(file -> file.getName().endsWith(".jar"));
     List<URL> udfURLs = new ArrayList<>(udfs.length);
     for (File udf : udfs) {
       try {
@@ -63,14 +58,6 @@ public class UDFLoader {
       throw new RuntimeException("Unsupported scalar UDF");
     }
     return UDFLoader.scalarUDFs.get(funcName).implement(inputs);
-  }
-
-  public static String translateScalar(String funcName, String dataSource, List<String> inputs) {
-    if (!UDFLoader.scalarUDFs.containsKey(funcName)) {
-      LOG.error("Unsupported scalar UDF {}", funcName);
-      throw new RuntimeException("Unsupported scalar UDF");
-    }
-    return UDFLoader.scalarUDFs.get(funcName).translate(dataSource, inputs);
   }
 
   public static ColumnType getScalarOutType(String funcName, List<Expression> inputs) {
