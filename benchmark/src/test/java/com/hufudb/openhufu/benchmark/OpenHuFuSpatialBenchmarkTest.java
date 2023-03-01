@@ -17,6 +17,7 @@ import com.hufudb.openhufu.plan.LeafPlan;
 import com.hufudb.openhufu.proto.OpenHuFuData.ColumnType;
 import com.hufudb.openhufu.proto.OpenHuFuData.Modifier;
 import com.hufudb.openhufu.proto.OpenHuFuPlan.Expression;
+import java.util.Collections;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -86,6 +87,32 @@ public class OpenHuFuSpatialBenchmarkTest {
     String tableName = SpatialTableName.SPATIAL.getName();
     LeafPlan plan = new LeafPlan();
     plan.setTableName(tableName);
+
+    // select Distance(S_POINT, Point(1404050.076199729, -4762163.267865509) from spatial;
+    Expression pointFunc =
+        ExpressionFactory.createScalarFunc(ColumnType.POINT, "Point",
+            ImmutableList.of(ExpressionFactory.createLiteral(ColumnType.DOUBLE, 1),
+                ExpressionFactory.createLiteral(ColumnType.DOUBLE, 1)));
+    Expression distanceFunc =
+        ExpressionFactory.createScalarFunc(ColumnType.DOUBLE, "Distance",
+            ImmutableList.of(pointFunc, pointFunc));
+    plan.setSelectExps(ImmutableList.of(distanceFunc));
+    DataSet dataset = user.executeQuery(plan);
+    DataSetIterator it = dataset.getIterator();
+    int count = 0;
+    assertEquals(1, it.size());
+    while (it.next()) {
+      assertEquals(0.0, it.get(0));
+      count++;
+    }
+    assertEquals(3000, count);
+  }
+
+  @Test
+  public void testSpatialDWithin() {
+    String tableName = SpatialTableName.SPATIAL.getName();
+    LeafPlan plan = new LeafPlan();
+    plan.setTableName(tableName);
     plan.setSelectExps(ExpressionFactory.createInputRef(user.getOpenHuFuTableSchema(tableName).getSchema()));
     // select * from spatial where DWithin(S_POINT, Point(1404050.076199729, -4762163.267865509), 0.1);
     Expression pointFunc =
@@ -107,5 +134,4 @@ public class OpenHuFuSpatialBenchmarkTest {
     }
     assertEquals(1, count);
   }
-
 }

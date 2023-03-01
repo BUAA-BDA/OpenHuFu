@@ -24,6 +24,8 @@ public enum ErrorCode {
   // udf error
   UDF_LOAD_FAILED(30001, "udf: {} load failed"),
 
+  FUNCTION_PARAMS_SIZE_ERROR(30002, "function {} parameters size error, expects {} , given {}"),
+  FUNCTION_PARAMS_TYPE_ERROR(30002, "function {} type error, expects {}"),
   // data type error
   DATA_TYPE_NOT_SUPPORT(40001, "data type: {} not support"),
 

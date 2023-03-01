@@ -43,8 +43,8 @@ public enum AggFuncType {
   }
 
   /**
-   * aggregate func with distinct
-   * such as count(distinct col_name)
+   * aggregate func with distinct such as count(distinct col_name)
+   *
    * @param id
    * @return
    */
@@ -53,6 +53,7 @@ public enum AggFuncType {
   }
 
   public static boolean isAllowedOnPrivate(int id) {
-    return id == AVG.id || id == COUNT.id ||id == SUM.id;
+    return id == AVG.id || id == COUNT.id || id == SUM.id || id == MAX.id || id == MIN.id
+        || id == KNN.id;
   }
 }
