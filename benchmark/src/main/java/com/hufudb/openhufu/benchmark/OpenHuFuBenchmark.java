@@ -13,7 +13,7 @@ import com.hufudb.openhufu.core.table.GlobalTableConfig;
 import com.hufudb.openhufu.data.schema.SchemaManager;
 import com.hufudb.openhufu.data.storage.DataSet;
 import com.hufudb.openhufu.expression.ExpressionFactory;
-import com.hufudb.openhufu.owner.user.OpenHuFuUser;
+import com.hufudb.openhufu.user.OpenHuFuUser;
 import com.hufudb.openhufu.plan.LeafPlan;
 import com.hufudb.openhufu.plan.Plan;
 import com.hufudb.openhufu.plan.RootPlan;

@@ -23,6 +23,7 @@
     <module>platform</module>
     <module>proto</module>
     <module>rpc</module>
+    <module>user</module>
   </modules>
 
   <properties>

@@ -11,7 +11,7 @@ import com.hufudb.openhufu.data.storage.DataSet;
 import com.hufudb.openhufu.data.storage.DataSetIterator;
 import com.hufudb.openhufu.expression.AggFuncType;
 import com.hufudb.openhufu.expression.ExpressionFactory;
-import com.hufudb.openhufu.owner.user.OpenHuFuUser;
+import com.hufudb.openhufu.user.OpenHuFuUser;
 import com.hufudb.openhufu.plan.BinaryPlan;
 import com.hufudb.openhufu.plan.LeafPlan;
 import com.hufudb.openhufu.proto.OpenHuFuData.ColumnType;
