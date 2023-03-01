@@ -16,10 +16,7 @@ import com.hufudb.openhufu.plan.BinaryPlan;
 import com.hufudb.openhufu.plan.LeafPlan;
 import com.hufudb.openhufu.proto.OpenHuFuData.ColumnType;
 import com.hufudb.openhufu.proto.OpenHuFuData.Modifier;
-import com.hufudb.openhufu.proto.OpenHuFuPlan;
-import com.hufudb.openhufu.proto.OpenHuFuPlan.Collation;
-import com.hufudb.openhufu.proto.OpenHuFuPlan.JoinCondition;
-import com.hufudb.openhufu.proto.OpenHuFuPlan.JoinType;
+import com.hufudb.openhufu.proto.OpenHuFuPlan.Expression;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -42,13 +39,13 @@ public class OpenHuFuSpatialBenchmarkTest {
 
     List<String> endpoints =
         new Gson().fromJson(Files.newBufferedReader(
-                Path.of(OpenHuFuBenchmark.class.getClassLoader().getResource("spatialEndpoints.json")
+                Path.of(OpenHuFuBenchmark.class.getClassLoader().getResource("spatial-endpoints.json")
                     .getPath())),
             new TypeToken<ArrayList<String>>() {
             }.getType());
     List<GlobalTableConfig> globalTableConfigs =
         new Gson().fromJson(Files.newBufferedReader(
-                Path.of(OpenHuFuBenchmark.class.getClassLoader().getResource("spatialTables.json")
+                Path.of(OpenHuFuBenchmark.class.getClassLoader().getResource("spatial-tables.json")
                     .getPath())),
             new TypeToken<ArrayList<GlobalTableConfig>>() {
             }.getType());
@@ -82,6 +79,33 @@ public class OpenHuFuSpatialBenchmarkTest {
     }
     assertEquals(3000, count);
     dataset.close();
+  }
+
+  @Test
+  public void testSpatialDistance() {
+    String tableName = SpatialTableName.SPATIAL.getName();
+    LeafPlan plan = new LeafPlan();
+    plan.setTableName(tableName);
+    plan.setSelectExps(ExpressionFactory.createInputRef(user.getOpenHuFuTableSchema(tableName).getSchema()));
+    // select * from spatial where DWithin(S_POINT, Point(1404050.076199729, -4762163.267865509), 0.1);
+    Expression pointFunc =
+        ExpressionFactory.createScalarFunc(ColumnType.POINT, "Point",
+            ImmutableList.of(ExpressionFactory.createLiteral(ColumnType.DOUBLE, 1404050.076199729),
+                ExpressionFactory.createLiteral(ColumnType.DOUBLE, -4762163.267865509)));
+    Expression dwithinFunc =
+        ExpressionFactory.createScalarFunc(ColumnType.BOOLEAN, "DWithin",
+            ImmutableList.of(ExpressionFactory.createInputRef(1, ColumnType.POINT, Modifier.PUBLIC),
+                pointFunc, ExpressionFactory.createLiteral(ColumnType.DOUBLE, 0.1)));
+    plan.setWhereExps(ImmutableList.of(dwithinFunc));
+    DataSet dataset = user.executeQuery(plan);
+    DataSetIterator it = dataset.getIterator();
+    int count = 0;
+    assertEquals(2, it.size());
+    while (it.next()) {
+      assertEquals(0L, it.get(0));
+      count++;
+    }
+    assertEquals(1, count);
   }
 
 }
