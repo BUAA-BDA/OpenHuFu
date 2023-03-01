@@ -24,6 +24,7 @@
     <module>proto</module>
     <module>rpc</module>
     <module>udf</module>
+    <module>user</module>
   </modules>
 
   <properties>

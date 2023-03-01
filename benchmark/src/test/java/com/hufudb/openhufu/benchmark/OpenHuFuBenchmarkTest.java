@@ -12,7 +12,7 @@ import com.hufudb.openhufu.data.storage.DataSet;
 import com.hufudb.openhufu.data.storage.DataSetIterator;
 import com.hufudb.openhufu.expression.AggFuncType;
 import com.hufudb.openhufu.expression.ExpressionFactory;
-import com.hufudb.openhufu.owner.user.OpenHuFuUser;
+import com.hufudb.openhufu.user.OpenHuFuUser;
 import com.hufudb.openhufu.plan.BinaryPlan;
 import com.hufudb.openhufu.plan.LeafPlan;
 import com.hufudb.openhufu.proto.OpenHuFuPlan.JoinCondition;
@@ -25,6 +25,8 @@ import com.hufudb.openhufu.proto.OpenHuFuPlan.Collation;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +35,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.xml.crypto.Data;
 
 public class OpenHuFuBenchmarkTest {
   private static final Logger LOG = LoggerFactory.getLogger(OpenHuFuBenchmark.class);
@@ -62,6 +66,26 @@ public class OpenHuFuBenchmarkTest {
       user.createOpenHuFuTable(config);
     }
     LOG.info("Init finish");
+  }
+
+  public void printLine(ResultSet it) throws SQLException {
+    for (int i = 1; i <= it.getMetaData().getColumnCount(); i++) {
+      System.out.print(it.getString(i) + "|");
+    }
+    System.out.println();
+  }
+
+  @Test
+  public void testSqlSelect() throws SQLException {
+    String sql = "select * from nation";
+    ResultSet it = user.executeQuery(sql);
+    int count = 0;
+    while (it.next()) {
+      printLine(it);
+      ++count;
+    }
+    assertEquals(75, count);
+    it.close();
   }
 
   @Test
