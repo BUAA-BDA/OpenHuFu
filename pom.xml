@@ -25,6 +25,7 @@
     <module>rpc</module>
     <module>udf</module>
     <module>user</module>
+    <module>aby4j</module>
   </modules>
 
   <properties>
