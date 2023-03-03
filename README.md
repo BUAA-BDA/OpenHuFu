@@ -146,7 +146,7 @@ export OPENHUFU_ROOT={OpenHuFu root path}
 # export OPENHUFU_ROOT=~/dev/release
 ```
 
-5. run package.sh, and the package result will be installed in `${OPENHUFU_ROOT}/lib`
+5. run package.sh, and the package result will be installed in `${OPENHUFU_ROOT}/lib` 
 
 ```
 # for first installation, or cpp code is modified, add 'all' to update .so library
@@ -155,6 +155,8 @@ export OPENHUFU_ROOT={OpenHuFu root path}
 # if only java code is modified, run package.sh directly
 ./package.sh
 ```
+
+(When using, you should add the parameter `-Djava.library.path=${OPENHUFU_ROOT}/lib` to add the library path)
 
 ### Project structure
 
