@@ -21,6 +21,8 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: '16'
+    - name: Compile ABY4j
+      run: cd aby4j && git submodule update --init && export OPENHUFU_ROOT=../ && ./package.sh all && cd ..
     - name: Build with Maven
       run: ./scripts/build/package.sh
     - name: Upload Hu-Fu Release Artifact
