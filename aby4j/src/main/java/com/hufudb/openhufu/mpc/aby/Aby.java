@@ -71,14 +71,11 @@ public class Aby implements ProtocolExecutor {
 
   @Override
   public Object run(long taskId, List<Integer> parties, Object... args) throws ProtocolException {
-    return null;
-  }
-
-  public List<byte[]> run(long taskId, List<Integer> parties, List<byte[]> inputData, Object... args) {
-    OperatorType opType = (OperatorType) args[0];
-    ColumnType type = (ColumnType) args[1];
-    String address = (String) args[2];
-    int port = (int) args[3];
+    List<byte[]> inputData = (List<byte[]>) args[0];
+    OperatorType opType = (OperatorType) args[1];
+    ColumnType type = (ColumnType) args[2];
+    String address = (String) args[3];
+    int port = (int) args[4];
     e_role role = e_role.SERVER;
     int otherId = parties.get(0);
     if (parties.get(1) != self.getId()) {

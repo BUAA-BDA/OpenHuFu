@@ -2,6 +2,7 @@ package com.hufudb.openhufu.mpc.aby;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -36,13 +37,13 @@ public class AbyTest
       Future<Boolean> r0 = service.submit(new Callable<Boolean>() {
         @Override
         public Boolean call() throws Exception {
-          return OpenHuFuCodec.decodeBoolean(aby0.run(0, ImmutableList.of(0, 1), ImmutableList.of(OpenHuFuCodec.encodeInt(A)), OperatorType.GT, ColumnType.INT, "127.0.0.1", 7767).get(0));
+          return OpenHuFuCodec.decodeBoolean(((List<byte[]>) aby0.run(0, ImmutableList.of(0, 1), ImmutableList.of(OpenHuFuCodec.encodeInt(A)), OperatorType.GT, ColumnType.INT, "127.0.0.1", 7767)).get(0));
         }
       });
       Future<Boolean> r1 = service.submit(new Callable<Boolean>() {
         @Override
         public Boolean call() throws Exception {
-          return OpenHuFuCodec.decodeBoolean(aby1.run(0, ImmutableList.of(0, 1), ImmutableList.of(OpenHuFuCodec.encodeInt(B)), OperatorType.GT, ColumnType.INT, "127.0.0.1", 7766).get(0));
+          return OpenHuFuCodec.decodeBoolean(((List<byte[]>) aby1.run(0, ImmutableList.of(0, 1), ImmutableList.of(OpenHuFuCodec.encodeInt(B)), OperatorType.GT, ColumnType.INT, "127.0.0.1", 7766)).get(0));
         }
       });
       assertEquals(expect, r0.get());
@@ -54,13 +55,13 @@ public class AbyTest
     Future<Boolean> r0 = service.submit(new Callable<Boolean>() {
       @Override
       public Boolean call() throws Exception {
-        return OpenHuFuCodec.decodeBoolean(aby0.run(0, ImmutableList.of(0, 1), ImmutableList.of(OpenHuFuCodec.encodeInt(C)), OperatorType.GT, ColumnType.INT, "127.0.0.1", 7767).get(0));
+        return OpenHuFuCodec.decodeBoolean(((List<byte[]>) aby0.run(0, ImmutableList.of(0, 1), ImmutableList.of(OpenHuFuCodec.encodeInt(C)), OperatorType.GT, ColumnType.INT, "127.0.0.1", 7767)).get(0));
       }
     });
     Future<Boolean> r1 = service.submit(new Callable<Boolean>() {
       @Override
       public Boolean call() throws Exception {
-        return OpenHuFuCodec.decodeBoolean(aby1.run(0, ImmutableList.of(0, 1), ImmutableList.of(OpenHuFuCodec.encodeInt(D)), OperatorType.GT, ColumnType.INT, "127.0.0.1", 7766).get(0));
+        return OpenHuFuCodec.decodeBoolean(((List<byte[]>) aby1.run(0, ImmutableList.of(0, 1), ImmutableList.of(OpenHuFuCodec.encodeInt(D)), OperatorType.GT, ColumnType.INT, "127.0.0.1", 7766)).get(0));
       }
     });
     assertEquals(expect, r0.get());
