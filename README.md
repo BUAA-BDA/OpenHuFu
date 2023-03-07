@@ -151,8 +151,6 @@ export OPENHUFU_ROOT={OpenHuFu root path}
 ```
 # for first installation, or cpp code is modified, add 'all' to update .so library
 # after running the script, need to move .so .a files in swig/build/lib into java lib path manually, e.g., /usr/lib/jni
-./package.sh all
-# if only java code is modified, run package.sh directly
 ./package.sh
 ```
 
