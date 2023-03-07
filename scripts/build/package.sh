@@ -12,6 +12,7 @@ if [ $# -eq 0 ]; then
   cp owner/target/*-with-dependencies.jar ./release/bin/owner_server.jar
   cp adapter/adapter-csv/target/*-with-dependencies.jar ./release/adapter/adapter_csv.jar
   cp udf/spatial-udf/target/*-with-dependencies.jar ./release/udf/scalar/spatial_udf.jar
+  cp aby4j/target/*.jar ./lib/aby4j.jar
 elif [ $1 == "owner" ]; then
   mvn install -T ${thread} -Dmaven.test.skip=true -pl $1
   cp owner/target/*-with-dependencies.jar ./release/bin/owner_server.jar
