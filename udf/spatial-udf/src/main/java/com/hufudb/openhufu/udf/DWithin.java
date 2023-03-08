@@ -17,10 +17,6 @@ public class DWithin implements ScalarUDF {
     return ColumnType.BOOLEAN;
   }
 
-  public Boolean dwithin(Point left, Point right, Double distance) {
-    return (Boolean) implement(ImmutableList.of(left, right, distance));
-  }
-
   @Override
   public Object implement(List<Object> inputs) {
     if (inputs.size() != 3) {
