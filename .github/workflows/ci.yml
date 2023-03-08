@@ -21,6 +21,8 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: '16'
+    - name: Compile ABY4j
+      run: sudo apt-get -y update && sudo apt-get -y install libboost-all-dev && export OPENHUFU_ROOT=$PWD && cd aby4j && git submodule update --init && ./package.sh all && cd ..
     - name: Build with Maven
       run: ./scripts/build/package.sh
     - name: Upload Hu-Fu Release Artifact
