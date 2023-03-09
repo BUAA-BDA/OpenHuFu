@@ -180,7 +180,7 @@ def genParameter(desPath):
             fout.write("%.4f %d\n" % (betas[i], k))
 
 
-def genSynDataSet(desPath, prefix, databaseNum, dataSize):
+def genSynDataSet(desPath, prefix, databaseNum, dataSize, params):
     if os.path.exists(desPath):
         shutil.rmtree(desPath)
     os.mkdir(desPath)
@@ -189,17 +189,16 @@ def genSynDataSet(desPath, prefix, databaseNum, dataSize):
         ownerPath = os.path.join(desPath, "database" + str(i))
         os.mkdir(ownerPath)
         if prefix == "uni":
-            mu = CFR.mu
-            gtor = uniformGenerator(CFR.Range * (-1), CFR.Range)
+            gtor = uniformGenerator(params.get("low"), params.get("high"))
             points = genPoints(gtor, dataSize)
             genSynData(points, ownerPath, prefix, dataSize, i)
         elif prefix == "nor":
-            mu, sig = CFR.mu, CFR.sigma
+            mu, sig = params.get("mu"), params.get("sigma")
             gtor = normalGenerator(mu, sig)
             points = genPoints(gtor, dataSize)
             genSynData(points, ownerPath, prefix, dataSize, i)
         elif prefix == "exp":
-            mu = CFR.mu
+            mu = params.get("mu")
             gtor = expGenerator(mu)
             points = genPoints(gtor, dataSize)
             genSynData(points, ownerPath, prefix, dataSize, i)
@@ -211,16 +210,47 @@ def genSynDataSet(desPath, prefix, databaseNum, dataSize):
     # genParameter(desPath)
 
 
-# def exp0():
-#     desPath = "dataset/SynData"
-#     genSynDataSet(desPath, CFR.caseN)
-
-
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print("please input 2 params")
+    if len(sys.argv) < 3:
+        print("please input at least 2 params, like\npython3 ./scripts/test/genSyntheticData.py 3 200")
         exit(0)
     desPath = "dataset/SynData"
     databaseNum = int(sys.argv[1])
     dataSize = int(sys.argv[2])
-    genSynDataSet(desPath, "uni", databaseNum, dataSize)
+    distribution = None
+    params = {}
+    if len(sys.argv) == 3 or sys.argv[3] == "uni":
+        distribution = "uni"
+        if len(sys.argv) < 5:
+            params["low"] = CFR.Range * (-1)
+            params["high"] = CFR.Range
+        elif len(sys.argv) == 6:
+            params["low"] = int(sys.argv[4])
+            params["high"] = int(sys.argv[5])
+        else:
+            print("wrong format for uni!")
+            exit(0)
+    elif sys.argv[3] == "nor":
+        distribution = "nor"
+        if len(sys.argv) < 5:
+            params["mu"] = 0
+            params["sigma"] = 10 ** 5
+        elif len(sys.argv) == 6:
+            params["mu"] = int(sys.argv[4])
+            params["sigma"] = int(sys.argv[5])
+        else:
+            print("wrong format for nor!")
+            exit(0)
+    elif sys.argv[3] == "exp":
+        distribution = "exp"
+        if len(sys.argv) < 5:
+            params["mu"] = 5 * 10 ** 6
+        elif len(sys.argv) == 5:
+            params["mu"] = int(sys.argv[4])
+        else:
+            print("wrong format for exp!")
+            exit(0)
+    else:
+        print("not support distribution: " + sys.argv[3])
+        exit(0)
+    genSynDataSet(desPath, distribution, databaseNum, dataSize, params)

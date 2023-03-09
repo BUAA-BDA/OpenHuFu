@@ -89,31 +89,22 @@ Spatial sample data: `dataset/newyork-taxi-sample.data`:
 
 #### How to use it
 
-Configuration in `scripts/test/genSyntheticData.py`:
-
-``` python
-class constForSyn():
-    caseN = 10
-	Range = 10**7
-	dim = 2
-	mu = 0.5 * Range
-	sigma = 0.10 * Range
-	pointFiles = ["uni", "nor", "exp", "skew"]
-	numList = [5*10**3, 10**4, 5*10**4, 10**5, 5*10**5, 10**6, 5*10**6]
-	alpha = 2
-	
-def exp0():	
-    # desPath is the target folder of generated data
-    desPath = "dataset/SynData"
-
-```
-
 Generate spatial data:
 
 ``` shell
 pip3 install numpy
-python3 dataset/genSyntheticData.py
+python3 scripts/test/genSyntheticData.py databaseNum dataSize [distribution name] [params]
 ```
+
+The distributions we support and their params are as follow:
+
+| Distribution |        param1        |        param2         |
+| :----------: | :------------------: | :-------------------: |
+|     uni      | low (default = -1e7) | high (default = 1e7)  |
+|     nor      |   mu (default = 0)   | sigma (default = 1e5) |
+|     exp      |  mu (default = 5e6)  |                       |
+
+(If needed, you can modify `scripts/test/genSyntheticData.py`)
 
 ## Configuration File
 
