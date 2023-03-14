@@ -2,6 +2,6 @@
 
 set -e
 
-bash ./scripts/test/extract_tpc_h.sh
+export OPENHUFU_ROOT=$PWD
 
-java -jar benchmark/target/benchmarks.jar $1 -rf json
+java -jar benchmark/target/benchmarks.jar -rf json
