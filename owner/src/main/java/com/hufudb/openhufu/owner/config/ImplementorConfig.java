@@ -2,6 +2,9 @@ package com.hufudb.openhufu.owner.config;
 
 import com.hufudb.openhufu.common.exception.ErrorCode;
 import com.hufudb.openhufu.common.exception.OpenHuFuException;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,32 +39,34 @@ public class ImplementorConfig {
   static Map<Implementor, String> implementor2ClassMap = new HashMap<>();
   static Map<String, Object> config;
 
-  static {
-    loadImplementorConfig();
-    implementor2ClassMap.put(Implementor.AGG_COUNT,
-        getClazz(Implementor.AGG_COUNT.value));
-    implementor2ClassMap.put(Implementor.AGG_MAX,
-        getClazz(Implementor.AGG_MAX.value));
-    implementor2ClassMap.put(Implementor.AGG_MIN,
-        getClazz(Implementor.AGG_MIN.value));
-    implementor2ClassMap.put(Implementor.AGG_SUM,
-        getClazz(Implementor.AGG_SUM.value));
-    implementor2ClassMap.put(Implementor.AGG_AVG,
-        getClazz(Implementor.AGG_AVG.value));
-    implementor2ClassMap.put(Implementor.JOIN,
-        getClazz(Implementor.JOIN.value));
-
-  }
-
   public static String getImplementorClassName(Implementor implementor) {
     return implementor2ClassMap.get(implementor);
   }
 
-  private static void loadImplementorConfig() {
+  public static void initImplementorConfig(String implementorPath) {
+    loadImplementorConfig(implementorPath);
+    implementor2ClassMap.put(Implementor.AGG_COUNT,
+            getClazz(Implementor.AGG_COUNT.value));
+    implementor2ClassMap.put(Implementor.AGG_MAX,
+            getClazz(Implementor.AGG_MAX.value));
+    implementor2ClassMap.put(Implementor.AGG_MIN,
+            getClazz(Implementor.AGG_MIN.value));
+    implementor2ClassMap.put(Implementor.AGG_SUM,
+            getClazz(Implementor.AGG_SUM.value));
+    implementor2ClassMap.put(Implementor.AGG_AVG,
+            getClazz(Implementor.AGG_AVG.value));
+    implementor2ClassMap.put(Implementor.JOIN,
+            getClazz(Implementor.JOIN.value));
+  }
+  private static void loadImplementorConfig(String implementorPath) {
     Yaml yaml = new Yaml(new SafeConstructor());
-    InputStream stream = ImplementorConfig.class.getClassLoader()
-        .getResourceAsStream(implementorPath);
-    config = yaml.load(stream);
+    try {
+      InputStream stream = new FileInputStream(implementorPath);
+      config = yaml.load(stream);
+    }
+    catch (FileNotFoundException e) {
+      throw new OpenHuFuException(ErrorCode.IMPLEMENTOR_CONFIG_FILE_NOT_FOUND, implementorPath);
+    }
   }
 
   private static String getClazz(String keyStr) {

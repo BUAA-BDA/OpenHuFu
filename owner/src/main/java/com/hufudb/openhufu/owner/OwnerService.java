@@ -2,6 +2,7 @@ package com.hufudb.openhufu.owner;
 
 import com.hufudb.openhufu.owner.adapter.Adapter;
 import com.hufudb.openhufu.owner.checker.Checker;
+import com.hufudb.openhufu.owner.config.ImplementorConfig;
 import com.hufudb.openhufu.owner.config.OwnerConfig;
 import com.hufudb.openhufu.owner.implementor.OwnerSideImplementor;
 import com.hufudb.openhufu.owner.storage.StreamDataSet;
@@ -51,6 +52,7 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
     this.implementor = new OwnerSideImplementor(ownerSideRpc, adapter, threadPool);
     this.schemaManager = this.adapter.getSchemaManager();
     this.libraries = config.librarys;
+    ImplementorConfig.initImplementorConfig(config.implementorConfigPath);
     initPublishedTable(config.tables);
   }
 

@@ -2,6 +2,7 @@
   "id": 1,
   "port": 12345,
   "hostname": "localhost",
+  "implementorconfigpath": "./config/owner.yml",
   "adapterconfig": {
     "datasource": "CSV",
     "url": "../dataset/sample/tpc-h",
@@ -171,7 +172,7 @@
         {
           "name": "N_NATIONKEY",
           "type": "LONG",
-          "modifier": "hidden",
+          "modifier": "protected",
           "columnId": 0
         },
         {
@@ -399,7 +400,7 @@
         {
           "name": "S_NATIONKEY",
           "type": "LONG",
-          "modifier": "hidden",
+          "modifier": "protected",
           "columnId": 3
         },
         {

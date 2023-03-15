@@ -30,6 +30,7 @@ public class OwnerAggregation {
 
   public static AggregateFunction getAggregateFunc(Expression exp, Rpc rpc, ExecutorService threadPool, TaskInfo taskInfo) {
     if (exp.getOpType().equals(OpenHuFuPlan.OperatorType.AGG_FUNC)) {
+      LOG.info("using aggfunc: " + AggFuncType.of(exp.getI32()).getName());
       return OwnerImplementorFactory.getAggregationFunction(AggFuncType.of(exp.getI32()), exp, rpc, threadPool, taskInfo);
     } else {
       throw new UnsupportedOperationException("Just support single aggregate function");

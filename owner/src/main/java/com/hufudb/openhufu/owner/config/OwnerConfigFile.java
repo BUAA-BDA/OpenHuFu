@@ -42,9 +42,9 @@ public class OwnerConfigFile {
   public List<PojoPublishedTableSchema> tables;
   public AdapterConfig adapterconfig;
   public List<LibraryConfig> libraryconfigs;
-
+  public String implementorconfigpath;
   public OwnerConfigFile(int id, int port, int threadnum, String hostname, String privatekeypath,
-      String certchainpath, String trustcertpath) {
+      String certchainpath, String trustcertpath, String implementorconfigpath) {
     this.id = id;
     this.port = port;
     this.threadnum = threadnum;
@@ -52,6 +52,7 @@ public class OwnerConfigFile {
     this.privatekeypath = privatekeypath;
     this.certchainpath = certchainpath;
     this.trustcertpath = trustcertpath;
+    this.implementorconfigpath = implementorconfigpath;
   }
 
   public OwnerConfigFile() {}
@@ -143,6 +144,10 @@ public class OwnerConfigFile {
     config.adapter = getAdapter(adapterconfig);
     config.librarys = getLibrary();
     config.tables = tables;
+    if (implementorconfigpath == null) {
+      throw new OpenHuFuException(ErrorCode.IMPLEMENTOR_CONFIG_FILE_PATH_NOT_SET);
+    }
+    config.implementorConfigPath = implementorconfigpath;
     return config;
   }
 }
