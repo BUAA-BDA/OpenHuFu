@@ -12,9 +12,6 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 public class ImplementorConfig {
-
-  private static final String implementorPath = "owner1.yml";
-
   private final static class IMPLEMENTOR_KEY {
     private final static String PREFIX = "owner.implementor.";
     private final static String AGG_PREFIX = PREFIX + "aggregate.";
