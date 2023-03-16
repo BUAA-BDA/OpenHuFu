@@ -43,6 +43,16 @@ cd ./dataset/TPC-H\ V3.0.1/dbgen/
 cd ../../..
 pwd
 i=0
+echo "N_NATIONKEY | N_NAME | N_REGIONKEY | N_COMMENT" > $dstDir/database0/nation.csv
+sed 's/.$//' ./dataset/TPC-H\ V3.0.1/dbgen/nation.tbl >> $dstDir/database0/nation.csv
+echo "N_NATIONKEY | N_NAME | N_REGIONKEY | N_COMMENT" > $dstDir/database0/nation.scm
+echo "LONG | STRING | LONG | STRING" >> $dstDir/database0/nation.scm
+
+echo "R_REGIONKEY | R_NAME | R_COMMENT" > $dstDir/database0/region.csv
+sed 's/.$//' ./dataset/TPC-H\ V3.0.1/dbgen/region.tbl >> $dstDir/database0/region.csv
+echo "R_REGIONKEY | R_NAME | R_COMMENT" > $dstDir/database0/region.scm
+echo "LONG | STRING | STRING" >> $dstDir/database0/region.scm
+
 while ((i < databaseNum))
 do
 	echo "separating data, running for database$i"
@@ -87,16 +97,6 @@ do
 	sed -n "$a,$b"p ./dataset/TPC-H\ V3.0.1/dbgen/supplier.tbl | sed 's/.$//' >> $dstDir/database$i/supplier.csv
 	echo "S_SUPPKEY | S_NAME | S_ADDRESS | S_NATIONKEY | S_PHONE | S_ACCTBAL | S_COMMENT" > $dstDir/database$i/supplier.scm
 	echo "LONG | STRING | STRING | LONG | STRING | DOUBLE | STRING" >> $dstDir/database$i/supplier.scm
-
-  echo "N_NATIONKEY | N_NAME | N_REGIONKEY | N_COMMENT" > $dstDir/database$i/nation.csv
-	sed 's/.$//' ./dataset/TPC-H\ V3.0.1/dbgen/nation.tbl >> $dstDir/database$i/nation.csv
-	echo "N_NATIONKEY | N_NAME | N_REGIONKEY | N_COMMENT" > $dstDir/database$i/nation.scm
-	echo "LONG | STRING | LONG | STRING" >> $dstDir/database$i/nation.scm
-
-	echo "R_REGIONKEY | R_NAME | R_COMMENT" > $dstDir/database$i/region.csv
-	sed 's/.$//' ./dataset/TPC-H\ V3.0.1/dbgen/region.tbl >> $dstDir/database$i/region.csv
-	echo "R_REGIONKEY | R_NAME | R_COMMENT" > $dstDir/database$i/region.scm
-	echo "LONG | STRING | STRING" >> $dstDir/database$i/region.scm
 
 	((i = i + 1))
 done

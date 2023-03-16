@@ -16,7 +16,7 @@
         {
           "name": "C_CUSTKEY",
           "type": "LONG",
-          "modifier": "hidden",
+          "modifier": "public",
           "columnId": 0
         },
         {
@@ -166,36 +166,6 @@
       ]
     },
     {
-      "actualName": "nation",
-      "publishedName": "nation",
-      "publishedColumns": [
-        {
-          "name": "N_NATIONKEY",
-          "type": "LONG",
-          "modifier": "protected",
-          "columnId": 0
-        },
-        {
-          "name": "N_NAME",
-          "type": "STRING",
-          "modifier": "hidden",
-          "columnId": 1
-        },
-        {
-          "name": "N_REGIONKEY",
-          "type": "LONG",
-          "modifier": "hidden",
-          "columnId": 2
-        },
-        {
-          "name": "N_COMMENT",
-          "type": "STRING",
-          "modifier": "hidden",
-          "columnId": 3
-        }
-      ]
-    },
-    {
       "actualName": "orders",
       "publishedName": "orders",
       "publishedColumns": [
@@ -262,7 +232,7 @@
         {
           "name": "P_PARTKEY",
           "type": "LONG",
-          "modifier": "hidden",
+          "modifier": "protected",
           "columnId": 0
         },
         {
@@ -352,30 +322,6 @@
       ]
     },
     {
-      "actualName": "region",
-      "publishedName": "region",
-      "publishedColumns": [
-        {
-          "name": "R_REGIONKEY",
-          "type": "LONG",
-          "modifier": "hidden",
-          "columnId": 0
-        },
-        {
-          "name": "R_NAME",
-          "type": "STRING",
-          "modifier": "hidden",
-          "columnId": 1
-        },
-        {
-          "name": "R_COMMENT",
-          "type": "STRING",
-          "modifier": "hidden",
-          "columnId": 2
-        }
-      ]
-    },
-    {
       "actualName": "supplier",
       "publishedName": "supplier",
       "publishedColumns": [
@@ -400,7 +346,7 @@
         {
           "name": "S_NATIONKEY",
           "type": "LONG",
-          "modifier": "protected",
+          "modifier": "public",
           "columnId": 3
         },
         {

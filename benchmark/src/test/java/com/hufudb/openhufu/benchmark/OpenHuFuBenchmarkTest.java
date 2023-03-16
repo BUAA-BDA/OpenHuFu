@@ -2,24 +2,10 @@ package com.hufudb.openhufu.benchmark;
 
 import static org.junit.Assert.assertEquals;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.hufudb.openhufu.benchmark.enums.TPCHTableName;
 import com.hufudb.openhufu.core.table.GlobalTableConfig;
-import com.hufudb.openhufu.data.schema.Schema;
-import com.hufudb.openhufu.data.storage.DataSet;
-import com.hufudb.openhufu.data.storage.DataSetIterator;
-import com.hufudb.openhufu.expression.AggFuncType;
-import com.hufudb.openhufu.expression.ExpressionFactory;
 import com.hufudb.openhufu.user.OpenHuFuUser;
-import com.hufudb.openhufu.plan.BinaryPlan;
-import com.hufudb.openhufu.plan.LeafPlan;
-import com.hufudb.openhufu.proto.OpenHuFuPlan.JoinCondition;
-import com.hufudb.openhufu.proto.OpenHuFuPlan.JoinType;
-import com.hufudb.openhufu.proto.OpenHuFuData.Modifier;
-import com.hufudb.openhufu.proto.OpenHuFuData.ColumnType;
-import com.hufudb.openhufu.proto.OpenHuFuPlan.Collation;
 
 
 import java.io.IOException;
@@ -30,7 +16,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.hufudb.openhufu.proto.OpenHuFuPlan;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -76,7 +61,7 @@ public class OpenHuFuBenchmarkTest {
   }
 
   @Test
-  public void testSqlSelect() throws SQLException {
+  public void testSelect() throws SQLException {
     String sql = "select * from nation";
     ResultSet it = user.executeQuery(sql);
     int count = 0;
@@ -84,304 +69,122 @@ public class OpenHuFuBenchmarkTest {
       printLine(it);
       ++count;
     }
-    assertEquals(75, count);
+    assertEquals(25, count);
     it.close();
   }
-
   @Test
-  public void testSelect() {
-    String tableName = TPCHTableName.NATION.getName();
-    LeafPlan plan = new LeafPlan();
-    plan.setTableName(tableName);
-    plan.setSelectExps(ExpressionFactory
-        .createInputRef(user.getOpenHuFuTableSchema(tableName).getSchema()));
-    DataSet dataset = user.executeQuery(plan);
-    DataSetIterator it = dataset.getIterator();
+  public void testEqualJoin() throws SQLException {
+    String sql = "select * from nation join region on nation.N_REGIONKEY = region.R_REGIONKEY";
+    ResultSet dataSet = user.executeQuery(sql);
     int count = 0;
-    while (it.next()) {
-      for (int i = 0; i < it.size(); i++) {
-        System.out.print(it.get(i) + "|");
-      }
-      System.out.println();
+    while (dataSet.next()) {
+      printLine(dataSet);
       ++count;
     }
-    assertEquals(75, count);
-    dataset.close();
+    assertEquals(25, count);
+    dataSet.close();
   }
-
   @Test
-  public void testEqualJoin() {
-    String leftTableName = TPCHTableName.SUPPLIER.getName();
-    LeafPlan leftPlan = new LeafPlan();
-    leftPlan.setTableName(leftTableName);
-    leftPlan.setSelectExps(ExpressionFactory
-            .createInputRef(user.getOpenHuFuTableSchema(leftTableName).getSchema()));
-
-    String rightTableName = TPCHTableName.NATION.getName();
-    LeafPlan rightPlan = new LeafPlan();
-    rightPlan.setTableName(rightTableName);
-    rightPlan.setSelectExps(ExpressionFactory
-            .createInputRef(user.getOpenHuFuTableSchema(rightTableName).getSchema()));
-
-    BinaryPlan plan = new BinaryPlan(leftPlan, rightPlan);
-    JoinCondition joinCondition = JoinCondition.newBuilder().setType(JoinType.INNER).addLeftKey(3)
-            .addRightKey(0).setModifier(Modifier.PUBLIC).build();
-    plan.setJoinInfo(joinCondition);
-    plan.setSelectExps(ExpressionFactory
-            .createInputRef(Schema.merge(user.getOpenHuFuTableSchema(leftTableName).getSchema(), user.getOpenHuFuTableSchema(rightTableName).getSchema())));
-    DataSet dataset = user.executeQuery(plan);
-    DataSetIterator it = dataset.getIterator();
+  public void testLeftJoin() throws SQLException {
+    String sql = "select * from nation left join region on nation.N_REGIONKEY = region.R_REGIONKEY";
+    ResultSet dataSet = user.executeQuery(sql);
     int count = 0;
-    while (it.next()) {
-      for (int i = 0; i < it.size(); i++) {
-        System.out.print(it.get(i) + "|");
-      }
-      System.out.println();
+    while (dataSet.next()) {
+      printLine(dataSet);
       ++count;
     }
-    assertEquals(90, count);
-    dataset.close();
+    assertEquals(25, count);
+    dataSet.close();
   }
   @Test
-  public void testLeftJoin() {
-    String leftTableName = TPCHTableName.SUPPLIER.getName();
-    LeafPlan leftPlan = new LeafPlan();
-    leftPlan.setTableName(leftTableName);
-    leftPlan.setSelectExps(ExpressionFactory
-            .createInputRef(user.getOpenHuFuTableSchema(leftTableName).getSchema()));
-
-    String rightTableName = TPCHTableName.NATION.getName();
-    LeafPlan rightPlan = new LeafPlan();
-    rightPlan.setTableName(rightTableName);
-    rightPlan.setSelectExps(ExpressionFactory
-            .createInputRef(user.getOpenHuFuTableSchema(rightTableName).getSchema()));
-
-    BinaryPlan plan = new BinaryPlan(leftPlan, rightPlan);
-    JoinCondition joinCondition = JoinCondition.newBuilder().setType(JoinType.LEFT).addLeftKey(3)
-            .addRightKey(0).setModifier(Modifier.PUBLIC).build();
-    plan.setJoinInfo(joinCondition);
-    plan.setSelectExps(ExpressionFactory
-            .createInputRef(Schema.merge(user.getOpenHuFuTableSchema(leftTableName).getSchema(), user.getOpenHuFuTableSchema(rightTableName).getSchema())));
-    DataSet dataset = user.executeQuery(plan);
-    DataSetIterator it = dataset.getIterator();
+  public void testRightJoin() throws SQLException {
+    String sql = "select * from nation right join region on nation.N_REGIONKEY = region.R_REGIONKEY";
+    ResultSet dataSet = user.executeQuery(sql);
     int count = 0;
-    while (it.next()) {
-      for (int i = 0; i < it.size(); i++) {
-        System.out.print(it.get(i) + "|");
-      }
-      System.out.println();
+    while (dataSet.next()) {
+      printLine(dataSet);
       ++count;
     }
-    assertEquals(90, count);
-    dataset.close();
+    assertEquals(25, count);
+    dataSet.close();
   }
   @Test
-  public void testRightJoin() {
-    String leftTableName = TPCHTableName.SUPPLIER.getName();
-    LeafPlan leftPlan = new LeafPlan();
-    leftPlan.setTableName(leftTableName);
-    leftPlan.setSelectExps(ExpressionFactory
-            .createInputRef(user.getOpenHuFuTableSchema(leftTableName).getSchema()));
-
-    String rightTableName = TPCHTableName.NATION.getName();
-    LeafPlan rightPlan = new LeafPlan();
-    rightPlan.setTableName(rightTableName);
-    rightPlan.setSelectExps(ExpressionFactory
-            .createInputRef(user.getOpenHuFuTableSchema(rightTableName).getSchema()));
-
-    BinaryPlan plan = new BinaryPlan(leftPlan, rightPlan);
-    JoinCondition joinCondition = JoinCondition.newBuilder().setType(JoinType.RIGHT).addLeftKey(3)
-            .addRightKey(0).setModifier(Modifier.PUBLIC).build();
-    plan.setJoinInfo(joinCondition);
-    plan.setSelectExps(ExpressionFactory
-            .createInputRef(Schema.merge(user.getOpenHuFuTableSchema(leftTableName).getSchema(), user.getOpenHuFuTableSchema(rightTableName).getSchema())));
-    DataSet dataset = user.executeQuery(plan);
-    DataSetIterator it = dataset.getIterator();
+  public void testFullJoin() throws SQLException {
+    String sql = "select * from nation full join region on nation.N_REGIONKEY = region.R_REGIONKEY";
+    ResultSet dataSet = user.executeQuery(sql);
     int count = 0;
-    while (it.next()) {
-      for (int i = 0; i < it.size(); i++) {
-        System.out.print(it.get(i) + "|");
-      }
-      System.out.println();
+    while (dataSet.next()) {
+      printLine(dataSet);
       ++count;
     }
-    assertEquals(138, count);
-    dataset.close();
+    assertEquals(25, count);
+    dataSet.close();
   }
   @Test
-  public void testOuterJoin() {
-    String leftTableName = TPCHTableName.SUPPLIER.getName();
-    LeafPlan leftPlan = new LeafPlan();
-    leftPlan.setTableName(leftTableName);
-    leftPlan.setSelectExps(ExpressionFactory
-            .createInputRef(user.getOpenHuFuTableSchema(leftTableName).getSchema()));
+  public void testCount() throws SQLException {
+    String sql = "select count(*) from supplier";
+    ResultSet dataSet = user.executeQuery(sql);
+    dataSet.next();
+    printLine(dataSet);
+    long ans = Long.parseLong(dataSet.getString(1));
+    assertEquals(30, ans);
+    dataSet.close();
+  }
 
-    String rightTableName = TPCHTableName.NATION.getName();
-    LeafPlan rightPlan = new LeafPlan();
-    rightPlan.setTableName(rightTableName);
-    rightPlan.setSelectExps(ExpressionFactory
-            .createInputRef(user.getOpenHuFuTableSchema(rightTableName).getSchema()));
+  @Test
+  public void testAvg() throws SQLException {
+    String sql = "select avg(P_PARTKEY) from part";
+    ResultSet dataSet = user.executeQuery(sql);
+    dataSet.next();
+    printLine(dataSet);
+    long ans = Long.parseLong(dataSet.getString(1));
+    assertEquals(100, ans);
+    dataSet.close();
+  }
 
-    BinaryPlan plan = new BinaryPlan(leftPlan, rightPlan);
-    JoinCondition joinCondition = JoinCondition.newBuilder().setType(JoinType.OUTER).addLeftKey(3)
-            .addRightKey(0).setModifier(Modifier.PUBLIC).build();
-    plan.setJoinInfo(joinCondition);
-    plan.setSelectExps(ExpressionFactory
-            .createInputRef(Schema.merge(user.getOpenHuFuTableSchema(leftTableName).getSchema(), user.getOpenHuFuTableSchema(rightTableName).getSchema())));
-    DataSet dataset = user.executeQuery(plan);
-    DataSetIterator it = dataset.getIterator();
+  @Test
+  public void testSum() throws SQLException {
+    String sql = "select sum(P_PARTKEY) from part";
+    ResultSet dataSet = user.executeQuery(sql);
+    dataSet.next();
+    printLine(dataSet);
+    long ans = Long.parseLong(dataSet.getString(1));
+    assertEquals(60300, ans);
+    dataSet.close();
+  }
+
+  @Test
+  public void testMax() throws SQLException {
+    String sql = "select max(C_CUSTKEY) from customer";
+    ResultSet dataSet = user.executeQuery(sql);
+    dataSet.next();
+    printLine(dataSet);
+    long ans = Long.parseLong(dataSet.getString(1));
+    assertEquals(150, ans);
+    dataSet.close();
+  }
+
+  @Test
+  public void testMin() throws SQLException {
+    String sql = "select min(C_CUSTKEY) from customer";
+    ResultSet dataSet = user.executeQuery(sql);
+    dataSet.next();
+    printLine(dataSet);
+    long ans = Long.parseLong(dataSet.getString(1));
+    assertEquals(1, ans);
+    dataSet.close();
+  }
+
+  @Test
+  public void testGroupByAndOrder() throws SQLException {
+    String sql = "select count(C_CUSTKEY) from customer group by C_CUSTKEY order by C_CUSTKEY DESC";
+    ResultSet dataSet = user.executeQuery(sql);
     int count = 0;
-    while (it.next()) {
-      for (int i = 0; i < it.size(); i++) {
-        System.out.print(it.get(i) + "|");
-      }
-      System.out.println();
+    while (dataSet.next()) {
+      printLine(dataSet);
       ++count;
     }
-    assertEquals(138, count);
-    dataset.close();
-  }
-  @Test
-  public void testSemiJoin() {
-    //todo
-    // not support semi-join
-    String leftTableName = TPCHTableName.SUPPLIER.getName();
-    LeafPlan leftPlan = new LeafPlan();
-    leftPlan.setTableName(leftTableName);
-    leftPlan.setSelectExps(ExpressionFactory
-            .createInputRef(user.getOpenHuFuTableSchema(leftTableName).getSchema()));
-
-    String rightTableName = TPCHTableName.NATION.getName();
-    LeafPlan rightPlan = new LeafPlan();
-    rightPlan.setTableName(rightTableName);
-    rightPlan.setSelectExps(ExpressionFactory
-            .createInputRef(user.getOpenHuFuTableSchema(rightTableName).getSchema()));
-
-    BinaryPlan plan = new BinaryPlan(leftPlan, rightPlan);
-    JoinCondition joinCondition = JoinCondition.newBuilder().setType(JoinType.SEMI).addLeftKey(3)
-            .addRightKey(0).setModifier(Modifier.PUBLIC).build();
-    plan.setJoinInfo(joinCondition);
-    plan.setSelectExps(ExpressionFactory
-            .createInputRef(user.getOpenHuFuTableSchema(leftTableName).getSchema()));
-    DataSet dataset = user.executeQuery(plan);
-    DataSetIterator it = dataset.getIterator();
-    int count = 0;
-    while (it.next()) {
-      for (int i = 0; i < it.size(); i++) {
-        System.out.print(it.get(i) + "|");
-      }
-      System.out.println();
-      ++count;
-    }
-    assertEquals(90, count);
-    dataset.close();
-  }
-  @Test
-  public void testCount() {
-    String tableName = TPCHTableName.SUPPLIER.getName();
-    LeafPlan plan = new LeafPlan();
-    plan.setTableName(tableName);
-  plan.setAggExps(ImmutableList.of(
-          ExpressionFactory.createAggFunc(ColumnType.DOUBLE, Modifier.PUBLIC, AggFuncType.COUNT.getId(),
-                  ImmutableList.of(ExpressionFactory.createInputRef(0, ColumnType.LONG, Modifier.PUBLIC)))));
-
-    DataSet dataset = user.executeQuery(plan);
-    DataSetIterator it = dataset.getIterator();
-    it.next();
-    assertEquals(30, ((Number) it.get(0)).longValue());
-    dataset.close();
-  }
-
-  @Test
-  public void testAvg() {
-    String tableName = TPCHTableName.SUPPLIER.getName();
-    LeafPlan plan = new LeafPlan();
-    plan.setTableName(tableName);
-    plan.setAggExps(ImmutableList.of(
-            ExpressionFactory.createAggFunc(ColumnType.DOUBLE, Modifier.PUBLIC, AggFuncType.AVG.getId(),
-                    ImmutableList.of(ExpressionFactory.createInputRef(0, ColumnType.LONG, Modifier.PUBLIC)))));
-
-    DataSet dataset = user.executeQuery(plan);
-    DataSetIterator it = dataset.getIterator();
-    it.next();
-    assertEquals(5.5, ((Number) it.get(0)).doubleValue(), 0.1);
-    dataset.close();
-  }
-
-  @Test
-  public void testSum() {
-    String tableName = TPCHTableName.SUPPLIER.getName();
-    LeafPlan plan = new LeafPlan();
-    plan.setTableName(tableName);
-    plan.setAggExps(ImmutableList.of(
-            ExpressionFactory.createAggFunc(ColumnType.DOUBLE, Modifier.PUBLIC, AggFuncType.SUM.getId(),
-                    ImmutableList.of(ExpressionFactory.createInputRef(0, ColumnType.LONG, Modifier.PUBLIC)))));
-
-    DataSet dataset = user.executeQuery(plan);
-    DataSetIterator it = dataset.getIterator();
-    it.next();
-    assertEquals(165, ((Number) it.get(0)).longValue());
-    dataset.close();
-  }
-
-  @Test
-  public void testMax() {
-    String tableName = TPCHTableName.SUPPLIER.getName();
-    LeafPlan plan = new LeafPlan();
-    plan.setTableName(tableName);
-    plan.setAggExps(ImmutableList.of(
-            ExpressionFactory.createAggFunc(ColumnType.DOUBLE, Modifier.PUBLIC, AggFuncType.MAX.getId(),
-                    ImmutableList.of(ExpressionFactory.createInputRef(0, ColumnType.LONG, Modifier.PUBLIC)))));
-
-    DataSet dataset = user.executeQuery(plan);
-    DataSetIterator it = dataset.getIterator();
-    it.next();
-    assertEquals(10, ((Number) it.get(0)).longValue());
-    dataset.close();
-  }
-
-  @Test
-  public void testMin() {
-    String tableName = TPCHTableName.SUPPLIER.getName();
-    LeafPlan plan = new LeafPlan();
-    plan.setTableName(tableName);
-    plan.setAggExps(ImmutableList.of(
-            ExpressionFactory.createAggFunc(ColumnType.DOUBLE, Modifier.PUBLIC, AggFuncType.MIN.getId(),
-                    ImmutableList.of(ExpressionFactory.createInputRef(0, ColumnType.LONG, Modifier.PUBLIC)))));
-
-    DataSet dataset = user.executeQuery(plan);
-    DataSetIterator it = dataset.getIterator();
-    it.next();
-    assertEquals(1, ((Number) it.get(0)).longValue());
-    dataset.close();
-  }
-
-  @Test
-  public void testGroupByAndOrder() {
-    String tableName = TPCHTableName.SUPPLIER.getName();
-    LeafPlan plan = new LeafPlan();
-    plan.setTableName(tableName);
-    plan.setSelectExps(
-            ImmutableList.of(ExpressionFactory.createInputRef(0, ColumnType.LONG, Modifier.PUBLIC),
-                    ExpressionFactory.createInputRef(3, ColumnType.LONG, Modifier.PUBLIC)));
-    plan.setAggExps(ImmutableList.of(
-            ExpressionFactory.createAggFunc(ColumnType.LONG, Modifier.PUBLIC, AggFuncType.GROUPKEY.getId(),
-                    ImmutableList
-                            .of(ExpressionFactory.createInputRef(1, ColumnType.STRING, Modifier.PUBLIC))),
-            ExpressionFactory.createAggFunc(ColumnType.LONG, Modifier.PUBLIC, AggFuncType.COUNT.getId(),
-                    ImmutableList.of(ExpressionFactory.createInputRef(0, ColumnType.LONG, Modifier.PUBLIC)))));
-    plan.setGroups(ImmutableList.of(1));
-    plan.setOrders(ImmutableList.of(Collation.newBuilder().setRef(1).setDirection(OpenHuFuPlan.Direction.DESC).build(),
-            Collation.newBuilder().setRef(0).setDirection(OpenHuFuPlan.Direction.DESC).build()));
-
-    DataSet dataset = user.executeQuery(plan);
-    DataSetIterator it = dataset.getIterator();
-    it.next();
-    assertEquals(6L, it.get(1));
-    assertEquals(17L, it.get(0));
-    it.next();
-    assertEquals(3L, it.get(1));
-    assertEquals(24L, it.get(0));
-    dataset.close();
+    assertEquals(150, count);
+    dataSet.close();
   }
 } 

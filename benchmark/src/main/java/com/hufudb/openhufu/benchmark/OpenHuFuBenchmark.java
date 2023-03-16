@@ -1,41 +1,18 @@
 package com.hufudb.openhufu.benchmark;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.hufudb.openhufu.benchmark.enums.TPCHTableName;
-import com.hufudb.openhufu.common.exception.ErrorCode;
-import com.hufudb.openhufu.common.exception.OpenHuFuException;
-import com.hufudb.openhufu.core.client.OpenHuFuClient;
-import com.hufudb.openhufu.core.sql.rel.OpenHuFuTable;
-import com.hufudb.openhufu.core.sql.schema.OpenHuFuSchemaFactory;
-import com.hufudb.openhufu.core.sql.schema.OpenHuFuSchemaManager;
 import com.hufudb.openhufu.core.table.GlobalTableConfig;
-import com.hufudb.openhufu.data.schema.Schema;
-import com.hufudb.openhufu.data.schema.SchemaManager;
-import com.hufudb.openhufu.data.storage.DataSet;
-import com.hufudb.openhufu.data.storage.DataSetIterator;
-import com.hufudb.openhufu.expression.AggFuncType;
-import com.hufudb.openhufu.expression.ExpressionFactory;
-import com.hufudb.openhufu.plan.BinaryPlan;
-import com.hufudb.openhufu.proto.OpenHuFuData;
-import com.hufudb.openhufu.proto.OpenHuFuPlan;
 import com.hufudb.openhufu.user.OpenHuFuUser;
-import com.hufudb.openhufu.plan.LeafPlan;
-import com.hufudb.openhufu.plan.Plan;
-import com.hufudb.openhufu.plan.RootPlan;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.apache.calcite.schema.SchemaPlus;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -90,15 +67,15 @@ public class OpenHuFuBenchmark {
   @Measurement(iterations = 1)
   public void testSelect() throws SQLException {
     String sql = "select * from nation";
-    ResultSet dataSet = user.executeQuery(sql);
-    dataSet.close();
+    ResultSet it = user.executeQuery(sql);
+    it.close();
   }
   @Benchmark
   @Fork(0)
   @Warmup(iterations = 2)
   @Measurement(iterations = 1)
   public void testEqualJoin() throws SQLException {
-    String sql = "select * from nation join supplier on nation.N_NATIONKEY = supplier.S_NATIONKEY";
+    String sql = "select * from nation join region on nation.N_REGIONKEY = region.R_REGIONKEY";
     ResultSet dataSet = user.executeQuery(sql);
     dataSet.close();
   }
@@ -107,7 +84,7 @@ public class OpenHuFuBenchmark {
   @Warmup(iterations = 2)
   @Measurement(iterations = 1)
   public void testLeftJoin() throws SQLException {
-    String sql = "select * from nation left join supplier on nation.N_NATIONKEY = supplier.S_NATIONKEY";
+    String sql = "select * from nation left join region on nation.N_REGIONKEY = region.R_REGIONKEY";
     ResultSet dataSet = user.executeQuery(sql);
     dataSet.close();
   }
@@ -116,19 +93,20 @@ public class OpenHuFuBenchmark {
   @Warmup(iterations = 2)
   @Measurement(iterations = 1)
   public void testRightJoin() throws SQLException {
-    String sql = "select * from nation right join supplier on nation.N_NATIONKEY = supplier.S_NATIONKEY";
+    String sql = "select * from nation right join region on nation.N_REGIONKEY = region.R_REGIONKEY";
     ResultSet dataSet = user.executeQuery(sql);
     dataSet.close();
   }
+
   @Benchmark
   @Fork(0)
   @Warmup(iterations = 2)
   @Measurement(iterations = 1)
-  public void testOuterJoin() throws SQLException {
-    String sql = "select * from nation outer join supplier on nation.N_NATIONKEY = supplier.S_NATIONKEY";
-    ResultSet dataSet = user.executeQuery(sql);
-    dataSet.close();
-  }
+public void testFullJoin() throws SQLException {
+  String sql = "select * from nation full join region on nation.N_REGIONKEY = region.R_REGIONKEY";
+  ResultSet dataSet = user.executeQuery(sql);
+  dataSet.close();
+}
   @Benchmark
   @Fork(0)
   @Warmup(iterations = 2)
@@ -144,7 +122,7 @@ public class OpenHuFuBenchmark {
   @Warmup(iterations = 2)
   @Measurement(iterations = 1)
   public void testAvg() throws SQLException {
-    String sql = "select avg(S_SUPPKEY) from supplier";
+    String sql = "select avg(P_PARTKEY) from part";
     ResultSet dataSet = user.executeQuery(sql);
     dataSet.close();
   }
@@ -154,7 +132,7 @@ public class OpenHuFuBenchmark {
   @Warmup(iterations = 2)
   @Measurement(iterations = 1)
   public void testSum() throws SQLException {
-    String sql = "select sum(S_SUPPKEY) from supplier";
+    String sql = "select sum(P_PARTKEY) from part";
     ResultSet dataSet = user.executeQuery(sql);
     dataSet.close();
   }
@@ -164,7 +142,7 @@ public class OpenHuFuBenchmark {
   @Warmup(iterations = 2)
   @Measurement(iterations = 1)
   public void testMax() throws SQLException {
-    String sql = "select max(S_SUPPKEY) from supplier";
+    String sql = "select max(C_CUSTKEY) from customer";
     ResultSet dataSet = user.executeQuery(sql);
     dataSet.close();
   }
@@ -174,7 +152,7 @@ public class OpenHuFuBenchmark {
   @Warmup(iterations = 2)
   @Measurement(iterations = 1)
   public void testMin() throws SQLException {
-    String sql = "select min(S_SUPPKEY) from supplier";
+    String sql = "select min(C_CUSTKEY) from customer";
     ResultSet dataSet = user.executeQuery(sql);
     dataSet.close();
   }
@@ -184,7 +162,7 @@ public class OpenHuFuBenchmark {
   @Warmup(iterations = 2)
   @Measurement(iterations = 1)
   public void testGroupByAndOrder() throws SQLException {
-    String sql = "select count(S_SUPPKEY) from supplier group by S_NATIONKEY order by S_NATIONKEY DESC";
+    String sql = "select count(C_CUSTKEY) from customer group by C_CUSTKEY order by C_CUSTKEY DESC";
     ResultSet dataSet = user.executeQuery(sql);
     dataSet.close();
   }
