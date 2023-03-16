@@ -24,7 +24,7 @@ public class OwnerConfig {
   public ChannelCredentials clientCerts;
   public List<PojoPublishedTableSchema> tables;
   public Map<ProtocolType, ProtocolExecutor> librarys;
-
+  public String implementorConfigPath;
   public OwnerConfig() {}
 
   public OwnerConfig(Party party, int port, String hostname, ExecutorService threadPool,
