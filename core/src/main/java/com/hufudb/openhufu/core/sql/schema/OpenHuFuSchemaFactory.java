@@ -21,7 +21,6 @@ public class OpenHuFuSchemaFactory implements SchemaFactory {
   private OpenHuFuSchemaFactory() {}
 
   private void addUDF(SchemaPlus parentSchema) {
-    // parentSchema.add("POINT", new PointType());
     for (ScalarUDF udf : UDFLoader.scalarUDFs.values()) {
       parentSchema.add(udf.getName(), ScalarFunctionImpl.create(udf.getClass(), udf.getName()));
     }
@@ -49,7 +48,7 @@ public class OpenHuFuSchemaFactory implements SchemaFactory {
     if (operand.containsKey("tables")) {
       tableObjs.addAll((List) operand.get("tables"));
     }
-//    addUDF(parentSchema);
+    addUDF(parentSchema);
     LOG.info("Use model");
     return new OpenHuFuSchemaManager(owners, tableObjs, parentSchema, userId);
   }

@@ -446,7 +446,7 @@ public class CalciteConverter {
           ColumnType type = TypeConverter.convert2OpenHuFuType(call.getType().getSqlTypeName());
           return ExpressionFactory.createScalarFunc(type, function.getName(), eles);
         default:
-          if (!UDFLoader.scalarUDFs.containsKey(function.getName())) {
+          if (!UDFLoader.scalarUDFs.containsKey(funcName)) {
             throw new RuntimeException("can't translate " + call);
           } else {
             return ExpressionFactory.createScalarFunc(UDFLoader.getScalarOutType(funcName, eles), function.getName(), eles);

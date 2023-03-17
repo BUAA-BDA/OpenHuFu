@@ -11,12 +11,13 @@ public class DWithin implements ScalarUDF {
   public String getName() {
     return "dwithin";
   }
-
   @Override
   public ColumnType getOutType(List<ColumnType> inTypes) {
     return ColumnType.BOOLEAN;
   }
-
+  public Boolean dwithin(Point left, Point right, Double distance) {
+    return (Boolean) implement(ImmutableList.of(left, right, distance));
+  }
   @Override
   public Object implement(List<Object> inputs) {
     if (inputs.size() != 3) {
