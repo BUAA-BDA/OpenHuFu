@@ -10,12 +10,13 @@ public class Point implements ScalarUDF {
   public String getName() {
     return "point";
   }
-
   @Override
   public ColumnType getOutType(List<ColumnType> inTypes) {
     return ColumnType.POINT;
   }
-
+  public com.hufudb.openhufu.data.storage.Point point(Double x, Double y) {
+    return (com.hufudb.openhufu.data.storage.Point) implement(ImmutableList.of(x, y));
+  }
   @Override
   public Object implement(List<Object> inputs) {
     if (inputs.size() != 2) {

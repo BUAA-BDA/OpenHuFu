@@ -16,7 +16,9 @@ public class Distance implements ScalarUDF {
   public ColumnType getOutType(List<ColumnType> inTypes) {
     return ColumnType.DOUBLE;
   }
-
+  public Double distance(Point left, Point right) {
+    return (Double) implement(ImmutableList.of(left, right));
+  }
   @Override
   public Object implement(List<Object> inputs) {
     if (inputs.size() != 2) {

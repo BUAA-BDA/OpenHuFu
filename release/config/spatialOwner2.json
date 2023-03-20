@@ -2,6 +2,7 @@
   "id": 2,
   "port": 12346,
   "hostname": "localhost",
+  "implementorconfigpath": "./config/owner.yml",
   "adapterconfig": {
     "datasource": "CSV",
     "url": "../dataset/sample/spatial/database1",
@@ -15,13 +16,13 @@
         {
           "name": "S_ID",
           "type": "LONG",
-          "modifier": "hidden",
+          "modifier": "public",
           "columnId": 0
         },
         {
           "name": "S_POINT",
           "type": "POINT",
-          "modifier": "hidden",
+          "modifier": "protected",
           "columnId": 1
         }
       ]
