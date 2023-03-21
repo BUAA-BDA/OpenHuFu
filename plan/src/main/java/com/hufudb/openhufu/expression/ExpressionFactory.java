@@ -1,5 +1,6 @@
 package com.hufudb.openhufu.expression;
 
+import com.hufudb.openhufu.data.storage.utils.GeometryUtils;
 import java.util.Calendar;
 import java.util.List;
 
@@ -13,6 +14,7 @@ import com.hufudb.openhufu.proto.OpenHuFuPlan.Expression;
 import com.hufudb.openhufu.proto.OpenHuFuPlan.JoinCondition;
 import com.hufudb.openhufu.proto.OpenHuFuPlan.JoinType;
 import com.hufudb.openhufu.proto.OpenHuFuPlan.OperatorType;
+import org.locationtech.jts.geom.Geometry;
 
 public class ExpressionFactory {
   private ExpressionFactory() {
@@ -110,6 +112,8 @@ public class ExpressionFactory {
         return builder.setI32(DateUtils.calendarToTimeInt((Calendar) value)).build();
       case TIMESTAMP:
         return builder.setI64(DateUtils.calendarToTimestampLong((Calendar) value)).build();
+      case GEOMETRY:
+        return builder.setStr(GeometryUtils.toString((Geometry) value)).build();
       case INTERVAL:
         return builder.setI64(((Number) value).longValue()).build();
       default:

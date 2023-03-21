@@ -2,6 +2,7 @@ package com.hufudb.openhufu.owner.adapter.csv;
 
 import com.hufudb.openhufu.common.exception.ErrorCode;
 import com.hufudb.openhufu.common.exception.OpenHuFuException;
+import com.hufudb.openhufu.data.storage.utils.GeometryUtils;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -10,7 +11,6 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import com.hufudb.openhufu.data.function.Mapper;
@@ -18,7 +18,6 @@ import com.hufudb.openhufu.data.schema.Schema;
 import com.hufudb.openhufu.data.storage.DataSet;
 import com.hufudb.openhufu.data.storage.EmptyDataSet;
 import com.hufudb.openhufu.data.storage.MapDataSet;
-import com.hufudb.openhufu.data.storage.Point;
 import com.hufudb.openhufu.proto.OpenHuFuData.ColumnType;
 import org.apache.commons.csv.CSVRecord;
 
@@ -149,8 +148,8 @@ public class CsvTable {
             }
           });
           break;
-        case POINT:
-          mappers.add(row -> Point.parse((String) row.get(actualColumnIdx)));
+        case GEOMETRY:
+          mappers.add(row -> GeometryUtils.fromString((String) row.get(actualColumnIdx)));
           break;
         case STRING:
           mappers.add(row -> row.get(actualColumnIdx));

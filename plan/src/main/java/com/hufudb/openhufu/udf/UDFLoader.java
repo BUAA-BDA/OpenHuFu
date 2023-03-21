@@ -1,14 +1,5 @@
 package com.hufudb.openhufu.udf;
 
-import com.hufudb.openhufu.common.exception.ErrorCode;
-import com.hufudb.openhufu.common.exception.OpenHuFuException;
-import java.io.File;
-import java.io.FileFilter;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
@@ -24,30 +15,17 @@ public class UDFLoader {
   public static Map<String, ScalarUDF> scalarUDFs;
 
   static {
-    Path libDir = Paths.get(System.getenv("OPENHUFU_ROOT"), "udf", "scalar");
-    scalarUDFs = UDFLoader.loadScalarUDF(libDir.toString());
+    scalarUDFs = UDFLoader.loadScalarUDF();
   }
 
   private UDFLoader() {}
 
-  public static Map<String, ScalarUDF> loadScalarUDF(String scalarUDFDirectory) {
-    LOG.info("Load scalar udf from {}", scalarUDFDirectory);
-    File udfs[] = new File(scalarUDFDirectory).listFiles(file -> file.getName().endsWith(".jar"));
-    List<URL> udfURLs = new ArrayList<>(udfs.length);
-    for (File udf : udfs) {
-      try {
-        udfURLs.add(udf.toURI().toURL());
-      } catch (Exception e) {
-        throw new OpenHuFuException(e, ErrorCode.UDF_LOAD_FAILED, udf.toURI().getPath());
-      }
-    }
-    ClassLoader udfClassLoader =
-        new URLClassLoader(udfURLs.toArray(new URL[0]), ScalarUDF.class.getClassLoader());
-    ServiceLoader<ScalarUDF> udfServices = ServiceLoader.load(ScalarUDF.class, udfClassLoader);
+  public static Map<String, ScalarUDF> loadScalarUDF() {
+    ServiceLoader<ScalarUDF> udfServices = ServiceLoader.load(ScalarUDF.class, ScalarUDF.class.getClassLoader());
     ImmutableMap.Builder<String, ScalarUDF> scalarUDFs = ImmutableMap.builder();
     for (ScalarUDF scalar : udfServices) {
       scalarUDFs.put(scalar.getName(), scalar);
-      LOG.info("get scalar udf {}", scalar.getClass().getName());
+      LOG.info("load scalar udf {} success", scalar.getClass().getName());
     }
     return scalarUDFs.build();
   }

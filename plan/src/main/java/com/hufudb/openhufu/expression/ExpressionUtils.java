@@ -1,5 +1,6 @@
 package com.hufudb.openhufu.expression;
 
+import com.hufudb.openhufu.data.storage.utils.GeometryUtils;
 import java.util.List;
 import java.util.stream.Collectors;
 import com.hufudb.openhufu.data.schema.Schema;
@@ -53,6 +54,8 @@ public class ExpressionUtils {
         return DateUtils.longToTimestamp(lit.getI64());
       case LONG:
         return lit.getI64();
+      case GEOMETRY:
+        return GeometryUtils.fromString(lit.getStr());
       default:
         throw new UnsupportedOperationException("Unsupported literal type");
     }

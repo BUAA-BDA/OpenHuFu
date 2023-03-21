@@ -1,2 +1,2 @@
 id,location
-INT, POINT
+INT, GEOMETRY

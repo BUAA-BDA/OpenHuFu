@@ -6,6 +6,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import com.hufudb.openhufu.data.storage.utils.GeometryUtils;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Time;
@@ -26,6 +27,7 @@ import com.hufudb.openhufu.proto.OpenHuFuPlan.Collation;
 import com.hufudb.openhufu.proto.OpenHuFuPlan.Direction;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Test;
+import org.locationtech.jts.geom.Geometry;
 
 public class DataSetTest {
 
@@ -512,12 +514,12 @@ public class DataSetTest {
 
   @Test
   public void testDataSetWithPoint() {
-    Schema schema = Schema.newBuilder().add("A", ColumnType.POINT, Modifier.PUBLIC).build();
+    Schema schema = Schema.newBuilder().add("A", ColumnType.GEOMETRY, Modifier.PUBLIC).build();
     Random random = new Random();
-    List<Point> ps = new ArrayList<>();
+    List<Geometry> ps = new ArrayList<>();
     ProtoDataSet.Builder dBuilder = ProtoDataSet.newBuilder(schema);
     for (int i = 0; i < 10; ++i) {
-      Point p = new Point(random.nextDouble(), random.nextDouble());
+      Geometry p = GeometryUtils.fromString(String.format("POINT(%f %f)", random.nextDouble(), random.nextDouble()));
       ArrayRow.Builder rBuilder = ArrayRow.newBuilder(1);
       rBuilder.set(0, p);
       dBuilder.addRow(rBuilder.build());

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+#set -e
 
 start() {
   echo "load config from $1"
