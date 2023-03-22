@@ -90,3 +90,6 @@ dataset/SynData
 dataset/databases
 !dataset/newyork-taxi.zip
 !dataset/newyork-taxi-sample.txt
+``
+# aby
+aby4j/swig/build/

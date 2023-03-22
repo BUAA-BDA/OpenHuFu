@@ -29,6 +29,8 @@ public class TypeConverter {
         return SqlTypeName.TIME;
       case TIMESTAMP:
         return SqlTypeName.TIMESTAMP;
+      case GEOMETRY:
+        return SqlTypeName.GEOMETRY;
       default:
         return SqlTypeName.ANY;
     }
@@ -60,6 +62,8 @@ public class TypeConverter {
         return ColumnType.TIME;
       case TIMESTAMP:
         return ColumnType.TIMESTAMP;
+      case GEOMETRY:
+        return ColumnType.GEOMETRY;
       case INTERVAL_YEAR:
       case INTERVAL_YEAR_MONTH:
       case INTERVAL_MONTH:

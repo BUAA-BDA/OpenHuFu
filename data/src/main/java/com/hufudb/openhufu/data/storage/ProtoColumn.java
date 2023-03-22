@@ -1,5 +1,6 @@
 package com.hufudb.openhufu.data.storage;
 
+import com.hufudb.openhufu.data.storage.utils.GeometryUtils;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -14,6 +15,7 @@ import com.hufudb.openhufu.proto.OpenHuFuData.F64Column;
 import com.hufudb.openhufu.proto.OpenHuFuData.I32Column;
 import com.hufudb.openhufu.proto.OpenHuFuData.I64Column;
 import com.hufudb.openhufu.proto.OpenHuFuData.StringColumn;
+import org.locationtech.jts.geom.Geometry;
 
 /**
  * Wrapper of protocol buffer ColumnProto
@@ -69,8 +71,8 @@ public class ProtoColumn implements Column {
         this.size = column.getBoolcol().getCellCount();
         break;
       case BYTESCOL:
-        if (type == ColumnType.POINT) {
-          this.getter = (rowNum) -> Point.fromBytes(column.getBytescol().getCell(rowNum).toByteArray());
+        if (type == ColumnType.GEOMETRY) {
+          this.getter = (rowNum) -> GeometryUtils.fromBytes(column.getBytescol().getCell(rowNum).toByteArray());
         } else {
           this.getter = (rowNum) -> column.getBytescol().getCell(rowNum).toByteArray();
         }
@@ -136,9 +138,9 @@ public class ProtoColumn implements Column {
           bytesBuilder = BytesColumn.newBuilder();
           appender = (val) -> bytesBuilder.addCell(ByteString.copyFrom((byte[]) val));
           break;
-        case POINT:
+        case GEOMETRY:
           bytesBuilder = BytesColumn.newBuilder();
-          appender = (val) -> bytesBuilder.addCell(ByteString.copyFrom(((Point) val).toBytes()));
+          appender = (val) -> bytesBuilder.addCell(ByteString.copyFrom((GeometryUtils.toBytes((Geometry) val))));
           break;
         case STRING:
           strBuilder = StringColumn.newBuilder();
@@ -208,7 +210,7 @@ public class ProtoColumn implements Column {
           boolBuilder.clear();
           break;
         case BLOB:
-        case POINT:
+        case GEOMETRY:
           bytesBuilder.clear();
           break;
         case STRING:
@@ -242,7 +244,7 @@ public class ProtoColumn implements Column {
           columnBuilder.setBoolcol(boolBuilder.build());
           break;
         case BLOB:
-        case POINT:
+        case GEOMETRY:
           columnBuilder.setBytescol(bytesBuilder.build());
           break;
         case STRING:

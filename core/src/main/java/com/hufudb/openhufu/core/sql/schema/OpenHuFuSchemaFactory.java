@@ -5,10 +5,14 @@ import com.hufudb.openhufu.udf.UDFLoader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.apache.calcite.rel.type.RelDataTypeFactory;
+import org.apache.calcite.rel.type.RelDataTypeSystem;
+import org.apache.calcite.schema.ScalarFunction;
 import org.apache.calcite.schema.Schema;
 import org.apache.calcite.schema.SchemaFactory;
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.schema.impl.ScalarFunctionImpl;
+import org.apache.calcite.sql.type.SqlTypeFactoryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +26,8 @@ public class OpenHuFuSchemaFactory implements SchemaFactory {
 
   private void addUDF(SchemaPlus parentSchema) {
     for (ScalarUDF udf : UDFLoader.scalarUDFs.values()) {
-      parentSchema.add(udf.getName(), ScalarFunctionImpl.create(udf.getClass(), udf.getName()));
+      ScalarFunction function = ScalarFunctionImpl.create(udf.getClass(), udf.getName());
+      parentSchema.add(udf.getName(), function);
     }
   }
 

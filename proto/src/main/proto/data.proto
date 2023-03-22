@@ -21,7 +21,7 @@ enum ColumnType {
   TIME = 11;
   TIMESTAMP = 12;
   INTERVAL = 13;
-  POINT = 14;
+  GEOMETRY = 14;
 }
 
 enum Modifier {
