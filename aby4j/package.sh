@@ -1,4 +1,7 @@
 #!/bin/bash
+
+set -ex
+
 if [ ${OPENHUFU_ROOT} ];then
   mkdir -p ${OPENHUFU_ROOT}/lib
   export LD_LIBRARY_PATH=${OPENHUFU_ROOT}/lib

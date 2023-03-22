@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import com.hufudb.openhufu.common.enums.DataSourceType;
+import com.hufudb.openhufu.data.storage.utils.GeometryUtils;
 import java.net.URL;
 import java.sql.Date;
 import java.sql.Time;
@@ -13,7 +14,6 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 import org.junit.Test;
@@ -24,7 +24,6 @@ import com.hufudb.openhufu.data.schema.utils.PojoColumnDesc;
 import com.hufudb.openhufu.data.schema.utils.PojoPublishedTableSchema;
 import com.hufudb.openhufu.data.storage.DataSet;
 import com.hufudb.openhufu.data.storage.DataSetIterator;
-import com.hufudb.openhufu.data.storage.Point;
 import com.hufudb.openhufu.data.storage.utils.ColumnTypeWrapper;
 import com.hufudb.openhufu.data.storage.utils.ModifierWrapper;
 import com.hufudb.openhufu.expression.ExpressionFactory;
@@ -97,7 +96,7 @@ public class CsvAdapterTest {
     t4.setPublishedName("traffic");
     t4.setPublishedColumns(ImmutableList.of(
         new PojoColumnDesc("id", ColumnTypeWrapper.INT, ModifierWrapper.PUBLIC, 0),
-        new PojoColumnDesc("location", ColumnTypeWrapper.POINT, ModifierWrapper.PUBLIC, 1)));
+        new PojoColumnDesc("location", ColumnTypeWrapper.GEOMETRY, ModifierWrapper.PUBLIC, 1)));
     manager.addPublishedTable(t1);
     manager.addPublishedTable(t2);
     manager.addPublishedTable(t3);
@@ -265,13 +264,13 @@ public class CsvAdapterTest {
     result = adapter.query(plan);
     it = result.getIterator();
     assertTrue(it.next());
-    assertEquals(new Point(0, -1), it.get(1));
+    assertEquals(GeometryUtils.fromString(String.format("POINT(%d %d)", 0, -1)), it.get(1));
     assertTrue(it.next());
-    assertEquals(new Point(0, 0), it.get(1));
+    assertEquals(GeometryUtils.fromString(String.format("POINT(%d %d)", 0, 0)), it.get(1));
     assertTrue(it.next());
-    assertEquals(new Point(1, -1), it.get(1));
+    assertEquals(GeometryUtils.fromString(String.format("POINT(%d %d)", 1, -1)), it.get(1));
     assertTrue(it.next());
-    assertEquals(new Point(-1, 1), it.get(1));
+    assertEquals(GeometryUtils.fromString(String.format("POINT(%d %d)", -1, 1)), it.get(1));
     assertTrue(it.next());
     assertNull(it.get(1));
     assertFalse(it.next());

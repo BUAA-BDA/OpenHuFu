@@ -21,7 +21,7 @@
         },
         {
           "name": "S_POINT",
-          "type": "POINT",
+          "type": "GEOMETRY",
           "modifier": "protected",
           "columnId": 1
         }

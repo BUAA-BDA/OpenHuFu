@@ -126,7 +126,7 @@ def genSynData(points, desPath, prefix, size, databaseID):
     with open(csvFileName, "w") as fout:
         fout.write("S_ID | S_POINT\n")
         for i in range(len(points)):
-            fout.write(str(size * databaseID + i) + " | (")
+            fout.write(str(size * databaseID + i) + " | POINT(")
             fout.write(" ".join(map(str, points[i])))
             fout.write(")\n")
     with open(scmFileName, "w") as fout:

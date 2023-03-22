@@ -39,6 +39,7 @@ import org.apache.calcite.sql.validate.SqlUserDefinedFunction;
 import org.apache.calcite.util.DateString;
 import org.apache.calcite.util.NlsString;
 import org.apache.calcite.util.Sarg;
+import org.locationtech.jts.geom.Geometry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -159,6 +160,8 @@ public class CalciteConverter {
         return ExpressionFactory.createLiteral(type, literal.getValueAs(Calendar.class));
       case INTERVAL:
         return ExpressionFactory.createLiteral(type, literal.getValueAs(Long.class));
+      case GEOMETRY:
+        return ExpressionFactory.createLiteral(type, literal.getValueAs(Geometry.class));
       default:
         return ExpressionFactory.createLiteral(type, literal.getValue2());
     }
