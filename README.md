@@ -106,6 +106,10 @@ The distributions we support and their params are as follow:
 
 (If needed, you can modify `scripts/test/genSyntheticData.py`)
 
+### Notes
+Each table is defined by two files in CSV and SCM format, and the names of the files serve as the actual names of the tables. <br/>
+The CSV file contains the column names and the data of the table, while the SCM file contains the column names and column types. The delimiter is used to separate different column fields, and it can be specified in the owner's configuration file.
+
 ## Configuration File
 
 ### OwnerSide
@@ -220,7 +224,9 @@ sudo bash scripts/test/network_mmonitor/monitor.sh
 
 * Filter
 * Projection
-* Join: equi-join, theta join 
+* Join
+  * equi join
+  * theta join
 * Cross products
 * Aggregate(inc. group-by)
 * Limited window aggs
