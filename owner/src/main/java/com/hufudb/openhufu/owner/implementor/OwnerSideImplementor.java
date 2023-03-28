@@ -15,8 +15,13 @@ import com.hufudb.openhufu.plan.Plan;
 import com.hufudb.openhufu.plan.UnaryPlan;
 import com.hufudb.openhufu.proto.OpenHuFuPlan.PlanType;
 import com.hufudb.openhufu.rpc.Rpc;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OwnerSideImplementor implements PlanImplementor {
+
+  private static final Logger LOG = LoggerFactory.getLogger(OwnerSideImplementor.class);
+
   Rpc rpc;
   Adapter dataSourceAdapter;
   ExecutorService threadPool;
@@ -59,7 +64,7 @@ public class OwnerSideImplementor implements PlanImplementor {
       }
       return result;
     } catch (ProtocolException e) {
-      LOG.error("Error in HashPSIJoin: {}", e.getMessage());
+      LOG.error("Error in owner side join: {}", e);
       return EmptyDataSet.INSTANCE;
     }
   }

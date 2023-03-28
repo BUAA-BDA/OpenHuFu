@@ -73,7 +73,7 @@ public class OpenHuFuBenchmarkTest {
     it.close();
   }
   @Test
-  public void testEqualJoin() throws SQLException {
+  public void testEqualJoinMPC() throws SQLException {
     String sql = "select * from nation join region on nation.N_REGIONKEY = region.R_REGIONKEY";
     ResultSet dataSet = user.executeQuery(sql);
     int count = 0;
@@ -82,6 +82,19 @@ public class OpenHuFuBenchmarkTest {
       ++count;
     }
     assertEquals(25, count);
+    dataSet.close();
+  }
+
+  @Test
+  public void testEqualJoin() throws SQLException {
+    String sql = "select * from orders join customer on orders.O_CUSTKEY = customer.C_CUSTKEY";
+    ResultSet dataSet = user.executeQuery(sql);
+    int count = 0;
+    while (dataSet.next()) {
+      printLine(dataSet);
+      ++count;
+    }
+    assertEquals(4500, count);
     dataSet.close();
   }
   @Test
@@ -138,7 +151,7 @@ public class OpenHuFuBenchmarkTest {
     dataSet.next();
     printLine(dataSet);
     long ans = Long.parseLong(dataSet.getString(1));
-    assertEquals(100, ans);
+    assertEquals(300, ans);
     dataSet.close();
   }
 
@@ -149,7 +162,7 @@ public class OpenHuFuBenchmarkTest {
     dataSet.next();
     printLine(dataSet);
     long ans = Long.parseLong(dataSet.getString(1));
-    assertEquals(60300, ans);
+    assertEquals(180300, ans);
     dataSet.close();
   }
 
@@ -160,7 +173,7 @@ public class OpenHuFuBenchmarkTest {
     dataSet.next();
     printLine(dataSet);
     long ans = Long.parseLong(dataSet.getString(1));
-    assertEquals(150, ans);
+    assertEquals(450, ans);
     dataSet.close();
   }
 
@@ -184,7 +197,7 @@ public class OpenHuFuBenchmarkTest {
       printLine(dataSet);
       ++count;
     }
-    assertEquals(150, count);
+    assertEquals(450, count);
     dataSet.close();
   }
 } 

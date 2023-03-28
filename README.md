@@ -50,19 +50,19 @@ OpenHuFu is now installed in `release`
 
 ### Notes
 
-If you use Macs with Apple Silicon Chips(ARM), you need to add this to `settings.xml`(maven settings file):
+If you use MacsOS, you need to add this to `settings.xml`(maven settings file):
 
 ``` xml
 <profiles>
     <profile>
-      <id>apple-silicon</id>
+      <id>macos</id>
       <properties>
         <os.detected.classifier>osx-x86_64</os.detected.classifier>
       </properties>
     </profile>
 </profiles>
 <activeProfiles>
-    <activeProfile>apple-silicon</activeProfile>
+    <activeProfile>macos</activeProfile>
 </activeProfiles>
 ```
 
@@ -75,10 +75,13 @@ If you use Macs with Apple Silicon Chips(ARM), you need to add this to `settings
 ```shell
 bash scripts/test/extract_tpc_h.sh
 
-cd dataset/TPC-H V3.0.1/dbgen
+cd dataset/TPC-H\ V3.0.1/dbgen
 cp makefile.suite makefile
+# If you use MacOS, you need to replace '#include <malloc.h>' with #include <sys/malloc.h> in dbgen
 make
 
+# Go to the root folder
+cd ../../..
 # x is the number of database，y is the volume of each database(MB)
 bash scripts/test/generateData.sh x y
 ```
@@ -105,6 +108,10 @@ The distributions we support and their params are as follow:
 |     exp      |  mu (default = 5e6)  |                       |
 
 (If needed, you can modify `scripts/test/genSyntheticData.py`)
+
+### Notes
+Each table is defined by two files in CSV and SCM format, and the names of the files serve as the actual names of the tables. <br/>
+The CSV file contains the column names and the data of the table, while the SCM file contains the column names and column types. The delimiter is used to separate different column fields, and it can be specified in the owner's configuration file.
 
 ## Configuration File
 
@@ -220,7 +227,9 @@ sudo bash scripts/test/network_mmonitor/monitor.sh
 
 * Filter
 * Projection
-* Join: equi-join, theta join 
+* Join
+  * equi join
+  * theta join
 * Cross products
 * Aggregate(inc. group-by)
 * Limited window aggs
