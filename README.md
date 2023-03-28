@@ -50,19 +50,19 @@ OpenHuFu is now installed in `release`
 
 ### Notes
 
-If you use Macs with Apple Silicon Chips(ARM), you need to add this to `settings.xml`(maven settings file):
+If you use MacsOS, you need to add this to `settings.xml`(maven settings file):
 
 ``` xml
 <profiles>
     <profile>
-      <id>apple-silicon</id>
+      <id>macos</id>
       <properties>
         <os.detected.classifier>osx-x86_64</os.detected.classifier>
       </properties>
     </profile>
 </profiles>
 <activeProfiles>
-    <activeProfile>apple-silicon</activeProfile>
+    <activeProfile>macos</activeProfile>
 </activeProfiles>
 ```
 
@@ -75,10 +75,13 @@ If you use Macs with Apple Silicon Chips(ARM), you need to add this to `settings
 ```shell
 bash scripts/test/extract_tpc_h.sh
 
-cd dataset/TPC-H V3.0.1/dbgen
+cd dataset/TPC-H\ V3.0.1/dbgen
 cp makefile.suite makefile
+# If you use MacOS, you need to replace '#include <malloc.h>' with #include <sys/malloc.h> in dbgen
 make
 
+# Go to the root folder
+cd ../../..
 # x is the number of database，y is the volume of each database(MB)
 bash scripts/test/generateData.sh x y
 ```

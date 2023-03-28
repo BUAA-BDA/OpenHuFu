@@ -28,31 +28,32 @@ do
     ((i = i + 1))
 done
 
-totalSize=$((databaseNum*dataSize))
+totalSize=`echo "scale=3;${databaseNum}*${dataSize}/1000"|bc`
+echo "generating data, total size: ${totalSize} G"
 
-if [ $totalSize -lt 1000 ];
-then
-  totalSize=1
-else
-  totalSize=$((databaseNum*dataSize/1000))
-fi
-echo "generating data, total size: $totalSize G"
 cd ./dataset/TPC-H\ V3.0.1/dbgen/
 
 ./dbgen -f -s $totalSize
+
 cd ../../..
 pwd
+
 i=0
-echo "N_NATIONKEY | N_NAME | N_REGIONKEY | N_COMMENT" > $dstDir/database0/nation.csv
-sed 's/.$//' ./dataset/TPC-H\ V3.0.1/dbgen/nation.tbl >> $dstDir/database0/nation.csv
-echo "N_NATIONKEY | N_NAME | N_REGIONKEY | N_COMMENT" > $dstDir/database0/nation.scm
-echo "LONG | STRING | LONG | STRING" >> $dstDir/database0/nation.scm
+while ((i < databaseNum))
+do
+  echo "N_NATIONKEY | N_NAME | N_REGIONKEY | N_COMMENT" > $dstDir/database$i/nation.csv
+  sed 's/.$//' ./dataset/TPC-H\ V3.0.1/dbgen/nation.tbl >> $dstDir/database$i/nation.csv
+  echo "N_NATIONKEY | N_NAME | N_REGIONKEY | N_COMMENT" > $dstDir/database$i/nation.scm
+  echo "LONG | STRING | LONG | STRING" >> $dstDir/database$i/nation.scm
 
-echo "R_REGIONKEY | R_NAME | R_COMMENT" > $dstDir/database0/region.csv
-sed 's/.$//' ./dataset/TPC-H\ V3.0.1/dbgen/region.tbl >> $dstDir/database0/region.csv
-echo "R_REGIONKEY | R_NAME | R_COMMENT" > $dstDir/database0/region.scm
-echo "LONG | STRING | STRING" >> $dstDir/database0/region.scm
+  echo "R_REGIONKEY | R_NAME | R_COMMENT" > $dstDir/database$i/region.csv
+  sed 's/.$//' ./dataset/TPC-H\ V3.0.1/dbgen/region.tbl >> $dstDir/database$i/region.csv
+  echo "R_REGIONKEY | R_NAME | R_COMMENT" > $dstDir/database$i/region.scm
+  echo "LONG | STRING | STRING" >> $dstDir/database$i/region.scm
+  ((i = i + 1))
+done
 
+i=0
 while ((i < databaseNum))
 do
 	echo "separating data, running for database$i"
@@ -70,8 +71,8 @@ do
 	echo "L_ORDERKEY | L_PARTKEY | L_SUPPKEY | L_LINENUMBER | L_QUANTITY | L_EXTENDEDPRICE | L_DISCOUNT | L_TAX | L_RETURNFLAG | L_LINESTATUS | L_SHIPDATE | L_COMMITDATE | L_RECEIPTDATE | L_SHIPINSTRUCT | L_SHIPMODE | L_COMMENT" > $dstDir/database$i/lineitem.scm
 	echo "LONG | LONG | LONG | LONG | LONG | DOUBLE | DOUBLE | DOUBLE | STRING | STRING | DATE | DATE | DATE | STRING | STRING | STRING" >> $dstDir/database$i/lineitem.scm
 
-	((a = i * 6000 * dataSize + 1))
-	((b = (i + 1) * 6000 * dataSize))
+	((a = i * 1500 * dataSize + 1))
+	((b = (i + 1) * 1500 * dataSize))
 	echo "O_ORDERKEY | O_CUSTKEY | O_ORDERSTATUS | O_TOTALPRICE | O_ORDERDATE | O_ORDER-PRIORITY | O_CLERK | O_SHIP-PRIORITY | O_COMMENT" > $dstDir/database$i/orders.csv
 	sed -n "$a,$b"p ./dataset/TPC-H\ V3.0.1/dbgen/orders.tbl | sed 's/.$//' >> $dstDir/database$i/orders.csv
 	echo "O_ORDERKEY | O_CUSTKEY | O_ORDERSTATUS | O_TOTALPRICE | O_ORDERDATE | O_ORDER-PRIORITY | O_CLERK | O_SHIP-PRIORITY | O_COMMENT" > $dstDir/database$i/orders.scm
@@ -100,4 +101,4 @@ do
 
 	((i = i + 1))
 done
-rm ./dataset/TPC-H\ V3.0.1/dbgen/*.tbl
+#rm ./dataset/TPC-H\ V3.0.1/dbgen/*.tbl
