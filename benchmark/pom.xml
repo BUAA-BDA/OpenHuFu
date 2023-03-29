@@ -14,7 +14,6 @@
   <properties>
     <uberjar.name>benchmarks</uberjar.name>
     <jmh.version>1.23</jmh.version>
-    <javac.target>11</javac.target>
   </properties>
 
   <dependencies>
@@ -65,9 +64,9 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.1</version>
         <configuration>
-          <compilerVersion>${javac.target}</compilerVersion>
-          <source>${javac.target}</source>
-          <target>${javac.target}</target>
+          <compilerVersion>${maven.compiler.source}</compilerVersion>
+          <source>${maven.compiler.source}</source>
+          <target>${maven.compiler.target}</target>
         </configuration>
       </plugin>
       <plugin>
