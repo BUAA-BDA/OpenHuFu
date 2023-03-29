@@ -189,8 +189,8 @@ public class OpenHuFuBenchmarkTest {
   }
 
   @Test
-  public void testGroupByAndOrder() throws SQLException {
-    String sql = "select count(C_CUSTKEY) from customer group by C_CUSTKEY order by C_CUSTKEY DESC";
+  public void testGroupByAndOrder1() throws SQLException {
+    String sql = "select C_CUSTKEY, count(C_CUSTKEY) from customer group by C_CUSTKEY order by C_CUSTKEY DESC";
     ResultSet dataSet = user.executeQuery(sql);
     int count = 0;
     while (dataSet.next()) {
@@ -198,6 +198,32 @@ public class OpenHuFuBenchmarkTest {
       ++count;
     }
     assertEquals(450, count);
+    dataSet.close();
+  }
+
+  @Test
+  public void testGroupByAndOrder2() throws SQLException {
+    String sql = "select O_CUSTKEY, count(O_CUSTKEY) from orders group by O_CUSTKEY order by O_CUSTKEY ASC";
+    ResultSet dataSet = user.executeQuery(sql);
+    int count = 0;
+    while (dataSet.next()) {
+      printLine(dataSet);
+      ++count;
+    }
+    assertEquals(300, count);
+    dataSet.close();
+  }
+
+  @Test
+  public void testGroupByAndOrder3() throws SQLException {
+    String sql = "select O_CUSTKEY, count(O_CUSTKEY) from orders group by O_CUSTKEY order by count(O_CUSTKEY) DESC, O_CUSTKEY ASC";
+    ResultSet dataSet = user.executeQuery(sql);
+    int count = 0;
+    while (dataSet.next()) {
+      printLine(dataSet);
+      ++count;
+    }
+    assertEquals(300, count);
     dataSet.close();
   }
 } 
