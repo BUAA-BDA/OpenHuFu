@@ -73,9 +73,9 @@ do
 
 	((a = i * 1500 * dataSize + 1))
 	((b = (i + 1) * 1500 * dataSize))
-	echo "O_ORDERKEY | O_CUSTKEY | O_ORDERSTATUS | O_TOTALPRICE | O_ORDERDATE | O_ORDER-PRIORITY | O_CLERK | O_SHIP-PRIORITY | O_COMMENT" > $dstDir/database$i/orders.csv
+	echo "O_ORDERKEY | O_CUSTKEY | O_ORDERSTATUS | O_TOTALPRICE | O_ORDERDATE | O_ORDERPRIORITY | O_CLERK | O_SHIPPRIORITY | O_COMMENT" > $dstDir/database$i/orders.csv
 	sed -n "$a,$b"p ./dataset/TPC-H\ V3.0.1/dbgen/orders.tbl | sed 's/.$//' >> $dstDir/database$i/orders.csv
-	echo "O_ORDERKEY | O_CUSTKEY | O_ORDERSTATUS | O_TOTALPRICE | O_ORDERDATE | O_ORDER-PRIORITY | O_CLERK | O_SHIP-PRIORITY | O_COMMENT" > $dstDir/database$i/orders.scm
+	echo "O_ORDERKEY | O_CUSTKEY | O_ORDERSTATUS | O_TOTALPRICE | O_ORDERDATE | O_ORDERPRIORITY | O_CLERK | O_SHIPPRIORITY | O_COMMENT" > $dstDir/database$i/orders.scm
 	echo "LONG | LONG | STRING | DOUBLE | DATE | STRING | STRING | INT | STRING" >> $dstDir/database$i/orders.scm
 
 	((a = i * 200 * dataSize + 1))
