@@ -1,9 +1,6 @@
 package com.hufudb.openhufu.mpc.secretsharing;
 
 import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
 import com.google.common.collect.ImmutableList;
 import com.hufudb.openhufu.mpc.ProtocolException;
 import com.hufudb.openhufu.mpc.ProtocolType;
@@ -22,25 +19,10 @@ import com.hufudb.openhufu.rpc.utils.DataPacketHeader;
  */
 public class SecretSharing extends RpcProtocolExecutor {
   final OpenHuFuRandom random;
-  private final static Lock lock = new ReentrantLock();
-  private static int globalSeqNum = 0;
-  private final static int SEQ_NUM_MAX = 100000;
+
   public SecretSharing(Rpc rpc) {
     super(rpc, ProtocolType.SS);
     this.random = new BasicRandom();
-  }
-  private static int newSeqNum() {
-    int ans;
-    lock.lock();
-    try {
-      ans = globalSeqNum;
-      globalSeqNum = (globalSeqNum + 1) % SEQ_NUM_MAX;
-    }
-    finally {
-      lock.unlock();
-    }
-    LOG.info("globalSeqNum is {}", ans);
-    return ans;
   }
 
   List<Long> splitLong(long value, int n) {
@@ -84,28 +66,24 @@ public class SecretSharing extends RpcProtocolExecutor {
   }
 
   List<? extends Number> distributeLong(long taskId, List<Integer> parties,
-                                        List<? extends Number> localshares, int seqNum) {
+      List<? extends Number> localshares) {
     // send local shares to other parties
     ImmutableList.Builder<Long> shares = ImmutableList.builder();
     for (int i = 0; i < parties.size(); ++i) {
       if (parties.get(i) != ownId) {
         final DataPacketHeader header =
-            new DataPacketHeader(taskId, getProtocolTypeId(), seqNum, ownId, parties.get(i));
-        LOG.info("secret sharing: start sending Long from owner" + ownId + " to owner" + (i + 1) + " :" + " {}", header);
+            new DataPacketHeader(taskId, getProtocolTypeId(), 0, ownId, parties.get(i));
         rpc.send(DataPacket.fromByteArrayList(header,
             ImmutableList.of(OpenHuFuCodec.encodeLong(localshares.get(i).longValue()))));
-        LOG.info("secret sharing: finish sending Long from owner" + ownId + " to owner" + (i + 1) + " : {}\n", header);
       }
     }
     // receive shares from other parties
     for (int i = 0; i < parties.size(); ++i) {
       if (parties.get(i) != ownId) {
         final DataPacketHeader expect =
-            new DataPacketHeader(taskId, getProtocolTypeId(), seqNum, parties.get(i), ownId);
-        LOG.info("secret sharing: start receiving Long from owner" + (i + 1) + " to owner" + ownId + " : {}", expect);
+            new DataPacketHeader(taskId, getProtocolTypeId(), 0, parties.get(i), ownId);
         DataPacket packet = rpc.receive(expect);
         shares.add(OpenHuFuCodec.decodeLong(packet.getPayload().get(0)));
-        LOG.info("secret sharing: finish receiving Long from owner" + (i + 1) + " to owner" + ownId + " : {}\n", expect);
       } else {
         shares.add(localshares.get(i).longValue());
       }
@@ -114,13 +92,13 @@ public class SecretSharing extends RpcProtocolExecutor {
   }
 
   List<? extends Number> distributeDouble(long taskId, List<Integer> parties,
-                                          List<? extends Number> localshares, int seqNum) {
+      List<? extends Number> localshares) {
     // send local shares to other parties
     ImmutableList.Builder<Double> shares = ImmutableList.builder();
     for (int i = 0; i < parties.size(); ++i) {
       if (parties.get(i) != ownId) {
         final DataPacketHeader header =
-            new DataPacketHeader(taskId, getProtocolTypeId(), seqNum, ownId, parties.get(i));
+            new DataPacketHeader(taskId, getProtocolTypeId(), 0, ownId, parties.get(i));
         rpc.send(DataPacket.fromByteArrayList(header,
             ImmutableList.of(OpenHuFuCodec.encodeDouble(localshares.get(i).doubleValue()))));
       }
@@ -129,7 +107,7 @@ public class SecretSharing extends RpcProtocolExecutor {
     for (int i = 0; i < parties.size(); ++i) {
       if (parties.get(i) != ownId) {
         final DataPacketHeader expect =
-            new DataPacketHeader(taskId, getProtocolTypeId(), seqNum, parties.get(i), ownId);
+            new DataPacketHeader(taskId, getProtocolTypeId(), 0, parties.get(i), ownId);
         DataPacket packet = rpc.receive(expect);
         shares.add(OpenHuFuCodec.decodeDouble(packet.getPayload().get(0)));
       } else {
@@ -140,28 +118,28 @@ public class SecretSharing extends RpcProtocolExecutor {
   }
 
   List<? extends Number> distribute(long taskId, List<Integer> parties,
-                                    List<? extends Number> shares, ColumnType type, int seqNum) {
+      List<? extends Number> shares, ColumnType type) {
     switch (type) {
       case FLOAT:
       case DOUBLE:
-        return distributeDouble(taskId, parties, shares, seqNum);
+        return distributeDouble(taskId, parties, shares);
       default:
-        return distributeLong(taskId, parties, shares, seqNum);
+        return distributeLong(taskId, parties, shares);
     }
   }
 
-  long sumLong(long taskId, List<Integer> parties, List<? extends Number> shares, int seqNum) {
+  long sumLong(long taskId, List<Integer> parties, List<? extends Number> shares) {
     long sum = 0L;
     for (Number s : shares) {
       sum += s.longValue();
     }
     if (ownId != parties.get(0)) {
-      DataPacketHeader header = new DataPacketHeader(taskId, getProtocolTypeId(), seqNum, ownId, parties.get(0));
+      DataPacketHeader header = new DataPacketHeader(taskId, getProtocolTypeId(), 1, ownId, parties.get(0));
       rpc.send(DataPacket.fromByteArrayList(header, ImmutableList.of(OpenHuFuCodec.encodeLong(sum))));
       return 0L;
     } else {
       for (int i = 1; i < parties.size(); ++i) {
-        final DataPacketHeader expect = new DataPacketHeader(taskId, getProtocolTypeId(), seqNum, parties.get(i), ownId);
+        final DataPacketHeader expect = new DataPacketHeader(taskId, getProtocolTypeId(), 1, parties.get(i), ownId);
         DataPacket packet = rpc.receive(expect);
         sum += OpenHuFuCodec.decodeLong(packet.getPayload().get(0));
       }
@@ -169,18 +147,18 @@ public class SecretSharing extends RpcProtocolExecutor {
     }
   }
 
-  double sumDouble(long taskId, List<Integer> parties, List<? extends Number> shares, int seqNum) {
+  double sumDouble(long taskId, List<Integer> parties, List<? extends Number> shares) {
     double sum = 0;
     for (Number s : shares) {
       sum += s.doubleValue();
     }
     if (ownId != parties.get(0)) {
-      DataPacketHeader header = new DataPacketHeader(taskId, getProtocolTypeId(), seqNum, ownId, parties.get(0));
+      DataPacketHeader header = new DataPacketHeader(taskId, getProtocolTypeId(), 1, ownId, parties.get(0));
       rpc.send(DataPacket.fromByteArrayList(header, ImmutableList.of(OpenHuFuCodec.encodeDouble(sum))));
       return 0L;
     } else {
       for (int i = 1; i < parties.size(); ++i) {
-        final DataPacketHeader expect = new DataPacketHeader(taskId, getProtocolTypeId(), seqNum, parties.get(i), ownId);
+        final DataPacketHeader expect = new DataPacketHeader(taskId, getProtocolTypeId(), 1, parties.get(i), ownId);
         DataPacket packet = rpc.receive(expect);
         sum += OpenHuFuCodec.decodeDouble(packet.getPayload().get(0));
       }
@@ -188,13 +166,13 @@ public class SecretSharing extends RpcProtocolExecutor {
     }
   }
 
-  Number sum(long taskId, ColumnType type, List<Integer> parties, List<? extends Number> shares, int seqNum) {
+  Number sum(long taskId, ColumnType type, List<Integer> parties, List<? extends Number> shares) {
     switch (type) {
       case FLOAT:
       case DOUBLE:
-        return sumDouble(taskId, parties, shares, seqNum);
+        return sumDouble(taskId, parties, shares);
       default:
-        return sumLong(taskId, parties, shares, seqNum);
+        return sumLong(taskId, parties, shares);
     }
   }
 
@@ -206,14 +184,13 @@ public class SecretSharing extends RpcProtocolExecutor {
    */
   @Override
   public Object run(long taskId, List<Integer> parties, Object... args) throws ProtocolException {
-    LOG.info("start to run");
     ColumnType type = (ColumnType) args[0];
     OperatorType op = (OperatorType) args[2];
     List<? extends Number> localshares = splitSecret(type, args[1], parties);
-    List<? extends Number> shares = distribute(taskId, parties, localshares, type, newSeqNum());
+    List<? extends Number> shares = distribute(taskId, parties, localshares, type);
     switch (op) {
       case PLUS:
-        return sum(taskId, type, parties, shares, newSeqNum());
+        return sum(taskId, type, parties, shares);
       default:
         throw new ProtocolException("Unsupported operation for secret sharing");
     }
