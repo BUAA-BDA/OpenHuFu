@@ -20,7 +20,6 @@
     <module>mpc</module>
     <module>owner</module>
     <module>plan</module>
-    <module>platform</module>
     <module>proto</module>
     <module>rpc</module>
     <module>udf</module>

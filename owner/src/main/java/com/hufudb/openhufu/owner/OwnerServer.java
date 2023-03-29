@@ -42,17 +42,17 @@ public class OwnerServer {
       this.creds = config.serverCerts;
       this.server = Grpc.newServerBuilderForPort(port, creds).addService(service)
           .addService(pipeService).build();
-      LOG.info("Owner Server start with TLS");
+      LOG.info("Owner Server {} start with TLS", config.party.getPartyId());
     } else {
       this.creds = null;
       this.server = ServerBuilder.forPort(port).addService(service).addService(pipeService).build();
-      LOG.info("Owner Server start in plaintext");
+      LOG.info("Owner Server {} start in plaintext", config.party.getPartyId());
     }
   }
 
   public void start() throws IOException {
     server.start();
-    LOG.info("Server started, listening on " + port);
+    LOG.info("Server started, listening on {}", port);
     Runtime.getRuntime().addShutdownHook(new Thread() {
       @Override
       public void run() {
@@ -94,7 +94,6 @@ public class OwnerServer {
     Gson gson = new Gson();
     Reader reader = Files.newBufferedReader(Paths.get(configPath));
     OwnerConfigFile config = gson.fromJson(reader, OwnerConfigFile.class);
-    // licenseInstall(config.license);
     return new OwnerServer(config.generateConfig());
   }
 

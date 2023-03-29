@@ -15,11 +15,13 @@ import java.util.concurrent.ExecutorService;
 
 public class SecretSharingSum extends OwnerAggregateFunction {
   static final Logger LOG = LoggerFactory.getLogger(SecretSharingSum.class);
-  final SecretSharing ss;
-  final boolean hasOutput;
+  private int sum;
+  final private SecretSharing ss;
+  final private boolean hasOutput;
 
   SecretSharingSum(int inputRef, SecretSharing ss, OpenHuFuData.ColumnType type, OpenHuFuPlan.TaskInfo taskInfo) {
     super(inputRef, type, taskInfo);
+    this.sum = 0;
     this.ss = ss;
     this.hasOutput = ss.getOwnId() == taskInfo.getPartiesList().get(0);
   }
@@ -55,6 +57,11 @@ public class SecretSharingSum extends OwnerAggregateFunction {
     }
   }
 
+  @Override
+  public void add(Row ele) {
+    Object e = ele.get(inputRef);
+    sum += ((Number) e).intValue();
+  }
   @Override
   public AggregateFunction<Row, Comparable> copy() {
     return new SecretSharingSum(inputRef, ss, type, taskInfo);

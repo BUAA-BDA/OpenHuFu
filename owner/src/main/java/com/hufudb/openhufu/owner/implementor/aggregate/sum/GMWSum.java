@@ -21,11 +21,13 @@ import java.util.concurrent.ExecutorService;
 public class GMWSum extends OwnerAggregateFunction {
   static final Logger LOG = LoggerFactory.getLogger(GMWSum.class);
 
-  final GMW gmw;
-  final Boardcast boardcast;
+  private int sum;
+  final private GMW gmw;
+  final private Boardcast boardcast;
 
   GMWSum(int inputRef, GMW gmw, Boardcast boardcast, OpenHuFuPlan.TaskInfo taskInfo) {
     super(inputRef, null, taskInfo);
+    this.sum = 0;
     this.gmw = gmw;
     this.boardcast = boardcast;
   }
@@ -52,6 +54,12 @@ public class GMWSum extends OwnerAggregateFunction {
       LOG.error("Error when executing GMW", e);
       return null;
     }
+  }
+
+  @Override
+  public void add(Row ele) {
+    Object e = ele.get(inputRef);
+    sum += ((Number) e).intValue();
   }
 
   @Override

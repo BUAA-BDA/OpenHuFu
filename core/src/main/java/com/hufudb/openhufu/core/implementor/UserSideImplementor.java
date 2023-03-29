@@ -25,10 +25,14 @@ import com.hufudb.openhufu.proto.OpenHuFuData.Modifier;
 import com.hufudb.openhufu.proto.OpenHuFuPlan.PlanType;
 import com.hufudb.openhufu.proto.OpenHuFuPlan.QueryPlanProto;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class UserSideImplementor implements PlanImplementor {
 
-  protected final OpenHuFuClient client;
+  private static final Logger LOG = LoggerFactory.getLogger(UserSideImplementor.class);
+
+  private final OpenHuFuClient client;
 
   protected UserSideImplementor(OpenHuFuClient client) {
     this.client = client;
@@ -117,7 +121,6 @@ public class UserSideImplementor implements PlanImplementor {
     Plan right = children.get(1);
     DataSet leftResult = implement(left);
     DataSet rightResult = implement(right);
-    // DataSet result = leftResult.join(this, rightResult, binary.getJoinCond());
     DataSet result = Interpreter.join(leftResult, rightResult, binary.getJoinCond());
     if (!binary.getWhereExps().isEmpty()) {
       result = Interpreter.filter(result, binary.getWhereExps());

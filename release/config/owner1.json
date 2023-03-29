@@ -5,7 +5,7 @@
   "implementorconfigpath": "./config/owner.yml",
   "adapterconfig": {
     "datasource": "CSV",
-    "url": "../dataset/sample/tpc-h",
+    "url": "../dataset/sample/tpc-h/database0",
     "delimiter": "|"
   },
   "tables": [
@@ -202,55 +202,55 @@
         {
           "name": "O_ORDERKEY",
           "type": "LONG",
-          "modifier": "hidden",
+          "modifier": "public",
           "columnId": 0
         },
         {
           "name": "O_CUSTKEY",
           "type": "LONG",
-          "modifier": "hidden",
+          "modifier": "public",
           "columnId": 1
         },
         {
           "name": "O_ORDERSTATUS",
           "type": "STRING",
-          "modifier": "hidden",
+          "modifier": "public",
           "columnId": 2
         },
         {
           "name": "O_TOTALPRICE",
           "type": "DOUBLE",
-          "modifier": "hidden",
+          "modifier": "public",
           "columnId": 3
         },
         {
           "name": "O_ORDERDATE",
           "type": "DATE",
-          "modifier": "hidden",
+          "modifier": "public",
           "columnId": 4
         },
         {
           "name": "O_ORDER-PRIORITY",
           "type": "STRING",
-          "modifier": "hidden",
+          "modifier": "public",
           "columnId": 5
         },
         {
           "name": "O_CLERK",
           "type": "STRING",
-          "modifier": "hidden",
+          "modifier": "public",
           "columnId": 6
         },
         {
           "name": "O_SHIP-PRIORITY",
           "type": "INT",
-          "modifier": "hidden",
+          "modifier": "public",
           "columnId": 7
         },
         {
           "name": "O_COMMENT",
           "type": "STRING",
-          "modifier": "hidden",
+          "modifier": "public",
           "columnId": 8
         }
       ]
