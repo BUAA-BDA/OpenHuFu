@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import com.google.gson.internal.LinkedTreeMap;
 import com.hufudb.openhufu.core.table.GlobalTableConfig;
 import com.hufudb.openhufu.user.OpenHuFuUser;
 
@@ -29,24 +30,17 @@ public class OpenHuFuBenchmarkTest {
 
   @BeforeClass
   public static void setUp() throws IOException {
-
-    List<String> endpoints =
-        new Gson().fromJson(Files.newBufferedReader(
-                Path.of(OpenHuFuBenchmark.class.getClassLoader().getResource("endpoints.json")
-                    .getPath())),
-            new TypeToken<ArrayList<String>>() {
-            }.getType());
-    List<GlobalTableConfig> globalTableConfigs =
-        new Gson().fromJson(Files.newBufferedReader(
-                Path.of(OpenHuFuBenchmark.class.getClassLoader().getResource("tables.json")
-                    .getPath())),
-            new TypeToken<ArrayList<GlobalTableConfig>>() {
-            }.getType());
+    LinkedTreeMap userConfigs = new Gson().fromJson(Files.newBufferedReader(
+                    Path.of(OpenHuFuBenchmark.class.getClassLoader().getResource("user-configs.json")
+                        .getPath())),
+                    LinkedTreeMap.class);
+    List<String> endpoints = (List<String>) userConfigs.get("owners");
+    List<GlobalTableConfig> globalTableConfigs = new Gson().fromJson(new Gson().toJson(userConfigs.get("tables")),
+            new TypeToken<ArrayList<GlobalTableConfig>>() {}.getType());
     LOG.info("Init benchmark of OpenHuFu...");
     for (String endpoint : endpoints) {
       user.addOwner(endpoint, null);
     }
-
     for (GlobalTableConfig config : globalTableConfigs) {
       user.createOpenHuFuTable(config);
     }
