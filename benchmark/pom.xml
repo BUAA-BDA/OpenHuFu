@@ -14,13 +14,17 @@
   <properties>
     <uberjar.name>benchmarks</uberjar.name>
     <jmh.version>1.23</jmh.version>
-    <javac.target>11</javac.target>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>com.hufudb.openhufu</groupId>
       <artifactId>openhufu-owner</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.hufudb.openhufu</groupId>
+      <artifactId>openhufu-user</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -44,18 +48,6 @@
       <artifactId>javax.annotation-api</artifactId>
       <version>1.3.2</version>
     </dependency>
-      <dependency>
-          <groupId>com.hufudb.openhufu</groupId>
-          <artifactId>openhufu-user</artifactId>
-          <version>${project.version}</version>
-          <scope>test</scope>
-      </dependency>
-    <dependency>
-      <groupId>com.hufudb.openhufu</groupId>
-      <artifactId>openhufu-user</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
-    </dependency>
   </dependencies>
 
   <build>
@@ -65,9 +57,9 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.1</version>
         <configuration>
-          <compilerVersion>${javac.target}</compilerVersion>
-          <source>${javac.target}</source>
-          <target>${javac.target}</target>
+          <compilerVersion>${maven.compiler.source}</compilerVersion>
+          <source>${maven.compiler.source}</source>
+          <target>${maven.compiler.target}</target>
         </configuration>
       </plugin>
       <plugin>
