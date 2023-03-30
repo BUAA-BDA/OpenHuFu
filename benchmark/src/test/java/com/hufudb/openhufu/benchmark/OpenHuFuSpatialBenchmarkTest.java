@@ -3,6 +3,7 @@ package com.hufudb.openhufu.benchmark;
 import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import com.google.gson.internal.LinkedTreeMap;
 import com.hufudb.openhufu.benchmark.enums.SpatialTableName;
 import com.hufudb.openhufu.core.table.GlobalTableConfig;
 import com.hufudb.openhufu.data.storage.DataSet;
@@ -35,19 +36,13 @@ public class OpenHuFuSpatialBenchmarkTest {
 
   @BeforeClass
   public static void setUp() throws IOException {
-
-    List<String> endpoints =
-        new Gson().fromJson(Files.newBufferedReader(
-                Path.of(OpenHuFuBenchmark.class.getClassLoader().getResource("spatial-endpoints.json")
-                    .getPath())),
-            new TypeToken<ArrayList<String>>() {
-            }.getType());
-    List<GlobalTableConfig> globalTableConfigs =
-        new Gson().fromJson(Files.newBufferedReader(
-                Path.of(OpenHuFuBenchmark.class.getClassLoader().getResource("spatial-tables.json")
-                    .getPath())),
-            new TypeToken<ArrayList<GlobalTableConfig>>() {
-            }.getType());
+    LinkedTreeMap userConfigs = new Gson().fromJson(Files.newBufferedReader(
+                    Path.of(OpenHuFuBenchmark.class.getClassLoader().getResource("spatial-user-configs.json")
+                            .getPath())),
+            LinkedTreeMap.class);
+    List<String> endpoints = (List<String>) userConfigs.get("owners");
+    List<GlobalTableConfig> globalTableConfigs = new Gson().fromJson(new Gson().toJson(userConfigs.get("tables")),
+            new TypeToken<ArrayList<GlobalTableConfig>>() {}.getType());
     LOG.info("Init benchmark of OpenHuFuSpatial...");
     for (String endpoint : endpoints) {
       user.addOwner(endpoint, null);
