@@ -1,15 +1,13 @@
 name: Deploy CI Workflow
 on:
-  pull_request:
+  push:
     branches:
       - main
-    types:
-      - closed
 
 jobs:
-  if_merged:
-    if: github.event.pull_request.merged == true
+  build:
     name: Deploy
+    if: github.repository_owner == 'BUAA-BDA'
     runs-on: ubuntu-latest
     permissions:
       contents: read
