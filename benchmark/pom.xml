@@ -12,7 +12,7 @@
   <artifactId>openhufu-benchmark</artifactId>
 
   <properties>
-    <uberjar.name>benchmarks</uberjar.name>
+    <uberjar.name>benchmark</uberjar.name>
     <jmh.version>1.23</jmh.version>
   </properties>
 

@@ -136,7 +136,7 @@ The CSV file contains the column names and the data of the table, while the SCM 
 * Join:
 
 ``` java
-
+  class implements com.hufudb.openhufu.owner.implementor.join.OwnerJoin
 ```
 
 2. Set the algorithm for the query(example in owner.yaml):
@@ -152,14 +152,38 @@ openhufu:
         avg: null
       join: com.hufudb.openhufu.owner.implementor.join.HashJoin
 ```
+3. Build OpenHuFu
+    
+    Follow the instructions in Section `Build OpenHuFu` to build the project.
 
-3. Running benchmarks
+
+4. Run OpenHuFu
+
+    We provide sample configurations for 3 owners in `release/config` folder. <br/> 
+You can use the configuration to run our demo on a single machine, or modify the configuration files to deploy OpenHuFu on multiple machines. <br/>
+
+    Please note that since the configuration files use relative paths, we need to `cd release` before running the command.
+
+    Run demo on a single machine:
+    ```shell
+      bash owner_all.sh
+    ```
+    Run OpenHuFu on multiple machines:
+    ```shell
+    bash owner.sh start ./config/owner{i}.json
+    ``` 
+    Stop OpeHuFu:
+    ```shell
+    bash owner.sh stop
+    ```
+
+4. Run benchmarks
 
 ```shell
-bash scripts/test/benchmark.sh
+bash benchmark.sh
 ```
 
-4. Evaluating communication cost
+5. Evaluating communication cost
 
 Before running benchmarks on OpenHuFu, you can follow the instructions to evaluate communication cost of the query:
 
