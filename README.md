@@ -166,7 +166,7 @@ You can use the configuration to run our demo on a single machine, or modify the
 
     Run demo on a single machine:
     ```shell
-      bash owner_all.sh
+    bash owner_all.sh
     ```
     Run OpenHuFu on multiple machines:
     ```shell
