@@ -97,19 +97,6 @@ public class OpenHuFuUser {
     }
   }
 
-  // TODO need to be removed, the statement cannot be closed outside the function call
-  @Deprecated
-  public ResultSet executeQuery(String sql) {
-    try {
-      Statement statement = connection.createStatement();
-      return statement.executeQuery(sql);
-    } catch (SQLException e) {
-      LOG.error("Execute query error", e);
-    }
-    return null;
-  }
-
-  // Recommend
   public Statement createStatement() throws SQLException {
     return connection.createStatement();
   }

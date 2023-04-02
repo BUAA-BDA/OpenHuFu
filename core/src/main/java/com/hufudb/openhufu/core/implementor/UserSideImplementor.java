@@ -106,10 +106,12 @@ public class UserSideImplementor implements PlanImplementor {
   public DataSet implement(Plan plan) {
     if (isMultiParty(plan)) {
       // implement on owner side
-      return ownerSideQuery(plan);
+      DataSet dataset = ownerSideQuery(plan);
+      return dataset;
     } else {
       // implement on user side
-      return plan.implement(this);
+      DataSet dataset = plan.implement(this);
+      return dataset;
     }
   }
 
@@ -164,7 +166,8 @@ public class UserSideImplementor implements PlanImplementor {
   public DataSet leafQuery(LeafPlan leaf) {
     List<Pair<OwnerClient, QueryPlanProto>> plans = PlanUtils.generateLeafOwnerPlans(client, leaf);
     List<Callable<Boolean>> tasks = new ArrayList<Callable<Boolean>>();
-    MultiSourceDataSet concurrentDataSet = new MultiSourceDataSet(leaf.getOutSchema(), plans.size());
+    MultiSourceDataSet concurrentDataSet =
+        new MultiSourceDataSet(leaf.getOutSchema(), plans.size());
     for (Pair<OwnerClient, QueryPlanProto> entry : plans) {
       tasks.add(() -> {
         final Producer producer = concurrentDataSet.newProducer();
