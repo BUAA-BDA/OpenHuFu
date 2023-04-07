@@ -25,6 +25,7 @@ enum OperatorType {
   OR = 112;
   LIKE = 113;
   MAX = 114;
+  MIN = 115;
   // for unary
   AS = 200;
   NOT = 201;
