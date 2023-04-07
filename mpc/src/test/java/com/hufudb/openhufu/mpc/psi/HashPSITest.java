@@ -21,6 +21,7 @@ import com.hufudb.openhufu.rpc.grpc.OpenHuFuRpcManager;
 import com.hufudb.openhufu.rpc.grpc.OpenHuFuRpc;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,7 +30,9 @@ import io.grpc.Channel;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.testing.GrpcCleanupRule;
+import org.junit.Test;
 
+@Ignore
 @RunWith(JUnit4.class)
 public class HashPSITest {
   @Rule

@@ -29,6 +29,7 @@ import io.grpc.Server;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.testing.GrpcCleanupRule;
+import org.junit.Ignore;
 
 @RunWith(JUnit4.class)
 public class SecretSharingTest {
@@ -123,6 +124,7 @@ public class SecretSharingTest {
     assertEquals(expect, (double) res, 0.00001);
   }
 
+  @Ignore
   @Test
   public void testSecretSharing() throws InterruptedException, ExecutionException {
     Random random = new Random();

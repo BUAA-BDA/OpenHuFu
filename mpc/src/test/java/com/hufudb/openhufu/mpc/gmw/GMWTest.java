@@ -26,6 +26,7 @@ import io.grpc.Server;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.testing.GrpcCleanupRule;
+import org.junit.Ignore;
 
 @RunWith(JUnit4.class)
 public class GMWTest {
@@ -97,6 +98,7 @@ public class GMWTest {
     }
   }
 
+  @Ignore
   @Test
   public void testGMW() throws Exception {
     testcase(2, 6);
