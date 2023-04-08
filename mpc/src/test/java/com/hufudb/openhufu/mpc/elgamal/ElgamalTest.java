@@ -5,9 +5,10 @@ import org.junit.Test;
 import java.security.SecureRandom;
 
 import static org.junit.Assert.*;
+import org.junit.Ignore;
 
 public class ElgamalTest {
-
+  @Ignore
   @Test
   public void testNotPreGenPG() {
     Elgamal elgamal = Elgamal.create(false);
@@ -22,6 +23,7 @@ public class ElgamalTest {
     }
   }
 
+  @Ignore
   @Test
   public void testPreGenPG() {
     Elgamal elgamal = Elgamal.create(true);

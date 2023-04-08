@@ -1,14 +1,17 @@
-name: CI Workflow
+name: Deploy CI Workflow
 on:
   push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
+    branches:
+      - main
 
 jobs:
   build:
-    name: Build
+    name: Deploy
+    if: github.repository_owner == 'BUAA-BDA'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
     - uses: actions/checkout@v3
     - name: Set up JDK 11
@@ -17,12 +20,12 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
         cache: maven
-    - name: Set up Node 16
-      uses: actions/setup-node@v3
-      with:
-        node-version: '16'
     - name: Build with Maven
       run: ./scripts/build/package.sh
+    - name: Deploy to GitHub Packages
+      run: ./scripts/build/deploy.sh
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Upload Hu-Fu Release Artifact
       uses: actions/upload-artifact@v3.1.0
       with:

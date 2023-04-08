@@ -53,7 +53,7 @@ public class BasicRewriter implements Rewriter {
       boolean hasLimit = leaf.getOffset() != 0 || leaf.getFetch() != 0;
       boolean hasSort = leaf.getOrders() != null && !leaf.getOrders().isEmpty();
       if (!hasAgg && !hasLimit && !hasSort) {
-        // return leaf directly if no aggergate, limit or sort
+        // return leaf directly if no aggregate, limit or sort
         return leaf;
       }
       UnaryPlan unary = new UnaryPlan(leaf);
