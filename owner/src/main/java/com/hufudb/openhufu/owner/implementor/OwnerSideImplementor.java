@@ -9,10 +9,12 @@ import com.hufudb.openhufu.interpreter.Interpreter;
 import com.hufudb.openhufu.mpc.ProtocolException;
 import com.hufudb.openhufu.owner.adapter.Adapter;
 import com.hufudb.openhufu.owner.implementor.aggregate.OwnerAggregation;
+import com.hufudb.openhufu.owner.implementor.knn.BinarySearchKNN;
 import com.hufudb.openhufu.plan.BinaryPlan;
 import com.hufudb.openhufu.plan.LeafPlan;
 import com.hufudb.openhufu.plan.Plan;
 import com.hufudb.openhufu.plan.UnaryPlan;
+import com.hufudb.openhufu.proto.OpenHuFuPlan;
 import com.hufudb.openhufu.proto.OpenHuFuPlan.PlanType;
 import com.hufudb.openhufu.rpc.Rpc;
 import org.slf4j.Logger;
@@ -81,7 +83,35 @@ public class OwnerSideImplementor implements PlanImplementor {
       input = OwnerAggregation.aggregate(input, unary.getGroups(), unary.getAggExps(),
           children.get(0).getOutTypes(), rpc, threadPool, unary.getTaskInfo());
     }
+    if (isMultiPartySecureKNN(unary)) {
+      try {
+        input = new BinarySearchKNN().kNN(input, rpc, unary.getTaskInfo());
+      } catch (ProtocolException e) {
+        throw new RuntimeException(e);
+      }
+    }
     return input;
+  }
+
+  private boolean isMultiPartySecureKNN(UnaryPlan unary) {
+    LeafPlan leaf = (LeafPlan) unary.getChildren().get(0);
+    boolean hasLimit = leaf.getOffset() != 0 || leaf.getFetch() != 0;
+    if (!hasLimit) {
+      return false;
+    }
+    if (leaf.getOrders() == null || leaf.getOrders().size() < 1) {
+      return false;
+    }
+    int orderRef = leaf.getOrders().get(0).getRef();
+    if (!(leaf.getSelectExps().get(orderRef).getOpType().equals(OpenHuFuPlan.OperatorType.SCALAR_FUNC)
+            && leaf.getSelectExps().get(orderRef).getStr().equals("distance"))) {
+      return false;
+    }
+    if (leaf.getOrders().get(0).getDirection().equals(OpenHuFuPlan.Direction.ASC)) {
+      LOG.info("This is a KNN query.");
+      return true;
+    }
+    return false;
   }
 
   @Override
