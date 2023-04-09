@@ -7,12 +7,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
+
+import com.hufudb.openhufu.core.implementor.spatial.knn.BinarySearchKNN;
 import com.hufudb.openhufu.core.sql.plan.PlanUtils;
 import com.hufudb.openhufu.data.schema.Schema;
-import com.hufudb.openhufu.data.storage.DataSet;
-import com.hufudb.openhufu.data.storage.LimitDataSet;
-import com.hufudb.openhufu.data.storage.MultiSourceDataSet;
-import com.hufudb.openhufu.data.storage.SortedDataSet;
+import com.hufudb.openhufu.data.storage.*;
 import com.hufudb.openhufu.data.storage.MultiSourceDataSet.Producer;
 import com.hufudb.openhufu.implementor.PlanImplementor;
 import com.hufudb.openhufu.interpreter.Interpreter;
@@ -22,6 +21,7 @@ import com.hufudb.openhufu.plan.Plan;
 import com.hufudb.openhufu.plan.UnaryPlan;
 import com.hufudb.openhufu.proto.OpenHuFuData.DataSetProto;
 import com.hufudb.openhufu.proto.OpenHuFuData.Modifier;
+import com.hufudb.openhufu.proto.OpenHuFuPlan;
 import com.hufudb.openhufu.proto.OpenHuFuPlan.PlanType;
 import com.hufudb.openhufu.proto.OpenHuFuPlan.QueryPlanProto;
 import org.apache.commons.lang3.tuple.Pair;
@@ -105,6 +105,9 @@ public class UserSideImplementor implements PlanImplementor {
   @Override
   public DataSet implement(Plan plan) {
     if (isMultiParty(plan)) {
+      if (plan instanceof UnaryPlan && isMultiPartySecureKNN((UnaryPlan) plan)) {
+        return privacyKNN((UnaryPlan) plan);
+      }
       // implement on owner side
       DataSet dataset = ownerSideQuery(plan);
       return dataset;
@@ -115,6 +118,94 @@ public class UserSideImplementor implements PlanImplementor {
     }
   }
 
+  private DataSet privacyKNN(UnaryPlan plan) {
+    LOG.info("Using binary-search KNN.");
+    boolean USE_DP = false;
+    int k = plan.getFetch();
+    double left = 0;
+    double right = 1000000;
+//    if (USE_DP) {
+//      right = kNNRadiusQuery(plan) * 2;
+//    }
+    double deviation = 1e-6;
+    int loop = 0;
+    long count = 0L;
+    if (USE_DP) {
+      while (left + deviation <= right) {
+        double mid = (left + right) / 2;
+        LOG.debug("k: {} left: {} right: {} mid: {}", k, left, right, mid);
+        Pair<Double, Double> res = dPRangeCount(plan);
+        count = Math.round(res.getKey());
+        if (Math.abs(res.getKey() - k) < res.getValue()) {
+          LOG.debug("change method on loop {}", loop);
+          break;
+        }
+        if (count > k) {
+          right = mid;
+        } else if (count < k) {
+          left = mid;
+        }
+        loop++;
+        LOG.debug("loop {} with result size {}", loop, count);
+      }
+    }
+    while (left + deviation <= right) {
+      double mid = (left + right) / 2;
+//        int sign = privacyCompare(plan);
+      int sign = (int) privacyCompare(plan, mid, k);
+      LOG.debug("loop {} with  sign {}", loop, sign);
+      if (sign < 0) {
+        left = mid;
+      } else if (sign > 0) {
+        right = mid;
+      } else {
+        loop++;
+        return kNNCircleRangeQuery(plan, mid);
+      }
+      loop++;
+    }
+    return kNNCircleRangeQuery(plan, right);
+  }
+  private double kNNRadiusQuery(UnaryPlan plan) {
+    //todo -sjz
+    ownerSideQuery(BinarySearchKNN.generateKNNRadiusQueryPlan(plan));
+    return 0;
+  }
+  private Pair<Double, Double> dPRangeCount(UnaryPlan plan) {
+    //todo -sjz
+    ownerSideQuery(BinarySearchKNN.generateDPRangeCountPlan(plan));
+    return null;
+  }
+  private long privacyCompare(UnaryPlan plan, double range, long k) {
+    //todo -sjz   now it is using secretSharingSum
+    DataSetIterator dataSet = ownerSideQuery(BinarySearchKNN.generatePrivacyComparePlan(plan, range)).getIterator();
+    dataSet.next();
+    long res = (long) dataSet.get(0);
+    return res - k;
+  }
+  private DataSet kNNCircleRangeQuery(UnaryPlan plan, double range) {
+    return ownerSideQuery(BinarySearchKNN.generateKNNCircleRangeQueryPlan(plan, range));
+  }
+  private boolean isMultiPartySecureKNN(UnaryPlan unary) {
+    LeafPlan leaf = (LeafPlan) unary.getChildren().get(0);
+    boolean hasLimit = leaf.getOffset() != 0 || leaf.getFetch() != 0;
+    if (!hasLimit) {
+      return false;
+    }
+    if (leaf.getOrders() == null || leaf.getOrders().size() < 1) {
+      return false;
+    }
+    int orderRef = leaf.getOrders().get(0).getRef();
+    if (!(leaf.getSelectExps().get(orderRef).getOpType().equals(OpenHuFuPlan.OperatorType.SCALAR_FUNC)
+            && leaf.getSelectExps().get(orderRef).getStr().equals("distance"))) {
+      return false;
+    }
+    if (leaf.getOrders().get(0).getDirection().equals(OpenHuFuPlan.Direction.ASC)) {
+      LOG.info("This is a KNN query.");
+      return true;
+    }
+    return false;
+  }
   @Override
   public DataSet binaryQuery(BinaryPlan binary) {
     List<Plan> children = binary.getChildren();
