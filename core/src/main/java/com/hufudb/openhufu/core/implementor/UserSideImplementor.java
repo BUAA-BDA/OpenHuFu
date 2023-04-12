@@ -125,7 +125,7 @@ public class UserSideImplementor implements PlanImplementor {
     double left = 0;
     double right = 1000000;
 //    if (USE_DP) {
-//      right = kNNRadiusQuery(plan) * 2;
+      right = kNNRadiusQuery(plan) * 2;
 //    }
     double deviation = 1e-6;
     int loop = 0;
@@ -168,8 +168,16 @@ public class UserSideImplementor implements PlanImplementor {
   }
   private double kNNRadiusQuery(UnaryPlan plan) {
     //todo -sjz
-    ownerSideQuery(BinarySearchKNN.generateKNNRadiusQueryPlan(plan));
-    return 0;
+    DataSetIterator dataSet = ownerSideQuery(BinarySearchKNN.generateKNNRadiusQueryPlan(plan)).getIterator();
+    double right = 1000000;
+    while (dataSet.next()) {
+      double res = (double) dataSet.get(0);
+      LOG.info(String.valueOf(res));
+      if (right > res) {
+        right = res;
+      }
+    }
+    return right;
   }
   private Pair<Double, Double> dPRangeCount(UnaryPlan plan) {
     //todo -sjz

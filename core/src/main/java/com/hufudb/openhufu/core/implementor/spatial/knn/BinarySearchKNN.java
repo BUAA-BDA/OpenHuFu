@@ -17,7 +17,19 @@ public class BinarySearchKNN {
     static final Logger LOG = LoggerFactory.getLogger(BinarySearchKNN.class);
 
     public static Plan generateKNNRadiusQueryPlan(UnaryPlan originalPlan) {
-        return null;
+        LOG.info("rewriting KNNRadiusQueryPlan");
+        LeafPlan originalLeaf = (LeafPlan) originalPlan.getChildren().get(0);
+        LeafPlan leafPlan = new LeafPlan();
+        leafPlan.setTableName(originalLeaf.getTableName());
+        OpenHuFuPlan.Expression distance = originalLeaf.getSelectExps()
+                .get(originalLeaf.getOrders().get(0).getRef());
+        leafPlan.setSelectExps(ImmutableList.of(distance));
+        leafPlan.setOrders(ImmutableList.of(OpenHuFuPlan.Collation.newBuilder().setRef(0)
+                .setDirection(OpenHuFuPlan.Direction.ASC).build()));
+        leafPlan.setOffset(originalLeaf.getFetch() - 1);
+        leafPlan.setFetch(1);
+        LOG.info(leafPlan.toString());
+        return leafPlan;
     }
     public static Plan generateDPRangeCountPlan(UnaryPlan originalPlan) {
         return null;
