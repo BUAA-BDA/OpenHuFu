@@ -46,6 +46,17 @@
       <groupId>org.locationtech.jts</groupId>
       <artifactId>jts-core</artifactId>
     </dependency>
+      <dependency>
+          <groupId>org.apache.commons</groupId>
+          <artifactId>commons-math3</artifactId>
+          <scope>compile</scope>
+      </dependency>
+      <dependency>
+          <groupId>com.hufudb.openhufu</groupId>
+          <artifactId>openhufu-common</artifactId>
+          <version>${project.version}</version>
+          <scope>compile</scope>
+      </dependency>
   </dependencies>
 
   <build>

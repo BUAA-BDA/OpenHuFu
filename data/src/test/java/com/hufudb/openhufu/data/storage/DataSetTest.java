@@ -11,6 +11,7 @@ import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.Year;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -532,5 +533,48 @@ public class DataSetTest {
       assertEquals(ps.get(i), it.get(0));
     }
     assertFalse(it.next());
+  }
+
+  @Test
+  public void testRandomDataSet() {
+    Schema schema = Schema.newBuilder().add("A", ColumnType.GEOMETRY, Modifier.PUBLIC).build();
+    Random random = new Random();
+    List<Geometry> ps = new ArrayList<>();
+    ProtoDataSet.Builder dBuilder = ProtoDataSet.newBuilder(schema);
+    for (int i = 0; i < 10; ++i) {
+      Geometry p = GeometryUtils.fromString(String.format("POINT(%f %f)", random.nextDouble(), random.nextDouble()));
+      ArrayRow.Builder rBuilder = ArrayRow.newBuilder(1);
+      rBuilder.set(0, p);
+      dBuilder.addRow(rBuilder.build());
+      ps.add(p);
+    }
+    ProtoDataSet dataset = dBuilder.build();
+    RandomDataSet randomDataSet = new RandomDataSet(dataset);
+    DataSet newDataSet = randomDataSet.getRandomSet();
+    DataSetIterator it = newDataSet.getIterator();
+    for (int i = 0; i < 10; ++i) {
+      assertTrue(it.next());
+    }
+    assertTrue(it.next());
+
+    it = randomDataSet.removeRandom(newDataSet).getIterator();
+    for (int i = 0; i < 10; ++i) {
+      assertTrue(it.next());
+      boolean has = false;
+      for (int j = 0; j < 10; ++j) {
+        if (ps.get(j).equals(it.get(0))) {
+          has = true;
+          break;
+        }
+      }
+      assertTrue(has);
+    }
+    assertFalse(it.next());
+  }
+  void printAll(DataSet dataSet) {
+    DataSetIterator it = dataSet.getIterator();
+    while (it.next()) {
+      System.out.println(it.get(0));
+    }
   }
 }
