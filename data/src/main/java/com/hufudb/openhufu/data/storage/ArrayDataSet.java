@@ -9,7 +9,7 @@ public class ArrayDataSet implements MaterializedDataSet {
   final List<ArrayRow> rows;
   final int rowCount;
 
-  ArrayDataSet(Schema schema, List<ArrayRow> rows) {
+  public ArrayDataSet(Schema schema, List<ArrayRow> rows) {
     this.schema = schema;
     this.rows = rows;
     this.rowCount = rows.size();
@@ -48,6 +48,10 @@ public class ArrayDataSet implements MaterializedDataSet {
   @Override
   public int rowCount() {
     return rowCount;
+  }
+
+  public List<ArrayRow> getRows() {
+    return rows;
   }
 
   class Iterator implements DataSetIterator {
