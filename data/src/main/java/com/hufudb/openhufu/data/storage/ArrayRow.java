@@ -50,6 +50,13 @@ public class ArrayRow implements Row, Serializable {
   }
 
   @Override
+  public String toString() {
+    return "ArrayRow{" +
+            "values=" + Arrays.toString(values) +
+            '}';
+  }
+
+  @Override
   public int hashCode() {
     return Arrays.hashCode(values);
   }
@@ -63,6 +70,24 @@ public class ArrayRow implements Row, Serializable {
     Builder builder = new Builder(size);
     for (int i = 0; i < size; ++i) {
       builder.set(i, row.get(i));
+    }
+    return builder.build();
+  }
+
+  public static ArrayRow merge(Row row1, Row row2, int pass) {
+    final int size1 = (pass == -1)? row1.size() : row1.size() - 1;
+    final int size2 = row2.size();
+    Builder builder = new Builder(size1 + size2);
+    int j = 0;
+    for (int i = 0; i < size1; ++i) {
+      if (pass == i) {
+        j++;
+      }
+      builder.set(i, row1.get(j));
+      j++;
+    }
+    for (int i = 0; i < size2; ++i) {
+      builder.set(i + size1, row2.get(i));
     }
     return builder.build();
   }

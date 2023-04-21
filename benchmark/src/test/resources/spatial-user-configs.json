@@ -21,6 +21,15 @@
           "localName": "spatial"
         }
       ]
+    },
+    {
+      "tableName": "join_left",
+      "localTables": [
+        {
+          "endpoint": "localhost:12345",
+          "localName": "join_left"
+        }
+      ]
     }
   ]
 }

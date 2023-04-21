@@ -11,6 +11,7 @@ import com.hufudb.openhufu.proto.OpenHuFuPlan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class BinarySearchKNN {
@@ -64,11 +65,23 @@ public class BinarySearchKNN {
         LOG.info(unaryPlan.toString());
         return unaryPlan;
     }
-    public static Plan generateKNNCircleRangeQueryPlan(UnaryPlan originalPlan, double range) {
+    public static Plan generateKNNCircleRangeQueryPlan(UnaryPlan originalPlan, double range, boolean isUsingKNNFunc) {
         LeafPlan originalLeaf = (LeafPlan) originalPlan.getChildren().get(0);
         LeafPlan leafPlan = new LeafPlan();
         leafPlan.setTableName(originalLeaf.getTableName());
-        leafPlan.setSelectExps(originalLeaf.getSelectExps());
+
+        List<OpenHuFuPlan.Expression> selects = new ArrayList<>();
+        for (int i = 0; i < originalLeaf.getSelectExps().size(); i++) {
+            if (i != originalLeaf.getOrders().get(0).getRef()) {
+                selects.add(originalLeaf.getSelectExps().get(i));
+            }
+        }
+        if (isUsingKNNFunc) {
+            leafPlan.setSelectExps(selects);
+        }
+        else {
+            leafPlan.setSelectExps(originalLeaf.getSelectExps());
+        }
         OpenHuFuPlan.Expression distance = originalLeaf.getSelectExps()
                 .get(originalLeaf.getOrders().get(0).getRef());
         OpenHuFuPlan.Expression dwithin = ExpressionFactory.createScalarFunc(OpenHuFuData.ColumnType.BOOLEAN, "dwithin",
@@ -78,7 +91,6 @@ public class BinarySearchKNN {
         LOG.info("rewriting KNNCircleRangeQueryPlan");
         List<OpenHuFuPlan.Expression> whereExps = ImmutableList.of(dwithin);
         leafPlan.setWhereExps(whereExps);
-        leafPlan.setOrders(originalLeaf.getOrders());
         LOG.info(leafPlan.toString());
         return leafPlan;
     }

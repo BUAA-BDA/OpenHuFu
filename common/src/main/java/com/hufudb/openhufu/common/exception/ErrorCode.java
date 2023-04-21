@@ -24,6 +24,7 @@ public enum ErrorCode {
   IMPLEMENTOR_CONFIG_FILE_PATH_NOT_SET(20037, "implementor config file path not set"),
   IMPLEMENTOR_CONFIG_FILE_NOT_FOUND(20038, "implementor config file: {} not found"),
 
+  RANGE_JOIN_LEFT_TABLE_NOT_PUBLIC(20041, "left table in range join must be public"),
 
   // udf error
   UDF_LOAD_FAILED(30001, "udf: {} load failed"),
