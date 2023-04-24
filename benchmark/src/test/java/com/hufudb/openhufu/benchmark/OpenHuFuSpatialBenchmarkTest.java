@@ -124,7 +124,7 @@ public class OpenHuFuSpatialBenchmarkTest {
 
   @Test
   public void testSqlRangeJoin() throws SQLException {
-    String sql = "select * from spatial s1 join spatial s2 on DWithin(s1.S_POINT, s2.S_POINT, 5)";
+    String sql = "select * from join_left s1 join spatial s2 on DWithin(s1.JL_POINT, s2.S_POINT, 500000)";
     try (Statement stmt = user.createStatement()) {
       ResultSet dataset = stmt.executeQuery(sql);
       long count = 0;
@@ -132,14 +132,29 @@ public class OpenHuFuSpatialBenchmarkTest {
         printLine(dataset);
         ++count;
       }
-      assertEquals(1, count);
+      assertEquals(78, count);
       dataset.close();
     }
   }
 
   @Test
-  public void testSqlKNNQuery() throws SQLException {
-    String sql = "select * from spatial order by Distance(S_POINT, POINT(1404050, -4762163)) asc limit 10";
+  public void testSqlKNNQuery1() throws SQLException {
+    String sql = "select S_ID from spatial order by Distance(POINT(1404050, -4762163), S_POINT) asc limit 10";
+    try (Statement stmt = user.createStatement()) {
+      ResultSet dataset = stmt.executeQuery(sql);
+      long count = 0;
+      while (dataset.next()) {
+        printLine(dataset);
+        ++count;
+      }
+      assertEquals(10, count);
+      dataset.close();
+    }
+  }
+
+  @Test
+  public void testSqlKNNQuery2() throws SQLException {
+    String sql = "select S_ID from spatial where KNN(POINT(1404050, -4762163), S_POINT, 10)";
     try (Statement stmt = user.createStatement()) {
       ResultSet dataset = stmt.executeQuery(sql);
       long count = 0;
@@ -154,7 +169,7 @@ public class OpenHuFuSpatialBenchmarkTest {
 
   @Test
   public void testSqlKNNJOIN() throws SQLException {
-    String sql = "select * from spatial s1 join spatial s2 on KNN(s1.S_POINT, s2.S_POINT, 5)";
+    String sql = "select s1.JL_ID, s2.S_ID from join_left s1 join spatial s2 on KNN(s1.JL_POINT, s2.S_POINT, 5)";
     try (Statement stmt = user.createStatement()) {
       ResultSet dataset = stmt.executeQuery(sql);
       long count = 0;
@@ -162,7 +177,7 @@ public class OpenHuFuSpatialBenchmarkTest {
         printLine(dataset);
         ++count;
       }
-      assertEquals(1, count);
+      assertEquals(50, count);
       dataset.close();
     }
   }

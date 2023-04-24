@@ -1,5 +1,7 @@
 package com.hufudb.openhufu.core.implementor;
 
+import com.hufudb.openhufu.common.exception.ErrorCode;
+import com.hufudb.openhufu.common.exception.OpenHuFuException;
 import com.hufudb.openhufu.core.client.OpenHuFuClient;
 import com.hufudb.openhufu.core.client.OwnerClient;
 import java.util.ArrayList;
@@ -8,11 +10,15 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
+import com.hufudb.openhufu.core.implementor.spatial.join.DistanceJoin;
+import com.hufudb.openhufu.core.implementor.spatial.join.KNNJoin;
 import com.hufudb.openhufu.core.implementor.spatial.knn.BinarySearchKNN;
+import com.hufudb.openhufu.core.implementor.spatial.knn.KNNConverter;
 import com.hufudb.openhufu.core.sql.plan.PlanUtils;
 import com.hufudb.openhufu.data.schema.Schema;
 import com.hufudb.openhufu.data.storage.*;
 import com.hufudb.openhufu.data.storage.MultiSourceDataSet.Producer;
+import com.hufudb.openhufu.expression.ExpressionUtils;
 import com.hufudb.openhufu.implementor.PlanImplementor;
 import com.hufudb.openhufu.interpreter.Interpreter;
 import com.hufudb.openhufu.plan.BinaryPlan;
@@ -102,11 +108,111 @@ public class UserSideImplementor implements PlanImplementor {
     return concurrentDataSet;
   }
 
+  private boolean isPrivacyRangeJoin(BinaryPlan plan) {
+    if (plan.getJoinCond().getModifier().equals(Modifier.PUBLIC)) {
+      return false;
+    }
+    if (!plan.getJoinCond().getCondition().getIn(0).getModifier().equals(Modifier.PUBLIC)) {
+      throw new OpenHuFuException(ErrorCode.RANGE_JOIN_LEFT_TABLE_NOT_PUBLIC);
+    }
+    return plan.getJoinCond().getCondition().getStr().equals("dwithin");
+  }
+
+  private boolean isPrivacyKNNJoin(BinaryPlan plan) {
+    if (plan.getJoinCond().getModifier().equals(Modifier.PUBLIC)) {
+      return false;
+    }
+    if (!plan.getJoinCond().getCondition().getIn(0).getModifier().equals(Modifier.PUBLIC)) {
+      throw new OpenHuFuException(ErrorCode.RANGE_JOIN_LEFT_TABLE_NOT_PUBLIC);
+    }
+    return plan.getJoinCond().getCondition().getStr().equals("knn");
+  }
+
+  private DataSet privacySpatialJoin(BinaryPlan plan, boolean isDistanceJoin) {
+    return privacySpatialJoin(plan, isDistanceJoin, false);
+  }
+
+  private DataSet privacySpatialJoin(BinaryPlan plan, boolean isDistanceJoin, boolean isUsingKNNFunc) {
+    DataSet left = ownerSideQuery(plan.getChildren().get(0));
+    DataSetIterator leftIter = left.getIterator();
+    List<ArrayRow> arrayRows = new ArrayList<>();
+
+    boolean containsLeftKey = false;
+    int leftKey = -1;
+    for (OpenHuFuPlan.Expression expression: plan.getSelectExps()) {
+      if (expression.getOpType().equals(OpenHuFuPlan.OperatorType.REF)
+              && expression.getI32() == plan.getJoinCond().getCondition().getIn(0).getI32()) {
+        containsLeftKey = true;
+      }
+    }
+    if (!containsLeftKey) {
+      for (int i = 0; i < plan.getChildren().get(0).getSelectExps().size(); i++) {
+        if (plan.getChildren().get(0).getSelectExps().get(i).getI32()
+                 == plan.getJoinCond().getCondition().getIn(0).getI32()) {
+          leftKey = i;
+          break;
+        }
+      }
+    }
+
+    boolean containsRightKey = false;
+    int rightKey = -1;
+    for (OpenHuFuPlan.Expression expression: plan.getSelectExps()) {
+      if (expression.getOpType().equals(OpenHuFuPlan.OperatorType.REF)
+              && expression.getI32() == plan.getJoinCond().getCondition().getIn(1).getI32()) {
+        containsRightKey = true;
+      }
+    }
+    if (!containsRightKey) {
+      for (int i = 0; i < plan.getChildren().get(1).getSelectExps().size(); i++) {
+        if (plan.getChildren().get(1).getSelectExps().get(i).getI32()
+                == plan.getJoinCond().getCondition().getIn(1).getI32() - plan.getChildren().get(0).getSelectExps().size()) {
+          rightKey = i;
+          break;
+        }
+      }
+    }
+    while (leftIter.next()) {
+      int leftRef = plan.getJoinCond().getCondition().getIn(0).getI32();
+      DataSet rightDataSet;
+      if (isDistanceJoin) {
+        rightDataSet = ownerSideQuery(DistanceJoin
+                .generateDistanceQueryPlan(plan, leftIter.get(leftRef).toString(), rightKey));
+      }
+      else {
+        rightDataSet = privacyKNN((UnaryPlan) KNNJoin.generateKNNQueryPlan(plan, leftIter.get(leftRef).toString(), rightKey), isUsingKNNFunc);
+      }
+      DataSetIterator rightIter = rightDataSet.getIterator();
+      while (rightIter.next()) {
+        arrayRows.add(ArrayRow.merge(leftIter, rightIter, leftKey));
+        LOG.info(ArrayRow.merge(leftIter, rightIter, leftKey).toString());
+      }
+    }
+    Schema schema;
+      schema = ExpressionUtils.createSchema(plan.getSelectExps());
+    LOG.info(schema.toString());
+    return new ArrayDataSet(schema, arrayRows);
+  }
+
   @Override
   public DataSet implement(Plan plan) {
+    LOG.info(plan.toString());
+    boolean isUsingKNNFuc = plan instanceof LeafPlan
+            && !plan.getWhereExps().isEmpty()
+            && plan.getWhereExps().get(0).getOpType().equals(OpenHuFuPlan.OperatorType.SCALAR_FUNC)
+            && plan.getWhereExps().get(0).getStr().equals("knn");
+    if (isUsingKNNFuc) {
+      plan = KNNConverter.convertKNN((LeafPlan) plan);
+    }
     if (isMultiParty(plan)) {
+      if (plan instanceof BinaryPlan && isPrivacyRangeJoin((BinaryPlan) plan)) {
+        return privacySpatialJoin((BinaryPlan) plan, true);
+      }
+      if (plan instanceof BinaryPlan && isPrivacyKNNJoin((BinaryPlan) plan)) {
+        return privacySpatialJoin((BinaryPlan) plan, false, isUsingKNNFuc);
+      }
       if (plan instanceof UnaryPlan && isMultiPartySecureKNN((UnaryPlan) plan)) {
-        return privacyKNN((UnaryPlan) plan);
+        return privacyKNN((UnaryPlan) plan, isUsingKNNFuc);
       }
       // implement on owner side
       DataSet dataset = ownerSideQuery(plan);
@@ -118,7 +224,7 @@ public class UserSideImplementor implements PlanImplementor {
     }
   }
 
-  private DataSet privacyKNN(UnaryPlan plan) {
+  private DataSet privacyKNN(UnaryPlan plan, boolean isUsingKNNFunc) {
     LOG.info("Using binary-search KNN.");
     boolean USE_DP = false;
     int k = plan.getFetch();
@@ -160,11 +266,12 @@ public class UserSideImplementor implements PlanImplementor {
         right = mid;
       } else {
         loop++;
-        return kNNCircleRangeQuery(plan, mid);
+        DataSet dataSet = ArrayDataSet.materialize(kNNCircleRangeQuery(plan, mid, isUsingKNNFunc));
+        return dataSet;
       }
       loop++;
     }
-    return kNNCircleRangeQuery(plan, right);
+    return kNNCircleRangeQuery(plan, right, isUsingKNNFunc);
   }
   private double kNNRadiusQuery(UnaryPlan plan) {
     //todo -sjz
@@ -191,8 +298,8 @@ public class UserSideImplementor implements PlanImplementor {
     long res = (long) dataSet.get(0);
     return res - k;
   }
-  private DataSet kNNCircleRangeQuery(UnaryPlan plan, double range) {
-    return ownerSideQuery(BinarySearchKNN.generateKNNCircleRangeQueryPlan(plan, range));
+  private DataSet kNNCircleRangeQuery(UnaryPlan plan, double range, boolean isUsingKNNFunc) {
+    return ownerSideQuery(BinarySearchKNN.generateKNNCircleRangeQueryPlan(plan, range, isUsingKNNFunc));
   }
   private boolean isMultiPartySecureKNN(UnaryPlan unary) {
     LeafPlan leaf = (LeafPlan) unary.getChildren().get(0);

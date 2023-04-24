@@ -26,6 +26,24 @@
           "columnId": 1
         }
       ]
+    },
+    {
+      "actualName": "join_left",
+      "publishedName": "join_left",
+      "publishedColumns": [
+        {
+          "name": "JL_ID",
+          "type": "LONG",
+          "modifier": "public",
+          "columnId": 0
+        },
+        {
+          "name": "JL_POINT",
+          "type": "GEOMETRY",
+          "modifier": "public",
+          "columnId": 1
+        }
+      ]
     }
   ]
 }
