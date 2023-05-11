@@ -17,7 +17,9 @@ public enum ProtocolType {
   SS("SS", 101, true),
   HASH_PSI("PSI", 200, true),
   ABY("ABY", 300, true),
-  SECRET_UNION("SECRET_UNION", 400, true);
+  SECRET_UNION("SECRET_UNION", 400, true),
+  SECRET_MULTIPLY("SECRET_MULTIPLY", 401, true);
+
   private static final ImmutableMap<Integer, ProtocolType> MAP;
 
   static {

@@ -112,7 +112,8 @@ public class UserSideImplementor implements PlanImplementor {
     if (plan.getJoinCond().getModifier().equals(Modifier.PUBLIC)) {
       return false;
     }
-    if (!plan.getJoinCond().getCondition().getIn(0).getModifier().equals(Modifier.PUBLIC)) {
+    if (!plan.getJoinCond().getCondition().getInList().isEmpty()
+            && !plan.getJoinCond().getCondition().getIn(0).getModifier().equals(Modifier.PUBLIC)) {
       throw new OpenHuFuException(ErrorCode.RANGE_JOIN_LEFT_TABLE_NOT_PUBLIC);
     }
     return plan.getJoinCond().getCondition().getStr().equals("dwithin");
@@ -122,7 +123,8 @@ public class UserSideImplementor implements PlanImplementor {
     if (plan.getJoinCond().getModifier().equals(Modifier.PUBLIC)) {
       return false;
     }
-    if (!plan.getJoinCond().getCondition().getIn(0).getModifier().equals(Modifier.PUBLIC)) {
+    if (!plan.getJoinCond().getCondition().getInList().isEmpty()
+            && !plan.getJoinCond().getCondition().getIn(0).getModifier().equals(Modifier.PUBLIC)) {
       throw new OpenHuFuException(ErrorCode.RANGE_JOIN_LEFT_TABLE_NOT_PUBLIC);
     }
     return plan.getJoinCond().getCondition().getStr().equals("knn");
