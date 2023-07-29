@@ -16,7 +16,7 @@ public class WXY_Module {
     return params.range;
   }
 
-  public int  getK() {
+  public int getK() {
     return params.k;
   }
 
