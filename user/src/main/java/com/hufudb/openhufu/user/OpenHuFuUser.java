@@ -10,6 +10,7 @@ import com.hufudb.openhufu.core.table.GlobalTableConfig;
 import com.hufudb.openhufu.data.schema.TableSchema;
 import com.hufudb.openhufu.data.storage.DataSet;
 import com.hufudb.openhufu.plan.Plan;
+import com.hufudb.openhufu.core.config.wyx_task.user.WXY_UserConfig;
 import com.hufudb.openhufu.user.utils.ModelGenerator;
 import com.hufudb.openhufu.user.utils.OpenHuFuLine;
 import java.io.IOException;
@@ -95,6 +96,20 @@ public class OpenHuFuUser {
     } catch (Exception e) {
       LOG.error("Setup cli error", e);
     }
+  }
+
+  public ResultSet executeTask(WXY_UserConfig userConfig) throws SQLException {
+    for (String endpoint: userConfig.endpoints) {
+      addOwner(endpoint);
+    }
+    for (GlobalTableConfig config: userConfig.globalTableConfigs) {
+      createOpenHuFuTable(config);
+    }
+    LOG.info("Init finish");
+    Statement statement = createStatement();
+    ResultSet resultSet = statement.executeQuery(userConfig.sql);
+    statement.close();
+    return resultSet;
   }
 
   public Statement createStatement() throws SQLException {
