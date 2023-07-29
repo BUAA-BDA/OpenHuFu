@@ -1,0 +1,54 @@
+{
+  "version": "1.0.0",
+  "jobID": "2caa8727d6524147b00f9e0d5d3f6e7e",
+  "taskName": "0",
+  "status": "WAITING",
+  "updateTime": "1686731064950",
+  "createTime": "1686731064950",
+  "module": {
+    "moduleName": "KNN",
+    "params": {
+      "point": "POINT(1404050, -4762163)",
+      "k": 10
+    }
+  },
+  "input": {
+    "data": [
+      {
+        "domainID": "localhost:12345",
+        "params": {
+          "table": "spatial",
+          "field": "S_POINT"
+        }
+      },
+      {
+        "domainID": "localhost:12346",
+        "params": {
+          "table": "spatial",
+          "field": "S_POINT"
+        }
+      },
+      {
+        "domainID": "localhost:12347",
+        "params": {
+          "table": "spatial",
+          "field": "S_POINT"
+        }
+      }
+    ]
+  },
+  "parties": [
+    {
+      "partyID": "localhost:12345",
+      "role": "client"
+    },
+    {
+      "partyID": "localhost:12346",
+      "role": "server"
+    },
+    {
+      "partyID": "localhost:12347",
+      "role": "server"
+    }
+  ]
+}
