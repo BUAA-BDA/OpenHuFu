@@ -130,22 +130,38 @@ public class WXY_ConfigFile {
 
   private ColumnTypeWrapper convertType(String columnType) {
     switch (columnType) {
+      case "character varying":
       case "varchar":
+      case "character":
       case "char":
       case "text":
         return ColumnTypeWrapper.STRING;
+      case "smallserial":
+      case "serial":
+      case "serial2":
+      case "serial4":
+      case "smallint":
+      case "integer":
+      case "int":
       case "int2":
       case "int4":
         return ColumnTypeWrapper.INT;
+      case "bigint":
       case "int8":
+      case "bigserial":
+      case "serial8":
         return ColumnTypeWrapper.LONG;
+      case "real":
       case "float4":
         return ColumnTypeWrapper.FLOAT;
+      case "decimal":
+      case "double precision":
       case "numeric":
       case "float8":
       case "money":
         return ColumnTypeWrapper.DOUBLE;
       case "bit":
+      case "boolean":
       case "bool":
         return ColumnTypeWrapper.BOOLEAN;
       case "time":
