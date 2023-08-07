@@ -108,7 +108,7 @@ public class OpenHuFuUser {
     LOG.info("Init finish");
     Statement statement = createStatement();
     ResultSet resultSet = statement.executeQuery(userConfig.sql);
-    statement.close();
+//    statement.close();
     return resultSet;
   }
 

@@ -6,10 +6,12 @@ import com.hufudb.openhufu.common.exception.OpenHuFuException;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import com.google.common.collect.ImmutableMap;
+import com.hufudb.openhufu.core.config.wyx_task.WXY_ConfigFile;
 import com.hufudb.openhufu.data.schema.utils.PojoPublishedTableSchema;
 import com.hufudb.openhufu.mpc.ProtocolExecutor;
 import com.hufudb.openhufu.mpc.ProtocolFactory;
@@ -36,6 +38,7 @@ public class OwnerConfigFile {
   public int port;
   public int threadnum;
   public String hostname;
+  public PostgisConfig postgisConfig;
   public String privatekeypath;
   public String certchainpath;
   public String trustcertpath;
@@ -143,11 +146,20 @@ public class OwnerConfigFile {
     }
     config.adapter = getAdapter(adapterconfig);
     config.librarys = getLibrary();
-    config.tables = tables;
     if (implementorconfigpath == null) {
       throw new OpenHuFuException(ErrorCode.IMPLEMENTOR_CONFIG_FILE_PATH_NOT_SET);
     }
+    config.postgisConfig = postgisConfig;
     config.implementorConfigPath = implementorconfigpath;
+    return config;
+  }
+
+  public OwnerConfig generateConfig(WXY_ConfigFile wxy_configFile) throws SQLException {
+    OwnerConfig config = generateConfig();
+    //todo
+    String endpoint = hostname + ":" + port;
+    config.tables = wxy_configFile.getLocalSchemas(endpoint,
+            postgisConfig.jdbcUrl, postgisConfig.user, postgisConfig.password);
     return config;
   }
 }

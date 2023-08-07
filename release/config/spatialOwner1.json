@@ -2,6 +2,11 @@
   "id": 1,
   "port": 12345,
   "hostname": "localhost",
+  "postgisConfig": {
+    "jdbcUrl": "jdbc:postgresql://localhost:13111/postgres",
+    "user": "postgres",
+    "password": "onedb"
+  },
   "implementorconfigpath": "./config/owner.yml",
   "adapterconfig": {
     "datasource": "CSV",

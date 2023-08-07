@@ -7,7 +7,6 @@ import com.hufudb.openhufu.data.schema.utils.PojoColumnDesc;
 import com.hufudb.openhufu.data.schema.utils.PojoPublishedTableSchema;
 import com.hufudb.openhufu.data.storage.utils.ColumnTypeWrapper;
 import com.hufudb.openhufu.data.storage.utils.ModifierWrapper;
-import com.hufudb.openhufu.proto.OpenHuFuData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
