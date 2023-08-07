@@ -3,9 +3,15 @@ package com.hufudb.openhufu.core.config.wyx_task;
 import com.hufudb.openhufu.core.config.wyx_task.user.WXY_UserConfig;
 import com.hufudb.openhufu.core.table.GlobalTableConfig;
 import com.hufudb.openhufu.core.table.LocalTableConfig;
+import com.hufudb.openhufu.data.schema.utils.PojoColumnDesc;
+import com.hufudb.openhufu.data.schema.utils.PojoPublishedTableSchema;
+import com.hufudb.openhufu.data.storage.utils.ColumnTypeWrapper;
+import com.hufudb.openhufu.data.storage.utils.ModifierWrapper;
+import com.hufudb.openhufu.proto.OpenHuFuData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -83,4 +89,89 @@ public class WXY_ConfigFile {
     return sql;
   }
 
+  public List<PojoPublishedTableSchema> getLocalSchemas(String endpoint, String jdbcUrl, String username, String password) throws SQLException {
+    List<PojoPublishedTableSchema> tableSchemas = new ArrayList<>();
+    String publishName = input.getData().get(0).getTable();
+    for (WXY_DataItem dataItem: input.getData()) {
+      if (endpoint.equals(dataItem.getDomainID())) {
+        PojoPublishedTableSchema schema = new PojoPublishedTableSchema();
+        schema.setActualName(dataItem.getTable());
+        schema.setPublishedName(publishName);
+
+        Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
+        DatabaseMetaData metaData = connection.getMetaData();
+        String tableName = dataItem.getTable();
+        ResultSet resultSet = metaData.getColumns(null, null, tableName, null);
+
+        List<PojoColumnDesc> columnDescs = new ArrayList<>();
+        int columnCount = 0;
+        while (resultSet.next()) {
+          String columnName = resultSet.getString("COLUMN_NAME");
+          String columnType = resultSet.getString("TYPE_NAME");
+          PojoColumnDesc columnDesc = new PojoColumnDesc();
+          columnDesc.columnId = columnCount;
+          columnDesc.name = columnName;
+          columnDesc.type = convertType(columnType);
+          columnDesc.modifier = ModifierWrapper.PUBLIC;
+          if (columnName.equals(dataItem.getField())) {
+            columnDesc.modifier = ModifierWrapper.PROTECTED;
+          }
+          LOG.info("ColumnID: {}, Column Name: {}, Data Type: {}, Modifier: {}",
+                  columnDesc.columnId, columnDesc.name, columnDesc.type, columnDesc.modifier);
+          columnDescs.add(columnDesc);
+          columnCount++;
+        }
+        schema.setPublishedColumns(columnDescs);
+        tableSchemas.add(schema);
+      }
+    }
+    return tableSchemas;
+  }
+
+  private ColumnTypeWrapper convertType(String columnType) {
+    switch (columnType) {
+      case "character varying":
+      case "varchar":
+      case "character":
+      case "char":
+      case "text":
+        return ColumnTypeWrapper.STRING;
+      case "smallserial":
+      case "serial":
+      case "serial2":
+      case "serial4":
+      case "smallint":
+      case "integer":
+      case "int":
+      case "int2":
+      case "int4":
+        return ColumnTypeWrapper.INT;
+      case "bigint":
+      case "int8":
+      case "bigserial":
+      case "serial8":
+        return ColumnTypeWrapper.LONG;
+      case "real":
+      case "float4":
+        return ColumnTypeWrapper.FLOAT;
+      case "decimal":
+      case "double precision":
+      case "numeric":
+      case "float8":
+      case "money":
+        return ColumnTypeWrapper.DOUBLE;
+      case "bit":
+      case "boolean":
+      case "bool":
+        return ColumnTypeWrapper.BOOLEAN;
+      case "time":
+        return ColumnTypeWrapper.TIME;
+      case "timestamp":
+        return ColumnTypeWrapper.TIMESTAMP;
+      case "geometry":
+        return ColumnTypeWrapper.GEOMETRY;
+      default:
+        throw new UnsupportedOperationException("Unsupported type");
+    }
+  }
 }
