@@ -33,6 +33,7 @@ import java.util.concurrent.ExecutorService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import redis.clients.jedis.Jedis;
 
 public class OwnerService extends ServiceGrpc.ServiceImplBase {
   private static final Logger LOG = LoggerFactory.getLogger(OwnerService.class);
@@ -41,6 +42,7 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
   protected final OpenHuFuRpc ownerSideRpc;
   protected final OwnerSideImplementor implementor;
   protected final Adapter adapter;
+  protected final Jedis jedis;
   protected final Map<ProtocolType, ProtocolExecutor> libraries;
   protected final SchemaManager schemaManager;
 
@@ -52,6 +54,9 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
     this.implementor = new OwnerSideImplementor(ownerSideRpc, adapter, threadPool);
     this.schemaManager = this.adapter.getSchemaManager();
     this.libraries = config.librarys;
+    this.jedis = config.jedis;
+    System.out.println(jedis.ping());
+    System.out.println(jedis.get("blockHeight"));
     ImplementorConfig.initImplementorConfig(config.implementorConfigPath);
     initPublishedTable(config.tables);
   }
