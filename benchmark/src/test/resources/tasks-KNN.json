@@ -15,21 +15,24 @@
   "input": {
     "data": [
       {
-        "domainID": "localhost:12345",
+        "domainID": "computer1",
+        "role": "client",
         "params": {
           "table": "spatial",
           "field": "S_POINT"
         }
       },
       {
-        "domainID": "localhost:12346",
+        "domainID": "computer2",
+        "role": "server",
         "params": {
           "table": "spatial",
           "field": "S_POINT"
         }
       },
       {
-        "domainID": "localhost:12347",
+        "domainID": "computer3",
+        "role": "server",
         "params": {
           "table": "spatial",
           "field": "S_POINT"
@@ -39,16 +42,25 @@
   },
   "parties": [
     {
-      "partyID": "localhost:12345",
-      "role": "client"
+      "partyID": "computer1",
+      "serviceInfo": {
+        "ip": "localhost",
+        "port": "12345"
+      }
     },
     {
-      "partyID": "localhost:12346",
-      "role": "server"
+      "partyID": "computer2",
+      "serviceInfo": {
+        "ip": "localhost",
+        "port": "12346"
+      }
     },
     {
-      "partyID": "localhost:12347",
-      "role": "server"
+      "partyID": "computer3",
+      "serviceInfo": {
+        "ip": "localhost",
+        "port": "12347"
+      }
     }
   ]
 }

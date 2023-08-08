@@ -41,4 +41,9 @@ public class KNN implements ScalarUDF {
 //    Geometry right = (Geometry) inputs.get(1);
 //    return true;
   }
+
+  @Override
+  public String translate(String dataSource, List<String> inputs) {
+    throw new RuntimeException();
+  }
 }

@@ -9,46 +9,10 @@
   },
   "implementorconfigpath": "./config/owner.yml",
   "adapterconfig": {
-    "datasource": "CSV",
-    "url": "../dataset/sample/spatial/database0",
-    "delimiter": "|"
-  },
-  "tables": [
-    {
-      "actualName": "spatial",
-      "publishedName": "spatial",
-      "publishedColumns": [
-        {
-          "name": "S_ID",
-          "type": "LONG",
-          "modifier": "public",
-          "columnId": 0
-        },
-        {
-          "name": "S_POINT",
-          "type": "GEOMETRY",
-          "modifier": "protected",
-          "columnId": 1
-        }
-      ]
-    },
-    {
-      "actualName": "join_left",
-      "publishedName": "join_left",
-      "publishedColumns": [
-        {
-          "name": "JL_ID",
-          "type": "LONG",
-          "modifier": "public",
-          "columnId": 0
-        },
-        {
-          "name": "JL_POINT",
-          "type": "GEOMETRY",
-          "modifier": "public",
-          "columnId": 1
-        }
-      ]
-    }
-  ]
+    "datasource": "POSTGIS",
+    "url": "jdbc:postgresql://localhost:13111/postgres",
+    "catalog": "postgres",
+    "user": "postgres",
+    "passwd": "onedb"
+  }
 }

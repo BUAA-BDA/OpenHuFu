@@ -38,6 +38,13 @@ public class UDFLoader {
     return UDFLoader.scalarUDFs.get(funcName).implement(inputs);
   }
 
+  public static String translateScalar(String funcName, String dataSource, List<String> inputs) {
+    if (!UDFLoader.scalarUDFs.containsKey(funcName)) {
+      LOG.error("Unsupported scalar UDF {}", funcName);
+      throw new RuntimeException("Unsupported scalar UDF");
+    }
+    return UDFLoader.scalarUDFs.get(funcName).translate(dataSource, inputs);
+  }
   public static ColumnType getScalarOutType(String funcName, List<Expression> inputs) {
     return UDFLoader.scalarUDFs.get(funcName)
         .getOutType(inputs.stream().map(in -> in.getOutType()).collect(Collectors.toList()));

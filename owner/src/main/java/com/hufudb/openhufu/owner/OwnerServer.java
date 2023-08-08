@@ -115,12 +115,15 @@ public class OwnerServer {
     Option cmdConfig = new Option("c", "config", true, "owner config file path");
     cmdConfig.setRequired(true);
     options.addOption(cmdConfig);
+    Option cmdConfig2 = new Option("t", "task", true, "task file path");
+    cmdConfig2.setRequired(true);
+    options.addOption(cmdConfig2);
     CommandLineParser parser = new DefaultParser();
     CommandLine cmd;
     try {
       cmd = parser.parse(options, args);
 //      OwnerServer server = create(cmd.getOptionValue("config"));
-      OwnerServer server = create(cmd.getOptionValue("config"), "./config/tasks-KNN.json");
+      OwnerServer server = create(cmd.getOptionValue("config"), cmd.getOptionValue("task"));
       server.start();
       server.blockUntilShutdown();
     } catch (Exception e) { // NOSONAR
@@ -128,5 +131,4 @@ public class OwnerServer {
       System.exit(1);
     }
   }
-
 }

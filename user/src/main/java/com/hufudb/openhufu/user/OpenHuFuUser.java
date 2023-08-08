@@ -1,7 +1,11 @@
 package com.hufudb.openhufu.user;
 
 import com.google.common.collect.ImmutableList;
+import com.google.gson.Gson;
 import com.hufudb.openhufu.core.client.OwnerClient;
+import com.hufudb.openhufu.core.config.wyx_task.WXY_ConfigFile;
+import com.hufudb.openhufu.core.config.wyx_task.WXY_DataItem;
+import com.hufudb.openhufu.core.config.wyx_task.WXY_Party;
 import com.hufudb.openhufu.core.sql.rel.OpenHuFuTable;
 import com.hufudb.openhufu.core.sql.schema.OpenHuFuSchemaManager;
 import com.hufudb.openhufu.core.sql.schema.OpenHuFuSchemaFactory;
@@ -14,6 +18,10 @@ import com.hufudb.openhufu.core.config.wyx_task.user.WXY_UserConfig;
 import com.hufudb.openhufu.user.utils.ModelGenerator;
 import com.hufudb.openhufu.user.utils.OpenHuFuLine;
 import java.io.IOException;
+import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -28,11 +36,7 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import org.apache.calcite.jdbc.CalciteConnection;
 import org.apache.calcite.schema.SchemaPlus;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
+import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,20 +85,32 @@ public class OpenHuFuUser {
     OpenHuFuLine.start(dbargs.toArray(new String[6]), null, true);
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws SQLException, ParseException, IOException {
+    String domainID = System.getenv("DOMAIN_ID");
     final Options options = new Options();
     final Option config = new Option("c", "config", true, "user config file path");
     config.setRequired(true);
     options.addOption(config);
     final CommandLineParser parser = new DefaultParser();
     CommandLine cmd;
-    try {
-      Class.forName("com.hufudb.openhufu.user.jdbc.OpenHuFuDriver");
-      cmd = parser.parse(options, args);
-      final String configPath = cmd.getOptionValue("config", "config/user.json");
-      setupCLI(configPath);
-    } catch (Exception e) {
-      LOG.error("Setup cli error", e);
+    cmd = parser.parse(options, args);
+    final String configPath = cmd.getOptionValue("config", "config/user.json");
+    OpenHuFuUser user = new OpenHuFuUser();
+    Reader reader = Files.newBufferedReader(Paths.get(configPath));
+    WXY_ConfigFile configFile = new Gson().fromJson(reader, WXY_ConfigFile.class);
+    for (WXY_DataItem dataItem: configFile.input.getData()) {
+      if (dataItem.getDomainID().equals(domainID) && dataItem.getRole().equals("server")) {
+        LOG.info("{} is server, exiting", domainID);
+        System.exit(0);
+      }
+    }
+    WXY_UserConfig userConfig = configFile.generateUserConfig();
+    ResultSet dataset = user.executeTask(userConfig);
+    while (dataset.next()) {
+      for (int i = 1; i <= dataset.getMetaData().getColumnCount(); i++) {
+        System.out.print(dataset.getString(i) + "|");
+      }
+      System.out.println();
     }
   }
 

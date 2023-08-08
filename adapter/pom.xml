@@ -15,6 +15,7 @@
 
   <modules>
     <module>adapter-csv</module>
+    <module>adapter-postgis</module>
   </modules>
 
   <dependencies>
