@@ -10,6 +10,8 @@ start() {
   if [ $# -eq 3 ]
     then
       export DOMAIN_ID=$3
+      export jobId="0"
+      export taskName="knn"
       filename=$filename_$3
     fi
 

@@ -41,9 +41,11 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 import org.apache.calcite.jdbc.CalciteConnection;
 import org.apache.calcite.schema.SchemaPlus;
+import org.apache.calcite.sql.dialect.JethroDataSqlDialect;
 import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import redis.clients.jedis.Jedis;
 
 public class OpenHuFuUser {
 
@@ -217,5 +219,19 @@ public class OpenHuFuUser {
 
   public void dropLocalTable(String openHuFuTableName, String endpoint, String localTableName) {
     schema.dropLocalTable(openHuFuTableName, endpoint, localTableName);
+  }
+
+  public String getTask(String jobId, String taskName) {
+    String host = "192.168.40.230";
+    int port = 31012;
+    int database = 0;
+    String pwd = "Wlty*Ny1b!";
+    String taskId = jobId + '_' + taskName;
+    Jedis jedis = new Jedis(host, port);
+    jedis.auth(pwd);
+    jedis.select(database);
+    String taskJson = jedis.get(taskId);
+    System.out.println(taskJson);
+    return taskJson;
   }
 }

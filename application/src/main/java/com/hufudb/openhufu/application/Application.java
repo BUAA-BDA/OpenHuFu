@@ -71,9 +71,13 @@ public class Application {
 
   private static void checkAndStartUser(String taskFilePath) throws IOException, SQLException, InterruptedException {
     String domainID = System.getenv("DOMAIN_ID");
+    String jobId = System.getenv("jobId");
+    String taskName = System.getenv("taskName");
     OpenHuFuUser user = new OpenHuFuUser();
-    Reader reader = Files.newBufferedReader(Paths.get(taskFilePath));
-    WXY_ConfigFile configFile = new Gson().fromJson(reader, WXY_ConfigFile.class);
+    String task = user.getTask(jobId, taskName);
+    // Reader reader = Files.newBufferedReader(Paths.get(taskFilePath));
+    // WXY_ConfigFile configFile = new Gson().fromJson(reader, WXY_ConfigFile.class);
+    WXY_ConfigFile configFile = new Gson().fromJson(task, WXY_ConfigFile.class);
     final int[] count = {0};
     for (WXY_DataItem dataItem: configFile.input.getData()) {
       if (dataItem.getDomainID().equals(domainID) && dataItem.getRole().equals("server")) {
