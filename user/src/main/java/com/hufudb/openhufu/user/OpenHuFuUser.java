@@ -15,12 +15,13 @@ import com.hufudb.openhufu.data.schema.TableSchema;
 import com.hufudb.openhufu.data.storage.DataSet;
 import com.hufudb.openhufu.plan.Plan;
 import com.hufudb.openhufu.core.config.wyx_task.user.WXY_UserConfig;
+import com.hufudb.openhufu.proto.OpenHuFuService;
+import com.hufudb.openhufu.proto.ServiceGrpc;
 import com.hufudb.openhufu.user.utils.ModelGenerator;
 import com.hufudb.openhufu.user.utils.OpenHuFuLine;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -34,6 +35,10 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import io.grpc.StatusRuntimeException;
 import org.apache.calcite.jdbc.CalciteConnection;
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.commons.cli.*;
@@ -111,6 +116,23 @@ public class OpenHuFuUser {
         System.out.print(dataset.getString(i) + "|");
       }
       System.out.println();
+    }
+  }
+
+  public boolean testServerConnection(String domainID, String ip, int port) {
+    ManagedChannel managedChannel = ManagedChannelBuilder
+            .forAddress(ip, port)
+            .usePlaintext()
+            .build();
+    try {
+      ServiceGrpc.newBlockingStub(managedChannel).getOwnerInfo(OpenHuFuService.GeneralRequest.newBuilder().build());
+      managedChannel.shutdown();
+      LOG.info("server {} ({}:{}) has started.", domainID, ip, port);
+      return true;
+    } catch (StatusRuntimeException e) {
+      managedChannel.shutdown();
+      LOG.info("server {} ({}:{}) has not started yet.", domainID, ip, port);
+      return false;
     }
   }
 

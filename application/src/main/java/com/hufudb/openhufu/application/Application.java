@@ -3,6 +3,7 @@ package com.hufudb.openhufu.application;
 import com.google.gson.Gson;
 import com.hufudb.openhufu.core.config.wyx_task.WXY_ConfigFile;
 import com.hufudb.openhufu.core.config.wyx_task.WXY_DataItem;
+import com.hufudb.openhufu.core.config.wyx_task.WXY_Party;
 import com.hufudb.openhufu.core.config.wyx_task.user.WXY_UserConfig;
 import com.hufudb.openhufu.owner.OwnerServer;
 import com.hufudb.openhufu.user.OpenHuFuUser;
@@ -43,7 +44,6 @@ public class Application {
     });
     owner.start();
 
-
     Thread user = new Thread(new Runnable() {
       @Override
       public void run() {
@@ -69,11 +69,12 @@ public class Application {
     }
   }
 
-  private static void checkAndStartUser(String taskFilePath) throws IOException, SQLException {
+  private static void checkAndStartUser(String taskFilePath) throws IOException, SQLException, InterruptedException {
     String domainID = System.getenv("DOMAIN_ID");
     OpenHuFuUser user = new OpenHuFuUser();
     Reader reader = Files.newBufferedReader(Paths.get(taskFilePath));
     WXY_ConfigFile configFile = new Gson().fromJson(reader, WXY_ConfigFile.class);
+    final int[] count = {0};
     for (WXY_DataItem dataItem: configFile.input.getData()) {
       if (dataItem.getDomainID().equals(domainID) && dataItem.getRole().equals("server")) {
         LOG.info("{} is server, exiting", domainID);
@@ -81,6 +82,30 @@ public class Application {
       }
     }
     WXY_UserConfig userConfig = configFile.generateUserConfig();
+
+    for (WXY_Party party: configFile.parties) {
+      Thread test = new Thread(new Runnable() {
+        @Override
+        public void run() {
+          while (!user.testServerConnection(party.getPartyID(), party.getIp(), party.getPort())) {
+            try {
+              Thread.sleep(200);
+            } catch (InterruptedException e) {
+              throw new RuntimeException(e);
+            }
+          }
+          synchronized (count) {
+            count[0]++;
+          }
+        }
+      });
+      test.start();
+    }
+
+    while (count[0] != configFile.parties.size()) {
+      Thread.sleep(200);
+    }
+
     ResultSet dataset = user.executeTask(userConfig);
     while (dataset.next()) {
       for (int i = 1; i <= dataset.getMetaData().getColumnCount(); i++) {
