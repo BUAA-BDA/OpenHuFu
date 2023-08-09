@@ -9,10 +9,7 @@ start() {
   log4j="./config/log4j.properties"
   if [ $# -eq 3 ]
     then
-      export DOMAIN_ID=$3
-      export jobID="0"
-      export taskName="knn"
-      filename=$filename_$3
+      filename=$filename_$orgDID
     fi
 
   export OPENHUFU_ROOT=$PWD
@@ -36,7 +33,7 @@ stop() {
 }
 
 usage() {
-  echo "usage: ./application.sh [start <owner_config_path> <task_file_path> <DOMAIN_ID>] | [stop]"
+  echo "usage: ./application.sh [start <owner_config_path> <task_file_path>] | [stop]"
 }
 
 log_dir='./log'
@@ -48,9 +45,9 @@ then
   usage
 elif [ $1 == "start" ]
 then
-  if [ $# -eq 4 ]
+  if [ $# -eq 3 ]
   then
-    start $2 $3 $4
+    start $2 $3
   else
     echo "no config file or task file"
     usage

@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "jobID": "2caa8727d6524147b00f9e0d5d3f6e7e",
-  "taskName": "0",
+  "jobID": "0",
+  "taskName": "knn",
   "status": "WAITING",
   "updateTime": "1686731064950",
   "createTime": "1686731064950",

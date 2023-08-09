@@ -70,7 +70,7 @@ public class Application {
   }
 
   private static void checkAndStartUser(String taskFilePath) throws IOException, SQLException, InterruptedException {
-    String domainID = System.getenv("DOMAIN_ID");
+    String domainID = System.getenv("orgDID");
     String jobId = System.getenv("jobID");
     String taskName = System.getenv("taskName");
     OpenHuFuUser user = new OpenHuFuUser();

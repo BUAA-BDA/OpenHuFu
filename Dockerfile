@@ -1,5 +1,4 @@
 FROM openjdk:11
-COPY ./dataset ./dataset
 WORKDIR /release
 COPY ./release/config ./config
 COPY ./release/bin ./bin
