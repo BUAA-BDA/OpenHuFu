@@ -25,6 +25,7 @@
     <module>udf</module>
     <module>user</module>
     <module>dp</module>
+    <module>application</module>
   </modules>
 
   <properties>
