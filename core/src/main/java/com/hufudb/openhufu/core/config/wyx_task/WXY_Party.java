@@ -12,7 +12,7 @@ public class WXY_Party {
     return serviceInfo.ip;
   }
 
-  public String getPort() {
+  public int getPort() {
     return serviceInfo.port;
   }
 
@@ -21,6 +21,6 @@ public class WXY_Party {
   }
   private class ServiceInfo {
     String ip;
-    String port;
+    int port;
   }
 }
