@@ -10,8 +10,9 @@ if [ $# -eq 0 ]; then
   mkdir -p ./release/adapter
   mkdir -p ./release/lib
   cp owner/target/*-with-dependencies.jar ./release/bin/owner_server.jar
+  cp user/target/*-with-dependencies.jar ./release/bin/user_client.jar
   cp adapter/adapter-csv/target/*-with-dependencies.jar ./release/adapter/adapter_csv.jar
-  cp adapter/adapter-csv/target/*-with-dependencies.jar ./release/adapter/adapter_csv.jar
+  cp adapter/adapter-postgis/target/*-with-dependencies.jar ./release/adapter/adapter_postgis.jar
   cp benchmark/target/benchmark.jar ./release/bin/benchmark.jar
 elif [ $1 == "owner" ]; then
   mvn install -T ${thread} -DskipTests -pl $1

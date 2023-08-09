@@ -11,4 +11,5 @@ public interface ScalarUDF {
   String getName();
   ColumnType getOutType(List<ColumnType> inTypes);
   Object implement(List<Object> inputs);
+  String translate(String dataSource, List<String> inputs);
 }

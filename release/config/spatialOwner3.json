@@ -2,30 +2,17 @@
   "id": 3,
   "port": 12347,
   "hostname": "localhost",
+  "postgisConfig": {
+    "jdbcUrl": "jdbc:postgresql://localhost:13113/postgres",
+    "user": "postgres",
+    "password": "onedb"
+  },
   "implementorconfigpath": "./config/owner.yml",
   "adapterconfig": {
-    "datasource": "CSV",
-    "url": "../dataset/sample/spatial/database2",
-    "delimiter": "|"
-  },
-  "tables": [
-    {
-      "actualName": "spatial",
-      "publishedName": "spatial",
-      "publishedColumns": [
-        {
-          "name": "S_ID",
-          "type": "LONG",
-          "modifier": "public",
-          "columnId": 0
-        },
-        {
-          "name": "S_POINT",
-          "type": "GEOMETRY",
-          "modifier": "protected",
-          "columnId": 1
-        }
-      ]
-    }
-  ]
+    "datasource": "POSTGIS",
+    "url": "jdbc:postgresql://localhost:13113/postgres",
+    "catalog": "postgres",
+    "user": "postgres",
+    "passwd": "onedb"
+  }
 }

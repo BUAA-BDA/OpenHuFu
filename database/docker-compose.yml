@@ -1,0 +1,50 @@
+version: '3.3'
+
+services:
+  htpostgis1:
+    image: postgis/postgis
+    restart: "no"
+    container_name: htpostgis1
+    ports:
+      - 13111:5432
+    environment:
+      POSTGRES_PASSWORD: onedb
+    volumes:
+      - $PWD/config/db1.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - ht_owner_net_1
+  htpostgis2:
+    image: postgis/postgis
+    restart: "no"
+    container_name: htpostgis2
+    ports:
+      - 13112:5432
+    environment:
+      POSTGRES_PASSWORD: onedb
+    volumes:
+      - $PWD/config/db2.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - ht_owner_net_2
+  htpostgis3:
+    image: postgis/postgis
+    restart: "no"
+    container_name: htpostgis3
+    ports:
+      - 13113:5432
+    environment:
+      POSTGRES_PASSWORD: onedb
+    volumes:
+      - $PWD/config/db3.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - ht_owner_net_3
+
+networks:
+  ht_owner_net_1:
+    name: ht_owner_net_1
+    driver: bridge
+  ht_owner_net_2:
+    name: ht_owner_net_2
+    driver: bridge
+  ht_owner_net_3:
+    name: ht_owner_net_3
+    driver: bridge

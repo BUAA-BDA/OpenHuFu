@@ -53,7 +53,7 @@ public class BinarySearchKNN {
         leafPlan.setWhereExps(whereExps);
         leafPlan.setAggExps(ImmutableList.of(ExpressionFactory.createAggFunc(OpenHuFuData.ColumnType.LONG,
                 OpenHuFuData.Modifier.PROTECTED, AggFuncType.COUNT.getId(), ImmutableList.of())));
-        leafPlan.setOrders(originalLeaf.getOrders());
+//        leafPlan.setOrders(originalLeaf.getOrders());
 
         UnaryPlan unaryPlan = new UnaryPlan(leafPlan);
         unaryPlan.setSelectExps(ImmutableList.of(ExpressionFactory

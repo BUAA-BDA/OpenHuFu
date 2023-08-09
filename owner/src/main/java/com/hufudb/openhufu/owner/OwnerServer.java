@@ -1,6 +1,7 @@
 package com.hufudb.openhufu.owner;
 
 
+import com.hufudb.openhufu.core.config.wyx_task.WXY_ConfigFile;
 import io.grpc.BindableService;
 import io.grpc.Grpc;
 import io.grpc.Server;
@@ -9,7 +10,9 @@ import io.grpc.ServerCredentials;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.SQLException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import com.google.gson.Gson;
@@ -97,16 +100,30 @@ public class OwnerServer {
     return new OwnerServer(config.generateConfig());
   }
 
-  public static void main(String[] args) {
+  public static OwnerServer create(String configPath, String taskPath) throws IOException, SQLException {
+    Gson gson = new Gson();
+    Reader reader1 = Files.newBufferedReader(Paths.get(taskPath));
+    Reader reader2 = Files.newBufferedReader(Paths.get(configPath));
+    WXY_ConfigFile wxy_configFile = gson.fromJson(reader1, WXY_ConfigFile.class);
+    OwnerConfigFile config = gson.fromJson(reader2, OwnerConfigFile.class);
+    return new OwnerServer(config.generateConfig(wxy_configFile));
+  }
+
+  public static void main(String[] args) throws ClassNotFoundException {
+    Class.forName("org.postgresql.Driver");
     Options options = new Options();
     Option cmdConfig = new Option("c", "config", true, "owner config file path");
     cmdConfig.setRequired(true);
     options.addOption(cmdConfig);
+    Option cmdConfig2 = new Option("t", "task", true, "task file path");
+    cmdConfig2.setRequired(true);
+    options.addOption(cmdConfig2);
     CommandLineParser parser = new DefaultParser();
     CommandLine cmd;
     try {
       cmd = parser.parse(options, args);
-      OwnerServer server = create(cmd.getOptionValue("config"));
+//      OwnerServer server = create(cmd.getOptionValue("config"));
+      OwnerServer server = create(cmd.getOptionValue("config"), cmd.getOptionValue("task"));
       server.start();
       server.blockUntilShutdown();
     } catch (Exception e) { // NOSONAR
@@ -114,5 +131,4 @@ public class OwnerServer {
       System.exit(1);
     }
   }
-
 }

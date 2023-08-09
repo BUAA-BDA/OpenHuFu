@@ -37,4 +37,14 @@ public class Distance implements ScalarUDF {
     Geometry right = (Geometry) inputs.get(1);
     return left.distance(right);
   }
+
+  @Override
+  public String translate(String dataSource, List<String> inputs) {
+    switch(dataSource) {
+      case "postgis":
+        return String.format("%s <-> %s", inputs.get(0), inputs.get(1));
+      default:
+        throw new RuntimeException("Unsupported datasource for Distance UDF");
+    }
+  }
 }

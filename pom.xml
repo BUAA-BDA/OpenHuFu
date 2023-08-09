@@ -43,7 +43,8 @@
 
     <!--  test  -->
     <junit.version>4.13.1</junit.version>
-    <postgreDriver.version>42.2.24</postgreDriver.version>
+
+    <postgreDriver.version>42.5.4</postgreDriver.version>
     <postgisDriver.version>2.5.0</postgisDriver.version>
   </properties>
 

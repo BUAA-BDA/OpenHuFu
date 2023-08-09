@@ -7,12 +7,12 @@ import com.hufudb.openhufu.data.schema.utils.PojoColumnDesc;
 import com.hufudb.openhufu.data.schema.utils.PojoPublishedTableSchema;
 import com.hufudb.openhufu.data.storage.utils.ColumnTypeWrapper;
 import com.hufudb.openhufu.data.storage.utils.ModifierWrapper;
-import com.hufudb.openhufu.proto.OpenHuFuData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class WXY_ConfigFile {
@@ -36,9 +36,11 @@ public class WXY_ConfigFile {
     WXY_UserConfig userConfig = new WXY_UserConfig();
 
     //step 1 generate endpoints
+    HashMap<String, String> domainID2endpoint = new HashMap<>();
     List<String> endpoints = new ArrayList<>();
     for (WXY_Party party: parties) {
-      endpoints.add(party.getPartyID());
+      endpoints.add(party.getEndpoint());
+      domainID2endpoint.put(party.getPartyID(), party.getEndpoint());
     }
     userConfig.endpoints = endpoints;
 
@@ -50,7 +52,7 @@ public class WXY_ConfigFile {
     for (WXY_DataItem dataItem: input.getData()) {
       LocalTableConfig localTableConfig = new LocalTableConfig();
       localTableConfig.localName = dataItem.getTable();
-      localTableConfig.endpoint = dataItem.getDomainID();
+      localTableConfig.endpoint = domainID2endpoint.get(dataItem.getDomainID());
       localTableConfigs.add(localTableConfig);
     }
     globalTableConfig.localTables = localTableConfigs;
@@ -90,10 +92,15 @@ public class WXY_ConfigFile {
   }
 
   public List<PojoPublishedTableSchema> getLocalSchemas(String endpoint, String jdbcUrl, String username, String password) throws SQLException {
+    HashMap<String, String> domainID2endpoint = new HashMap<>();
+    for (WXY_Party party: parties) {
+      domainID2endpoint.put(party.getPartyID(), party.getEndpoint());
+    }
+
     List<PojoPublishedTableSchema> tableSchemas = new ArrayList<>();
     String publishName = input.getData().get(0).getTable();
     for (WXY_DataItem dataItem: input.getData()) {
-      if (endpoint.equals(dataItem.getDomainID())) {
+      if (endpoint.equals(domainID2endpoint.get(dataItem.getDomainID()))) {
         PojoPublishedTableSchema schema = new PojoPublishedTableSchema();
         schema.setActualName(dataItem.getTable());
         schema.setPublishedName(publishName);
@@ -113,7 +120,7 @@ public class WXY_ConfigFile {
           columnDesc.name = columnName;
           columnDesc.type = convertType(columnType);
           columnDesc.modifier = ModifierWrapper.PUBLIC;
-          if (columnName.equals(dataItem.getField())) {
+          if (columnName.equalsIgnoreCase(dataItem.getField())) {
             columnDesc.modifier = ModifierWrapper.PROTECTED;
           }
           LOG.info("ColumnID: {}, Column Name: {}, Data Type: {}, Modifier: {}",

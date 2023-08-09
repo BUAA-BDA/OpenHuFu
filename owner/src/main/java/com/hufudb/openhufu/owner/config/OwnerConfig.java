@@ -16,6 +16,7 @@ public class OwnerConfig {
   public Party party;
   public int port;
   public String hostname;
+  public PostgisConfig postgisConfig;
   public ExecutorService threadPool;
   public Adapter adapter;
   public OpenHuFuRpc acrossOwnerRpc;
