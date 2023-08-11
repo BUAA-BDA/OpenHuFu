@@ -1,6 +1,5 @@
 FROM openjdk:11
 WORKDIR /release
-COPY ./release/config ./config
 COPY ./release/bin ./bin
 COPY ./release/adapter ./adapter
 ADD ./release/*.sh ./
