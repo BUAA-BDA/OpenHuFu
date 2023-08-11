@@ -222,8 +222,8 @@ public class OpenHuFuUser {
   }
 
   public String getTask(String jobId, String taskName) {
-    String host = "192.168.40.230";
-    int port = 31012;
+    String host = "redis-master";
+    int port = 6379;
     int database = 0;
     String pwd = "Wlty*Ny1b!";
     String taskId = jobId + '_' + taskName;
@@ -231,7 +231,7 @@ public class OpenHuFuUser {
     jedis.auth(pwd);
     jedis.select(database);
     String taskJson = jedis.get(taskId);
-    System.out.println(taskJson);
+    LOG.info(taskJson);
     return taskJson;
   }
 }

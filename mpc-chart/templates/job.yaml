@@ -1,0 +1,42 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app: mpc-chart
+  name: {{ include "mpc-chart.fullname" . }}
+  namespace: {{ .Values.namespace }}
+spec:
+  # ttlSecondsAfterFinished: 300
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app: mpc-chart
+    spec:
+      volumes:  # 宿主机挂载目录
+        - name: engine-config         # 给需要挂载的宿主机路径起个名字
+          hostPath:                           # 宿主机路径
+            path: {{ .Values.configPath }}
+            type: Directory
+      containers:
+      - image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        name: mpc-chart
+        # command: [ "python", "/code/main.py" ]
+        env:
+        - name: jobID
+          value: {{ .Values.jobID | toJson }}
+        - name: taskName
+          value: {{ .Values.taskName | toJson }}
+        - name: taskStatus
+          value: {{ .Values.taskStatus | toJson }}
+        - name: orgDID
+          value: {{ .Values.orgDID | toJson }}
+        - name: taskType
+          value: {{ .Values.taskType | toJson }}
+        - name: nodePort
+          value: {{ quote .Values.tport }}
+        volumeMounts:                 # 容器内部映射的目录路径
+          - name: engine-config    # 给需要映射的目录路径起个名字，名字要和上面的宿主机路径的名字对应
+            mountPath: /release/config/
+      restartPolicy: Never

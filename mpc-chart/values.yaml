@@ -1,0 +1,27 @@
+jobID: "0"
+taskName: "knn"
+taskStatus: READY
+taskType: OTPSI
+orgDID: computer1
+port: 32010
+tport: 32010
+
+configPath: /data/mpc/engine
+image:
+  repository: docker.oa.com:5000/mpc/openhufu-server
+  tag: "3.3"
+  pullPolicy: IfNotPresent
+key: node-role.kubernetes.io/mpc
+values: mpc
+
+# namespace is the values for deploy namespace
+namespace: mpc
+# service.type is the values for service type
+service:
+  type: NodePort
+  # service port
+  port: 12345
+  # container port
+  targetPort: 12345
+  # k8s port
+  nodePort: 31050

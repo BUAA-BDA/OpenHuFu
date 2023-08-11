@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-postgis
+  labels:
+    app: my-postgis
+    version: v1.0.0
+spec:
+  selector:
+    matchLabels:
+      app: my-postgis
+      version: v1.0.0
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: my-postgis
+        version: v1.0.0
+    spec:
+      containers:
+      - image: postgis/postgis:latest
+        name: htpostgis
+        env:
+        - name: POSTGRES_PASSWORD     #  新建用户的用户名
+          value: onedb
+        volumeMounts:
+          - name: data
+            mountPath: /docker-entrypoint-initdb.d/init.sql
+        ports:
+        - containerPort: 5432
+          name: postgis
+      volumes:
+      - name: data
+        hostPath:
+          path: /data/mpc/database/db.sql
+          type: File
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+   name: postgis-master
+spec:
+   selector: 
+       name: postgis
+   type: NodePort
+   ports:
+     - port: 5432
+       targetPort: 5432
+       nodePort: 30082
