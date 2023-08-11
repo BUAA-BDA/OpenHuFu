@@ -41,7 +41,7 @@ spec:
            claimName: postgis-pv-claim
       - name: data
         hostPath:
-          path: /data/mpc/database/db.sql
+          path: /opt/OpenHuFu/database/config/db1.sql
           type: File
 
 ---

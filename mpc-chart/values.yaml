@@ -6,7 +6,7 @@ orgDID: computer1
 port: 32010
 tport: 32010
 
-configPath: /data/mpc/engine
+configPath: /opt/OpenHuFu/release/config
 image:
   repository: docker.oa.com:5000/mpc/openhufu-server
   tag: "3.3"
