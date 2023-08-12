@@ -11,8 +11,8 @@ spec:
   ports:
     - port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.targetPort }}
-      nodePort: {{ .Values.tport}}
+      nodePort: {{ .Values.service.nodePort}}
       protocol: TCP
       name: http
   selector:
-    app: {{ $jobName }}
+    app: {{ .Values.app}}

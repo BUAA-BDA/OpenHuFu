@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   labels:
-    app: mpc-chart
+    app: {{ .Values.app }}
   name: {{ include "mpc-chart.fullname" . }}
   namespace: {{ .Values.namespace }}
 spec:
@@ -11,7 +11,7 @@ spec:
   template:
     metadata:
       labels:
-        app: mpc-chart
+        app: {{ .Values.app }}
     spec:
       volumes:  # 宿主机挂载目录
         - name: engine-config         # 给需要挂载的宿主机路径起个名字
@@ -20,6 +20,8 @@ spec:
             type: Directory
       containers:
       - image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        ports:
+          - containerPort: {{ .Values.service.targetPort }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         name: mpc-chart
         # command: [ "python", "/code/main.py" ]
@@ -35,7 +37,7 @@ spec:
         - name: taskType
           value: {{ .Values.taskType | toJson }}
         - name: nodePort
-          value: {{ quote .Values.tport }}
+          value: {{ quote .Values.service.nodePort }}
         volumeMounts:                 # 容器内部映射的目录路径
           - name: engine-config    # 给需要映射的目录路径起个名字，名字要和上面的宿主机路径的名字对应
             mountPath: /release/config/
