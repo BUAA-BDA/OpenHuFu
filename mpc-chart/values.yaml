@@ -9,7 +9,7 @@ tport: 32010
 configPath: /opt/OpenHuFu/release/config
 image:
   repository: docker.oa.com:5000/mpc/openhufu-server
-  tag: "3.3"
+  tag: "4.1"
   pullPolicy: IfNotPresent
 key: node-role.kubernetes.io/mpc
 values: mpc

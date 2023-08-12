@@ -3,14 +3,14 @@
   "port": 12345,
   "hostname": "localhost",
   "postgisConfig": {
-    "jdbcUrl": "jdbc:postgresql://postgis:5432/postgres",
+    "jdbcUrl": "jdbc:postgresql://postgis-master:5432/postgres",
     "user": "postgres",
     "password": "onedb"
   },
   "implementorconfigpath": "./config/owner.yml",
   "adapterconfig": {
     "datasource": "POSTGIS",
-    "url": "jdbc:postgresql://postgis:5432/postgres",
+    "url": "jdbc:postgresql://postgis-master:5432/postgres",
     "catalog": "postgres",
     "user": "postgres",
     "passwd": "onedb"

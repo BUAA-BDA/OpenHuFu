@@ -10,6 +10,7 @@ import com.hufudb.openhufu.user.OpenHuFuUser;
 import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import redis.clients.jedis.Jedis;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -35,11 +36,22 @@ public class Application {
     cmd = parser.parse(options, args);
     String ownerConfigPath = cmd.getOptionValue("config");
     String taskFilePath = cmd.getOptionValue("task");
-
+    String jobId = System.getenv("jobID");
+    String taskName = System.getenv("taskName");
+    String task = getTask(jobId, taskName);
+    WXY_ConfigFile wxy_configFile;
+    if (!task.equals("")) {
+      wxy_configFile = new Gson().fromJson(task, WXY_ConfigFile.class);
+      LOG.info("GET TASK FROM REDIS");
+    } else {
+       Reader reader = Files.newBufferedReader(Paths.get(taskFilePath));
+       wxy_configFile = new Gson().fromJson(reader, WXY_ConfigFile.class);
+       LOG.info("GET TASK FROM CONFIG_FILE");
+    }
     Thread owner = new Thread(new Runnable() {
       @Override
       public void run() {
-        startOwner(ownerConfigPath, taskFilePath);
+        startOwner(ownerConfigPath, wxy_configFile);
       }
     });
     owner.start();
@@ -48,7 +60,7 @@ public class Application {
       @Override
       public void run() {
         try {
-          checkAndStartUser(taskFilePath);
+          checkAndStartUser(wxy_configFile);
         } catch (Exception e) {
           LOG.info("Error when start user client");
         }
@@ -58,9 +70,10 @@ public class Application {
 
 
   }
-  private static void startOwner(String ownerConfigPath, String taskFilePath) {
+
+  private static void startOwner(String ownerConfigPath, WXY_ConfigFile wxy_configFile) {
     try {
-      OwnerServer server = OwnerServer.create(ownerConfigPath, taskFilePath);
+      OwnerServer server = OwnerServer.create(ownerConfigPath, wxy_configFile);
       server.start();
       server.blockUntilShutdown();
     } catch (Exception e) {
@@ -69,25 +82,19 @@ public class Application {
     }
   }
 
-  private static void checkAndStartUser(String taskFilePath) throws IOException, SQLException, InterruptedException {
+  private static void checkAndStartUser(WXY_ConfigFile wxy_configFile) throws IOException, SQLException, InterruptedException {
     String domainID = System.getenv("orgDID");
-    String jobId = System.getenv("jobID");
-    String taskName = System.getenv("taskName");
     OpenHuFuUser user = new OpenHuFuUser();
-    String task = user.getTask(jobId, taskName);
-    // Reader reader = Files.newBufferedReader(Paths.get(taskFilePath));
-    // WXY_ConfigFile configFile = new Gson().fromJson(reader, WXY_ConfigFile.class);
-    WXY_ConfigFile configFile = new Gson().fromJson(task, WXY_ConfigFile.class);
     final int[] count = {0};
-    for (WXY_DataItem dataItem: configFile.input.getData()) {
+    for (WXY_DataItem dataItem: wxy_configFile.input.getData()) {
       if (dataItem.getDomainID().equals(domainID) && dataItem.getRole().equals("server")) {
         LOG.info("{} is server, exiting", domainID);
         return;
       }
     }
-    WXY_UserConfig userConfig = configFile.generateUserConfig();
+    WXY_UserConfig userConfig = wxy_configFile.generateUserConfig();
 
-    for (WXY_Party party: configFile.parties) {
+    for (WXY_Party party: wxy_configFile.parties) {
       Thread test = new Thread(new Runnable() {
         @Override
         public void run() {
@@ -106,7 +113,7 @@ public class Application {
       test.start();
     }
 
-    while (count[0] != configFile.parties.size()) {
+    while (count[0] != wxy_configFile.parties.size()) {
       Thread.sleep(200);
     }
 
@@ -117,5 +124,19 @@ public class Application {
       }
       System.out.println();
     }
+  }
+
+  public static String getTask(String jobId, String taskName) {
+    String host = "redis-master";
+    int port = 6379;
+    int database = 0;
+    String pwd = "Wlty*Ny1b!";
+    String taskId = jobId + '_' + taskName;
+    Jedis jedis = new Jedis(host, port);
+    jedis.auth(pwd);
+    jedis.select(database);
+    String taskJson = jedis.get(taskId);
+    LOG.info("TASK: {}", taskJson);
+    return taskJson;
   }
 }

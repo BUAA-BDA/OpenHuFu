@@ -220,18 +220,4 @@ public class OpenHuFuUser {
   public void dropLocalTable(String openHuFuTableName, String endpoint, String localTableName) {
     schema.dropLocalTable(openHuFuTableName, endpoint, localTableName);
   }
-
-  public String getTask(String jobId, String taskName) {
-    String host = "redis-master";
-    int port = 6379;
-    int database = 0;
-    String pwd = "Wlty*Ny1b!";
-    String taskId = jobId + '_' + taskName;
-    Jedis jedis = new Jedis(host, port);
-    jedis.auth(pwd);
-    jedis.select(database);
-    String taskJson = jedis.get(taskId);
-    LOG.info(taskJson);
-    return taskJson;
-  }
 }
