@@ -91,16 +91,11 @@ public class WXY_ConfigFile {
     return sql;
   }
 
-  public List<PojoPublishedTableSchema> getLocalSchemas(String endpoint, String jdbcUrl, String username, String password) throws SQLException {
-    HashMap<String, String> domainID2endpoint = new HashMap<>();
-    for (WXY_Party party: parties) {
-      domainID2endpoint.put(party.getPartyID(), party.getEndpoint());
-    }
-
+  public List<PojoPublishedTableSchema> getLocalSchemas(String domainId, String jdbcUrl, String username, String password) throws SQLException {
     List<PojoPublishedTableSchema> tableSchemas = new ArrayList<>();
     String publishName = input.getData().get(0).getTable();
     for (WXY_DataItem dataItem: input.getData()) {
-      if (endpoint.equals(domainID2endpoint.get(dataItem.getDomainID()))) {
+      if (dataItem.getDomainID().equals(domainId)) {
         PojoPublishedTableSchema schema = new PojoPublishedTableSchema();
         schema.setActualName(dataItem.getTable());
         schema.setPublishedName(publishName);

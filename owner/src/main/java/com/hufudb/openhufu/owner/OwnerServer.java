@@ -109,6 +109,13 @@ public class OwnerServer {
     return new OwnerServer(config.generateConfig(wxy_configFile));
   }
 
+  public static OwnerServer create(String configPath, WXY_ConfigFile wxy_configFile) throws IOException, SQLException {
+    Gson gson = new Gson();
+    Reader reader2 = Files.newBufferedReader(Paths.get(configPath));
+    OwnerConfigFile config = gson.fromJson(reader2, OwnerConfigFile.class);
+    return new OwnerServer(config.generateConfig(wxy_configFile));
+  }
+
   public static void main(String[] args) throws ClassNotFoundException {
     Class.forName("org.postgresql.Driver");
     Options options = new Options();

@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgis-master
+  namespace: mpc
+  labels:
+    app: postgis-master
+    version: v1.0.0
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgis-master
+      version: v1.0.0
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: postgis-master
+        version: v1.0.0
+    spec:
+      containers:
+      - image: docker.oa.com:5000/mpc/postgis/postgis:1.6
+        name: htpostgis
+        env:
+        - name: POSTGRES_PASSWORD
+          value: onedb
+        volumeMounts:
+          - name: data
+            mountPath: /docker-entrypoint-initdb.d/init.sql
+          - name: postgisdb
+            mountPath: /var/lib/postgresql/data
+        ports:
+        - containerPort: 5432
+          protocol: TCP
+          name: postgis
+      volumes:
+      - name: postgisdb
+        persistentVolumeClaim:
+           claimName: postgis-pv-claim
+      - name: data
+        hostPath:
+          path: /opt/OpenHuFu/database/config/db1.sql
+          type: File
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+   name: postgis-master
+   namespace: mpc
+spec:
+   selector: 
+       app: postgis-master
+   type: NodePort
+   ports:
+     - port: 5432
+       protocol: TCP
+       targetPort: 5432
+       nodePort: 30082

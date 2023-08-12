@@ -1,0 +1,34 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgis-pv-volume
+  namespace: mpc
+  labels:
+    type: local
+    app: postgis
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/mnt/data/openhufu/postgis"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: postgis-pv-claim
+  namespace: mpc
+  labels:
+    app: postgis
+spec:
+  selector:
+    matchLabels:
+     app: postgis
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
