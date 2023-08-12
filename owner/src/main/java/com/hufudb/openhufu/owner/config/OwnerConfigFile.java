@@ -156,9 +156,7 @@ public class OwnerConfigFile {
 
   public OwnerConfig generateConfig(WXY_ConfigFile wxy_configFile) throws SQLException {
     OwnerConfig config = generateConfig();
-    //todo
-    String endpoint = hostname + ":" + port;
-    config.tables = wxy_configFile.getLocalSchemas(endpoint,
+    config.tables = wxy_configFile.getLocalSchemas(System.getenv("orgDID"),
             postgisConfig.jdbcUrl, postgisConfig.user, postgisConfig.password);
     return config;
   }
