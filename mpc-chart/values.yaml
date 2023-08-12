@@ -5,6 +5,7 @@ taskType: OTPSI
 orgDID: computer1
 port: 31050
 tport: 31050
+hostname: 192.168.40.230
 
 configPath: /opt/OpenHuFu/release/config
 image:

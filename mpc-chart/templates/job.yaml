@@ -38,6 +38,10 @@ spec:
           value: {{ .Values.taskType | toJson }}
         - name: nodePort
           value: {{ quote .Values.service.nodePort }}
+        - name: hostname
+          value: {{ .Values.hostname | toJson }}
+        - name: port
+          value: {{ .Values.port | toJson }}
         volumeMounts:                 # 容器内部映射的目录路径
           - name: engine-config    # 给需要映射的目录路径起个名字，名字要和上面的宿主机路径的名字对应
             mountPath: /release/config/
