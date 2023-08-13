@@ -3,13 +3,12 @@ taskName: "knn"
 taskStatus: READY
 taskType: OTPSI
 orgDID: computer1
-port: 31050
-tport: 31050
+hostname: 192.168.40.230
 
 configPath: /opt/OpenHuFu/release/config
 image:
   repository: docker.oa.com:5000/mpc/openhufu-server
-  tag: "5.3"
+  tag: "6.0"
   pullPolicy: IfNotPresent
 key: node-role.kubernetes.io/mpc
 values: mpc
