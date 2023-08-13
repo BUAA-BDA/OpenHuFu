@@ -47,7 +47,7 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
   public OwnerService(OwnerConfig config) {
     this.threadPool = config.threadPool;
     String hostname = System.getenv("hostname");
-    String port = System.getenv("port");
+    String port = System.getenv("nodePort");
     this.endpoint = hostname + ":" + port;
     // this.endpoint = String.format("%s:%d", config.hostname, config.port);
     this.ownerSideRpc = config.acrossOwnerRpc;
