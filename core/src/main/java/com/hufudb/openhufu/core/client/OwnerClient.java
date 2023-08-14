@@ -3,6 +3,10 @@ package com.hufudb.openhufu.core.client;
 import com.hufudb.openhufu.core.utils.EmptyIterator;
 import com.hufudb.openhufu.data.schema.Schema;
 import com.hufudb.openhufu.data.schema.TableSchema;
+import com.hufudb.openhufu.data.storage.DataSet;
+import com.hufudb.openhufu.data.storage.DataSetIterator;
+import com.hufudb.openhufu.data.storage.ProtoDataSet;
+import com.hufudb.openhufu.proto.OpenHuFuService.SaveRequest;
 import com.hufudb.openhufu.rpc.grpc.OpenHuFuOwnerInfo;
 import com.hufudb.openhufu.rpc.Party;
 import com.hufudb.openhufu.proto.ServiceGrpc;
@@ -90,6 +94,21 @@ public class OwnerClient {
       LOG.error("RPC failed in onDBQuery: {}", e.getStatus());
     }
     return new EmptyIterator<DataSetProto>();
+  }
+
+  public void saveResult(String tableName, DataSet result) {
+    ProtoDataSet.Builder builder = ProtoDataSet.newBuilder(result.getSchema());
+    DataSetIterator it = result.getIterator();
+    while (it.next()) {
+      builder.addRow(it);
+    }
+    SaveRequest saveRequest = SaveRequest.newBuilder().setTableName(tableName)
+            .setData(builder.buildProto()).build();
+    try {
+      blockingStub.saveResult(saveRequest);
+    } catch (StatusRuntimeException e) {
+      LOG.error("RPC failed in onDBQuery: {}", e.getStatus());
+    }
   }
 
   public String getEndpoint() {

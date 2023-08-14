@@ -1,6 +1,6 @@
 package com.hufudb.openhufu.core.config.wyx_task;
 
-public class WXY_DataItem {
+public class WXY_InputDataItem {
   private String domainID;
   private String role;
   private Params params;

@@ -7,7 +7,10 @@ import "plan.proto";
 option java_package = "com.hufudb.openhufu.proto";
 option java_outer_classname = "OpenHuFuService";
 
-
+message SaveRequest {
+  string tableName = 1;
+  DataSetProto data = 2;
+}
 message GeneralRequest {
   string value = 1;
 }
@@ -28,4 +31,5 @@ service Service {
   rpc GetTableSchema(GeneralRequest) returns (SchemaProto);
   rpc GetAllTableSchema(GeneralRequest) returns (TableSchemaListProto);
   rpc Query(QueryPlanProto) returns (stream DataSetProto);
+  rpc saveResult(SaveRequest) returns (GeneralResponse);
 }

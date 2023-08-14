@@ -2,9 +2,15 @@ package com.hufudb.openhufu.application;
 
 import com.google.gson.Gson;
 import com.hufudb.openhufu.core.config.wyx_task.WXY_ConfigFile;
-import com.hufudb.openhufu.core.config.wyx_task.WXY_DataItem;
+import com.hufudb.openhufu.core.config.wyx_task.WXY_InputDataItem;
 import com.hufudb.openhufu.core.config.wyx_task.WXY_Party;
 import com.hufudb.openhufu.core.config.wyx_task.user.WXY_UserConfig;
+import com.hufudb.openhufu.data.schema.Schema;
+import com.hufudb.openhufu.data.schema.utils.PojoColumnDesc;
+import com.hufudb.openhufu.data.storage.ArrayDataSet;
+import com.hufudb.openhufu.data.storage.ResultDataSet;
+import com.hufudb.openhufu.data.storage.Row;
+import com.hufudb.openhufu.data.storage.utils.ModifierWrapper;
 import com.hufudb.openhufu.owner.OwnerServer;
 import com.hufudb.openhufu.user.OpenHuFuUser;
 import org.apache.commons.cli.*;
@@ -16,8 +22,8 @@ import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.Map;
 
 public class Application {
   private static final Logger LOG = LoggerFactory.getLogger(Application.class);
@@ -61,8 +67,12 @@ public class Application {
       public void run() {
         try {
           checkAndStartUser(wxy_configFile);
-        } catch (Exception e) {
-          LOG.info("Error when start user client");
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        } catch (SQLException e) {
+          throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+          throw new RuntimeException(e);
         }
       }
     });
@@ -86,7 +96,7 @@ public class Application {
     String domainID = System.getenv("orgDID");
     OpenHuFuUser user = new OpenHuFuUser();
     final int[] count = {0};
-    for (WXY_DataItem dataItem: wxy_configFile.input.getData()) {
+    for (WXY_InputDataItem dataItem: wxy_configFile.input.getData()) {
       if (dataItem.getDomainID().equals(domainID) && dataItem.getRole().equals("server")) {
         LOG.info("{} is server, exiting", domainID);
         return;
@@ -118,14 +128,34 @@ public class Application {
     }
 
     ResultSet dataset = user.executeTask(userConfig);
-    while (dataset.next()) {
-      for (int i = 1; i <= dataset.getMetaData().getColumnCount(); i++) {
-        System.out.print(dataset.getString(i) + "|");
-      }
-      System.out.println();
+    ArrayDataSet resultDataSet = ArrayDataSet.materialize(new ResultDataSet(generateSchema(dataset), dataset));
+    for (Row row: resultDataSet.getRows()) {
+      LOG.info(row.toString());
     }
+
+    for (Map.Entry<String, String> entry: wxy_configFile.getOutputMap().entrySet()) {
+      user.saveResult(entry.getKey(), entry.getValue(), resultDataSet);
+    }
+    LOG.info("task finish");
   }
 
+  private static Schema generateSchema(ResultSet dataset) throws SQLException {
+    Schema.Builder schema = Schema.newBuilder();
+    ResultSetMetaData resultSet = dataset.getMetaData();
+    for (int i = 1; i <= resultSet.getColumnCount(); i++) {
+      String columnName = resultSet.getColumnName(i);
+      String columnType = resultSet.getColumnTypeName(i);
+      PojoColumnDesc columnDesc = new PojoColumnDesc();
+      columnDesc.columnId = i - 1;
+      columnDesc.name = columnName;
+      columnDesc.type = WXY_ConfigFile.convertType(columnType);
+      columnDesc.modifier = ModifierWrapper.PUBLIC;
+      LOG.info("ColumnID: {}, Column Name: {}, Data Type: {}, Modifier: {}",
+              columnDesc.columnId, columnDesc.name, columnDesc.type, columnDesc.modifier);
+      schema.add(columnDesc.toColumnDesc());
+    }
+    return schema.build();
+  }
   public static String getTask(String jobId, String taskName) {
     String host = "redis-master";
     int port = 6379;
@@ -139,4 +169,5 @@ public class Application {
     LOG.info("TASK: {}", taskJson);
     return taskJson;
   }
+
 }

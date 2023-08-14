@@ -1,9 +1,12 @@
 package com.hufudb.openhufu.owner;
 
+import com.hufudb.openhufu.data.storage.DataSetIterator;
+import com.hufudb.openhufu.data.storage.ProtoDataSet;
 import com.hufudb.openhufu.owner.adapter.Adapter;
 import com.hufudb.openhufu.owner.checker.Checker;
 import com.hufudb.openhufu.owner.config.ImplementorConfig;
 import com.hufudb.openhufu.owner.config.OwnerConfig;
+import com.hufudb.openhufu.owner.config.PostgisConfig;
 import com.hufudb.openhufu.owner.implementor.OwnerSideImplementor;
 import com.hufudb.openhufu.owner.storage.StreamDataSet;
 import com.hufudb.openhufu.plan.Plan;
@@ -15,6 +18,7 @@ import com.hufudb.openhufu.data.schema.utils.PojoPublishedTableSchema;
 import com.hufudb.openhufu.data.storage.DataSet;
 import com.hufudb.openhufu.mpc.ProtocolExecutor;
 import com.hufudb.openhufu.mpc.ProtocolType;
+import com.hufudb.openhufu.proto.OpenHuFuData.ColumnProto;
 import com.hufudb.openhufu.rpc.grpc.OpenHuFuOwnerInfo;
 import com.hufudb.openhufu.rpc.grpc.OpenHuFuRpc;
 import com.hufudb.openhufu.rpc.Party;
@@ -26,7 +30,10 @@ import com.hufudb.openhufu.proto.OpenHuFuPlan.QueryPlanProto;
 import com.hufudb.openhufu.proto.OpenHuFuService.GeneralRequest;
 import com.hufudb.openhufu.proto.OpenHuFuService.GeneralResponse;
 import com.hufudb.openhufu.proto.OpenHuFuService.OwnerInfo;
+import com.hufudb.openhufu.proto.OpenHuFuService.SaveRequest;
 import io.grpc.stub.StreamObserver;
+
+import java.sql.*;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -43,6 +50,8 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
   protected final Adapter adapter;
   protected final Map<ProtocolType, ProtocolExecutor> libraries;
   protected final SchemaManager schemaManager;
+  protected final PostgisConfig postgisConfig;
+
 
   public OwnerService(OwnerConfig config) {
     this.threadPool = config.threadPool;
@@ -55,6 +64,7 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
     this.implementor = new OwnerSideImplementor(ownerSideRpc, adapter, threadPool);
     this.schemaManager = this.adapter.getSchemaManager();
     this.libraries = config.librarys;
+    this.postgisConfig = config.postgisConfig;
     ImplementorConfig.initImplementorConfig(config.implementorConfigPath);
     initPublishedTable(config.tables);
   }
@@ -105,6 +115,63 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
     LOG.info("Get schema of table {} {}", request.getValue(), fakeSchema);
     responseObserver.onNext(schemaProto);
     responseObserver.onCompleted();
+  }
+
+  @Override
+  public void saveResult(SaveRequest request, StreamObserver<GeneralResponse> responseObserver) {
+    try {
+      saveResult(request.getTableName(), ProtoDataSet.create(request.getData()));
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+    responseObserver.onNext(GeneralResponse.getDefaultInstance());
+    responseObserver.onCompleted();
+  }
+
+  private void saveResult(String tableName, DataSet result) throws SQLException {
+    Connection connection = DriverManager
+            .getConnection(postgisConfig.jdbcUrl, postgisConfig.user, postgisConfig.password);
+    Statement statement = connection.createStatement();
+    //todo now all the columns are stored as string
+    //step1 create table
+    String checkTableQuery = "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = '" + tableName + "')";
+    ResultSet resultSet = statement.executeQuery(checkTableQuery);
+
+    if (resultSet.next() && resultSet.getBoolean(1)) {
+      String dropTableQuery = "DROP TABLE " + tableName;
+      statement.executeUpdate(dropTableQuery);
+      LOG.info("table {} exists, deleting", tableName);
+    }
+    Schema schema = result.getSchema();
+    int columnCount = schema.getColumnDescs().size();
+    String createTableSql = "CREATE TABLE "
+            + tableName + " (";
+    for (int i = 0; i < columnCount - 1; i++) {
+      createTableSql = createTableSql
+              + schema.getColumnDesc(i).getName()
+              + " varchar(255), ";
+    }
+    createTableSql = createTableSql
+            + schema.getColumnDesc(columnCount - 1).getName()
+            + " varchar(255))";
+    LOG.info("executing SQL: {}", createTableSql);
+    statement.executeUpdate(createTableSql);
+
+    //step2 insert records
+    String insertSql = "insert into " + tableName + " values (";
+    for (int i = 1; i < columnCount; i++) {
+      insertSql = insertSql + "?, ";
+    }
+    insertSql = insertSql + "?)";
+    PreparedStatement preparedStatement = connection.prepareStatement(insertSql);
+    DataSetIterator it = result.getIterator();
+    while (it.next()) {
+      for (int i = 0; i < columnCount; i++) {
+        preparedStatement.setString(i + 1, it.get(i).toString());
+      }
+      preparedStatement.executeUpdate();
+    }
+    connection.close();
   }
 
   public ExecutorService getThreadPool() {
