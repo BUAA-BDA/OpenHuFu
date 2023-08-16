@@ -3,6 +3,9 @@ package com.hufudb.openhufu.owner.config;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+
+import com.hufudb.openhufu.core.config.wyx_task.WXY_ConfigFile;
+import com.hufudb.openhufu.core.config.wyx_task.WXY_OutputDataItem;
 import com.hufudb.openhufu.data.schema.utils.PojoPublishedTableSchema;
 import com.hufudb.openhufu.mpc.ProtocolExecutor;
 import com.hufudb.openhufu.mpc.ProtocolType;
@@ -26,6 +29,8 @@ public class OwnerConfig {
   public List<PojoPublishedTableSchema> tables;
   public Map<ProtocolType, ProtocolExecutor> librarys;
   public String implementorConfigPath;
+
+  public WXY_ConfigFile wxy_configFile;
   public OwnerConfig() {}
 
   public OwnerConfig(Party party, int port, String hostname, ExecutorService threadPool,

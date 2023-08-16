@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import com.google.common.collect.ImmutableMap;
 import com.hufudb.openhufu.core.config.wyx_task.WXY_ConfigFile;
+import com.hufudb.openhufu.core.config.wyx_task.WXY_OutputDataItem;
 import com.hufudb.openhufu.data.schema.utils.PojoPublishedTableSchema;
 import com.hufudb.openhufu.mpc.ProtocolExecutor;
 import com.hufudb.openhufu.mpc.ProtocolFactory;
@@ -158,6 +159,7 @@ public class OwnerConfigFile {
     OwnerConfig config = generateConfig();
     config.tables = wxy_configFile.getLocalSchemas(System.getenv("orgDID"),
             postgisConfig.jdbcUrl, postgisConfig.user, postgisConfig.password);
+    config.wxy_configFile = wxy_configFile;
     return config;
   }
 }
