@@ -3,8 +3,8 @@ package com.hufudb.openhufu.owner;
 import com.hufudb.openhufu.core.config.wyx_task.WXY_ConfigFile;
 import com.hufudb.openhufu.core.config.wyx_task.WXY_Output;
 import com.hufudb.openhufu.core.config.wyx_task.WXY_OutputDataItem;
-import com.hufudb.openhufu.data.storage.DataSetIterator;
-import com.hufudb.openhufu.data.storage.ProtoDataSet;
+import com.hufudb.openhufu.data.schema.utils.PojoColumnDesc;
+import com.hufudb.openhufu.data.storage.*;
 import com.hufudb.openhufu.owner.adapter.Adapter;
 import com.hufudb.openhufu.owner.checker.Checker;
 import com.hufudb.openhufu.owner.config.ImplementorConfig;
@@ -12,15 +12,16 @@ import com.hufudb.openhufu.owner.config.OwnerConfig;
 import com.hufudb.openhufu.owner.config.PostgisConfig;
 import com.hufudb.openhufu.owner.implementor.OwnerSideImplementor;
 import com.hufudb.openhufu.owner.storage.StreamDataSet;
+import com.hufudb.openhufu.plan.LeafPlan;
 import com.hufudb.openhufu.plan.Plan;
 import com.hufudb.openhufu.data.schema.PublishedTableSchema;
 import com.hufudb.openhufu.data.schema.Schema;
 import com.hufudb.openhufu.data.schema.SchemaManager;
 import com.hufudb.openhufu.data.schema.TableSchema;
 import com.hufudb.openhufu.data.schema.utils.PojoPublishedTableSchema;
-import com.hufudb.openhufu.data.storage.DataSet;
 import com.hufudb.openhufu.mpc.ProtocolExecutor;
 import com.hufudb.openhufu.mpc.ProtocolType;
+import com.hufudb.openhufu.plan.UnaryPlan;
 import com.hufudb.openhufu.proto.OpenHuFuData;
 import com.hufudb.openhufu.proto.OpenHuFuData.ColumnProto;
 import com.hufudb.openhufu.rpc.grpc.OpenHuFuOwnerInfo;
@@ -34,7 +35,6 @@ import com.hufudb.openhufu.proto.OpenHuFuPlan.QueryPlanProto;
 import com.hufudb.openhufu.proto.OpenHuFuService.GeneralRequest;
 import com.hufudb.openhufu.proto.OpenHuFuService.GeneralResponse;
 import com.hufudb.openhufu.proto.OpenHuFuService.OwnerInfo;
-import com.hufudb.openhufu.proto.OpenHuFuService.SaveRequest;
 import io.grpc.stub.StreamObserver;
 
 import java.io.FileWriter;
@@ -58,6 +58,7 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
   protected final SchemaManager schemaManager;
   protected final PostgisConfig postgisConfig;
 
+  protected final Schema schema;
   protected final WXY_ConfigFile wxy_configFile;
 
   protected WXY_OutputDataItem outputDataItem = null;
@@ -76,8 +77,13 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
     this.schemaManager = this.adapter.getSchemaManager();
     this.libraries = config.librarys;
     this.postgisConfig = config.postgisConfig;
+    Schema.Builder schemaBuilder = Schema.newBuilder();
     ImplementorConfig.initImplementorConfig(config.implementorConfigPath);
     initPublishedTable(config.tables);
+    for (PojoColumnDesc pojoColumnDesc : config.tables.get(0).publishedColumns) {
+      schemaBuilder.add(pojoColumnDesc.toColumnDesc());
+    }
+    this.schema = schemaBuilder.build();
     for (WXY_OutputDataItem outputDataItem : wxy_configFile.output.getData()) {
       if (outputDataItem.getDomainID().equals(System.getenv("orgDID"))) {
           this.outputDataItem = outputDataItem;
@@ -96,8 +102,34 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
       return;
     }
     try {
-      DataSet result = implementor.implement(plan);
-      StreamDataSet output = new StreamDataSet(result, responseObserver);
+      DataSet result = null;
+      ArrayDataSet tempDataset = null;
+      StreamDataSet output = null;
+      switch (wxy_configFile.module.getModuleName()) {
+        case "KNN":
+          result = implementor.implement(plan);
+          output = new StreamDataSet(result, responseObserver);
+          break;
+        case "RANGEQUERY":
+          result = implementor.leafQuery((LeafPlan) plan);
+          tempDataset = ArrayDataSet.materialize(schema, result);
+          saveResult(tempDataset);
+          output = new StreamDataSet(EmptyDataSet.INSTANCE, responseObserver);
+          break;
+        case "RANGECOUNT":
+          result = implementor.leafQuery((LeafPlan) ((UnaryPlan) plan).getChildren().get(0));
+          tempDataset =  ArrayDataSet.materialize(Schema.newBuilder()
+                  .add(OpenHuFuData.ColumnDesc.newBuilder()
+                          .setName("local_count")
+                          .setModifier(OpenHuFuData.Modifier.PUBLIC)
+                          .setType(OpenHuFuData.ColumnType.LONG).build()).build(),
+                  result);
+          saveResult(tempDataset);
+          output = new StreamDataSet(EmptyDataSet.INSTANCE, responseObserver);
+          break;
+        default:
+          LOG.error("not support module {}", wxy_configFile.module.getModuleName());
+      }
       output.stream();
       output.close();
     } catch (Exception e) {
@@ -135,9 +167,9 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
   }
 
   @Override
-  public void saveResult(SaveRequest request, StreamObserver<GeneralResponse> responseObserver) {
+  public void saveResult(DataSetProto dataSetProto, StreamObserver<GeneralResponse> responseObserver) {
     try {
-      saveResult(request.getTableName(), ProtoDataSet.create(request.getData()));
+      saveResult(ProtoDataSet.create(dataSetProto));
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
@@ -145,14 +177,15 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
     responseObserver.onCompleted();
   }
 
-  private void saveResult(String tableName, DataSet result) throws SQLException {
+  private void saveResult(DataSet result) throws SQLException {
+    LOG.info("save result");
     if (outputDataItem == null) {
       return;
     }
     if (outputDataItem.getFinalResult().equals("Y")) {
       saveResult2Minio(result);
     } else if (outputDataItem.getFinalResult().equals("N")) {
-      saveResult2PG(tableName, result);
+      saveResult2PG(outputDataItem.getDataName(), result);
     }
   }
 

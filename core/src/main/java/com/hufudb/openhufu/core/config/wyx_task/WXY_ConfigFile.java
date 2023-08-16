@@ -132,16 +132,16 @@ public class WXY_ConfigFile {
     return tableSchemas;
   }
 
-  public HashMap<String, String> getOutputMap() {
+  public List<String> getOutputEndpoints() {
     HashMap<String, String> domainID2endpoint = new HashMap<>();
     for (WXY_Party party: parties) {
       domainID2endpoint.put(party.getPartyID(), party.getEndpoint());
     }
-    HashMap<String, String> endpoint2name = new HashMap<>();
+    List<String> endpoints = new ArrayList<>();
     for (WXY_OutputDataItem dataItem: output.getData()) {
-      endpoint2name.put(domainID2endpoint.get(dataItem.getDomainID()), dataItem.getDataName());
+      endpoints.add(domainID2endpoint.get(dataItem.getDomainID()));
     }
-    return endpoint2name;
+    return endpoints;
   }
 
   public static ColumnTypeWrapper convertType(String columnType) {

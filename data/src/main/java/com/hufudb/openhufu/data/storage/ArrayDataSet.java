@@ -25,6 +25,16 @@ public class ArrayDataSet implements MaterializedDataSet {
     return new ArrayDataSet(dataSet.getSchema(), rows);
   }
 
+  public static ArrayDataSet materialize(Schema schema, DataSet dataSet) {
+    DataSetIterator iterator = dataSet.getIterator();
+    List<ArrayRow> rows = new ArrayList<>();
+    while (iterator.next()) {
+      rows.add(ArrayRow.materialize(iterator));
+    }
+    dataSet.close();
+    return new ArrayDataSet(schema, rows);
+  }
+
   @Override
   public Schema getSchema() {
     return schema;

@@ -149,8 +149,8 @@ public class OpenHuFuUser {
     return resultSet;
   }
 
-  public void saveResult(String endpoint, String tableName, DataSet result) {
-    schema.getOwnerClient(endpoint).saveResult(tableName, result);
+  public void saveResult(String endpoint, DataSet result) {
+    schema.getOwnerClient(endpoint).saveResult(result);
   }
 
   public Statement createStatement() throws SQLException {
