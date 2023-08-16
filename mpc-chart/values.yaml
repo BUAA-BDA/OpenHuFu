@@ -4,6 +4,9 @@ taskStatus: READY
 taskType: OTPSI
 orgDID: computer1
 hostname: 192.168.40.230
+minioUrl: http://192.168.40.230:32000
+minioAccess: minio
+minioSecret: minio123
 
 configPath: /opt/OpenHuFu/release/config
 image:

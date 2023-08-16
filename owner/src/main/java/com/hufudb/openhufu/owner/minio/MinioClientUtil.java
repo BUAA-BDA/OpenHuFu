@@ -5,14 +5,34 @@ import io.minio.PutObjectArgs;
 import io.minio.errors.*;
 import io.minio.messages.Bucket;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
 public class MinioClientUtil {
+
+    private final MinioClient minioClient;
+    public MinioClientUtil() {
+        String httpUrl = System.getenv("minioUrl");
+        String accessKey = System.getenv("minioAccess");
+        String secretKey = System.getenv("minioSecret");
+        minioClient = MinioClient.builder().endpoint(httpUrl).credentials(accessKey, secretKey).build();
+    }
+
+    public void uploadFile(String bucketName, String objectName, File file) {
+        InputStream inputStream = null;
+        try {
+            inputStream = new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            minioClient.putObject(PutObjectArgs.builder().bucket(bucketName).object(objectName).stream(inputStream, inputStream.available(), -1).build());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static void main(String[] args) {
         try {
             String httpUrl = "http://192.168.40.230:32000";
@@ -26,8 +46,6 @@ public class MinioClientUtil {
             String dirName = "dirName";
             String fileName = "fileName";
             File file = new File("1.txt");
-            InputStream inputStream = new FileInputStream(file);
-            minioClient.putObject(PutObjectArgs.builder().bucket(bucketName).object(dirName+"/"+fileName).stream(inputStream, inputStream.available(), -1).build());
             System.out.println("__________________");
 
         } catch (ServerException e) {

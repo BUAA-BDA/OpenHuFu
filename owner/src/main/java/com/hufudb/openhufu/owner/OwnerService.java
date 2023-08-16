@@ -1,5 +1,8 @@
 package com.hufudb.openhufu.owner;
 
+import com.hufudb.openhufu.core.config.wyx_task.WXY_ConfigFile;
+import com.hufudb.openhufu.core.config.wyx_task.WXY_Output;
+import com.hufudb.openhufu.core.config.wyx_task.WXY_OutputDataItem;
 import com.hufudb.openhufu.data.storage.DataSetIterator;
 import com.hufudb.openhufu.data.storage.ProtoDataSet;
 import com.hufudb.openhufu.owner.adapter.Adapter;
@@ -18,6 +21,7 @@ import com.hufudb.openhufu.data.schema.utils.PojoPublishedTableSchema;
 import com.hufudb.openhufu.data.storage.DataSet;
 import com.hufudb.openhufu.mpc.ProtocolExecutor;
 import com.hufudb.openhufu.mpc.ProtocolType;
+import com.hufudb.openhufu.proto.OpenHuFuData;
 import com.hufudb.openhufu.proto.OpenHuFuData.ColumnProto;
 import com.hufudb.openhufu.rpc.grpc.OpenHuFuOwnerInfo;
 import com.hufudb.openhufu.rpc.grpc.OpenHuFuRpc;
@@ -33,6 +37,8 @@ import com.hufudb.openhufu.proto.OpenHuFuService.OwnerInfo;
 import com.hufudb.openhufu.proto.OpenHuFuService.SaveRequest;
 import io.grpc.stub.StreamObserver;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.*;
 import java.util.List;
 import java.util.Map;
@@ -52,8 +58,13 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
   protected final SchemaManager schemaManager;
   protected final PostgisConfig postgisConfig;
 
+  protected final WXY_ConfigFile wxy_configFile;
+
+  protected WXY_OutputDataItem outputDataItem = null;
+
 
   public OwnerService(OwnerConfig config) {
+    this.wxy_configFile = config.wxy_configFile;
     this.threadPool = config.threadPool;
     String hostname = System.getenv("hostname");
     String port = System.getenv("nodePort");
@@ -67,6 +78,12 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
     this.postgisConfig = config.postgisConfig;
     ImplementorConfig.initImplementorConfig(config.implementorConfigPath);
     initPublishedTable(config.tables);
+    for (WXY_OutputDataItem outputDataItem : wxy_configFile.output.getData()) {
+      if (outputDataItem.getDomainID().equals(System.getenv("orgDID"))) {
+          this.outputDataItem = outputDataItem;
+          break;
+      }
+    }
   }
 
   @Override
@@ -129,6 +146,17 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
   }
 
   private void saveResult(String tableName, DataSet result) throws SQLException {
+    if (outputDataItem == null) {
+      return;
+    }
+    if (outputDataItem.getFinalResult().equals("Y")) {
+      saveResult2Minio(result);
+    } else if (outputDataItem.getFinalResult().equals("N")) {
+      saveResult2PG(tableName, result);
+    }
+  }
+
+  private void saveResult2PG(String tableName, DataSet result) throws SQLException {
     Connection connection = DriverManager
             .getConnection(postgisConfig.jdbcUrl, postgisConfig.user, postgisConfig.password);
     Statement statement = connection.createStatement();
@@ -172,6 +200,39 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
       preparedStatement.executeUpdate();
     }
     connection.close();
+  }
+
+  private void saveResult2Minio(DataSet result) {
+    if (outputDataItem == null) {
+      return;
+    }
+    String bucket = "result";
+    String jobID = wxy_configFile.jobID;
+    String dataID = outputDataItem.getDataID();
+    String objectName = jobID + "/" + dataID;
+    Schema schema = result.getSchema();
+    int columnCount = schema.getColumnDescs().size();
+    try (FileWriter csvWriter = new FileWriter("data.csv")) {
+      StringBuilder sb = new StringBuilder();
+      for (OpenHuFuData.ColumnDesc columnDesc : schema.getColumnDescs()) {
+        sb.append(columnDesc.getName());
+        sb.append(",");
+      }
+      sb.deleteCharAt(sb.length() - 1);
+      sb.append("\n");
+      DataSetIterator it = result.getIterator();
+      while (it.next()) {
+        for (int i = 0; i < columnCount; i++) {
+          sb.append(it.get(i).toString());
+          sb.append(",");
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        sb.append("\n");
+      }
+      csvWriter.write(sb.toString());
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public ExecutorService getThreadPool() {
