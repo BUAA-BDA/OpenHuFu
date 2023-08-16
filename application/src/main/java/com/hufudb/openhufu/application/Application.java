@@ -128,13 +128,14 @@ public class Application {
     }
 
     ResultSet dataset = user.executeTask(userConfig);
-    ArrayDataSet resultDataSet = ArrayDataSet.materialize(new ResultDataSet(generateSchema(dataset), dataset));
-    for (Row row: resultDataSet.getRows()) {
-      LOG.info(row.toString());
-    }
-
-    for (Map.Entry<String, String> entry: wxy_configFile.getOutputMap().entrySet()) {
-      user.saveResult(entry.getKey(), entry.getValue(), resultDataSet);
+    if (wxy_configFile.module.getModuleName().equals("KNN")) {
+      ArrayDataSet resultDataSet = ArrayDataSet.materialize(new ResultDataSet(generateSchema(dataset), dataset));
+      for (Row row: resultDataSet.getRows()) {
+        LOG.info(row.toString());
+      }
+      for (String endpoint : wxy_configFile.getOutputEndpoints()) {
+        user.saveResult(endpoint, resultDataSet);
+      }
     }
     LOG.info("task finish");
   }
