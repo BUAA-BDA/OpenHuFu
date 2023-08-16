@@ -4,8 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.hufudb.openhufu.core.client.OwnerClient;
 import com.hufudb.openhufu.core.config.wyx_task.WXY_ConfigFile;
-import com.hufudb.openhufu.core.config.wyx_task.WXY_DataItem;
-import com.hufudb.openhufu.core.config.wyx_task.WXY_Party;
+import com.hufudb.openhufu.core.config.wyx_task.WXY_InputDataItem;
 import com.hufudb.openhufu.core.sql.rel.OpenHuFuTable;
 import com.hufudb.openhufu.core.sql.schema.OpenHuFuSchemaManager;
 import com.hufudb.openhufu.core.sql.schema.OpenHuFuSchemaFactory;
@@ -41,11 +40,9 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 import org.apache.calcite.jdbc.CalciteConnection;
 import org.apache.calcite.schema.SchemaPlus;
-import org.apache.calcite.sql.dialect.JethroDataSqlDialect;
 import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import redis.clients.jedis.Jedis;
 
 public class OpenHuFuUser {
 
@@ -105,7 +102,7 @@ public class OpenHuFuUser {
     OpenHuFuUser user = new OpenHuFuUser();
     Reader reader = Files.newBufferedReader(Paths.get(configPath));
     WXY_ConfigFile configFile = new Gson().fromJson(reader, WXY_ConfigFile.class);
-    for (WXY_DataItem dataItem: configFile.input.getData()) {
+    for (WXY_InputDataItem dataItem: configFile.input.getData()) {
       if (dataItem.getDomainID().equals(domainID) && dataItem.getRole().equals("server")) {
         LOG.info("{} is server, exiting", domainID);
         System.exit(0);
@@ -150,6 +147,10 @@ public class OpenHuFuUser {
     ResultSet resultSet = statement.executeQuery(userConfig.sql);
 //    statement.close();
     return resultSet;
+  }
+
+  public void saveResult(String endpoint, String tableName, DataSet result) {
+    schema.getOwnerClient(endpoint).saveResult(tableName, result);
   }
 
   public Statement createStatement() throws SQLException {

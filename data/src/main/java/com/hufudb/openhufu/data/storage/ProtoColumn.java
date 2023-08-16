@@ -140,7 +140,7 @@ public class ProtoColumn implements Column {
           break;
         case GEOMETRY:
           bytesBuilder = BytesColumn.newBuilder();
-          appender = (val) -> bytesBuilder.addCell(ByteString.copyFrom((GeometryUtils.toBytes((Geometry) val))));
+          appender = (val) -> bytesBuilder.addCell(ByteString.copyFrom((GeometryUtils.toBytes(GeometryUtils.fromString(val.toString())))));
           break;
         case STRING:
           strBuilder = StringColumn.newBuilder();

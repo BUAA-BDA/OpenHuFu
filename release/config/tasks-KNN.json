@@ -32,6 +32,22 @@
       }
     ]
   },
+  "output": {
+    "data": [
+      {
+        "dataName": "result1",
+        "finalResult": "Y",
+        "domainID": "computer1",
+        "dataID": ""
+      },
+      {
+        "dataName": "result2",
+        "finalResult": "Y",
+        "domainID": "computer2",
+        "dataID": ""
+      }
+    ]
+  },
   "parties": [
     {
       "partyID": "computer1",

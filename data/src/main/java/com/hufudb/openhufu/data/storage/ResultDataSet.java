@@ -83,6 +83,10 @@ public class ResultDataSet implements DataSet {
             return result.getFloat(idx);
           });
           break;
+        case GEOMETRY:
+          builder.add(() -> {
+            return result.getString(idx);
+          });
         default:
           break;
       }

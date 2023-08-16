@@ -14,6 +14,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class WXY_ConfigFile {
   private static final int THREAD_NUM = 8;
@@ -30,6 +31,7 @@ public class WXY_ConfigFile {
 
   public WXY_Input input;
 
+  public WXY_Output output;
   public List<WXY_Party> parties;
 
   public WXY_UserConfig generateUserConfig() {
@@ -49,7 +51,7 @@ public class WXY_ConfigFile {
     GlobalTableConfig globalTableConfig = new GlobalTableConfig();
     globalTableConfig.tableName = "global_" + input.getData().get(0).getTable();
     List<LocalTableConfig> localTableConfigs = new ArrayList<>();
-    for (WXY_DataItem dataItem: input.getData()) {
+    for (WXY_InputDataItem dataItem: input.getData()) {
       LocalTableConfig localTableConfig = new LocalTableConfig();
       localTableConfig.localName = dataItem.getTable();
       localTableConfig.endpoint = domainID2endpoint.get(dataItem.getDomainID());
@@ -94,7 +96,7 @@ public class WXY_ConfigFile {
   public List<PojoPublishedTableSchema> getLocalSchemas(String domainId, String jdbcUrl, String username, String password) throws SQLException {
     List<PojoPublishedTableSchema> tableSchemas = new ArrayList<>();
     String publishName = input.getData().get(0).getTable();
-    for (WXY_DataItem dataItem: input.getData()) {
+    for (WXY_InputDataItem dataItem: input.getData()) {
       if (dataItem.getDomainID().equals(domainId)) {
         PojoPublishedTableSchema schema = new PojoPublishedTableSchema();
         schema.setActualName(dataItem.getTable());
@@ -130,8 +132,20 @@ public class WXY_ConfigFile {
     return tableSchemas;
   }
 
-  private ColumnTypeWrapper convertType(String columnType) {
-    switch (columnType) {
+  public HashMap<String, String> getOutputMap() {
+    HashMap<String, String> domainID2endpoint = new HashMap<>();
+    for (WXY_Party party: parties) {
+      domainID2endpoint.put(party.getPartyID(), party.getEndpoint());
+    }
+    HashMap<String, String> endpoint2name = new HashMap<>();
+    for (WXY_OutputDataItem dataItem: output.getData()) {
+      endpoint2name.put(domainID2endpoint.get(dataItem.getDomainID()), dataItem.getDataName());
+    }
+    return endpoint2name;
+  }
+
+  public static ColumnTypeWrapper convertType(String columnType) {
+    switch (columnType.toLowerCase()) {
       case "character varying":
       case "varchar":
       case "character":
@@ -173,7 +187,7 @@ public class WXY_ConfigFile {
       case "geometry":
         return ColumnTypeWrapper.GEOMETRY;
       default:
-        throw new UnsupportedOperationException("Unsupported type");
+        throw new UnsupportedOperationException("Unsupported type: " + columnType);
     }
   }
 }
