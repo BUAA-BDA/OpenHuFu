@@ -250,7 +250,7 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
     String objectName = jobID + "/" + dataID;
     Schema schema = result.getSchema();
     int columnCount = schema.getColumnDescs().size();
-    String fileName = "./release/log/result.csv";
+    String fileName = "./result.csv";
     File file = new File(fileName);
     try {
       if (file.createNewFile()) {

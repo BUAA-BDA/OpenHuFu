@@ -4,14 +4,14 @@ taskStatus: READY
 taskType: OTPSI
 orgDID: computer1
 hostname: 192.168.40.230
-minioUrl: minio.minio:9000
+minioUrl: http://minio.minio:9000
 minioAccess: minio
 minioSecret: minio123
 
 configPath: /opt/OpenHuFu/release/config
 image:
   repository: docker.oa.com:5000/mpc/openhufu-server
-  tag: "6.2"
+  tag: "6.3"
   pullPolicy: IfNotPresent
 key: node-role.kubernetes.io/mpc
 values: mpc

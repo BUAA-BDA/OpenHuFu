@@ -15,6 +15,9 @@ if [ $# -eq 0 ]; then
   cp adapter/adapter-csv/target/*-with-dependencies.jar ./release/adapter/adapter_csv.jar
   cp adapter/adapter-postgis/target/*-with-dependencies.jar ./release/adapter/adapter_postgis.jar
   cp benchmark/target/benchmark.jar ./release/bin/benchmark.jar
+  chmod -R 777 ./scripts/build/package.sh
+  chmod -R 777 ./scripts/build/image.sh
+  chmod -R 777 .
 elif [ $1 == "owner" ]; then
   mvn install -T ${thread} -DskipTests -pl $1
   cp owner/target/*-with-dependencies.jar ./release/bin/owner_server.jar
