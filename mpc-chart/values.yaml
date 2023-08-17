@@ -11,7 +11,7 @@ minioSecret: minio123
 configPath: /opt/OpenHuFu/release/config
 image:
   repository: docker.oa.com:5000/mpc/openhufu-server
-  tag: "6.1"
+  tag: "6.2"
   pullPolicy: IfNotPresent
 key: node-role.kubernetes.io/mpc
 values: mpc
