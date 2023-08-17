@@ -11,6 +11,7 @@ import com.hufudb.openhufu.owner.config.ImplementorConfig;
 import com.hufudb.openhufu.owner.config.OwnerConfig;
 import com.hufudb.openhufu.owner.config.PostgisConfig;
 import com.hufudb.openhufu.owner.implementor.OwnerSideImplementor;
+import com.hufudb.openhufu.owner.minio.MinioClientUtil;
 import com.hufudb.openhufu.owner.storage.StreamDataSet;
 import com.hufudb.openhufu.plan.LeafPlan;
 import com.hufudb.openhufu.plan.Plan;
@@ -37,6 +38,7 @@ import com.hufudb.openhufu.proto.OpenHuFuService.GeneralResponse;
 import com.hufudb.openhufu.proto.OpenHuFuService.OwnerInfo;
 import io.grpc.stub.StreamObserver;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.*;
@@ -183,8 +185,10 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
       return;
     }
     if (outputDataItem.getFinalResult().equals("Y")) {
+      LOG.info("save to minio");
       saveResult2Minio(result);
     } else if (outputDataItem.getFinalResult().equals("N")) {
+      LOG.info("save to PG");
       saveResult2PG(outputDataItem.getDataName(), result);
     }
   }
@@ -239,13 +243,25 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
     if (outputDataItem == null) {
       return;
     }
-    String bucket = "result";
+    MinioClientUtil minioClientUtil = new MinioClientUtil();
+    String bucketName = "result";
     String jobID = wxy_configFile.jobID;
     String dataID = outputDataItem.getDataID();
     String objectName = jobID + "/" + dataID;
     Schema schema = result.getSchema();
     int columnCount = schema.getColumnDescs().size();
-    try (FileWriter csvWriter = new FileWriter("data.csv")) {
+    String fileName = "./result.csv";
+    File file = new File(fileName);
+    try {
+      if (file.createNewFile()) {
+        LOG.info("create result.csv successfully!");
+      } else {
+        LOG.info("resul.csv existed!");
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+    try (FileWriter csvWriter = new FileWriter(fileName)) {
       StringBuilder sb = new StringBuilder();
       for (OpenHuFuData.ColumnDesc columnDesc : schema.getColumnDescs()) {
         sb.append(columnDesc.getName());
@@ -263,7 +279,13 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
         sb.append("\n");
       }
       csvWriter.write(sb.toString());
+      csvWriter.flush();
+      csvWriter.close();
+      LOG.info("write result table to result.csv successfully!");
+      minioClientUtil.uploadFile(bucketName, objectName, file);
+      LOG.info("upload file to minio successfully!");
     } catch (IOException e) {
+      LOG.info("upload file to minio unsuccessfully!");
       throw new RuntimeException(e);
     }
   }
