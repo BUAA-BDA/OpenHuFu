@@ -214,29 +214,60 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
     for (int i = 0; i < columnCount - 1; i++) {
       createTableSql = createTableSql
               + schema.getColumnDesc(i).getName()
-              + " varchar(255), ";
+              + " " + convertType(schema.getType(i)) + ", ";
     }
     createTableSql = createTableSql
             + schema.getColumnDesc(columnCount - 1).getName()
-            + " varchar(255))";
+            + " " + convertType(schema.getType(columnCount - 1)) + ")";
     LOG.info("executing SQL: {}", createTableSql);
     statement.executeUpdate(createTableSql);
 
     //step2 insert records
-    String insertSql = "insert into " + tableName + " values (";
-    for (int i = 1; i < columnCount; i++) {
-      insertSql = insertSql + "?, ";
-    }
-    insertSql = insertSql + "?)";
-    PreparedStatement preparedStatement = connection.prepareStatement(insertSql);
     DataSetIterator it = result.getIterator();
     while (it.next()) {
-      for (int i = 0; i < columnCount; i++) {
-        preparedStatement.setString(i + 1, it.get(i).toString());
+      StringBuilder insertSql = new StringBuilder("insert into " + tableName + " values (");
+      for (int i = 0; i < columnCount - 1; i++) {
+        insertSql.append(convertValue(it.get(i).toString(), schema.getType(i))).append(", ");
       }
-      preparedStatement.executeUpdate();
+      insertSql.append(convertValue(it.get(columnCount - 1).toString(), schema.getType(columnCount - 1))).append(")");
+      statement.executeUpdate(insertSql.toString());
     }
     connection.close();
+  }
+
+  private String convertValue(String value, OpenHuFuData.ColumnType type) throws SQLException {
+    switch (type) {
+      case GEOMETRY:
+        return "ST_GeomFromText('" + value + "', 4326)";
+      default:
+        return value;
+    }
+  }
+
+  private String convertType(OpenHuFuData.ColumnType type) {
+    switch (type) {
+      case STRING:
+        return "varchar(255)";
+      case INT:
+        return "int4";
+      case LONG:
+        return "int8";
+      case FLOAT:
+        return "float4";
+      case DOUBLE:
+        return "float8";
+      case BOOLEAN:
+        return "bool";
+      case TIME:
+        return "time";
+      case TIMESTAMP:
+        return "timestamp";
+      case GEOMETRY:
+        return "geometry";
+      default:
+        LOG.error("not support type {}", type);
+    }
+    return null;
   }
 
   private void saveResult2Minio(DataSet result) {
