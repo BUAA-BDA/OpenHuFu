@@ -31,12 +31,12 @@ public class MysqlIRTranslator extends IRTranslator {
         if (inputs.size() != 3) {
           throw new RuntimeException("DWithin need 3 arguments, but give " + inputs.size());
         }
-        return String.format("Distance(%s, %s) <= %s", inputs.get(0), inputs.get(1), inputs.get(2));
+        return String.format("ST_Distance(%s, %s) <= %s", inputs.get(0), inputs.get(1), inputs.get(2));
       case kDistance:
         if (inputs.size() != 2) {
-          throw new RuntimeException("Distance need 2 arguments, but give " + inputs.size());
+          throw new RuntimeException("ST_Distance need 2 arguments, but give " + inputs.size());
         }
-        return String.format("Distance(%s, %s)", inputs.get(0), inputs.get(1));
+        return String.format("ST_Distance(%s, %s)", inputs.get(0), inputs.get(1));
       case kPoint:
         if (inputs.size() != 2) {
           throw new RuntimeException("Point need 2 arguments, but give " + inputs.size());
