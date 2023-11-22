@@ -1,15 +1,15 @@
 {
   "version": "1.0.0",
-  "jobID": "0",
-  "taskName": "KNN",
+  "jobID": "1",
+  "taskName": "RangeCount",
   "status": "WAITING",
   "updateTime": "1686731064950",
   "createTime": "1686731064950",
   "module": {
-    "moduleName": "KNN",
+    "moduleName": "RANGECOUNT",
     "params": {
       "point": "POINT(1404050, -4762163)",
-      "k": 10
+      "range": 500000
     }
   },
   "input": {
@@ -35,14 +35,14 @@
   "output": {
     "data": [
       {
-        "dataName": "result1",
-        "finalResult": "Y",
+        "dataName": "rangecount1",
+        "finalResult": "N",
         "domainID": "computer1",
         "dataID": "result1.ID"
       },
       {
-        "dataName": "result2",
-        "finalResult": "Y",
+        "dataName": "rangecount2",
+        "finalResult": "N",
         "domainID": "computer2",
         "dataID": "result2.ID"
       }
