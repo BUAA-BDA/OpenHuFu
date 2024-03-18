@@ -35,7 +35,7 @@ public class MinioClientUtil {
 
     public static void main(String[] args) {
         try {
-            String httpUrl = "http://192.168.40.230:32000";
+            String httpUrl = "http://192.168.0.101:32000";
             String accessKey = "minio";
             String secretKey = "minio123";
             MinioClient minioClient = MinioClient.builder().endpoint(httpUrl).credentials(accessKey, secretKey).build();

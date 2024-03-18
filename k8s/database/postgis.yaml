@@ -21,7 +21,7 @@ spec:
         version: v1.0.0
     spec:
       containers:
-      - image: docker.oa.com:5000/mpc/postgis/postgis:1.6
+      - image: docker.oa.com:5000/mpc/pgvector/pgvector:1.6
         name: htpostgis
         env:
         - name: POSTGRES_PASSWORD

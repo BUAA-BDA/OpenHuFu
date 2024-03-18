@@ -1,9 +1,9 @@
 jobID: "0"
-taskName: "knn"
+taskName: "KNN"
 taskStatus: READY
 taskType: OTPSI
 orgDID: computer1
-hostname: 192.168.40.230
+hostname: 192.168.0.101
 minioUrl: http://minio.minio:9000
 minioAccess: minio
 minioSecret: minio123
@@ -11,7 +11,7 @@ minioSecret: minio123
 configPath: /opt/OpenHuFu/release/config
 image:
   repository: docker.oa.com:5000/mpc/openhufu-server
-  tag: "6.3"
+  tag: "1.0"
   pullPolicy: IfNotPresent
 key: node-role.kubernetes.io/mpc
 values: mpc
