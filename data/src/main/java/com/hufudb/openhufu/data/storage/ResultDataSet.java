@@ -68,6 +68,7 @@ public class ResultDataSet implements DataSet {
             return result.getLong(idx);
           });
           break;
+        case VECTOR:
         case STRING:
           builder.add(() -> {
             return result.getString(idx);

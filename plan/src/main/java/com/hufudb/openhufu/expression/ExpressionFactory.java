@@ -94,6 +94,7 @@ public class ExpressionFactory {
     switch (type) {
       case BOOLEAN:
         return builder.setB((Boolean) value).build();
+      case VECTOR:
       case STRING:
         return builder.setStr((String) value).build();
       case FLOAT:

@@ -82,9 +82,18 @@ public class WXY_ConfigFile {
                 + field + ", " + module.getRange() + ")";
         break;
       case "KNN":
-        sql += "* from " + globalTable
-                + " where KNN(" + module.getPoint() + ", "
-                + field + ", " + module.getK() + ")";
+        if (module.getPoint().strip().charAt(0) == '[') {
+          // high dimension vector
+          sql += "* from " + globalTable
+                  + " where KNN('" + module.getPoint() + "', "
+                  + field + ", " + module.getK() + ")";
+        }
+        else {
+          // point
+          sql += "* from " + globalTable
+                  + " where KNN(" + module.getPoint() + ", "
+                  + field + ", " + module.getK() + ")";
+        }
         break;
       default:
         LOG.error("not support {}", module.getModuleName());
@@ -186,6 +195,8 @@ public class WXY_ConfigFile {
         return ColumnTypeWrapper.TIMESTAMP;
       case "geometry":
         return ColumnTypeWrapper.GEOMETRY;
+      case "vector":
+        return ColumnTypeWrapper.VECTOR;
       default:
         throw new UnsupportedOperationException("Unsupported type: " + columnType);
     }

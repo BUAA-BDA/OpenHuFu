@@ -64,6 +64,10 @@ public class PostgisResultDataSet extends ResultDataSet {
             return result.getLong(idx);
           });
           break;
+        case VECTOR:
+          builder.add(() -> {
+            return result.getString(idx);
+          });
         case STRING:
           builder.add(() -> {
             return result.getString(idx);

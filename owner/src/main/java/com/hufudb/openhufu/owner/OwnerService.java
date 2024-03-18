@@ -42,6 +42,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -193,11 +194,17 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
     }
   }
 
+  public static boolean isVector(String str) {
+    String pattern = "^\\[(\\d+,?)+\\]$";
+    str = str.replaceAll("\\s", "");
+    return str.matches(pattern);
+  }
+
   private void saveResult2PG(String tableName, DataSet result) throws SQLException {
     Connection connection = DriverManager
             .getConnection(postgisConfig.jdbcUrl, postgisConfig.user, postgisConfig.password);
     Statement statement = connection.createStatement();
-    //todo now all the columns are stored as string
+
     //step1 create table
     String checkTableQuery = "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = '" + tableName + "')";
     ResultSet resultSet = statement.executeQuery(checkTableQuery);
@@ -208,46 +215,75 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
       LOG.info("table {} exists, deleting", tableName);
     }
     Schema schema = result.getSchema();
+    DataSetIterator it = result.getIterator();
+
     int columnCount = schema.getColumnDescs().size();
+    ArrayList<String> samples = new ArrayList<>();
+    ArrayList<String> types = new ArrayList<>();
+    if (it.next()) {
+      for (int i = 0; i < columnCount; i++) {
+        samples.add(it.get(i).toString());
+      }
+    }
     String createTableSql = "CREATE TABLE "
             + tableName + " (";
     for (int i = 0; i < columnCount - 1; i++) {
-      createTableSql = createTableSql
-              + schema.getColumnDesc(i).getName()
-              + " " + convertType(schema.getType(i)) + ", ";
+      String type = convertType(schema.getType(i), samples.get(i));
+      createTableSql = createTableSql + schema.getColumnDesc(i).getName() + " " + type + ", ";
+      types.add(type);
     }
+    String type = convertType(schema.getType(columnCount - 1), samples.get(columnCount - 1));
     createTableSql = createTableSql
             + schema.getColumnDesc(columnCount - 1).getName()
-            + " " + convertType(schema.getType(columnCount - 1)) + ")";
+            + " " + type + ")";
+    types.add(type);
     LOG.info("executing SQL: {}", createTableSql);
     statement.executeUpdate(createTableSql);
 
     //step2 insert records
-    DataSetIterator it = result.getIterator();
+    if (samples.size() > 0) {
+      StringBuilder insertSql = new StringBuilder("insert into " + tableName + " values (");
+      for (int i = 0; i < columnCount - 1; i++) {
+        insertSql.append(convertValue(it.get(i).toString(), types.get(i))).append(", ");
+      }
+      insertSql.append(convertValue(it.get(columnCount - 1).toString(), types.get(columnCount - 1))).append(")");
+      statement.executeUpdate(insertSql.toString());
+    }
     while (it.next()) {
       StringBuilder insertSql = new StringBuilder("insert into " + tableName + " values (");
       for (int i = 0; i < columnCount - 1; i++) {
-        insertSql.append(convertValue(it.get(i).toString(), schema.getType(i))).append(", ");
+        insertSql.append(convertValue(it.get(i).toString(), types.get(i))).append(", ");
       }
-      insertSql.append(convertValue(it.get(columnCount - 1).toString(), schema.getType(columnCount - 1))).append(")");
+      insertSql.append(convertValue(it.get(columnCount - 1).toString(), types.get(columnCount - 1))).append(")");
       statement.executeUpdate(insertSql.toString());
     }
     connection.close();
   }
 
-  private String convertValue(String value, OpenHuFuData.ColumnType type) throws SQLException {
+  private String convertValue(String value, String type) {
+    if (type.contains("(")) {
+      type = type.substring(0, type.indexOf('('));
+    }
     switch (type) {
-      case GEOMETRY:
+      case "geometry":
         return "ST_GeomFromText('" + value + "', 4326)";
+      case "vector":
+        return "'" + value + "'";
       default:
         return value;
     }
   }
 
-  private String convertType(OpenHuFuData.ColumnType type) {
+  private String convertType(OpenHuFuData.ColumnType type, Object sample) {
     switch (type) {
       case STRING:
-        return "varchar(255)";
+        String s = (String) sample;
+        if (isVector(s)) {
+          return "vector(" + String.valueOf(s.length() - s.replace(",", "").length() + 1) + ")";
+        }
+        else {
+          return "varchar(255)";
+        }
       case INT:
         return "int4";
       case LONG:

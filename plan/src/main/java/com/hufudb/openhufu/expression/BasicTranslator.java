@@ -93,6 +93,7 @@ public class BasicTranslator implements Translator {
         return String.valueOf(literal.getF32());
       case DOUBLE:
         return String.valueOf(literal.getF64());
+      case VECTOR:
       case STRING:
         return String.format("'%s'", literal.getStr());
       case GEOMETRY:

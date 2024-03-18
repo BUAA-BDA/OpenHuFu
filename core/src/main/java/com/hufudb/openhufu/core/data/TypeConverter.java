@@ -7,6 +7,7 @@ import org.apache.calcite.sql.type.SqlTypeName;
 public class TypeConverter {
   public static SqlTypeName convert2SqlType(ColumnType type) {
     switch (type) {
+      case VECTOR:
       case STRING:
         return SqlTypeName.VARCHAR;
       case BOOLEAN:

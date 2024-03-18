@@ -133,6 +133,7 @@ public class RandomDataSet {
         } else {
           throw new OpenHuFuException(ErrorCode.DATA_TYPE_NOT_SUPPORT, type);
         }
+      case VECTOR:
       case STRING:
         return originRows.get(r).get(columnIndex);
       default:
@@ -162,6 +163,7 @@ public class RandomDataSet {
         return lap.sample() > 0.0;
       case GEOMETRY:
         return geoFactory.createPoint(new Coordinate(lap.sample(), lap.sample()));
+      case VECTOR: 
       case STRING:
         return RandomStringUtils.randomAlphanumeric(RANDOM_SET_OFFSET);
       default:

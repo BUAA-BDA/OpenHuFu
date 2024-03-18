@@ -35,7 +35,9 @@ public enum ColumnTypeWrapper {
   @SerializedName("BLOB")
   BLOB(ColumnType.BLOB),
   @SerializedName("GEOMETRY")
-  GEOMETRY(ColumnType.GEOMETRY);
+  GEOMETRY(ColumnType.GEOMETRY),
+  @SerializedName("VECTOR")
+  VECTOR(ColumnType.VECTOR);
 
   private final static ImmutableMap<Integer, ColumnTypeWrapper> MAP;
 

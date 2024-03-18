@@ -17,7 +17,7 @@ public class DWithin implements ScalarUDF {
     return ColumnType.BOOLEAN;
   }
 
-  public Boolean dwithin(Geometry left, Geometry right, Double distance) {
+  public Boolean dwithin(Object left, Object right, Double distance) {
     return (Boolean) implement(ImmutableList.of(left, right, distance));
   }
 
@@ -45,7 +45,12 @@ public class DWithin implements ScalarUDF {
   public String translate(String dataSource, List<String> inputs) {
     switch(dataSource) {
       case "postgis":
-        return String.format("ST_DWithin(%s, %s, %s)", inputs.get(0), inputs.get(1), inputs.get(2));
+        if (inputs.get(0).toLowerCase().contains("point (") || inputs.get(1).toLowerCase().contains("point (")) {
+          return String.format("ST_DWithin(%s, %s, %s)", inputs.get(0), inputs.get(1), inputs.get(2));
+        }
+        else {
+          return String.format("l2_distance(%s, %s) < %s", inputs.get(0), inputs.get(1), inputs.get(2));
+        }
       default:
         throw new RuntimeException("Unsupported datasource for Distance UDF");
     }

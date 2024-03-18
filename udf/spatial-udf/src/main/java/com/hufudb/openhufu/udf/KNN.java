@@ -18,7 +18,7 @@ public class KNN implements ScalarUDF {
     return ColumnType.BOOLEAN;
   }
 
-  public Boolean knn(Geometry left, Geometry right, Integer distance) {
+  public Boolean knn(Object left, Object right, Integer distance) {
     return (Boolean) implement(ImmutableList.of(left, right, distance));
   }
 
