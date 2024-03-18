@@ -41,6 +41,8 @@ public class PostgisTypeConverter extends AdapterTypeConverter {
       return ColumnType.TIMESTAMP;
       case "geometry":
       return ColumnType.GEOMETRY;
+      case "vector":
+      return ColumnType.VECTOR;
       default:
       return ColumnType.STRING;
     }

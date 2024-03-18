@@ -36,6 +36,7 @@ public class ExpressionUtils {
     switch (lit.getOutType()) {
       case BOOLEAN:
         return lit.getB();
+      case VECTOR:
       case STRING:
         return lit.getStr();
       case FLOAT:

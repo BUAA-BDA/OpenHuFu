@@ -142,6 +142,7 @@ public class ProtoColumn implements Column {
           bytesBuilder = BytesColumn.newBuilder();
           appender = (val) -> bytesBuilder.addCell(ByteString.copyFrom((GeometryUtils.toBytes(GeometryUtils.fromString(val.toString())))));
           break;
+        case VECTOR:
         case STRING:
           strBuilder = StringColumn.newBuilder();
           appender = (val) -> strBuilder.addCell((String) val);
@@ -213,6 +214,7 @@ public class ProtoColumn implements Column {
         case GEOMETRY:
           bytesBuilder.clear();
           break;
+        case VECTOR:
         case STRING:
           strBuilder.clear();
           break;
@@ -247,6 +249,7 @@ public class ProtoColumn implements Column {
         case GEOMETRY:
           columnBuilder.setBytescol(bytesBuilder.build());
           break;
+        case VECTOR:
         case STRING:
           columnBuilder.setStrcol(strBuilder.build());
           break;
