@@ -1,0 +1,67 @@
+{
+  "version": "1.0.0",
+  "jobID": "3",
+  "taskName": "VectorKNN",
+  "status": "WAITING",
+  "updateTime": "1686731064950",
+  "createTime": "1686731064950",
+  "module": {
+    "moduleName": "KNN",
+    "params": {
+      "point": "[500,500,500,500]",
+      "k": 50
+    }
+  },
+  "input": {
+    "data": [
+      {
+        "domainID": "computer1",
+        "role": "client",
+        "params": {
+          "table": "spatial_vector",
+          "field": "embedding"
+        }
+      },
+      {
+        "domainID": "computer2",
+        "role": "server",
+        "params": {
+          "table": "spatial_vector",
+          "field": "embedding"
+        }
+      }
+    ]
+  },
+  "output": {
+    "data": [
+      {
+        "dataName": "result1",
+        "finalResult": "N",
+        "domainID": "computer1",
+        "dataID": ""
+      },
+      {
+        "dataName": "result2",
+        "finalResult": "N",
+        "domainID": "computer2",
+        "dataID": ""
+      }
+    ]
+  },
+  "parties": [
+    {
+      "partyID": "computer1",
+      "serviceInfo": {
+        "ip": "192.168.0.101",
+        "port": "31050"
+      }
+    },
+    {
+      "partyID": "computer2",
+      "serviceInfo": {
+        "ip": "192.168.0.104",
+        "port": "31050"
+      }
+    }
+  ]
+}
