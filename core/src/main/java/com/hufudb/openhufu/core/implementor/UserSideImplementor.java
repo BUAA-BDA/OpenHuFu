@@ -132,23 +132,24 @@ public class UserSideImplementor implements PlanImplementor {
     return privacySpatialJoin(plan, isDistanceJoin, false);
   }
 
-  private DataSet privacySpatialJoin(BinaryPlan plan, boolean isDistanceJoin, boolean isUsingKNNFunc) {
+  private DataSet privacySpatialJoin(BinaryPlan plan, boolean isDistanceJoin,
+      boolean isUsingKNNFunc) {
     DataSet left = ownerSideQuery(plan.getChildren().get(0));
     DataSetIterator leftIter = left.getIterator();
     List<ArrayRow> arrayRows = new ArrayList<>();
 
     boolean containsLeftKey = false;
     int leftKey = -1;
-    for (OpenHuFuPlan.Expression expression: plan.getSelectExps()) {
+    for (OpenHuFuPlan.Expression expression : plan.getSelectExps()) {
       if (expression.getOpType().equals(OpenHuFuPlan.OperatorType.REF)
-              && expression.getI32() == plan.getJoinCond().getCondition().getIn(0).getI32()) {
+          && expression.getI32() == plan.getJoinCond().getCondition().getIn(0).getI32()) {
         containsLeftKey = true;
       }
     }
     if (!containsLeftKey) {
       for (int i = 0; i < plan.getChildren().get(0).getSelectExps().size(); i++) {
-        if (plan.getChildren().get(0).getSelectExps().get(i).getI32()
-                 == plan.getJoinCond().getCondition().getIn(0).getI32()) {
+        if (plan.getChildren().get(0).getSelectExps().get(i).getI32() == plan.getJoinCond()
+            .getCondition().getIn(0).getI32()) {
           leftKey = i;
           break;
         }
@@ -157,16 +158,17 @@ public class UserSideImplementor implements PlanImplementor {
 
     boolean containsRightKey = false;
     int rightKey = -1;
-    for (OpenHuFuPlan.Expression expression: plan.getSelectExps()) {
+    for (OpenHuFuPlan.Expression expression : plan.getSelectExps()) {
       if (expression.getOpType().equals(OpenHuFuPlan.OperatorType.REF)
-              && expression.getI32() == plan.getJoinCond().getCondition().getIn(1).getI32()) {
+          && expression.getI32() == plan.getJoinCond().getCondition().getIn(1).getI32()) {
         containsRightKey = true;
       }
     }
     if (!containsRightKey) {
       for (int i = 0; i < plan.getChildren().get(1).getSelectExps().size(); i++) {
         if (plan.getChildren().get(1).getSelectExps().get(i).getI32()
-                == plan.getJoinCond().getCondition().getIn(1).getI32() - plan.getChildren().get(0).getSelectExps().size()) {
+            == plan.getJoinCond().getCondition().getIn(1).getI32() - plan.getChildren().get(0)
+            .getSelectExps().size()) {
           rightKey = i;
           break;
         }
@@ -176,11 +178,13 @@ public class UserSideImplementor implements PlanImplementor {
       int leftRef = plan.getJoinCond().getCondition().getIn(0).getI32();
       DataSet rightDataSet;
       if (isDistanceJoin) {
-        rightDataSet = ownerSideQuery(DistanceJoin
-                .generateDistanceQueryPlan(plan, leftIter.get(leftRef).toString(), rightKey));
-      }
-      else {
-        rightDataSet = privacyKNN((UnaryPlan) KNNJoin.generateKNNQueryPlan(plan, leftIter.get(leftRef).toString(), rightKey), isUsingKNNFunc);
+        rightDataSet = ownerSideQuery(
+            DistanceJoin.generateDistanceQueryPlan(plan, leftIter.get(leftRef).toString(),
+                rightKey));
+      } else {
+        rightDataSet = privacyKNN(
+            (UnaryPlan) KNNJoin.generateKNNQueryPlan(plan, leftIter.get(leftRef).toString(),
+                rightKey), isUsingKNNFunc);
       }
       DataSetIterator rightIter = rightDataSet.getIterator();
       while (rightIter.next()) {
@@ -189,7 +193,7 @@ public class UserSideImplementor implements PlanImplementor {
       }
     }
     Schema schema;
-      schema = ExpressionUtils.createSchema(plan.getSelectExps());
+    schema = ExpressionUtils.createSchema(plan.getSelectExps());
     LOG.info(schema.toString());
     return new ArrayDataSet(schema, arrayRows);
   }
@@ -197,10 +201,10 @@ public class UserSideImplementor implements PlanImplementor {
   @Override
   public DataSet implement(Plan plan) {
     LOG.info(plan.toString());
-    boolean isUsingKNNFuc = plan instanceof LeafPlan
-            && !plan.getWhereExps().isEmpty()
-            && plan.getWhereExps().get(0).getOpType().equals(OpenHuFuPlan.OperatorType.SCALAR_FUNC)
-            && plan.getWhereExps().get(0).getStr().equals("knn");
+    boolean isUsingKNNFuc =
+        plan instanceof LeafPlan && !plan.getWhereExps().isEmpty() && plan.getWhereExps().get(0)
+            .getOpType().equals(OpenHuFuPlan.OperatorType.SCALAR_FUNC) && plan.getWhereExps().get(0)
+            .getStr().equals("knn");
     if (isUsingKNNFuc) {
       plan = KNNConverter.convertKNN((LeafPlan) plan);
     }
@@ -231,7 +235,7 @@ public class UserSideImplementor implements PlanImplementor {
     double left = 0;
     double right = 1000000;
 //    if (USE_DP) {
-      right = kNNRadiusQuery(plan) * 2;
+    right = kNNRadiusQuery(plan) * 2;
 //    }
     double deviation = 1e-6;
     int loop = 0;
@@ -257,7 +261,6 @@ public class UserSideImplementor implements PlanImplementor {
     }
     while (left + deviation <= right) {
       double mid = (left + right) / 2;
-//        int sign = privacyCompare(plan);
       int sign = (int) privacyCompare(plan, mid, k);
       LOG.debug("loop {} with  sign {}", loop, sign);
       if (sign < 0) {
@@ -265,7 +268,6 @@ public class UserSideImplementor implements PlanImplementor {
       } else if (sign > 0) {
         right = mid;
       } else {
-        loop++;
         DataSet dataSet = ArrayDataSet.materialize(kNNCircleRangeQuery(plan, mid, isUsingKNNFunc));
         return dataSet;
       }
@@ -273,9 +275,11 @@ public class UserSideImplementor implements PlanImplementor {
     }
     return kNNCircleRangeQuery(plan, right, isUsingKNNFunc);
   }
+
   private double kNNRadiusQuery(UnaryPlan plan) {
     //todo -sjz
-    DataSetIterator dataSet = ownerSideQuery(BinarySearchKNN.generateKNNRadiusQueryPlan(plan)).getIterator();
+    DataSetIterator dataSet =
+        ownerSideQuery(BinarySearchKNN.generateKNNRadiusQueryPlan(plan)).getIterator();
     double right = 1000000;
     while (dataSet.next()) {
       double res = (double) dataSet.get(0);
@@ -286,21 +290,27 @@ public class UserSideImplementor implements PlanImplementor {
     }
     return right;
   }
+
   private Pair<Double, Double> dPRangeCount(UnaryPlan plan) {
     //todo -sjz
     ownerSideQuery(BinarySearchKNN.generateDPRangeCountPlan(plan));
     return null;
   }
+
   private long privacyCompare(UnaryPlan plan, double range, long k) {
-    //todo -sjz   now it is using secretSharingSum
-    DataSetIterator dataSet = ownerSideQuery(BinarySearchKNN.generatePrivacyComparePlan(plan, range)).getIterator();
+    //todo -sjz now it is using secretSharingSum
+    DataSetIterator dataSet =
+        ownerSideQuery(BinarySearchKNN.generatePrivacyComparePlan(plan, range)).getIterator();
     dataSet.next();
     long res = (long) dataSet.get(0);
     return res - k;
   }
+
   private DataSet kNNCircleRangeQuery(UnaryPlan plan, double range, boolean isUsingKNNFunc) {
-    return ownerSideQuery(BinarySearchKNN.generateKNNCircleRangeQueryPlan(plan, range, isUsingKNNFunc));
+    return ownerSideQuery(
+        BinarySearchKNN.generateKNNCircleRangeQueryPlan(plan, range, isUsingKNNFunc));
   }
+
   private boolean isMultiPartySecureKNN(UnaryPlan unary) {
     LeafPlan leaf = (LeafPlan) unary.getChildren().get(0);
     boolean hasLimit = leaf.getOffset() != 0 || leaf.getFetch() != 0;
@@ -311,7 +321,8 @@ public class UserSideImplementor implements PlanImplementor {
       return false;
     }
     int orderRef = leaf.getOrders().get(0).getRef();
-    if (!(leaf.getSelectExps().get(orderRef).getOpType().equals(OpenHuFuPlan.OperatorType.SCALAR_FUNC)
+    if (!(
+        leaf.getSelectExps().get(orderRef).getOpType().equals(OpenHuFuPlan.OperatorType.SCALAR_FUNC)
             && leaf.getSelectExps().get(orderRef).getStr().equals("distance"))) {
       return false;
     }
@@ -321,6 +332,7 @@ public class UserSideImplementor implements PlanImplementor {
     }
     return false;
   }
+
   @Override
   public DataSet binaryQuery(BinaryPlan binary) {
     List<Plan> children = binary.getChildren();

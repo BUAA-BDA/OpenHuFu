@@ -146,10 +146,8 @@ openhufu:
     implementor:
       aggregate:
         sum: com.hufudb.openhufu.owner.implementor.aggregate.sum.SecretSharingSum
-        count: null
         max: null
         min: null
-        avg: null
       join: com.hufudb.openhufu.owner.implementor.join.HashJoin
 ```
 3. Build OpenHuFu

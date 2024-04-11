@@ -23,16 +23,16 @@ public class OwnerImplementorFactory {
 
   static {
     aggFuncType2ClassName = new HashMap<>();
-    aggFuncType2ClassName.put(AggFuncType.COUNT, ImplementorConfig.getImplementorClassName(
-        Implementor.AGG_COUNT));
+    aggFuncType2ClassName.put(AggFuncType.SUM, ImplementorConfig.getImplementorClassName(
+        Implementor.AGG_SUM));
     aggFuncType2ClassName.put(AggFuncType.MAX, ImplementorConfig.getImplementorClassName(
         Implementor.AGG_MAX));
     aggFuncType2ClassName.put(AggFuncType.MIN, ImplementorConfig.getImplementorClassName(
         Implementor.AGG_MIN));
-    aggFuncType2ClassName.put(AggFuncType.SUM, ImplementorConfig.getImplementorClassName(
-        Implementor.AGG_SUM));
-    aggFuncType2ClassName.put(AggFuncType.AVG, ImplementorConfig.getImplementorClassName(
-        Implementor.AGG_AVG));
+//    aggFuncType2ClassName.put(AggFuncType.COUNT, ImplementorConfig.getImplementorClassName(
+//        Implementor.AGG_COUNT));
+//    aggFuncType2ClassName.put(AggFuncType.AVG, ImplementorConfig.getImplementorClassName(
+//        Implementor.AGG_AVG));
     joinClassName = ImplementorConfig.getImplementorClassName(Implementor.JOIN);
   }
 
@@ -50,7 +50,7 @@ public class OwnerImplementorFactory {
     } catch (ClassNotFoundException e) {
       throw new OpenHuFuException(e, ErrorCode.IMPLEMENTOR_CLASS_NOT_FOUND, className);
     } catch (NoSuchMethodException e) {
-      throw new OpenHuFuException(e, ErrorCode.IMPLEMENTOR_CONSTRUCTOR_NOT_FOUND, className);
+      throw new OpenHuFuException(e , ErrorCode.IMPLEMENTOR_CONSTRUCTOR_NOT_FOUND, className);
     } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
       throw new OpenHuFuException(e, ErrorCode.IMPLEMENTOR_CREATE_FAILED, className);
     }

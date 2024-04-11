@@ -4,6 +4,15 @@ import com.hufudb.openhufu.common.exception.ErrorCode;
 import com.hufudb.openhufu.common.exception.OpenHuFuException;
 import com.hufudb.openhufu.data.schema.Schema;
 import com.hufudb.openhufu.proto.OpenHuFuData;
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.function.Function;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.math3.distribution.LaplaceDistribution;
 import org.locationtech.jts.geom.Coordinate;
@@ -11,18 +20,18 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 
-import java.util.*;
-import java.util.function.Function;
-
+/*
+ * Used for security union, insert fake record to dataset
+ */
 public class RandomDataSet {
-  public final static GeometryFactory geoFactory = new GeometryFactory();
-  private final static double RANDOM_SET_SCALE = 0.5;
-  private final static double EPS = 1.0;
-  public final static int RANDOM_SET_OFFSET = 10;
-  private final static LaplaceDistribution lap = new LaplaceDistribution(0, 1 / EPS);
-  private final static Random random = new Random();
+
+  private static final GeometryFactory geoFactory = new GeometryFactory();
+  private static final double RANDOM_SET_SCALE = 0.5;
+  private static final double EPS = 1.0;
+  private static final int RANDOM_SET_OFFSET = 10;
+  private static final LaplaceDistribution lap = new LaplaceDistribution(0, 1 / EPS);
+  private static final Random random = new SecureRandom();
   private final Schema schema;
-  private final DataSet source;
   private final List<ArrayRow> originRows;
   private final int originSize;
   private final int resultSize;
@@ -31,7 +40,6 @@ public class RandomDataSet {
 
   public RandomDataSet(DataSet source) {
     this.schema = source.getSchema();
-    this.source = source;
     this.originRows = ArrayDataSet.materialize(source).rows;
     this.originSize = originRows.size();
     this.randomRows = new ArrayList<>();
@@ -129,7 +137,8 @@ public class RandomDataSet {
         Geometry geometry = (Geometry) originRows.get(r).get(columnIndex);
         if (geometry instanceof Point) {
           Point p = (Point) geometry;
-          return geoFactory.createPoint(new Coordinate(p.getX() + lap.sample(), p.getX() + lap.sample()));
+          return geoFactory.createPoint(
+              new Coordinate(p.getX() + lap.sample(), p.getX() + lap.sample()));
         } else {
           throw new OpenHuFuException(ErrorCode.DATA_TYPE_NOT_SUPPORT, type);
         }
@@ -163,7 +172,7 @@ public class RandomDataSet {
       case GEOMETRY:
         return geoFactory.createPoint(new Coordinate(lap.sample(), lap.sample()));
       case STRING:
-        return RandomStringUtils.randomAlphanumeric(RANDOM_SET_OFFSET);
+        return RandomStringUtils.randomAlphanumeric(RANDOM_SET_OFFSET); // NOSONAR
       default:
         throw new OpenHuFuException(ErrorCode.DATA_TYPE_NOT_SUPPORT, type);
     }

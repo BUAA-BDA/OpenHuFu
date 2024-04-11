@@ -35,6 +35,11 @@ public enum ErrorCode {
   // data type error
   DATA_TYPE_NOT_SUPPORT(40001, "data type: {} not support"),
 
+  // query error
+  QUERY_ERROR(50001, "query error"),
+
+  UNSUPPORTED_OPERATION(60001, "unsupported operation {}"),
+
   SETUP_FAILED(90001, "setup failed"),
   ;
 

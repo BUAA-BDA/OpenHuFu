@@ -1,5 +1,7 @@
 package com.hufudb.openhufu.owner;
 
+import com.hufudb.openhufu.common.exception.ErrorCode;
+import com.hufudb.openhufu.common.exception.OpenHuFuException;
 import com.hufudb.openhufu.owner.adapter.Adapter;
 import com.hufudb.openhufu.owner.checker.Checker;
 import com.hufudb.openhufu.owner.config.ImplementorConfig;
@@ -61,7 +63,7 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
     Plan plan = Plan.fromProto(request);
     LOG.info("receives plan:\n{}", plan);
     if (!Checker.check(plan, schemaManager)) {
-      LOG.warn("Check fail for plan {}", request.toString());
+      LOG.warn("Check fail for plan {}", request);
       responseObserver.onCompleted();
       return;
     }
@@ -71,7 +73,7 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
       output.stream();
       output.close();
     } catch (Exception e) {
-      LOG.error("Error in query", e);
+      throw new OpenHuFuException(ErrorCode.QUERY_ERROR, e);
     }
   }
 

@@ -1,5 +1,7 @@
 package com.hufudb.openhufu.udf;
 
+import com.hufudb.openhufu.common.exception.ErrorCode;
+import com.hufudb.openhufu.common.exception.OpenHuFuException;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
 import com.hufudb.openhufu.proto.OpenHuFuData.ColumnType;
@@ -24,7 +26,8 @@ public class Distance implements ScalarUDF {
   public Object implement(List<Object> inputs) {
     if (inputs.size() != 2) {
       LOG.error("Distance UDF expect 2 parameters, but give {}", inputs.size());
-      throw new RuntimeException("Distance UDF expect 2 parameters");
+      throw new OpenHuFuException(ErrorCode.FUNCTION_PARAMS_SIZE_ERROR, getName(), 2,
+          inputs.size());
     }
     if (inputs.get(0) == null || inputs.get(1) == null) {
       return null;

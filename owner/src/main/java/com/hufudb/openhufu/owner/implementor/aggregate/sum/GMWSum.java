@@ -18,6 +18,9 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
+/*
+ * support two owners
+ */
 public class GMWSum extends OwnerAggregateFunction {
   static final Logger LOG = LoggerFactory.getLogger(GMWSum.class);
 
@@ -26,7 +29,7 @@ public class GMWSum extends OwnerAggregateFunction {
   final private Boardcast boardcast;
 
   GMWSum(int inputRef, GMW gmw, Boardcast boardcast, OpenHuFuPlan.TaskInfo taskInfo) {
-    super(inputRef, null, taskInfo);
+    super(inputRef, null, taskInfo, true);
     this.sum = 0;
     this.gmw = gmw;
     this.boardcast = boardcast;
@@ -51,7 +54,7 @@ public class GMWSum extends OwnerAggregateFunction {
         return OpenHuFuCodec.decodeInt(res);
       }
     } catch (ProtocolException e) {
-      LOG.error("Error when executing GMW", e);
+      LOG.error("Error when executing GMW Sum", e);
       return null;
     }
   }

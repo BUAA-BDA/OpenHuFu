@@ -131,7 +131,7 @@ def genSynData(points, desPath, prefix, size, databaseID):
             fout.write(")\n")
     with open(scmFileName, "w") as fout:
         fout.write("S_ID | S_POINT\n")
-        fout.write("LONG | POINT\n")
+        fout.write("LONG | GEOMETRY\n")
 
 
 
