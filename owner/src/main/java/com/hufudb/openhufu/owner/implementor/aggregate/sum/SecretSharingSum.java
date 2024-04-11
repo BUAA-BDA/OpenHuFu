@@ -20,7 +20,7 @@ public class SecretSharingSum extends OwnerAggregateFunction {
   final private boolean hasOutput;
 
   SecretSharingSum(int inputRef, SecretSharing ss, OpenHuFuData.ColumnType type, OpenHuFuPlan.TaskInfo taskInfo) {
-    super(inputRef, type, taskInfo);
+    super(inputRef, type, taskInfo, false);
     this.sum = 0;
     this.ss = ss;
     this.hasOutput = ss.getOwnId() == taskInfo.getPartiesList().get(0);
