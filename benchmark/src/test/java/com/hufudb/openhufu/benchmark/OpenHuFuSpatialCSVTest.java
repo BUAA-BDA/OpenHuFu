@@ -31,20 +31,20 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-public class OpenHuFuSpatialBenchmarkTest {
+public class OpenHuFuSpatialCSVTest {
   private static final Logger LOG = LoggerFactory.getLogger(OpenHuFuBenchmark.class);
   private static final OpenHuFuUser user = new OpenHuFuUser();
 
   @BeforeClass
   public static void setUp() throws IOException {
     LinkedTreeMap userConfigs = new Gson().fromJson(Files.newBufferedReader(
-                    Path.of(OpenHuFuBenchmark.class.getClassLoader().getResource("spatial-user-configs.json")
+                    Path.of(OpenHuFuBenchmark.class.getClassLoader().getResource("spatial-csv-configs.json")
                             .getPath())),
             LinkedTreeMap.class);
     List<String> endpoints = (List<String>) userConfigs.get("owners");
     List<GlobalTableConfig> globalTableConfigs = new Gson().fromJson(new Gson().toJson(userConfigs.get("tables")),
             new TypeToken<ArrayList<GlobalTableConfig>>() {}.getType());
-    LOG.info("Init benchmark of OpenHuFuSpatial...");
+    LOG.info("Init benchmark of OpenHuFuSpatialCSV...");
     for (String endpoint : endpoints) {
       user.addOwner(endpoint, null);
     }

@@ -18,27 +18,22 @@ public class KNN implements ScalarUDF {
     return ColumnType.BOOLEAN;
   }
 
-  public Boolean knn(Geometry left, Geometry right, Integer distance) {
-    return (Boolean) implement(ImmutableList.of(left, right, distance));
+  public Boolean knn(Geometry left, Geometry right, Integer count) {
+    return (Boolean) implement(ImmutableList.of(left, right, count));
   }
 
   @Override
   public Object implement(List<Object> inputs) {
     throw new RuntimeException();
-//    if (inputs.size() != 3) {
-//      LOG.error("KNN UDF expect 3 parameters, but give {}", inputs.size());
-//      throw new RuntimeException("KNN UDF expect 3 parameters");
-//    }
-//    if (inputs.get(0) == null || inputs.get(1) == null || inputs.get(2) == null) {
-//      return null;
-//    }
-//    if (!(inputs.get(0) instanceof Geometry) || !(inputs.get(1) instanceof Geometry)
-//        || !(inputs.get(2) instanceof Integer)) {
-//      LOG.error("KNN UDF requires (Point, Point, Integer)");
-//      throw new RuntimeException("KNN UDF requires (Point, Point)");
-//    }
-//    Geometry left = (Geometry) inputs.get(0);
-//    Geometry right = (Geometry) inputs.get(1);
-//    return true;
+  }
+
+  @Override
+  public String translate(String dataSource, List<String> inputs) {
+    switch (dataSource) {
+      case "POSTGIS":
+        return String.format("ORDER BY %s<->'SRID=4326;%s' limit %s", inputs.get(0), inputs.get(1), inputs.get(2));
+      default:
+        throw new RuntimeException("Unsupported datasource for Point UDF");
+    }
   }
 }

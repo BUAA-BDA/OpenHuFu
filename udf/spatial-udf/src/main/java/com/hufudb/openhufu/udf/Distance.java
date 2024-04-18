@@ -18,6 +18,7 @@ public class Distance implements ScalarUDF {
   public ColumnType getOutType(List<ColumnType> inTypes) {
     return ColumnType.DOUBLE;
   }
+
   public Double distance(Geometry left, Geometry right) {
 
     return (Double) implement(ImmutableList.of(left, right));
@@ -39,5 +40,15 @@ public class Distance implements ScalarUDF {
     Geometry left = (Geometry) inputs.get(0);
     Geometry right = (Geometry) inputs.get(1);
     return left.distance(right);
+  }
+
+  @Override
+  public String translate(String dataSource, List<String> inputs) {
+    switch(dataSource) {
+      case "POSTGIS":
+        return String.format("%s <-> %s", inputs.get(0), inputs.get(1));
+      default:
+        throw new RuntimeException("Unsupported datasource for Distance UDF");
+    }
   }
 }

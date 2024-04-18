@@ -72,7 +72,7 @@ public class ProtoColumn implements Column {
         break;
       case BYTESCOL:
         if (type == ColumnType.GEOMETRY) {
-          this.getter = (rowNum) -> GeometryUtils.fromBytes(column.getBytescol().getCell(rowNum).toByteArray());
+          this.getter = (rowNum) -> Point.fromBytes(column.getBytescol().getCell(rowNum).toByteArray());
         } else {
           this.getter = (rowNum) -> column.getBytescol().getCell(rowNum).toByteArray();
         }
@@ -140,7 +140,7 @@ public class ProtoColumn implements Column {
           break;
         case GEOMETRY:
           bytesBuilder = BytesColumn.newBuilder();
-          appender = (val) -> bytesBuilder.addCell(ByteString.copyFrom((GeometryUtils.toBytes((Geometry) val))));
+          appender = (val) -> bytesBuilder.addCell(ByteString.copyFrom(((Point) val).toBytes()));
           break;
         case STRING:
           strBuilder = StringColumn.newBuilder();

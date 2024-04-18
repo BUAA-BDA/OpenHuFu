@@ -3,6 +3,7 @@ package com.hufudb.openhufu.owner.adapter;
 import com.hufudb.openhufu.data.schema.SchemaManager;
 import com.hufudb.openhufu.data.storage.DataSet;
 import com.hufudb.openhufu.plan.Plan;
+import java.util.List;
 
 public interface Adapter {
   SchemaManager getSchemaManager();

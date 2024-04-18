@@ -8,7 +8,7 @@ public class ErrorFormatter {
 
   static String format(ErrorCode error, Object... args) {
     if (error == null) {
-      throw new IllegalArgumentException("BaymaxError cannot be null");
+      throw new IllegalArgumentException("OpenHuFuError cannot be null");
     }
 
     if (error.getDesc() == null) {
