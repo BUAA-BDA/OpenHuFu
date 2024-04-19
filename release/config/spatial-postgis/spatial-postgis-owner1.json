@@ -42,7 +42,7 @@
         {
           "name": "location",
           "type": "GEOMETRY",
-          "modifier": "protected",
+          "modifier": "public",
           "columnId": 1
         }
       ]

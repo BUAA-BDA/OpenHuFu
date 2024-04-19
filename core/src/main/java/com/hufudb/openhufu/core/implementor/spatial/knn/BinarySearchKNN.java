@@ -25,8 +25,8 @@ public class BinarySearchKNN {
         OpenHuFuPlan.Expression distance = originalLeaf.getSelectExps()
                 .get(originalLeaf.getOrders().get(0).getRef());
         leafPlan.setSelectExps(ImmutableList.of(distance));
-        leafPlan.setOrders(ImmutableList.of(OpenHuFuPlan.Collation.newBuilder().setRef(0)
-                .setDirection(OpenHuFuPlan.Direction.ASC).build()));
+//        leafPlan.setOrders(ImmutableList.of(OpenHuFuPlan.Collation.newBuilder().setRef(0)
+//                .setDirection(OpenHuFuPlan.Direction.ASC).build()));
         leafPlan.setOffset(originalLeaf.getFetch() - 1);
         leafPlan.setFetch(1);
         LOG.info(leafPlan.toString());
@@ -53,7 +53,7 @@ public class BinarySearchKNN {
         leafPlan.setWhereExps(whereExps);
         leafPlan.setAggExps(ImmutableList.of(ExpressionFactory.createAggFunc(OpenHuFuData.ColumnType.LONG,
                 OpenHuFuData.Modifier.PROTECTED, AggFuncType.COUNT.getId(), ImmutableList.of())));
-        leafPlan.setOrders(originalLeaf.getOrders());
+//        leafPlan.setOrders(originalLeaf.getOrders());
 
         UnaryPlan unaryPlan = new UnaryPlan(leafPlan);
         unaryPlan.setSelectExps(ImmutableList.of(ExpressionFactory

@@ -1,5 +1,5 @@
 {
-  "id": 1,
+  "id": 3,
   "port": 12347,
   "hostname": "localhost",
   "implementorconfigpath": "./config/owner.yml",
@@ -42,7 +42,7 @@
         {
           "name": "location",
           "type": "GEOMETRY",
-          "modifier": "protected",
+          "modifier": "public",
           "columnId": 1
         }
       ]

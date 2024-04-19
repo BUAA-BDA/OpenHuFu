@@ -94,6 +94,8 @@ public class BasicTranslator implements Translator {
         return String.valueOf(literal.getF64());
       case STRING:
         return String.format("'%s'", literal.getStr());
+      case GEOMETRY:
+        return String.format("'SRID=4326;%s'", literal.getStr());
       default:
         throw new RuntimeException("can't translate literal " + literal);
     }

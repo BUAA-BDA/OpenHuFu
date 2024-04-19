@@ -239,7 +239,7 @@ public class UserSideImplementor implements PlanImplementor {
 //    if (USE_DP) {
     right = kNNRadiusQuery(plan) * 2;
 //    }
-    double deviation = 1e-6;
+    double deviation = 1e-10;
     int loop = 0;
     long count = 0L;
     if (USE_DP) {
@@ -270,11 +270,13 @@ public class UserSideImplementor implements PlanImplementor {
       } else if (sign > 0) {
         right = mid;
       } else {
+        LOG.info("kNN radius is {}", mid);
         DataSet dataSet = ArrayDataSet.materialize(kNNCircleRangeQuery(plan, mid, isUsingKNNFunc));
         return dataSet;
       }
       loop++;
     }
+    LOG.info("kNN radius is {}", right);
     return kNNCircleRangeQuery(plan, right, isUsingKNNFunc);
   }
 

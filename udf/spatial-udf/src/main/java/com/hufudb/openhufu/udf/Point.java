@@ -44,7 +44,7 @@ public class Point implements ScalarUDF {
   @Override
   public String translate(String dataSource, List<String> inputs) {
     switch (dataSource) {
-      case "postgis":
+      case "POSTGIS":
         return String.format("'SRID=4326;POINT(%s %s)'", inputs.get(0), inputs.get(1));
       default:
         throw new RuntimeException("Unsupported datasource for Point UDF");

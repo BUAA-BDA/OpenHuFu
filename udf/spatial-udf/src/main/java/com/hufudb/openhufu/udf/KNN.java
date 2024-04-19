@@ -29,11 +29,6 @@ public class KNN implements ScalarUDF {
 
   @Override
   public String translate(String dataSource, List<String> inputs) {
-    switch (dataSource) {
-      case "POSTGIS":
-        return String.format("ORDER BY %s<->'SRID=4326;%s' limit %s", inputs.get(0), inputs.get(1), inputs.get(2));
-      default:
-        throw new RuntimeException("Unsupported datasource for Point UDF");
-    }
+    return "";
   }
 }

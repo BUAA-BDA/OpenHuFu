@@ -20,6 +20,9 @@ elif [ $1 == "adapter" ]; then
   mvn install -T ${thread} -DskipTests -amd -pl $1
   cp adapter/adapter-csv/target/*-with-dependencies.jar ./release/adapter/adapter_csv.jar
   cp adapter/adapter-postgis/target/*-with-dependencies.jar ./release/adapter/adapter_postgis.jar
+elif [ $1 == "udf" ]; then
+  mvn install -T ${thread} -DskipTests -amd -pl $1
+  cp udf/spatial-udf/target/*-with-dependencies.jar ./release/udf/scalar/spatial_udf.jar
 elif [ $1 == "benchmark" ]; then
   mvn install -T ${thread} -DskipTests -pl $1
   cp benchmark/target/benchmark.jar ./release/bin/benchmark.jar
