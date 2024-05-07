@@ -9,6 +9,7 @@ import com.hufudb.openhufu.interpreter.Interpreter;
 import com.hufudb.openhufu.mpc.ProtocolException;
 import com.hufudb.openhufu.owner.adapter.Adapter;
 import com.hufudb.openhufu.owner.implementor.aggregate.OwnerAggregation;
+import com.hufudb.openhufu.owner.implementor.union.OwnerUnion;
 import com.hufudb.openhufu.plan.BinaryPlan;
 import com.hufudb.openhufu.plan.LeafPlan;
 import com.hufudb.openhufu.plan.Plan;
@@ -17,6 +18,8 @@ import com.hufudb.openhufu.proto.OpenHuFuPlan.PlanType;
 import com.hufudb.openhufu.rpc.Rpc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.hufudb.openhufu.owner.implementor.OwnerImplementorFactory.getUnion;
 
 public class OwnerSideImplementor implements PlanImplementor {
 
@@ -87,7 +90,9 @@ public class OwnerSideImplementor implements PlanImplementor {
   @Override
   public DataSet leafQuery(LeafPlan leaf) {
     try {
-      return dataSourceAdapter.query(leaf);
+      DataSet localDataSet =  dataSourceAdapter.query(leaf);
+      OwnerUnion union = getUnion();
+      return union.union(localDataSet, rpc, leaf.getTaskInfo());
     } catch (Exception e) {
       LOG.error("Error when execute query on Database", e);
       return EmptyDataSet.INSTANCE;

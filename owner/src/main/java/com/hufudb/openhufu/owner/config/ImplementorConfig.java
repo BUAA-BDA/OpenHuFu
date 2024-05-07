@@ -23,7 +23,8 @@ public class ImplementorConfig {
     AGG_MIN(IMPLEMENTOR_KEY.AGG_PREFIX + "min"),
     AGG_SUM(IMPLEMENTOR_KEY.AGG_PREFIX + "sum"),
     AGG_AVG(IMPLEMENTOR_KEY.AGG_PREFIX + "avg"),
-    JOIN(IMPLEMENTOR_KEY.PREFIX + "join");
+    JOIN(IMPLEMENTOR_KEY.PREFIX + "join"),
+    UNION(IMPLEMENTOR_KEY.PREFIX + "union");
 
     Implementor(String value) {
       this.value = value;
@@ -54,6 +55,8 @@ public class ImplementorConfig {
             getClazz(Implementor.AGG_AVG.value));
     implementor2ClassMap.put(Implementor.JOIN,
             getClazz(Implementor.JOIN.value));
+    implementor2ClassMap.put(Implementor.UNION,
+            getClazz(Implementor.UNION.value));
   }
   private static void loadImplementorConfig(String implementorPath) {
     Yaml yaml = new Yaml(new SafeConstructor());

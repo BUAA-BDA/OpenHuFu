@@ -47,6 +47,11 @@ public class PlanUtils {
     }
     List<Pair<OwnerClient, String>> tableClients = client.getTableClients(plan.getTableName());
     List<Pair<OwnerClient, QueryPlanProto>> ownerContext = new ArrayList<>();
+    TaskInfo.Builder taskInfo = TaskInfo.newBuilder().setTaskId(client.getTaskId());
+    for (Pair<OwnerClient, String> entry : tableClients) {
+      taskInfo.addParties(entry.getLeft().getParty().getPartyId());
+    }
+    builder.setTaskInfo(taskInfo);
     for (Pair<OwnerClient, String> entry : tableClients) {
       builder.setTableName(entry.getRight());
       ownerContext.add(MutablePair.of(entry.getLeft(), builder.build()));
