@@ -130,10 +130,6 @@ public class UserSideImplementor implements PlanImplementor {
     return plan.getJoinCond().getCondition().getStr().equals("knn");
   }
 
-  private DataSet privacySpatialJoin(BinaryPlan plan, boolean isDistanceJoin) {
-    return privacySpatialJoin(plan, isDistanceJoin, false);
-  }
-
   private DataSet privacySpatialJoin(BinaryPlan plan, boolean isDistanceJoin,
       boolean isUsingKNNFunc) {
     DataSet left = ownerSideQuery(plan.getChildren().get(0));
@@ -212,7 +208,7 @@ public class UserSideImplementor implements PlanImplementor {
     }
     if (isMultiParty(plan)) {
       if (plan instanceof BinaryPlan && isPrivacyRangeJoin((BinaryPlan) plan)) {
-        return privacySpatialJoin((BinaryPlan) plan, true);
+        return privacySpatialJoin((BinaryPlan) plan, true, false);
       }
       if (plan instanceof BinaryPlan && isPrivacyKNNJoin((BinaryPlan) plan)) {
         return privacySpatialJoin((BinaryPlan) plan, false, isUsingKNNFuc);

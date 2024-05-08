@@ -94,6 +94,9 @@ def import_data(databases):
         # create_index(con, database['schemas'])
         con.close()
 
+# osm traffic
+# directory
+# simulate or
 if __name__ == "__main__":
     databases = load_schema("schema.json")
     import_data(databases)

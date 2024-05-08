@@ -5,7 +5,7 @@
       "port": 54321,
       "username": "hufu",
       "password": "hufu",
-      "database": "osm_db",
+      "database": "postgres",
       "schemas": [
         {
           "name": "osm_a_1",
