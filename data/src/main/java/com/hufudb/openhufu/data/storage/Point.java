@@ -1,12 +1,13 @@
 package com.hufudb.openhufu.data.storage;
 
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Point {
+public class Point implements Serializable {
   private static PointParser parser = new PointParser();
 
   private double x;

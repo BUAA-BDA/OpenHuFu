@@ -1,5 +1,8 @@
 package com.hufudb.openhufu.owner.implementor;
 
+import com.hufudb.openhufu.proto.OpenHuFuData.Modifier;
+import com.hufudb.openhufu.proto.OpenHuFuPlan.Expression;
+import com.hufudb.openhufu.proto.OpenHuFuPlan.OperatorType;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import com.hufudb.openhufu.data.storage.DataSet;
@@ -91,6 +94,13 @@ public class OwnerSideImplementor implements PlanImplementor {
   public DataSet leafQuery(LeafPlan leaf) {
     try {
       DataSet localDataSet =  dataSourceAdapter.query(leaf);
+      if (leaf.hasAgg()) {
+        for(Expression expression : leaf.getAggExps()) {
+          if (expression.getOpType()== OperatorType.AGG_FUNC && expression.getModifier() == Modifier.PROTECTED) {
+            return localDataSet;
+          }
+        }
+      }
       OwnerUnion union = getUnion();
       return union.union(localDataSet, rpc, leaf.getTaskInfo());
     } catch (Exception e) {
