@@ -182,6 +182,6 @@ public class SecretUnion extends RpcProtocolExecutor {
     } else {
       followerProcedure(localDataSet);
     }
-    return null;
+    return EmptyDataSet.INSTANCE;
   }
 }

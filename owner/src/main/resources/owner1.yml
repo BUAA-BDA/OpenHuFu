@@ -8,3 +8,4 @@ owner:
       sum: com.hufudb.openhufu.owner.implementor.aggregate.sum.SecretSharingSum
       avg: null
     join: com.hufudb.openhufu.owner.implementor.join.HashEqualJoin
+    union: com.hufudb.openhufu.owner.implementor.union.SafeUnion

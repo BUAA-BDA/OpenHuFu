@@ -11,6 +11,7 @@ import com.hufudb.openhufu.expression.ExpressionUtils;
 import com.hufudb.openhufu.implementor.PlanImplementor;
 import com.hufudb.openhufu.proto.OpenHuFuData.ColumnType;
 import com.hufudb.openhufu.proto.OpenHuFuData.Modifier;
+import com.hufudb.openhufu.proto.OpenHuFuPlan;
 import com.hufudb.openhufu.proto.OpenHuFuPlan.Collation;
 import com.hufudb.openhufu.proto.OpenHuFuPlan.Expression;
 import com.hufudb.openhufu.proto.OpenHuFuPlan.PlanType;
@@ -29,7 +30,7 @@ public class LeafPlan extends BasePlan {
   List<Collation> orders = ImmutableList.of();
   int fetch;
   int offset;
-
+  OpenHuFuPlan.TaskInfo taskInfo;
   public LeafPlan() {
     super();
   }
@@ -42,6 +43,7 @@ public class LeafPlan extends BasePlan {
     builder.addAllAggExp(aggExps);
     builder.addAllGroup(groups);
     builder.addAllOrder(orders);
+    builder.setTaskInfo(taskInfo);
     return builder.build();
   }
 
@@ -55,6 +57,7 @@ public class LeafPlan extends BasePlan {
     plan.setOrders(proto.getOrderList());
     plan.setFetch(proto.getFetch());
     plan.setOffset(proto.getOffset());
+    plan.taskInfo = proto.getTaskInfo();
     return plan;
   }
 
@@ -91,6 +94,11 @@ public class LeafPlan extends BasePlan {
   @Override
   public List<Modifier> getOutModifiers() {
     return getOutExpressions().stream().map(exp -> exp.getModifier()).collect(Collectors.toList());
+  }
+
+  @Override
+  public OpenHuFuPlan.TaskInfo getTaskInfo() {
+    return taskInfo;
   }
 
   @Override
@@ -204,7 +212,8 @@ public class LeafPlan extends BasePlan {
             "\tgroups=" + groups + '$' +
             "\torders=" + orders + '$' +
             "\tfetch=" + fetch + '$' +
-            "\toffset=" + offset).replace('\n', '|').replace('$', '\n') + '\n' +
-        "}";
+            "\toffset=" + offset + '$' +
+            "\ttaskInfo=" + taskInfo).replace('\n', '|').replace('$', '\n') + '\n' +
+            "}";
   }
 }
