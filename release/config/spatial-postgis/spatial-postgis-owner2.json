@@ -1,0 +1,51 @@
+{
+  "id": 2,
+  "port": 12346,
+  "hostname": "localhost",
+  "implementorconfigpath": "./config/owner.yml",
+  "adapterconfig": {
+    "datasource": "POSTGIS",
+    "url": "jdbc:postgresql://localhost:54321/osm_db",
+    "catalog": "osm_db",
+    "user": "hufu",
+    "passwd": "hufu"
+  },
+  "tables": [
+    {
+      "actualName": "osm_a_2",
+      "publishedName": "osm_a",
+      "publishedColumns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "modifier": "public",
+          "columnId": 0
+        },
+        {
+          "name": "location",
+          "type": "GEOMETRY",
+          "modifier": "protected",
+          "columnId": 1
+        }
+      ]
+    },
+    {
+      "actualName": "osm_b_2",
+      "publishedName": "osm_b",
+      "publishedColumns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "modifier": "public",
+          "columnId": 0
+        },
+        {
+          "name": "location",
+          "type": "GEOMETRY",
+          "modifier": "public",
+          "columnId": 1
+        }
+      ]
+    }
+  ]
+}

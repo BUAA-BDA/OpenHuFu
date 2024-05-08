@@ -16,9 +16,7 @@ import java.util.function.Function;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.math3.distribution.LaplaceDistribution;
 import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
 
 /*
  * Used for security union, insert fake record to dataset
@@ -134,14 +132,9 @@ public class RandomDataSet {
       case BOOLEAN:
         return lap.sample() > 0.0;
       case GEOMETRY:
-        Geometry geometry = (Geometry) originRows.get(r).get(columnIndex);
-        if (geometry instanceof Point) {
-          Point p = (Point) geometry;
-          return geoFactory.createPoint(
-              new Coordinate(p.getX() + lap.sample(), p.getX() + lap.sample()));
-        } else {
-          throw new OpenHuFuException(ErrorCode.DATA_TYPE_NOT_SUPPORT, type);
-        }
+        Point p = (Point) originRows.get(r).get(columnIndex);
+        return geoFactory.createPoint(
+            new Coordinate(p.getX() + lap.sample(), p.getX() + lap.sample()));
       case STRING:
         return originRows.get(r).get(columnIndex);
       default:

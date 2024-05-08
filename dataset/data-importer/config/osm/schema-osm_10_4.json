@@ -1,0 +1,181 @@
+{
+  "databases": [
+    {
+      "host": "localhost",
+      "port": 54321,
+      "username": "hufu",
+      "password": "hufu",
+      "database": "postgres",
+      "schemas": [
+        {
+          "name": "osm_a_1",
+          "csv_path": "./data/osm_a_1.csv",
+          "columns": [
+            {
+              "name": "id",
+              "type": "int",
+              "index": [
+                0
+              ]
+            },
+            {
+              "name": "location",
+              "type": "geometry",
+              "index": [
+                1,
+                2
+              ]
+            }
+          ]
+        },
+        {
+          "name": "osm_a_2",
+          "csv_path": "./data/osm_a_2.csv",
+          "columns": [
+            {
+              "name": "id",
+              "type": "int",
+              "index": [
+                0
+              ]
+            },
+            {
+              "name": "location",
+              "type": "geometry",
+              "index": [
+                1,
+                2
+              ]
+            }
+          ]
+        },
+        {
+          "name": "osm_a_3",
+          "csv_path": "./data/osm_a_3.csv",
+          "columns": [
+            {
+              "name": "id",
+              "type": "int",
+              "index": [
+                0
+              ]
+            },
+            {
+              "name": "location",
+              "type": "geometry",
+              "index": [
+                1,
+                2
+              ]
+            }
+          ]
+        },
+        {
+          "name": "osm_a_4",
+          "csv_path": "./data/osm_a_4.csv",
+          "columns": [
+            {
+              "name": "id",
+              "type": "int",
+              "index": [
+                0
+              ]
+            },
+            {
+              "name": "location",
+              "type": "geometry",
+              "index": [
+                1,
+                2
+              ]
+            }
+          ]
+        },
+        {
+          "name": "osm_b_1",
+          "csv_path": "./data/osm_b_1.csv",
+          "columns": [
+            {
+              "name": "id",
+              "type": "int",
+              "index": [
+                0
+              ]
+            },
+            {
+              "name": "location",
+              "type": "geometry",
+              "index": [
+                1,
+                2
+              ]
+            }
+          ]
+        },
+        {
+          "name": "osm_b_2",
+          "csv_path": "./data/osm_b_2.csv",
+          "columns": [
+            {
+              "name": "id",
+              "type": "int",
+              "index": [
+                0
+              ]
+            },
+            {
+              "name": "location",
+              "type": "geometry",
+              "index": [
+                1,
+                2
+              ]
+            }
+          ]
+        },
+        {
+          "name": "osm_b_3",
+          "csv_path": "./data/osm_b_3.csv",
+          "columns": [
+            {
+              "name": "id",
+              "type": "int",
+              "index": [
+                0
+              ]
+            },
+            {
+              "name": "location",
+              "type": "geometry",
+              "index": [
+                1,
+                2
+              ]
+            }
+          ]
+        },
+        {
+          "name": "osm_b_4",
+          "csv_path": "./data/osm_b_4.csv",
+          "columns": [
+            {
+              "name": "id",
+              "type": "int",
+              "index": [
+                0
+              ]
+            },
+            {
+              "name": "location",
+              "type": "geometry",
+              "index": [
+                1,
+                2
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

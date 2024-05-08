@@ -6,7 +6,8 @@ package com.hufudb.openhufu.common.enums;
  */
 public enum DataSourceType {
 
-  CSV("CSV");
+  CSV("CSV"),
+  POSTGIS("POSTGIS");
 
   DataSourceType(String type) {
     this.type = type;

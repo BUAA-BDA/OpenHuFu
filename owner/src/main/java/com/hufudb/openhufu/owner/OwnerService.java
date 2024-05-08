@@ -73,7 +73,7 @@ public class OwnerService extends ServiceGrpc.ServiceImplBase {
       output.stream();
       output.close();
     } catch (Exception e) {
-      throw new OpenHuFuException(ErrorCode.QUERY_ERROR, e);
+      throw new OpenHuFuException(e, ErrorCode.QUERY_ERROR);
     }
   }
 

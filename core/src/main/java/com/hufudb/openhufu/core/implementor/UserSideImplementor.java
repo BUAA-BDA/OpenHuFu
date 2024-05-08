@@ -130,10 +130,6 @@ public class UserSideImplementor implements PlanImplementor {
     return plan.getJoinCond().getCondition().getStr().equals("knn");
   }
 
-  private DataSet privacySpatialJoin(BinaryPlan plan, boolean isDistanceJoin) {
-    return privacySpatialJoin(plan, isDistanceJoin, false);
-  }
-
   private DataSet privacySpatialJoin(BinaryPlan plan, boolean isDistanceJoin,
       boolean isUsingKNNFunc) {
     DataSet left = ownerSideQuery(plan.getChildren().get(0));
@@ -212,7 +208,7 @@ public class UserSideImplementor implements PlanImplementor {
     }
     if (isMultiParty(plan)) {
       if (plan instanceof BinaryPlan && isPrivacyRangeJoin((BinaryPlan) plan)) {
-        return privacySpatialJoin((BinaryPlan) plan, true);
+        return privacySpatialJoin((BinaryPlan) plan, true, false);
       }
       if (plan instanceof BinaryPlan && isPrivacyKNNJoin((BinaryPlan) plan)) {
         return privacySpatialJoin((BinaryPlan) plan, false, isUsingKNNFuc);
@@ -239,7 +235,7 @@ public class UserSideImplementor implements PlanImplementor {
 //    if (USE_DP) {
     right = kNNRadiusQuery(plan) * 2;
 //    }
-    double deviation = 1e-6;
+    double deviation = 1e-10;
     int loop = 0;
     long count = 0L;
     if (USE_DP) {
@@ -270,11 +266,13 @@ public class UserSideImplementor implements PlanImplementor {
       } else if (sign > 0) {
         right = mid;
       } else {
+        LOG.info("kNN radius is {}", mid);
         DataSet dataSet = ArrayDataSet.materialize(kNNCircleRangeQuery(plan, mid, isUsingKNNFunc));
         return dataSet;
       }
       loop++;
     }
+    LOG.info("kNN radius is {}", right);
     return kNNCircleRangeQuery(plan, right, isUsingKNNFunc);
   }
 

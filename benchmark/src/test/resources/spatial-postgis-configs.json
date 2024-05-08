@@ -1,0 +1,52 @@
+{
+  "owners": [
+    "localhost:12345",
+    "localhost:12346",
+    "localhost:12347",
+    "localhost:12348"
+  ],
+  "tables": [
+    {
+      "tableName": "osm_a",
+      "localTables": [
+        {
+          "endpoint": "localhost:12345",
+          "localName": "osm_a"
+        },
+        {
+          "endpoint": "localhost:12346",
+          "localName": "osm_a"
+        },
+        {
+          "endpoint": "localhost:12347",
+          "localName": "osm_a"
+        },
+        {
+          "endpoint": "localhost:12348",
+          "localName": "osm_a"
+        }
+      ]
+    },
+    {
+      "tableName": "osm_b",
+      "localTables": [
+        {
+          "endpoint": "localhost:12345",
+          "localName": "osm_b"
+        },
+        {
+          "endpoint": "localhost:12346",
+          "localName": "osm_b"
+        },
+        {
+          "endpoint": "localhost:12347",
+          "localName": "osm_b"
+        },
+        {
+          "endpoint": "localhost:12348",
+          "localName": "osm_b"
+        }
+      ]
+    }
+  ]
+}
