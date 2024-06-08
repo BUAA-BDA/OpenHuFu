@@ -95,7 +95,7 @@ public class SpatiaLiteServer extends FederateDBServer {
       }
     }
 
-    private void fillDataSet(ResultSet rs, StreamDataSet dataSet) throws SQLException {
+    private void fillDataSet(boolean preFilter, ResultSet rs, StreamDataSet dataSet) throws SQLException {
       final Header header = dataSet.getHeader();
       final int columnSize = header.size();
       while (rs.next()) {
@@ -271,12 +271,12 @@ public class SpatiaLiteServer extends FederateDBServer {
       return new DistanceDataSet(dataSet, distances);
     }
 
-    private void executeSQL(String sql, StreamDataSet dataSet, String aggUuid) throws SQLException {
+    private void executeSQL(boolean preFilter, String sql, StreamDataSet dataSet, String aggUuid) throws SQLException {
       ResultSet rs = st.executeQuery(sql);
       if (dataSet.getHeader().isPrivacyAgg()) {
         fillAggregateDataSet(rs, aggUuid, dataSet);
       } else {
-        fillDataSet(rs, dataSet);
+        fillDataSet(preFilter, rs, dataSet);
       }
       LOG.info("Execute {} returned {} rows", sql, dataSet.getRowCount());
     }
@@ -295,7 +295,7 @@ public class SpatiaLiteServer extends FederateDBServer {
     }
 
     @Override
-    public void fedSpatialQueryInternal(Query request, StreamDataSet streamDataSet) throws SQLException {
+    public void fedSpatialQueryInternal(boolean preFilter, Query request, StreamDataSet streamDataSet) throws SQLException {
       String sql = generateSQL(request);
       String aggUuid = "";
       if (request.hasAggUuid()) {
@@ -304,7 +304,7 @@ public class SpatiaLiteServer extends FederateDBServer {
       if (sql.isEmpty()) {
         return;
       }
-      executeSQL(sql, streamDataSet, aggUuid);
+      executeSQL(preFilter, sql, streamDataSet, aggUuid);
     }
 
     private String generateSQL(Query request) {

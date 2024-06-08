@@ -30,3 +30,5 @@ hs_err_pid*
 .factorypath
 *.iml
 *.idea
+/dataset/
+/target/

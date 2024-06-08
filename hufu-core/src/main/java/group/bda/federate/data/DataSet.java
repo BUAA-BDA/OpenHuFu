@@ -36,6 +36,7 @@ public class DataSet implements Iterable<DataRow>, Enumerator<Row>, Serializable
     this.header = header;
     this.rows = rows;
     this.uuid = uuid;
+    this.count = rows.size();
   }
 
   public static DataSet newDataSet(Header header) {
@@ -143,7 +144,7 @@ public class DataSet implements Iterable<DataRow>, Enumerator<Row>, Serializable
     return new DataRowBuilder(this);
   }
 
-  private void addRow(Row.RowBuilder rowBuilder) {
+  private void /**/addRow(Row.RowBuilder rowBuilder) {
     this.rows.add(rowBuilder.build());
   }
 
@@ -506,7 +507,7 @@ public class DataSet implements Iterable<DataRow>, Enumerator<Row>, Serializable
           }
           return false;
         case INT:
-          if (value instanceof Integer) {
+          if (value instanceof Integer || value instanceof Long) {
             rowBuilder.set(index, value);
             return true;
           }

@@ -11,7 +11,12 @@ public final class FedSpatialConfig {
   public static final long DATA_TIME_OUT = 100000; // time out when waiting for response in ms
   public static final int SET_UNION_DIVIDE = 2;
   public static final boolean USE_DP = true; // dp optimization for knn
+  public static final double DELTA_DP = 1.0; // dp delta
   public static final double EPS_DP = 1.0; // dp epsilon
   public static final double SD_DP = 0.5; // dp sd
+  public static final double Planar_DELTA_DP = 0.0001; // dp delta
+  public static final double Planar_EPS_DP = 1.0; // dp epsilon
   public static final double KNN_RADIUS = 1.0; // predefine radius of kNN
+  public static final int FLOAT = 10000000; // float to long
+  public static final boolean PROTECT_QUERY = true; // whether to protect query
 }

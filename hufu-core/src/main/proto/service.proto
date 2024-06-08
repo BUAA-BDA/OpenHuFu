@@ -199,6 +199,8 @@ message PrivacyQuery {
   required SetUnionRequest setUnion = 2;
   optional string knnCacheId = 3;
   optional double radius = 4;
+  optional string cacheUuid = 5;
+  optional string twoPartyUuid = 6;
 }
 
 message Order {
@@ -236,6 +238,24 @@ message Value {
   required int32 val = 1;
 }
 
+message CompareEncDistanceRequest {
+  required bytes encLongitude = 1;
+  required bytes encLatitude = 2;
+  required bytes encRadius = 3;
+  required string uuid = 4;
+}
+
+message ComparePolyRequest {
+  repeated bytes polyDist = 1;
+  required bytes polyRadius = 2;
+}
+
+message ComparePolyResponse {
+  repeated bool isIn = 1;
+  required string cacheUuid = 2;
+  required int32 state = 3; // state=0: not sure, state=1: count < k, state=2: count=k, state=3: count >k
+}
+
 service Federate {
   rpc AddClient(AddClientRequest) returns (GeneralResponse);
   rpc KnnRadiusQuery(KnnRadiusQueryRequest) returns (KnnRadiusQueryResponse);
@@ -247,6 +267,8 @@ service Federate {
   rpc ClearCache(CacheID) returns (google.protobuf.Empty);
   rpc FedSpatialQuery(Query) returns(stream DataSetProto);
   rpc FedSpatialPrivacyQuery(PrivacyQuery) returns(stream DataSetProto);
+  rpc TwoPartyDistanceCompare(CompareEncDistanceRequest) returns (ComparePolyRequest);
+  rpc TwoPartyDistanceCompareResult(ComparePolyResponse) returns (GeneralResponse);
   rpc GetRandomDataSet(CacheID) returns (stream DataSetProto);
   rpc PrivacyCompare(PrivacyCompareRequest) returns (PrivacyCompareResponse);
   rpc GetMulValue(GetMulValueRequest) returns (Value);
