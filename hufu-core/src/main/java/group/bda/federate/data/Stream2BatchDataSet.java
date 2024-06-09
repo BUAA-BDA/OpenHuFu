@@ -10,7 +10,7 @@ public class Stream2BatchDataSet extends StreamDataSet {
   public Stream2BatchDataSet(DataSet dataSet) {
     super(dataSet.header);
     this.dataSet = dataSet;
-    this.rowCount = 0;
+    this.rowCount = dataSet.count;
   }
 
   @Override

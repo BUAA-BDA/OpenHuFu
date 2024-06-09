@@ -93,21 +93,21 @@ public class PostgresqlServer extends FederateDBServer {
       }
     }
 
-    private void fillDataSet(ResultSet rs, StreamDataSet dataSet) throws SQLException {
+    private void fillDataSet(boolean preFilter, ResultSet rs, StreamDataSet dataSet) throws SQLException {
       final Header header = dataSet.getHeader();
       final int columnSize = header.size();
       while (rs.next()) {
         Row.RowBuilder builder = Row.newBuilder(columnSize);
         for (int i = 0; i < columnSize; ++i) {
-          if (header.getLevel(i).equals(Level.HIDE)) {
-            if (header.getType(i) == FederateFieldType.POINT) {
-              builder.set(i, new group.bda.federate.sql.type.Point(0, 0));
-            } else {
-              LOG.error("the type should not be hidden");
-              throw new RuntimeException("the type should not be hidden");
-            }
-            continue;
-          }
+//          if (header.getLevel(i).equals(Level.HIDE)) {
+//            if (header.getType(i) == FederateFieldType.POINT) {
+//              builder.set(i, new group.bda.federate.sql.type.Point(0, 0));
+//            } else {
+//              LOG.error("the type should not be hidden");
+//              throw new RuntimeException("the type should not be hidden");
+//            }
+//            continue;
+//          }
           switch (header.getType(i)) {
             case BYTE:
               builder.set(i, rs.getByte(i + 1));
@@ -211,6 +211,8 @@ public class PostgresqlServer extends FederateDBServer {
         if (actualColumnSize == columnSize + 1) {
           distances.add(rs.getDouble(columnSize + 1));
           // LOG.debug("the distance is {}", rs.getDouble(columnSize + 1));
+        } else if(actualColumnSize == columnSize + 2) {
+          distances.add(rs.getDouble(columnSize + 2));
         }
         for (int i = 0; i < columnSize; ++i) {
           if (header.getLevel(i).equals(Level.HIDE)) {
@@ -277,13 +279,13 @@ public class PostgresqlServer extends FederateDBServer {
       return new DistanceDataSet(dataSet, distances);
     }
 
-    private void executeSQL(String sql, StreamDataSet dataSet, String aggUuid) throws SQLException {
+    private void executeSQL(boolean preFilter, String sql, StreamDataSet dataSet, String aggUuid) throws SQLException {
       Statement st = connection.createStatement();
       ResultSet rs = st.executeQuery(sql);
-      if (dataSet.getHeader().isPrivacyAgg()) {
+      if (preFilter && dataSet.getHeader().isPrivacyAgg()) {
         fillAggregateDataSet(rs, aggUuid, dataSet);
       } else {
-        fillDataSet(rs, dataSet);
+        fillDataSet(preFilter, rs, dataSet);
       }
       LOG.info("Execute {} returned {} rows", sql, dataSet.getRowCount());
     }
@@ -313,7 +315,7 @@ public class PostgresqlServer extends FederateDBServer {
     }
 
     @Override
-    public void fedSpatialQueryInternal(Query request, StreamDataSet streamDataSet) throws SQLException {
+    public void fedSpatialQueryInternal(boolean preFilter, Query request, StreamDataSet streamDataSet) throws SQLException {
       String sql = generateSQL(request);
       String aggUuid = "";
       if (request.hasAggUuid()) {
@@ -322,7 +324,7 @@ public class PostgresqlServer extends FederateDBServer {
       if (sql.isEmpty()) {
         return;
       }
-      executeSQL(sql, streamDataSet, aggUuid);
+      executeSQL(preFilter, sql, streamDataSet, aggUuid);
     }
 
     private String generateSQL(Query request) {
@@ -330,9 +332,16 @@ public class PostgresqlServer extends FederateDBServer {
       Header tableHeader = getTableHeader(tableName);
       int fetch = Integer.MAX_VALUE;
       List<String> projectStr = new ArrayList<>();
-      for (Expression e : request.getProjectExpList()) {
-        projectStr.add(new IRTranslator(e, tableHeader).translate());
+      // TODO
+      if (request.hasAggUuid()) {
+        projectStr.add(tableHeader.getName(0));
+      } else {
+        for (Expression e : request.getProjectExpList()) {
+          projectStr.add(new IRTranslator(e, tableHeader).translate());
+        }
       }
+      String geoFieldName =  tableHeader.getGeomFieldName();
+      projectStr.add(geoFieldName);
       List<String> order = request.getOrderList();
       // order by clause
       StringBuilder orderClause = new StringBuilder();

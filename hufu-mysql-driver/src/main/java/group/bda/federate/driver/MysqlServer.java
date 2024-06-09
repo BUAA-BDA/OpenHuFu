@@ -287,7 +287,7 @@ public class MysqlServer extends FederateDBServer {
     }
 
     @Override
-    public void fedSpatialQueryInternal(Query request, StreamDataSet streamDataSet) throws SQLException {
+    public void fedSpatialQueryInternal(boolean preFilter, Query request, StreamDataSet streamDataSet) throws SQLException {
       String sql = generateSQL(request);
       String aggUuid = "";
       if (request.hasAggUuid()) {

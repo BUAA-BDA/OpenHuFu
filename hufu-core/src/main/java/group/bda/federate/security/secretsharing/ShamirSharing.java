@@ -179,7 +179,7 @@ public class ShamirSharing {
     }
     LOG.debug("cal S value finish {} ", sList);
     double res = calCount(xList, sList);
-    LOG.debug("the shamir result is {} ", res);
+    LOG.info("the shamir result is {} ", res);
     return res;
   }
 

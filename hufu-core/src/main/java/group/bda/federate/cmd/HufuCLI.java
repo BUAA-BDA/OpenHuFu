@@ -30,7 +30,7 @@ public class HufuCLI {
       fedArgs.add("admin");
       fedArgs.add("-p");
       fedArgs.add("admin");
-      HufuLine.start(fedArgs.toArray(new String[6]), null, true);
+      HufuLine.start(fedArgs.toArray(new String[6]), System.in, true);
     } catch (Exception e1) {
       e1.printStackTrace();
     }

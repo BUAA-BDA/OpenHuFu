@@ -9,6 +9,11 @@ message Point {
   required double longitude = 2;
 }
 
+message EncPoint {
+  required int64 latitude = 1;
+  required int64 longitude = 2;
+}
+
 message IndexPoint {
   required int64 id = 1;
   required Point point = 2;
@@ -67,6 +72,7 @@ message RowField {
     float f32 = 7;
     double f64 = 8;
     Point p = 9;
+    EncPoint encP = 10;
   }
 }
 
