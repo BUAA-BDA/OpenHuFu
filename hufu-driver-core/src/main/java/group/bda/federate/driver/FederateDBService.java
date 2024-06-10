@@ -79,8 +79,10 @@ public abstract class FederateDBService extends FederateGrpc.FederateImplBase {
   protected final Map<String, ServerTableInfo> tableInfoMap;
   protected final Lock clientLock;
   protected ConcurrentBuffer buffer;
-  protected ConcurrentHashMap<String, Object> stateBuffer; // Stor compare results of s2bDataSet in last round
-  protected ConcurrentHashMap<String, Object> verifiedBuffer;// Store the data that are` known to be in the radius
+  protected ConcurrentHashMap<String, Object> stateBuffer;
+  // Stor compare results of s2bDataSet in last round
+  protected ConcurrentHashMap<String, Object> verifiedBuffer;
+  // Store the data that are` known to be in the radius
   protected Random random;
   private final int THREAD_POOL_SIZE;
   private final ExecutorService executorService;
@@ -286,18 +288,21 @@ public abstract class FederateDBService extends FederateGrpc.FederateImplBase {
       Ciphertext cipherRadius = new Ciphertext(PHE.context);
       cipherRadius.load(PHE.context, request.getEncRadius().toByteArray());
 
-      Stream2BatchDataSet s2bDataSet = (Stream2BatchDataSet) buffer.get(cacheUuid);
-      DataSet dataSet = s2bDataSet.getDataSet();
+      LOG.info("receive encrypted longitude: {}, latitude: {}, radius: {} from client",
+          cipherLongitude, cipherLatitude, cipherRadius);
 
+      Stream2BatchDataSet s2bDataSet = (Stream2BatchDataSet) buffer.get(cacheUuid);
+      LOG.info("remain {} rows cache need to compare with client", s2bDataSet.getRowCount());
+      DataSet dataSet = s2bDataSet.getDataSet();
+      LOG.info("start compute distance between client and server cache..");
       long[] x2 = new long[s2bDataSet.getRowCount()];
       long[] y2 = new long[s2bDataSet.getRowCount()];
-
       for (int i = 0; i < s2bDataSet.getRowCount(); i++) {
         Point point = dataSet.getRow(i).getPoint(1);
         x2[i] = (long) (point.getX() * FedSpatialConfig.FLOAT);
         y2[i] = (long) (point.getY() * FedSpatialConfig.FLOAT);
-        LOG.info("x2: {}, y2:{}, a*dist+b: {}", x2[i], y2[i], (1215000000 - x2[i]) * (1215000000 - x2[i]) );
       }
+      long startEncryptTime = System.currentTimeMillis();
       Ciphertext[] polyDists =
           PHE.polyDistance(plainA, plainB, cipherLongitude, cipherLatitude, x2, y2);
       Ciphertext polyRadius = PHE.poly(plainA, plainB, cipherRadius);
@@ -305,8 +310,17 @@ public abstract class FederateDBService extends FederateGrpc.FederateImplBase {
       for (Ciphertext polyDist : polyDists) {
         response.addPolyDist(ByteString.copyFrom(polyDist.save()));
       }
+      long endEncryptTime = System.currentTimeMillis();
+      LOG.info("finish compute {} rows in encryption mode within {} seconds",
+          s2bDataSet.getRowCount(), (endEncryptTime - startEncryptTime) / 1000);
       response.setPolyRadius(ByteString.copyFrom(polyRadius.save()));
-      observer.onNext(response.build());
+      ComparePolyRequest ComparePolyResponse = response.build();
+      int size = ComparePolyResponse.getSerializedSize();
+      int kbSize = size / 1024;
+      int mbSize = kbSize / 1024;
+      int gbSize = mbSize / 1024;
+      LOG.info("send {} bytes({} KB, {} MB, {} GB) to client", size, kbSize, mbSize, gbSize);
+      observer.onNext(ComparePolyResponse);
       observer.onCompleted();
     } catch (IOException e) {
       LOG.error("error when he calculate", e);
@@ -361,7 +375,8 @@ public abstract class FederateDBService extends FederateGrpc.FederateImplBase {
 
     if (request.hasTwoPartyUuid()) {
       // fetch data from cache
-      DataSet cacheDataSet = ((Stream2BatchDataSet) buffer.get(request.getCacheUuid())).getDataSet();
+      DataSet cacheDataSet =
+          ((Stream2BatchDataSet) buffer.get(request.getCacheUuid())).getDataSet();
       Iterator<Row> rows = cacheDataSet.rawIterator();
       List<Row> verifiedRows = (List<Row>) verifiedBuffer.get(request.getCacheUuid());
       List<Boolean> isIns = (List<Boolean>) stateBuffer.get(request.getCacheUuid());
@@ -386,7 +401,7 @@ public abstract class FederateDBService extends FederateGrpc.FederateImplBase {
         Row.RowBuilder rawBuilder = Row.newBuilder(1);
         Long count = 0L;
         if (isIns != null) {
-          for (int index = 0; index < isIns.size();index++) {
+          for (int index = 0; index < isIns.size(); index++) {
             if (isIns.get(index) == Boolean.TRUE) {
               count++;
             }

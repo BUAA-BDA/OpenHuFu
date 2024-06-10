@@ -15,10 +15,14 @@ import edu.alibaba.mpc4j.crypto.fhe.modulus.CoeffModulus;
 import edu.alibaba.mpc4j.crypto.fhe.modulus.CoeffModulus.SecLevelType;
 import edu.alibaba.mpc4j.crypto.fhe.modulus.Modulus;
 import edu.alibaba.mpc4j.crypto.fhe.zq.UintCore;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class PHE {
 
   public static SealContext context = sealContextInit();
+
+  private static final Logger LOG = LogManager.getLogger(PHE.class);
 
   public static SealContext sealContextInit() {
     EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV);
@@ -113,6 +117,9 @@ public class PHE {
       plains[i] = new Plaintext();
       decryptor.decrypt(encrypts[i], plains[i]);
       decryptValues[i] = Long.parseLong(plains[i].toString(), 16);
+      if (i % 1000 == 0) {
+        LOG.info("decrypt {} rows...", i);
+      }
     }
     return decryptValues;
   }
@@ -157,9 +164,9 @@ public class PHE {
   public static Ciphertext poly(Plaintext a, Plaintext b, Ciphertext x) {
     Evaluator evaluator = new Evaluator(PHE.context);
     Ciphertext encryptedSub1 = new Ciphertext();
-    evaluator.multiplyPlain(x, a, x);
-    evaluator.addPlain(x, b, x);
-    return x;
+    evaluator.multiplyPlain(x, a, encryptedSub1);
+    evaluator.addPlain(x, b, encryptedSub1);
+    return encryptedSub1;
   }
   public static Ciphertext[] distance(Ciphertext encryptedX1, Ciphertext encryptedY1,
       Plaintext[] plaintextX2, Plaintext[] plaintextY2) {
@@ -206,6 +213,9 @@ public class PHE {
       plaintextX2[i] = new Plaintext(UintCore.uintToHexString(new long[] {x2[i]}, 1));
       plaintextY2[i] = new Plaintext(UintCore.uintToHexString(new long[] {y2[i]}, 1));
       result[i] = polyDistance(a, b, encryptedX1, encryptedY1, plaintextX2[i], plaintextY2[i]);
+      if (i % 1000 == 0) {
+        LOG.info("compute {} rows in encryption mode...", i);
+      }
     }
     return result;
   }

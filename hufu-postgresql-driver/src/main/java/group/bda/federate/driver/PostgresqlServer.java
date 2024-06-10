@@ -280,6 +280,7 @@ public class PostgresqlServer extends FederateDBServer {
     }
 
     private void executeSQL(boolean preFilter, String sql, StreamDataSet dataSet, String aggUuid) throws SQLException {
+      long start = System.currentTimeMillis();
       Statement st = connection.createStatement();
       ResultSet rs = st.executeQuery(sql);
       if (preFilter && dataSet.getHeader().isPrivacyAgg()) {
@@ -287,7 +288,8 @@ public class PostgresqlServer extends FederateDBServer {
       } else {
         fillDataSet(preFilter, rs, dataSet);
       }
-      LOG.info("Execute {} returned {} rows", sql, dataSet.getRowCount());
+      long end = System.currentTimeMillis();
+      LOG.info("Execute {} returned {} rows in {} seconds", sql, dataSet.getRowCount(), (end - start) / 1000.0);
     }
 
     @Override

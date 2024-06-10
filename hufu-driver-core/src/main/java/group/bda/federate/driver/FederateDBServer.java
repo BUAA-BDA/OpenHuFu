@@ -22,7 +22,9 @@ public abstract class FederateDBServer {
   public FederateDBServer(ServerBuilder<?> serverBuilder, int port, FederateGrpc.FederateImplBase service)
       throws IOException {
     this.port = port;
-    server = serverBuilder.addService(service).build();
+    server = serverBuilder.addService(service)
+        .maxInboundMessageSize(Integer.MAX_VALUE)
+        .build();
   }
 
   public void start() throws IOException {
