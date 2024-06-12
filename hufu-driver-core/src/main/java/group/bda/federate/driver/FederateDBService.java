@@ -423,6 +423,7 @@ public abstract class FederateDBService extends FederateImplBase {
           dataSet = DataSet.newDataSet(Header.fromProto(headerBuilder.build()));
           dataSetCache = new PointDataSet(dataSet);
           fedSpatialQueryInternal(false, query, dataSetCache);
+          LOG.info("dp filter remain {} rows", dataSetCache.getRowCount());
         }
       } catch (Exception e) {
         LOG.error("error when query table [{}]", query.getTableName(), e);
