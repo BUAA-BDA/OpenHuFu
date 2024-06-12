@@ -176,8 +176,8 @@
         <version>3.1</version>
         <configuration>
           <compilerVersion>${javac.target}</compilerVersion>
-          <source>${javac.target}</source>
-          <target>${javac.target}</target>
+          <source>9</source>
+          <target>9</target>
         </configuration>
       </plugin>
       <plugin>

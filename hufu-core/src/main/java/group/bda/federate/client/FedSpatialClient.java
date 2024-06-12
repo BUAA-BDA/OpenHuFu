@@ -280,7 +280,7 @@ public class FedSpatialClient {
       streamProto = privacyKnn(header, projects, filter, tableClients, fetch, order);
     } else if (header.hasPrivacy()) {
       streamProto =
-          fedSpatialPrivacyQuery(header, projects, filter, tableClients, fetch, order, aggUuid, 0, false, 0);
+          fedSpatialPrivacyQuery(header, projects, filter, tableClients, fetch, order, aggUuid, 0, false, 0, PHE.keyGenerator());
     } else {
       streamProto =
           fedSpatialPublicQuery(header, projects, filter, tableClients, fetch, order, aggUuid);
@@ -403,14 +403,14 @@ public class FedSpatialClient {
       List<Expression> project,
       List<Expression> filter, Map<FederateDBClient, String> tableClients, int fetch,
       List<String> order,
-      String aggUuid, int state, boolean cached, int k) {
+      String aggUuid, int state, boolean cached, int k, KeyGenerator keygen) {
 
     double latitude = filter.get(0).getIr(0).getIn(0).getLiteral().getValue().getP().getLatitude();
     double longitude =
         filter.get(0).getIr(0).getIn(0).getLiteral().getValue().getP().getLongitude();
     double radius = filter.get(0).getIr(0).getIn(2).getLiteral().getValue().getF64();
     List<Expression> dpFilter = positionDP(filter, false);
-    KeyGenerator keygen = PHE.keyGenerator();
+
     // Generate a public key
     PublicKey publicKey = PHE.generatePublicKey(keygen);
 
@@ -538,10 +538,10 @@ public class FedSpatialClient {
       List<Expression> filter, Map<FederateDBClient, String> tableClients, int fetch,
       List<String> order,
       String aggUuid,
-      int state, boolean cached, int k) {
+      int state, boolean cached, int k, KeyGenerator keygen) {
     if (PROTECT_QUERY) {
       return fedEncSpatialPrivacyQuery(header, project, filter, tableClients, fetch, order,
-          aggUuid, state, cached, k);
+          aggUuid, state, cached, k, keygen);
     }
     StreamingIterator<DataSetProto> iterator = new StreamingIterator<>(tableClients.size());
     List<Callable<Boolean>> tasks = new ArrayList<Callable<Boolean>>();
@@ -614,7 +614,7 @@ public class FedSpatialClient {
       List<Expression> project,
       List<Expression> filter, Map<FederateDBClient, String> tableClients, int fetch,
       List<String> order,
-      String aggUuid, String knnCacheId, double radius) {
+      String aggUuid, String knnCacheId, double radius, KeyGenerator keygen) {
     Expression.Builder expressionBuilder = filter.get(0).toBuilder();
     IR.Builder irBuilder = expressionBuilder.getIr(0).toBuilder();
     IRField.Builder irFieldBuilder = irBuilder.getIn(2).toBuilder();
@@ -628,7 +628,7 @@ public class FedSpatialClient {
     List<Expression> rangeFilter = new ArrayList<>();
     rangeFilter.add(expressionBuilder.build());
     return fedSpatialPrivacyQuery(header, project, rangeFilter, tableClients, fetch, order, aggUuid,
-        0, true, 0);
+        0, true, 0, keygen);
   }
 
   private Pair<Double, Double> dPRangeCount(FederateService.PrivacyCountRequest request,
@@ -733,6 +733,7 @@ public class FedSpatialClient {
     double mid = (left + right) / 2;
     int state = 0;
     boolean cached = false;
+    KeyGenerator keygen = PHE.keyGenerator();
     while (left + deviation <= right) {
       mid = (left + right) / 2;
       Header.IteratorBuilder headerBuilder = Header.newBuilder();
@@ -763,7 +764,7 @@ public class FedSpatialClient {
 
       StreamingIterator<DataSetProto> streamProto =
           fedSpatialPrivacyQuery(countHeader, countProjects, countFilter, tableClients,
-              Integer.MAX_VALUE, order, uuid, state, cached, k);
+              Integer.MAX_VALUE, order, uuid, state, cached, k, keygen);
       cached = true;
       DataSet localSet = DataSet.newDataSet(header);
       while (streamProto.hasNext()) {
@@ -790,7 +791,7 @@ public class FedSpatialClient {
     }
     try {
       return knnCircleRangeQuery(header, project, filter, tableClients, Integer.MAX_VALUE, order,
-          uuid, uuid, mid);
+          uuid, uuid, mid, keygen);
     } finally {
       clearCache(uuid, tableClients);
     }

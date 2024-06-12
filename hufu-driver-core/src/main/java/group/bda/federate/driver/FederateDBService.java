@@ -5,6 +5,7 @@ import edu.alibaba.mpc4j.crypto.fhe.Ciphertext;
 import edu.alibaba.mpc4j.crypto.fhe.Plaintext;
 import edu.alibaba.mpc4j.crypto.fhe.zq.UintCore;
 import group.bda.federate.data.Row.RowBuilder;
+import group.bda.federate.data.PointDataSet;
 import group.bda.federate.rpc.FederateGrpc.FederateImplBase;
 import group.bda.federate.rpc.FederateService.CompareEncDistanceRequest;
 import group.bda.federate.rpc.FederateService.ComparePolyRequest;
@@ -52,8 +53,6 @@ import group.bda.federate.data.StreamDataSet;
 import group.bda.federate.data.StreamObserverDataSet;
 import group.bda.federate.rpc.FederateCommon.DataSetProto;
 import group.bda.federate.rpc.FederateCommon.HeaderProto;
-import group.bda.federate.rpc.FederateGrpc;
-import group.bda.federate.rpc.FederateService;
 import group.bda.federate.rpc.FederateService.AddClientRequest;
 import group.bda.federate.rpc.FederateService.CacheID;
 import group.bda.federate.rpc.FederateService.Code;
@@ -278,11 +277,6 @@ public abstract class FederateDBService extends FederateImplBase {
       StreamObserver<ComparePolyRequest> observer) {
     String cacheUuid = request.getUuid();
     Random random = new Random();
-    int a = random.nextInt(7) + 1;
-    int b = random.nextInt(Integer.MAX_VALUE);
-    LOG.info("random a: {}, b: {}", a, b);
-    Plaintext plainA = new Plaintext(UintCore.uintToHexString(new long[] {a}, 1));
-    Plaintext plainB = new Plaintext(UintCore.uintToHexString(new long[] {b}, 1));
     try {
       Ciphertext cipherLongitude = new Ciphertext(PHE.context);
       cipherLongitude.load(PHE.context, request.getEncLongitude().toByteArray());
@@ -296,43 +290,68 @@ public abstract class FederateDBService extends FederateImplBase {
       LOG.info("receive encrypted longitude: {}, latitude: {}, radius: {} from client",
           cipherLongitude, cipherLatitude, cipherRadius);
 
-      Stream2BatchDataSet s2bDataSet = (Stream2BatchDataSet) buffer.get(cacheUuid);
+      PointDataSet dataSetCache = (PointDataSet) buffer.get(cacheUuid);
       if (request.getState() == 3) {
         List<Boolean> isIns = isInBuffer.get(request.getUuid());
-        Iterator<Row> rows = s2bDataSet.getDataSet().rawIterator();
+        Iterator<Row> rows = dataSetCache.getDataSet().rawIterator();
         List<Row> inRows = new ArrayList<>();
-        for (int i = 0;i < s2bDataSet.getRowCount();i++) {
+        List<Double> x = new ArrayList<>();
+        List<Double> y = new ArrayList<>();
+        List<Ciphertext> cipherDist = new ArrayList<>();
+        for (int i = 0; i < dataSetCache.getRowCount(); i++) {
           if (isIns.get(i) == Boolean.TRUE) {
             inRows.add(rows.next());
+            double[] point = dataSetCache.getPoint(i);
+            x.add(point[0]);
+            y.add(point[1]);
+            cipherDist.add(dataSetCache.getCipherDist(i));
           } else {
             rows.next();
           }
         }
-        DataSet dataSet = DataSet.newDataSetUnsafe(s2bDataSet.getHeader(), inRows, cacheUuid);
-        s2bDataSet = new Stream2BatchDataSet(dataSet);
-        buffer.set(request.getUuid(), s2bDataSet);
+        DataSet emptyDataSet = DataSet.newDataSetUnsafe(dataSetCache.getHeader(), inRows);
+        dataSetCache = new PointDataSet(emptyDataSet, true, x, y, cipherDist);
+        buffer.set(request.getUuid(), dataSetCache);
       }
-      LOG.info("remain {} rows cache need to compare with client", s2bDataSet.getRowCount());
-      DataSet dataSet = s2bDataSet.getDataSet();
-      LOG.info("start compute distance between client and server cache..");
-      long[] x2 = new long[s2bDataSet.getRowCount()];
-      long[] y2 = new long[s2bDataSet.getRowCount()];
-      for (int i = 0; i < s2bDataSet.getRowCount(); i++) {
-        Point point = dataSet.getRow(i).getPoint(1);
-        x2[i] = (long) (point.getX() * FedSpatialConfig.FLOAT);
-        y2[i] = (long) (point.getY() * FedSpatialConfig.FLOAT);
+      LOG.info("remain {} rows cache need to compare with client", dataSetCache.getRowCount());
+
+      if (!dataSetCache.getCached()) {
+        LOG.info("start compute distance between client and server cache..");
+        long startEncryptTime = System.currentTimeMillis();
+        long[] x2 = new long[dataSetCache.getRowCount()];
+        long[] y2 = new long[dataSetCache.getRowCount()];
+        for (int i = 0; i < dataSetCache.getRowCount(); i++) {
+          double[] point = dataSetCache.getPoint(i);
+          x2[i] = (long) (point[0] * FedSpatialConfig.FLOAT);
+          y2[i] = (long) (point[1] * FedSpatialConfig.FLOAT);
+        }
+        long endEncryptTime = System.currentTimeMillis();
+        Ciphertext[] polyDists =
+            PHE.distance(cipherLongitude, cipherLatitude, x2, y2);
+        dataSetCache.addAll(polyDists);
+        LOG.info("finish compute {} rows in encryption mode within {} seconds",
+            dataSetCache.getRowCount(), (endEncryptTime - startEncryptTime) / 1000);
+      } else {
+        LOG.info("use cipher distance in DataSetCache..");
       }
-      long startEncryptTime = System.currentTimeMillis();
-      Ciphertext[] polyDists =
-          PHE.polyDistance(plainA, plainB, cipherLongitude, cipherLatitude, x2, y2);
+      LOG.info("start compute polynomial between client and server cache..");
+
+      int a = random.nextInt(10) + 1;
+      int b = random.nextInt(Integer.MAX_VALUE - 1) + 1;
+      Plaintext plainA = new Plaintext(UintCore.uintToHexString(new long[] {a}, 1));
+      Plaintext plainB = new Plaintext(UintCore.uintToHexString(new long[] {b}, 1));
+
+      long startPolyTime = System.currentTimeMillis();
+      List<Ciphertext> cipherDists = dataSetCache.getCipherDist();
+      List<Ciphertext> polyDists = PHE.poly(plainA, plainB, cipherDists);
       Ciphertext polyRadius = PHE.poly(plainA, plainB, cipherRadius);
+      long endPolyTime = System.currentTimeMillis();
+      LOG.info("finish compute {} rows of polynomial with a: {}, b: {} in encryption mode within {} seconds",
+          dataSetCache.getRowCount(), a, b, (endPolyTime - startPolyTime) / 1000);
       Builder response = ComparePolyRequest.newBuilder();
       for (Ciphertext polyDist : polyDists) {
         response.addPolyDist(ByteString.copyFrom(polyDist.save()));
       }
-      long endEncryptTime = System.currentTimeMillis();
-      LOG.info("finish compute {} rows in encryption mode within {} seconds",
-          s2bDataSet.getRowCount(), (endEncryptTime - startEncryptTime) / 1000);
       response.setPolyRadius(ByteString.copyFrom(polyRadius.save()));
       ComparePolyRequest ComparePolyResponse = response.build();
       int size = ComparePolyResponse.getSerializedSize();
@@ -369,13 +388,13 @@ public abstract class FederateDBService extends FederateImplBase {
       return;
     }
     DataSet dataSet = DataSet.newDataSet(header);
-    Stream2BatchDataSet s2bDataSet = null;
+    PointDataSet dataSetCache = null;
 
     if (request.hasTwoPartyUuid()) {
       // fetch data from cache
       int count = 0;
       List<Boolean> isIns = isInBuffer.get(request.getCacheUuid());
-      for (int i = 0;i < isIns.size();i++) {
+      for (int i = 0; i < isIns.size(); i++) {
         if (isIns.get(i) == Boolean.TRUE) {
           count++;
         }
@@ -392,7 +411,7 @@ public abstract class FederateDBService extends FederateImplBase {
       }
 
     } else {
-      s2bDataSet = new Stream2BatchDataSet(dataSet);
+      dataSetCache = new PointDataSet(dataSet);
       // Phase 1:
       try {
         if (FedSpatialConfig.PROTECT_QUERY) {
@@ -402,14 +421,14 @@ public abstract class FederateDBService extends FederateImplBase {
           headerBuilder.addLevel(2);
           headerBuilder.addType(11);
           dataSet = DataSet.newDataSet(Header.fromProto(headerBuilder.build()));
-          s2bDataSet = new Stream2BatchDataSet(dataSet);
-          fedSpatialQueryInternal(false, query, s2bDataSet);
+          dataSetCache = new PointDataSet(dataSet);
+          fedSpatialQueryInternal(false, query, dataSetCache);
         }
       } catch (Exception e) {
         LOG.error("error when query table [{}]", query.getTableName(), e);
       }
       if (FedSpatialConfig.PROTECT_QUERY) {
-        buffer.set(request.getCacheUuid(), s2bDataSet);
+        buffer.set(request.getCacheUuid(), dataSetCache);
       }
       if (query.hasAggUuid()) {
         observer.onNext(DataSet.newDataSet(header).toProto());
@@ -421,11 +440,11 @@ public abstract class FederateDBService extends FederateImplBase {
       return;
     }
     // remove userless column
-    s2bDataSet = (Stream2BatchDataSet) buffer.get(request.getCacheUuid());
-    Iterator<Row> rows = s2bDataSet.getDataSet().rawIterator();
+    dataSetCache = (PointDataSet) buffer.get(request.getCacheUuid());
+    Iterator<Row> rows = dataSetCache.getDataSet().rawIterator();
     List<Row> allRows = new ArrayList<>();
     List<Boolean> isIns = isInBuffer.get(request.getCacheUuid());
-    for (int i = 0;i < isIns.size();i++) {
+    for (int i = 0; i < isIns.size(); i++) {
       if (isIns.get(i) == Boolean.TRUE) {
         Row row = rows.next();
         RowBuilder builder = Row.newBuilder(1);
@@ -436,7 +455,7 @@ public abstract class FederateDBService extends FederateImplBase {
       }
     }
     dataSet = DataSet.newDataSetUnsafe(header, allRows, request.getCacheUuid());
-    s2bDataSet = new Stream2BatchDataSet(dataSet);
+    dataSetCache = new PointDataSet(dataSet);
 
     SetUnionRequest setUnionRequest = request.getSetUnion();
     // if (setUnionRequest.getAddOrder(0).getEndpointsCount() < 3) {
@@ -446,7 +465,7 @@ public abstract class FederateDBService extends FederateImplBase {
     //   return;
     // }
     int divide = setUnionRequest.getAddOrderCount();
-    final List<List<Row>> dividedRows = s2bDataSet.getDivided(divide);
+    final List<List<Row>> dividedRows = dataSetCache.getDivided(divide);
     List<Callable<DataSet>> unionTasks = new ArrayList<>();
     // add loop
     boolean isLeader = false;

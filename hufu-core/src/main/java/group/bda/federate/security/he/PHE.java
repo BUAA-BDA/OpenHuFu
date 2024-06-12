@@ -15,6 +15,8 @@ import edu.alibaba.mpc4j.crypto.fhe.modulus.CoeffModulus;
 import edu.alibaba.mpc4j.crypto.fhe.modulus.CoeffModulus.SecLevelType;
 import edu.alibaba.mpc4j.crypto.fhe.modulus.Modulus;
 import edu.alibaba.mpc4j.crypto.fhe.zq.UintCore;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -117,7 +119,7 @@ public class PHE {
       plains[i] = new Plaintext();
       decryptor.decrypt(encrypts[i], plains[i]);
       decryptValues[i] = Long.parseLong(plains[i].toString(), 16);
-      if (i % 1000 == 0) {
+      if (i % 1000 == 0 && i > 0) {
         LOG.info("decrypt {} rows...", i);
       }
     }
@@ -163,11 +165,27 @@ public class PHE {
 
   public static Ciphertext poly(Plaintext a, Plaintext b, Ciphertext x) {
     Evaluator evaluator = new Evaluator(PHE.context);
-    Ciphertext encryptedSub1 = new Ciphertext();
-    evaluator.multiplyPlain(x, a, encryptedSub1);
-    evaluator.addPlain(encryptedSub1, b, encryptedSub1);
-    return encryptedSub1;
+    Ciphertext encryptedSub = new Ciphertext();
+    evaluator.multiplyPlain(x, a, encryptedSub);
+    evaluator.addPlain(encryptedSub, b, encryptedSub);
+    return encryptedSub;
   }
+
+  public static List<Ciphertext> poly(Plaintext a, Plaintext b, List<Ciphertext> x) {
+    Evaluator evaluator = new Evaluator(PHE.context);
+    List<Ciphertext> encryptedResults = new ArrayList<>();
+    for (int i = 0;i < x.size();i++) {
+      Ciphertext encryptedSub = new Ciphertext();
+      evaluator.multiplyPlain(x.get(i), a, encryptedSub);
+      evaluator.addPlain(encryptedSub, b, encryptedSub);
+      encryptedResults.add(encryptedSub);
+      if (i % 1000 == 0 && i != 0) {
+        LOG.info("compute {} rows of poly in encryption mode...", i);
+      }
+    }
+    return encryptedResults;
+  }
+
   public static Ciphertext[] distance(Ciphertext encryptedX1, Ciphertext encryptedY1,
       Plaintext[] plaintextX2, Plaintext[] plaintextY2) {
     Evaluator evaluator = new Evaluator(PHE.context);
@@ -181,6 +199,9 @@ public class PHE {
       evaluator.square(encryptedSub2, encryptedSub2);
       encryptedDistances[i] = new Ciphertext();
       evaluator.add(encryptedSub1, encryptedSub2, encryptedDistances[i]);
+      if (i % 1000 == 0 && i != 0) {
+        LOG.info("compute {} rows of distance in encryption mode...", i);
+      }
     }
     return encryptedDistances;
   }
@@ -201,23 +222,6 @@ public class PHE {
       plaintextY2[i] = new Plaintext(UintCore.uintToHexString(new long[] {y2[i]}, 1));
     }
     return distance(encryptedX1, encryptedY1, plaintextX2, plaintextY2);
-  }
-
-  public static Ciphertext[] polyDistance(Plaintext a, Plaintext b, Ciphertext encryptedX1,
-      Ciphertext encryptedY1, long[] x2,
-      long[] y2) {
-    Plaintext[] plaintextX2 = new Plaintext[x2.length];
-    Plaintext[] plaintextY2 = new Plaintext[y2.length];
-    Ciphertext[] result = new Ciphertext[x2.length];
-    for (int i = 0; i < x2.length; i++) {
-      plaintextX2[i] = new Plaintext(UintCore.uintToHexString(new long[] {x2[i]}, 1));
-      plaintextY2[i] = new Plaintext(UintCore.uintToHexString(new long[] {y2[i]}, 1));
-      result[i] = polyDistance(a, b, encryptedX1, encryptedY1, plaintextX2[i], plaintextY2[i]);
-      if (i % 1000 == 0) {
-        LOG.info("compute {} rows in encryption mode...", i);
-      }
-    }
-    return result;
   }
 
   public static void main(String[] args) {

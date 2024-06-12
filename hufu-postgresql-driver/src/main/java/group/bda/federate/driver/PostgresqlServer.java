@@ -1,5 +1,6 @@
 package group.bda.federate.driver;
 
+import group.bda.federate.data.PointDataSet;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
@@ -93,7 +94,7 @@ public class PostgresqlServer extends FederateDBServer {
       }
     }
 
-    private void fillDataSet(boolean preFilter, ResultSet rs, StreamDataSet dataSet) throws SQLException {
+    private void fillDataSet(ResultSet rs, StreamDataSet dataSet) throws SQLException {
       final Header header = dataSet.getHeader();
       final int columnSize = header.size();
       while (rs.next()) {
@@ -149,6 +150,9 @@ public class PostgresqlServer extends FederateDBServer {
             case POINT:
               group.bda.federate.sql.type.Point p = fromPGPoint((PGobject) rs.getObject(i + 1));
               builder.set(i, p);
+              if (dataSet instanceof PointDataSet) {
+                ((PointDataSet) dataSet).addPoint(p.getX(), p.getY());
+              }
               break;
             default:
               break;
@@ -286,7 +290,7 @@ public class PostgresqlServer extends FederateDBServer {
       if (preFilter && dataSet.getHeader().isPrivacyAgg()) {
         fillAggregateDataSet(rs, aggUuid, dataSet);
       } else {
-        fillDataSet(preFilter, rs, dataSet);
+        fillDataSet(rs, dataSet);
       }
       long end = System.currentTimeMillis();
       LOG.info("Execute {} returned {} rows in {} seconds", sql, dataSet.getRowCount(), (end - start) / 1000.0);
