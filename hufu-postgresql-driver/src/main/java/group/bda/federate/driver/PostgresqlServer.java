@@ -302,7 +302,7 @@ public class PostgresqlServer extends FederateDBServer {
       Statement st = connection.createStatement();
       ResultSet rs = st.executeQuery(sql);
       DistanceDataSet dataSet = fillDistanceDataSet(Header.fromProto(query.getHeader()), rs);
-      LOG.info("Execute {} returned {} rows", sql, dataSet.size());
+      LOG.info("Execute {} returned {} rows", sql, dataSet.getDataSet().columnSize());
       return dataSet;
     }
 
@@ -388,7 +388,6 @@ public class PostgresqlServer extends FederateDBServer {
       if (fetch != Integer.MAX_VALUE) {
         sql.append(" LIMIT ").append(fetch);
       }
-      LOG.info(sql.toString());
       return sql.toString();
     }
   }

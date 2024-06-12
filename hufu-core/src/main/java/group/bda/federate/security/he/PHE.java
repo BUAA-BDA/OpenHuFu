@@ -165,7 +165,7 @@ public class PHE {
     Evaluator evaluator = new Evaluator(PHE.context);
     Ciphertext encryptedSub1 = new Ciphertext();
     evaluator.multiplyPlain(x, a, encryptedSub1);
-    evaluator.addPlain(x, b, encryptedSub1);
+    evaluator.addPlain(encryptedSub1, b, encryptedSub1);
     return encryptedSub1;
   }
   public static Ciphertext[] distance(Ciphertext encryptedX1, Ciphertext encryptedY1,
@@ -228,25 +228,21 @@ public class PHE {
     PublicKey publicKey = generatePublicKey(keygen);
     Encryptor encryptor = new Encryptor(context, publicKey);
 
-    long x1 = 0;
-    long y1 = 0;
-    long r = 100000000;
-    Plaintext plaintextX1 = new Plaintext(UintCore.uintToHexString(new long[] {x1}, 1));
-    Plaintext plaintextY1 = new Plaintext(UintCore.uintToHexString(new long[] {y1}, 1));
+    long a = 4L;
+    long b = 400L;
+    long r = 127093L * 127093L;
+    Plaintext plainR = new Plaintext(UintCore.uintToHexString(new long[] {r}, 1));
+    Ciphertext encRadius = new Ciphertext();
+    encryptor.encrypt(plainR, encRadius);
 
-    Ciphertext encryptedx1 = new Ciphertext();
-    Ciphertext encryptedy1 = new Ciphertext();
-    encryptor.encrypt(plaintextX1, encryptedx1);
-    encryptor.encrypt(plaintextY1, encryptedy1);
 
-    long x2 = 750000000;
-    long y2 = 600000000;
-
-    Ciphertext encrypt = distance(encryptedx1, encryptedy1, x2, y2);
+    Plaintext plaintextA = new Plaintext(UintCore.uintToHexString(new long[] {a}, 1));
+    Plaintext plaintextB = new Plaintext(UintCore.uintToHexString(new long[] {b}, 1));
+    Ciphertext ciphertextPoly = PHE.poly(plaintextA, plaintextB, encRadius);
 
     // Use keygen to decrypt
-    long actual = decryptLong(keygen.secretKey(), encrypt);
-    long expected = (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);
+    long actual = decryptLong(keygen.secretKey(), ciphertextPoly);
+    long expected = a * r + b;
     System.out.println(actual);
     System.out.println(expected);
     String res = (actual - r * r) < 0 ? "In" : "Out";

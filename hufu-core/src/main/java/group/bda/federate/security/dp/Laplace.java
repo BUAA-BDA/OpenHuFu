@@ -1,5 +1,6 @@
 package group.bda.federate.security.dp;
 
+import group.bda.federate.config.FedSpatialConfig;
 import java.util.Random;
 import org.apache.commons.math3.distribution.LaplaceDistribution;
 
@@ -60,6 +61,10 @@ public class Laplace {
   }
 
   public static void main(String[] args) {
-    System.out.println(LambertW.lambertW1(-0.2));
+    double longitude = 121;
+    double latitude = 40;
+    double[] result = Laplace.boundedPlanarLaplaceMechanism(longitude, latitude,
+        FedSpatialConfig.Planar_EPS_DP, FedSpatialConfig.Planar_DELTA_DP);
+    System.out.println("(" + result[0] + "," + result[1] + ")");
   }
 }

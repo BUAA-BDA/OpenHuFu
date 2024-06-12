@@ -2,10 +2,8 @@ package group.bda.federate.client;
 
 import com.google.protobuf.ByteString;
 import edu.alibaba.mpc4j.crypto.fhe.Ciphertext;
-import edu.alibaba.mpc4j.crypto.fhe.Encryptor;
 import edu.alibaba.mpc4j.crypto.fhe.KeyGenerator;
 import edu.alibaba.mpc4j.crypto.fhe.PublicKey;
-import edu.alibaba.mpc4j.crypto.fhe.serialization.SealCloneable;
 import group.bda.federate.rpc.FederateCommon;
 import group.bda.federate.rpc.FederateCommon.IRField;
 import group.bda.federate.rpc.FederateCommon.LiteralField;
@@ -40,7 +38,6 @@ import com.google.common.collect.ImmutableList;
 
 import group.bda.federate.data.DataSet;
 import group.bda.federate.rpc.FederateService;
-import group.bda.federate.security.secretsharing.ShamirSharing;
 import group.bda.federate.sql.functions.AggregateFunc;
 import group.bda.federate.sql.functions.AggregateFuncImpl;
 import group.bda.federate.sql.type.FederateFieldType;
@@ -283,7 +280,7 @@ public class FedSpatialClient {
       streamProto = privacyKnn(header, projects, filter, tableClients, fetch, order);
     } else if (header.hasPrivacy()) {
       streamProto =
-          fedSpatialPrivacyQuery(header, projects, filter, tableClients, fetch, order, aggUuid, 0);
+          fedSpatialPrivacyQuery(header, projects, filter, tableClients, fetch, order, aggUuid, 0, false, 0);
     } else {
       streamProto =
           fedSpatialPublicQuery(header, projects, filter, tableClients, fetch, order, aggUuid);
@@ -293,7 +290,7 @@ public class FedSpatialClient {
       while (streamProto.hasNext()) {
         localSet.mergeDataSetUnsafe(DataSet.fromProto(streamProto.next()));
       }
-      DataSet dataSet = null;
+      DataSet dataSet = localSet;
       if (!aggregateFields.isEmpty()) {
         dataSet = calculateAgg(aggUuid, localSet, aggregateFields, header, tableClients);
       } else {
@@ -350,7 +347,7 @@ public class FedSpatialClient {
     return iterator;
   }
 
-  private List<Expression> positionDP(List<Expression> filter) {
+  private List<Expression> positionDP(List<Expression> filter, boolean knnRadiusQuery) {
     List<Expression> expressions = new ArrayList<>();
     for (Expression exp : filter) {
       if (exp.getIr(0).getFunc() == Func.kDWithin || exp.getIr(0).getFunc() == Func.kKNN) {
@@ -370,7 +367,9 @@ public class FedSpatialClient {
         Expression.Builder builder = exp.toBuilder();
         IR.Builder ir = exp.getIr(0).toBuilder();
         // change knn to dwithin
-        ir.setFunc(Func.kDWithin);
+        if (!knnRadiusQuery) {
+          ir.setFunc(Func.kDWithin);
+        }
         IRField.Builder irField = exp.getIr(0).getIn(0).toBuilder();
         LiteralField.Builder literalField = exp.getIr(0).getIn(0).getLiteral().toBuilder();
 
@@ -404,13 +403,13 @@ public class FedSpatialClient {
       List<Expression> project,
       List<Expression> filter, Map<FederateDBClient, String> tableClients, int fetch,
       List<String> order,
-      String aggUuid, int state) {
+      String aggUuid, int state, boolean cached, int k) {
 
     double latitude = filter.get(0).getIr(0).getIn(0).getLiteral().getValue().getP().getLatitude();
     double longitude =
         filter.get(0).getIr(0).getIn(0).getLiteral().getValue().getP().getLongitude();
     double radius = filter.get(0).getIr(0).getIn(2).getLiteral().getValue().getF64();
-    List<Expression> dpFilter = positionDP(filter);
+    List<Expression> dpFilter = positionDP(filter, false);
     KeyGenerator keygen = PHE.keyGenerator();
     // Generate a public key
     PublicKey publicKey = PHE.generatePublicKey(keygen);
@@ -425,6 +424,7 @@ public class FedSpatialClient {
     List<Callable<Boolean>> tasks = new ArrayList<Callable<Boolean>>();
     Map<String, FederateService.SetUnionRequest> setUnionRequestMap =
         genSetUnionRequest(tableClients);
+    AtomicInteger totalCount = new AtomicInteger(0);
     for (Entry<FederateDBClient, String> entry : tableClients.entrySet()) {
       tasks.add(() -> {
         try {
@@ -440,11 +440,12 @@ public class FedSpatialClient {
           PrivacyQuery.Builder privacyQueryBuilder =
               PrivacyQuery.newBuilder().setQuery(queryBuilder.build()).setCacheUuid(aggUuid)
                   .setSetUnion(setUnionRequestMap.get(endpoint));
-
-          Iterator<DataSetProto> dataset =
-              entry.getKey().fedSpatialPrivacyQuery(privacyQueryBuilder.build());
-          while (dataset.hasNext()) {
-            dataset.next();
+          if (!cached) {
+            Iterator<DataSetProto> dataset =
+                entry.getKey().fedSpatialPrivacyQuery(privacyQueryBuilder.build());
+            while (dataset.hasNext()) {
+              dataset.next();
+            }
           }
           // ignore the results
 
@@ -454,6 +455,8 @@ public class FedSpatialClient {
               .setEncLatitude(ByteString.copyFrom(encLatitude.save()))
               .setEncRadius(ByteString.copyFrom(encRadius.save()))
               .setUuid(aggUuid)
+              .setState(state)
+              .setK(k)
               .build();
           ComparePolyRequest comparePolyRequest = entry.getKey().twoPartyDistanceCompare(request);
           ComparePolyResponse.Builder comparePolyResponse = ComparePolyResponse.newBuilder();
@@ -466,7 +469,9 @@ public class FedSpatialClient {
           int kbSize = size / 1024;
           int mbSize = kbSize / 1024;
           int gbSize = mbSize / 1024;
-          LOG.info("receive {} encrypted rows from server: {}, total size: {} bytes({} KB, {} MB, {} GB)", count, endpoint,
+          LOG.info(
+              "receive {} encrypted rows from server: {}, total size: {} bytes({} KB, {} MB, {} GB)",
+              count, endpoint,
               size, kbSize, mbSize, gbSize);
           LOG.info("start to decrypt and compare the distance");
           long startEncryptTime = System.currentTimeMillis();
@@ -476,18 +481,22 @@ public class FedSpatialClient {
             ciperPolyDists[i].load(PHE.context, comparePolyRequest.getPolyDist(i).toByteArray());
           }
           long[] decrPolyDist = PHE.decryptLong(keygen.secretKey(), ciperPolyDists);
+          int isInCount = 0;
           for (int i = 0; i < count; i++) {
             if (decrPolyDist[i] <= decrPolyRadius) {
               comparePolyResponse.addIsIn(true);
+              isInCount++;
             } else {
               comparePolyResponse.addIsIn(false);
             }
           }
+          totalCount.addAndGet(isInCount);
+          LOG.info("this round isIn size:{} in server: {}, total size: {}", isInCount, endpoint,
+              totalCount);
           long endEncryptTime = System.currentTimeMillis();
           LOG.info("finish decrypt and compare the distance within {} seconds with server: {}",
               (endEncryptTime - startEncryptTime) / 1000, endpoint);
           comparePolyResponse.setCacheUuid(aggUuid);
-          comparePolyResponse.setState(state);
           GeneralResponse generalResponse =
               entry.getKey().twoPartyDistanceCompareResult(comparePolyResponse.build());
           LOG.debug("Two party Distance Compare Status: {}", generalResponse.getStatus());
@@ -496,7 +505,8 @@ public class FedSpatialClient {
           Iterator<DataSetProto> it =
               entry.getKey().fedSpatialPrivacyQuery(privacyQueryBuilder.build());
           while (it.hasNext()) {
-            iterator.add(it.next());
+            DataSetProto dataSetProto = it.next();
+            iterator.add(dataSetProto);
           }
           return true;
         } catch (Exception e) {
@@ -528,10 +538,10 @@ public class FedSpatialClient {
       List<Expression> filter, Map<FederateDBClient, String> tableClients, int fetch,
       List<String> order,
       String aggUuid,
-      int state) {
+      int state, boolean cached, int k) {
     if (PROTECT_QUERY) {
       return fedEncSpatialPrivacyQuery(header, project, filter, tableClients, fetch, order,
-          aggUuid, state);
+          aggUuid, state, cached, k);
     }
     StreamingIterator<DataSetProto> iterator = new StreamingIterator<>(tableClients.size());
     List<Callable<Boolean>> tasks = new ArrayList<Callable<Boolean>>();
@@ -618,7 +628,7 @@ public class FedSpatialClient {
     List<Expression> rangeFilter = new ArrayList<>();
     rangeFilter.add(expressionBuilder.build());
     return fedSpatialPrivacyQuery(header, project, rangeFilter, tableClients, fetch, order, aggUuid,
-        0);
+        0, true, 0);
   }
 
   private Pair<Double, Double> dPRangeCount(FederateService.PrivacyCountRequest request,
@@ -710,7 +720,7 @@ public class FedSpatialClient {
     String uuid = UUID.randomUUID().toString();
     fetch = filter.get(0).getIr(0).getIn(2).getLiteral().getValue().getI32();
     Query.Builder dpQuery = Query.newBuilder().setHeader(header.toProto()).addAllProjectExp(project)
-        .addAllFilterExp(positionDP(filter)).setFetch(fetch).addAllOrder(order).setAggUuid(uuid);
+        .addAllFilterExp(positionDP(filter, true)).setFetch(fetch).addAllOrder(order).setAggUuid(uuid);
     double kNND = knnRadiusQuery(tableClients, dpQuery.clone(), uuid);
     LOG.info("max knn distance: {}", kNND);
     double right = kNND + knnDistQ;
@@ -722,10 +732,9 @@ public class FedSpatialClient {
     long count = 0L;
     double mid = (left + right) / 2;
     int state = 0;
+    boolean cached = false;
     while (left + deviation <= right) {
       mid = (left + right) / 2;
-      LOG.info("k: {} left: {} right: {} mid: {}", k, left, right, mid);
-
       Header.IteratorBuilder headerBuilder = Header.newBuilder();
       headerBuilder.add("EXP$0", FederateFieldType.LONG, Level.PUBLIC);
       headerBuilder.setPrivacyAgg();
@@ -754,7 +763,8 @@ public class FedSpatialClient {
 
       StreamingIterator<DataSetProto> streamProto =
           fedSpatialPrivacyQuery(countHeader, countProjects, countFilter, tableClients,
-              Integer.MAX_VALUE, order, uuid, state);
+              Integer.MAX_VALUE, order, uuid, state, cached, k);
+      cached = true;
       DataSet localSet = DataSet.newDataSet(header);
       while (streamProto.hasNext()) {
         localSet.mergeDataSetUnsafe(DataSet.fromProto(streamProto.next()));
@@ -764,7 +774,8 @@ public class FedSpatialClient {
               Arrays.asList(new AbstractMap.SimpleEntry<>(AggregateType.COUNT, Arrays.asList(0))),
               header, tableClients);
       count = (long) dataSet.iterator().next().get(0);
-      LOG.info("loop {} with count {}", loop, count);
+      LOG.info("k: {} left: {} right: {} mid: {}", k, left, right, mid);
+      LOG.info("loop {}, radius: {}, with count {}", loop, mid, count);
       if (count > k) {
         right = mid;
         state = 3;
@@ -772,6 +783,7 @@ public class FedSpatialClient {
         left = mid;
         state = 1;
       } else {
+        LOG.info("find exact kNN: {}", count);
         break;
       }
       loop++;
@@ -853,12 +865,9 @@ public class FedSpatialClient {
     int i = 0;
     int typeIdx = 0;
     List<AggregateFunc> funcs = new ArrayList<>(size);
-    boolean[] hide = new boolean[size];
     for (Map.Entry<AggregateType, List<Integer>> entry : aggregateFields) {
       AggregateType aggType = entry.getKey();
       List<Integer> columns = entry.getValue();
-      hide[i] = rawHeader.getLevel(columns.get(0)) == Level.HIDE
-          || rawHeader.getLevel(columns.get(0)) == Level.PROTECTED;
       FederateFieldType type = localSet.getType(typeIdx);
       types.add(type);
       funcs.add(AggregateFuncImpl.getAggFunc(aggType, type, columns));
@@ -872,15 +881,10 @@ public class FedSpatialClient {
     Header header = builder.build();
     DataSet result = DataSet.newDataSet(header);
     for (int j = 0; j < size; j++) {
-      if (hide[j]) {
-        funcs.get(j).ShamirCount(aggUuid, tableClients, executorService);
-      } else {
-        for (DataSet.DataRow row : localSet) {
-          funcs.get(j).addRow(row);
-        }
+      for (DataSet.DataRow row : localSet) {
+        funcs.get(j).addRow(row);
       }
     }
-    clearCache(aggUuid, tableClients);
     DataSet.DataRowBuilder rowBuilder = result.newRow();
     for (int j = 0; j < size; ++j) {
       rowBuilder.set(j, funcs.get(j).result());

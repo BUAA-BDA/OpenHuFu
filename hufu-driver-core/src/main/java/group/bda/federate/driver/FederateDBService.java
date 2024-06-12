@@ -5,14 +5,22 @@ import edu.alibaba.mpc4j.crypto.fhe.Ciphertext;
 import edu.alibaba.mpc4j.crypto.fhe.Plaintext;
 import edu.alibaba.mpc4j.crypto.fhe.zq.UintCore;
 import group.bda.federate.data.Row.RowBuilder;
+import group.bda.federate.rpc.FederateGrpc.FederateImplBase;
 import group.bda.federate.rpc.FederateService.CompareEncDistanceRequest;
 import group.bda.federate.rpc.FederateService.ComparePolyRequest;
+import group.bda.federate.rpc.FederateService.ComparePolyRequest.Builder;
 import group.bda.federate.rpc.FederateService.ComparePolyResponse;
+import group.bda.federate.rpc.FederateService.DPRangeCountResponse;
+import group.bda.federate.rpc.FederateService.KnnRadiusQueryRequest;
+import group.bda.federate.rpc.FederateService.PrivacyCountRequest;
+import group.bda.federate.rpc.FederateService.PrivacyCountResponse;
+import group.bda.federate.rpc.FederateService.SetUnionRequest;
 import group.bda.federate.security.he.PHE;
 import group.bda.federate.sql.type.Point;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -72,17 +80,14 @@ import group.bda.federate.driver.utils.ConcurrentBuffer;
 import group.bda.federate.driver.utils.DistanceDataSet;
 import io.grpc.stub.StreamObserver;
 
-public abstract class FederateDBService extends FederateGrpc.FederateImplBase {
+public abstract class FederateDBService extends FederateImplBase {
 
   private static final Logger LOG = LogManager.getLogger(FederateDBService.class);
   protected final Map<String, FederateDBClient> federateClientMap;
   protected final Map<String, ServerTableInfo> tableInfoMap;
   protected final Lock clientLock;
   protected ConcurrentBuffer buffer;
-  protected ConcurrentHashMap<String, Object> stateBuffer;
-  // Stor compare results of s2bDataSet in last round
-  protected ConcurrentHashMap<String, Object> verifiedBuffer;
-  // Store the data that are` known to be in the radius
+  protected ConcurrentHashMap<String, List<Boolean>> isInBuffer;
   protected Random random;
   private final int THREAD_POOL_SIZE;
   private final ExecutorService executorService;
@@ -93,8 +98,7 @@ public abstract class FederateDBService extends FederateGrpc.FederateImplBase {
     tableInfoMap = new TreeMap<>();
     clientLock = new ReentrantLock();
     buffer = new ConcurrentBuffer();
-    stateBuffer = new ConcurrentHashMap<>();
-    verifiedBuffer = new ConcurrentHashMap<>();
+    isInBuffer = new ConcurrentHashMap<>();
     random = new Random();
     THREAD_POOL_SIZE = threadNum;
     this.executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
@@ -274,8 +278,9 @@ public abstract class FederateDBService extends FederateGrpc.FederateImplBase {
       StreamObserver<ComparePolyRequest> observer) {
     String cacheUuid = request.getUuid();
     Random random = new Random();
-    int a = random.nextInt(10) + 1;
+    int a = random.nextInt(7) + 1;
     int b = random.nextInt(Integer.MAX_VALUE);
+    LOG.info("random a: {}, b: {}", a, b);
     Plaintext plainA = new Plaintext(UintCore.uintToHexString(new long[] {a}, 1));
     Plaintext plainB = new Plaintext(UintCore.uintToHexString(new long[] {b}, 1));
     try {
@@ -292,6 +297,21 @@ public abstract class FederateDBService extends FederateGrpc.FederateImplBase {
           cipherLongitude, cipherLatitude, cipherRadius);
 
       Stream2BatchDataSet s2bDataSet = (Stream2BatchDataSet) buffer.get(cacheUuid);
+      if (request.getState() == 3) {
+        List<Boolean> isIns = isInBuffer.get(request.getUuid());
+        Iterator<Row> rows = s2bDataSet.getDataSet().rawIterator();
+        List<Row> inRows = new ArrayList<>();
+        for (int i = 0;i < s2bDataSet.getRowCount();i++) {
+          if (isIns.get(i) == Boolean.TRUE) {
+            inRows.add(rows.next());
+          } else {
+            rows.next();
+          }
+        }
+        DataSet dataSet = DataSet.newDataSetUnsafe(s2bDataSet.getHeader(), inRows, cacheUuid);
+        s2bDataSet = new Stream2BatchDataSet(dataSet);
+        buffer.set(request.getUuid(), s2bDataSet);
+      }
       LOG.info("remain {} rows cache need to compare with client", s2bDataSet.getRowCount());
       DataSet dataSet = s2bDataSet.getDataSet();
       LOG.info("start compute distance between client and server cache..");
@@ -306,7 +326,7 @@ public abstract class FederateDBService extends FederateGrpc.FederateImplBase {
       Ciphertext[] polyDists =
           PHE.polyDistance(plainA, plainB, cipherLongitude, cipherLatitude, x2, y2);
       Ciphertext polyRadius = PHE.poly(plainA, plainB, cipherRadius);
-      ComparePolyRequest.Builder response = ComparePolyRequest.newBuilder();
+      Builder response = ComparePolyRequest.newBuilder();
       for (Ciphertext polyDist : polyDists) {
         response.addPolyDist(ByteString.copyFrom(polyDist.save()));
       }
@@ -330,31 +350,9 @@ public abstract class FederateDBService extends FederateGrpc.FederateImplBase {
   @Override
   public void twoPartyDistanceCompareResult(final ComparePolyResponse response,
       StreamObserver<GeneralResponse> observer) {
-    List<Row> verifiedRows = (List<Row>) verifiedBuffer.get(response.getCacheUuid());
-    Stream2BatchDataSet s2bDataSet = (Stream2BatchDataSet) buffer.get(response.getCacheUuid());
-    DataSet dataSet = s2bDataSet.getDataSet();
-    List<Row> rows = new ArrayList<>();
-    List<Row> outRows = new ArrayList<>();
-    List<Boolean> isIns = response.getIsInList();
-    Iterator<Row> it = dataSet.rawIterator();
-    for (int i = 0; i < response.getIsInCount(); i++) {
-      if (isIns.get(i) == Boolean.TRUE) {
-        rows.add(it.next());
-      } else {
-        outRows.add(it.next());
-      }
-    }
-    if (response.getState() == 2) {
-      if (verifiedRows == null) {
-        verifiedRows = new ArrayList<>();
-      }
-      verifiedRows.addAll(rows);
-      verifiedBuffer.put(response.getCacheUuid(), verifiedRows);
-    } else {
-      stateBuffer.put(response.getCacheUuid(), isIns);
-    }
+    isInBuffer.put(response.getCacheUuid(), response.getIsInList());
     observer.onNext(GeneralResponse.newBuilder()
-        .setStatus(Status.newBuilder().setCode(FederateService.Code.kOk).setMsg("ok").build())
+        .setStatus(Status.newBuilder().setCode(Code.kOk).setMsg("ok").build())
         .build());
     observer.onCompleted();
   }
@@ -371,46 +369,24 @@ public abstract class FederateDBService extends FederateGrpc.FederateImplBase {
       return;
     }
     DataSet dataSet = DataSet.newDataSet(header);
-    Stream2BatchDataSet s2bDataSet;
+    Stream2BatchDataSet s2bDataSet = null;
 
     if (request.hasTwoPartyUuid()) {
       // fetch data from cache
-      DataSet cacheDataSet =
-          ((Stream2BatchDataSet) buffer.get(request.getCacheUuid())).getDataSet();
-      Iterator<Row> rows = cacheDataSet.rawIterator();
-      List<Row> verifiedRows = (List<Row>) verifiedBuffer.get(request.getCacheUuid());
-      List<Boolean> isIns = (List<Boolean>) stateBuffer.get(request.getCacheUuid());
-      List<Row> newRows = new ArrayList<>();
-      int i = 0;
-      while (rows.hasNext()) {
-        Row row = rows.next();
-        RowBuilder builder = Row.newBuilder(1);
-        builder.set(0, row.getObject(0));
-        if (isIns.get(i++) == Boolean.TRUE) {
-          newRows.add(builder.build());
+      int count = 0;
+      List<Boolean> isIns = isInBuffer.get(request.getCacheUuid());
+      for (int i = 0;i < isIns.size();i++) {
+        if (isIns.get(i) == Boolean.TRUE) {
+          count++;
         }
       }
-      if (verifiedRows != null) {
-        newRows.addAll(verifiedRows);
-      }
-      dataSet = DataSet.newDataSetUnsafe(header, newRows, request.getCacheUuid());
-      s2bDataSet = new Stream2BatchDataSet(dataSet);
-      // remove point
-//      LOG.info("local size: {}", s2bDataSet.getRowCount());
+      LOG.info("local cache size: {}", count);
       if (request.getQuery().hasAggUuid()) {
-        Row.RowBuilder rawBuilder = Row.newBuilder(1);
-        Long count = 0L;
-        if (isIns != null) {
-          for (int index = 0; index < isIns.size(); index++) {
-            if (isIns.get(index) == Boolean.TRUE) {
-              count++;
-            }
-          }
-        }
+        RowBuilder rawBuilder = Row.newBuilder(1);
         rawBuilder.set(0, count);
-        LOG.info("local size: {}", count);
-        buffer.set(request.getQuery().getAggUuid(), new AggCache(rawBuilder.build(), header));
-        observer.onNext(DataSet.newDataSet(header).toProto());
+        DataSet countDataSet = DataSet.newDataSetUnsafe(header,
+            Collections.singletonList(rawBuilder.build()), request.getCacheUuid());
+        observer.onNext(countDataSet.toProto());
         observer.onCompleted();
         return;
       }
@@ -419,20 +395,15 @@ public abstract class FederateDBService extends FederateGrpc.FederateImplBase {
       s2bDataSet = new Stream2BatchDataSet(dataSet);
       // Phase 1:
       try {
-        if (request.hasKnnCacheId()) {
-          DistanceDataSet distanceDataSet = buffer.getDistanceDataSet(request.getKnnCacheId());
-          distanceDataSet.getRangeView(request.getRadius(), s2bDataSet);
-        } else {
-          if (FedSpatialConfig.PROTECT_QUERY) {
-            HeaderProto.Builder headerBuilder = query.getHeader().toBuilder();
-            // add point
-            headerBuilder.addName("EXP$1");
-            headerBuilder.addLevel(2);
-            headerBuilder.addType(11);
-            dataSet = DataSet.newDataSet(Header.fromProto(headerBuilder.build()));
-            s2bDataSet = new Stream2BatchDataSet(dataSet);
-            fedSpatialQueryInternal(false, query, s2bDataSet);
-          }
+        if (FedSpatialConfig.PROTECT_QUERY) {
+          HeaderProto.Builder headerBuilder = query.getHeader().toBuilder();
+          // add point
+          headerBuilder.addName("EXP$1");
+          headerBuilder.addLevel(2);
+          headerBuilder.addType(11);
+          dataSet = DataSet.newDataSet(Header.fromProto(headerBuilder.build()));
+          s2bDataSet = new Stream2BatchDataSet(dataSet);
+          fedSpatialQueryInternal(false, query, s2bDataSet);
         }
       } catch (Exception e) {
         LOG.error("error when query table [{}]", query.getTableName(), e);
@@ -449,8 +420,25 @@ public abstract class FederateDBService extends FederateGrpc.FederateImplBase {
       observer.onCompleted();
       return;
     }
+    // remove userless column
+    s2bDataSet = (Stream2BatchDataSet) buffer.get(request.getCacheUuid());
+    Iterator<Row> rows = s2bDataSet.getDataSet().rawIterator();
+    List<Row> allRows = new ArrayList<>();
+    List<Boolean> isIns = isInBuffer.get(request.getCacheUuid());
+    for (int i = 0;i < isIns.size();i++) {
+      if (isIns.get(i) == Boolean.TRUE) {
+        Row row = rows.next();
+        RowBuilder builder = Row.newBuilder(1);
+        builder.set(0, row.getObject(0));
+        allRows.add(builder.build());
+      } else {
+        rows.next();
+      }
+    }
+    dataSet = DataSet.newDataSetUnsafe(header, allRows, request.getCacheUuid());
+    s2bDataSet = new Stream2BatchDataSet(dataSet);
 
-    FederateService.SetUnionRequest setUnionRequest = request.getSetUnion();
+    SetUnionRequest setUnionRequest = request.getSetUnion();
     // if (setUnionRequest.getAddOrder(0).getEndpointsCount() < 3) {
     //   StreamDataSet streamDataSet = new StreamObserverDataSet(observer, Header.fromProto(request.getQuery().getHeader()));
     //   streamDataSet.addDataSet(s2bDataSet.getDataSet());
@@ -532,9 +520,9 @@ public abstract class FederateDBService extends FederateGrpc.FederateImplBase {
   }
 
   private DataSet getPredecessorDataSet(PrivacyQuery query, int loop, boolean isAdd) {
-    FederateService.SetUnionRequest setUnionRequest = query.getSetUnion();
+    SetUnionRequest setUnionRequest = query.getSetUnion();
     Header header = Header.fromProto(query.getQuery().getHeader());
-    FederateService.Order order;
+    Order order;
     if (loop >= setUnionRequest.getAddOrderCount()) {
       order = null;
     } else if (isAdd) {
@@ -579,7 +567,7 @@ public abstract class FederateDBService extends FederateGrpc.FederateImplBase {
   }
 
   @Override
-  public void getRandomDataSet(FederateService.CacheID request,
+  public void getRandomDataSet(CacheID request,
       StreamObserver<DataSetProto> responseObserver) {
     String uuid = request.getUuid();
     DataSet dataSet = null;
@@ -608,8 +596,7 @@ public abstract class FederateDBService extends FederateGrpc.FederateImplBase {
   public void clearCache(CacheID request, StreamObserver<Empty> observer) {
     String uuid = request.getUuid();
     buffer.remove(uuid);
-    verifiedBuffer.remove(request.getUuid());
-    stateBuffer.remove(request.getUuid());
+    isInBuffer.remove(uuid);
     observer.onNext(Empty.newBuilder().build());
     observer.onCompleted();
   }
@@ -628,13 +615,13 @@ public abstract class FederateDBService extends FederateGrpc.FederateImplBase {
   }
 
   @Override
-  public void knnRadiusQuery(FederateService.KnnRadiusQueryRequest request,
+  public void knnRadiusQuery(KnnRadiusQueryRequest request,
       StreamObserver<KnnRadiusQueryResponse> responseObserver) {
     responseObserver.onNext(knnRadiusQuery(request.getQuery(), request.getUuid()));
     responseObserver.onCompleted();
   }
 
-  private double bufferCount(FederateService.PrivacyCountRequest request) {
+  private double bufferCount(PrivacyCountRequest request) {
     Object o = buffer.get(request.getCacheUuid());
     if (o instanceof DistanceDataSet) {
       DistanceDataSet distanceDataSet = (DistanceDataSet) o;
@@ -668,8 +655,8 @@ public abstract class FederateDBService extends FederateGrpc.FederateImplBase {
   // }
 
   @Override
-  public void privacyCount(final FederateService.PrivacyCountRequest request,
-      final StreamObserver<FederateService.PrivacyCountResponse> observer) {
+  public void privacyCount(final PrivacyCountRequest request,
+      final StreamObserver<PrivacyCountResponse> observer) {
     double value = bufferCount(request);
     observer.onNext(
         ShamirSharing.privacyCount(value, request.getXList(), request.getEndpointsList(),
@@ -677,7 +664,7 @@ public abstract class FederateDBService extends FederateGrpc.FederateImplBase {
     observer.onCompleted();
   }
 
-  public double dpCount(FederateService.PrivacyCountRequest request) {
+  public double dpCount(PrivacyCountRequest request) {
     DistanceDataSet distanceDataSet = buffer.getDistanceDataSet(request.getCacheUuid());
     double count = (double) distanceDataSet.getRangeCount(request.getRadius()) + lp.sample();
     LOG.debug("in knn local radius: {} , dp count: {} ", request.getRadius(), count);
@@ -685,11 +672,11 @@ public abstract class FederateDBService extends FederateGrpc.FederateImplBase {
   }
 
   @Override
-  public void dPRangeCount(final FederateService.PrivacyCountRequest request,
-      final StreamObserver<FederateService.DPRangeCountResponse> observer) {
+  public void dPRangeCount(final PrivacyCountRequest request,
+      final StreamObserver<DPRangeCountResponse> observer) {
     double value = dpCount(request);
     observer.onNext(
-        FederateService.DPRangeCountResponse.newBuilder().setSd(lp.getSD()).setResult(value)
+        DPRangeCountResponse.newBuilder().setSd(lp.getSD()).setResult(value)
             .build());
     observer.onCompleted();
   }
@@ -702,7 +689,7 @@ public abstract class FederateDBService extends FederateGrpc.FederateImplBase {
 
   @Override
   public void getSum(final CacheID request,
-      final StreamObserver<FederateService.PrivacyCountResponse> observer) {
+      final StreamObserver<PrivacyCountResponse> observer) {
     observer.onNext(ShamirSharing.getSum(request.getUuid()));
     observer.onCompleted();
   }
@@ -716,7 +703,6 @@ public abstract class FederateDBService extends FederateGrpc.FederateImplBase {
     } else {
       try {
         results = calKnn(query);
-        buffer.set(uuid, results);
       } catch (SQLException e) {
         LOG.error("error when calculate local knn");
         e.printStackTrace();
