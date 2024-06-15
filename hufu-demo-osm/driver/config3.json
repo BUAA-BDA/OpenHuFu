@@ -1,5 +1,5 @@
 {
-    "port": 54680,
+    "port": 54603,
     "url": "jdbc:postgresql://localhost:54321/osm_db",
     "catalog": "osm_db",
     "user": "hufu",
