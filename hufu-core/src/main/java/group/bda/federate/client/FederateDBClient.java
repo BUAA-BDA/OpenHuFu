@@ -173,10 +173,8 @@ public final class FederateDBClient {
   public void clearCache(String uuid) {
     try {
       blockingStub.clearCache(CacheID.newBuilder().setUuid(uuid).build());
-      return;
     } catch (StatusRuntimeException e) {
       LOG.error("RPC failed in clear cache: {}", e.getStatus());
-      return;
     }
   }
 

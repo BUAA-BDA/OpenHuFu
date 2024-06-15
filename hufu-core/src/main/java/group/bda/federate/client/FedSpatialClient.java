@@ -281,6 +281,7 @@ public class FedSpatialClient {
     } else if (header.hasPrivacy()) {
       streamProto =
           fedSpatialPrivacyQuery(header, projects, filter, tableClients, fetch, order, aggUuid, 0, false, 0, PHE.keyGenerator());
+      clearCache(aggUuid, tableClients);
     } else {
       streamProto =
           fedSpatialPublicQuery(header, projects, filter, tableClients, fetch, order, aggUuid);
@@ -386,7 +387,9 @@ public class FedSpatialClient {
         LiteralField.Builder literalField1 = exp.getIr(0).getIn(2).getLiteral().toBuilder();
 
         RowField.Builder rowField1 = exp.getIr(0).getIn(2).getLiteral().getValue().toBuilder();
-        rowField1.setF64(dpRadius);
+        if (!knnRadiusQuery) {
+          rowField1.setF64(dpRadius);
+        }
         literalField1.setValue(rowField1);
         irField1.setLiteral(literalField1);
         ir.setIn(2, irField1);
@@ -714,6 +717,33 @@ public class FedSpatialClient {
     return fetch;
   }
 
+  private List<Expression> buildCountProject() {
+    List<Expression> countProjects = new ArrayList<>();
+    Expression.Builder countExpressionBuilder = Expression.newBuilder();
+    IR.Builder countIrBuilder = IR.newBuilder();
+    countIrBuilder.setOp(Op.kAggFunc);
+    countIrBuilder.setOutType(5);
+    countIrBuilder.setFunc(Func.kCount);
+    countExpressionBuilder.addIr(countIrBuilder.build()).setLevel(2);
+    countProjects.add(countExpressionBuilder.build());
+    return countProjects;
+  }
+
+  private List<Expression> buildCountFilter(List<Expression> filter, double mid) {
+    Expression.Builder expressionBuilder = filter.get(0).toBuilder();
+    IR.Builder irBuilder = expressionBuilder.getIr(0).toBuilder();
+    IRField.Builder irFieldBuilder = irBuilder.getIn(2).toBuilder();
+    LiteralField.Builder literalFieldBuilder = irFieldBuilder.getLiteral().toBuilder();
+    literalFieldBuilder.setValue(RowField.newBuilder().setF64(mid).build());
+    literalFieldBuilder.setType(7);
+    irFieldBuilder.setLiteral(literalFieldBuilder.build());
+    irBuilder.setIn(2, irFieldBuilder.build());
+    expressionBuilder.setIr(0, irBuilder.build());
+
+    List<Expression> countFilter = new ArrayList<>();
+    countFilter.add(expressionBuilder.build());
+    return countFilter;
+  }
   private StreamingIterator<DataSetProto> privacyKnn(Header header, List<Expression> project,
       List<Expression> filter,
       Map<FederateDBClient, String> tableClients, int fetch, List<String> order) {
@@ -734,60 +764,60 @@ public class FedSpatialClient {
     int state = 0;
     boolean cached = false;
     KeyGenerator keygen = PHE.keyGenerator();
-    while (left + deviation <= right) {
-      mid = (left + right) / 2;
-      Header.IteratorBuilder headerBuilder = Header.newBuilder();
-      headerBuilder.add("EXP$0", FederateFieldType.LONG, Level.PUBLIC);
-      headerBuilder.setPrivacyAgg();
-      Header countHeader = headerBuilder.build();
-      List<Expression> countProjects = new ArrayList<>();
-      Expression.Builder countExpressionBuilder = Expression.newBuilder();
-      IR.Builder countIrBuilder = IR.newBuilder();
-      countIrBuilder.setOp(Op.kAggFunc);
-      countIrBuilder.setOutType(5);
-      countIrBuilder.setFunc(Func.kCount);
-      countExpressionBuilder.addIr(countIrBuilder.build()).setLevel(2);
-      countProjects.add(countExpressionBuilder.build());
+    // using right to build cache
 
-      Expression.Builder expressionBuilder = filter.get(0).toBuilder();
-      IR.Builder irBuilder = expressionBuilder.getIr(0).toBuilder();
-      IRField.Builder irFieldBuilder = irBuilder.getIn(2).toBuilder();
-      LiteralField.Builder literalFieldBuilder = irFieldBuilder.getLiteral().toBuilder();
-      literalFieldBuilder.setValue(RowField.newBuilder().setF64(mid).build());
-      literalFieldBuilder.setType(7);
-      irFieldBuilder.setLiteral(literalFieldBuilder.build());
-      irBuilder.setIn(2, irFieldBuilder.build());
-      expressionBuilder.setIr(0, irBuilder.build());
+    Header.IteratorBuilder headerBuilder = Header.newBuilder();
+    headerBuilder.add("EXP$0", FederateFieldType.LONG, Level.PUBLIC);
+    headerBuilder.setPrivacyAgg();
+    Header countHeader = headerBuilder.build();
+    List<Expression> countProjects = buildCountProject();
 
-      List<Expression> countFilter = new ArrayList<>();
-      countFilter.add(expressionBuilder.build());
-
-      StreamingIterator<DataSetProto> streamProto =
-          fedSpatialPrivacyQuery(countHeader, countProjects, countFilter, tableClients,
-              Integer.MAX_VALUE, order, uuid, state, cached, k, keygen);
-      cached = true;
-      DataSet localSet = DataSet.newDataSet(header);
-      while (streamProto.hasNext()) {
-        localSet.mergeDataSetUnsafe(DataSet.fromProto(streamProto.next()));
+    List<Expression> countFilter = buildCountFilter(filter, right);
+    StreamingIterator<DataSetProto> streamProto =
+        fedSpatialPrivacyQuery(countHeader, countProjects, countFilter, tableClients,
+            Integer.MAX_VALUE, order, uuid, state, cached, k, keygen);
+    cached = true;
+    DataSet localSet = DataSet.newDataSet(header);
+    while (streamProto.hasNext()) {
+      localSet.mergeDataSetUnsafe(DataSet.fromProto(streamProto.next()));
+    }
+    DataSet dataSet =
+        calculateAgg(uuid, localSet,
+            Arrays.asList(new AbstractMap.SimpleEntry<>(AggregateType.COUNT, Arrays.asList(0))),
+            header, tableClients);
+    count = (long) dataSet.iterator().next().get(0);
+    if (count != k) {
+      while (left + deviation <= right) {
+        mid = (left + right) / 2;
+        countFilter = buildCountFilter(filter, mid);
+        streamProto =
+            fedSpatialPrivacyQuery(countHeader, countProjects, countFilter, tableClients,
+                Integer.MAX_VALUE, order, uuid, state, cached, k, keygen);
+        localSet = DataSet.newDataSet(header);
+        while (streamProto.hasNext()) {
+          localSet.mergeDataSetUnsafe(DataSet.fromProto(streamProto.next()));
+        }
+        dataSet =
+            calculateAgg(uuid, localSet,
+                Arrays.asList(new AbstractMap.SimpleEntry<>(AggregateType.COUNT, Arrays.asList(0))),
+                header, tableClients);
+        count = (long) dataSet.iterator().next().get(0);
+        LOG.info("k: {} left: {} right: {} mid: {}", k, left, right, mid);
+        LOG.info("loop {}, radius: {}, with count {}", loop, mid, count);
+        if (count > k) {
+          right = mid;
+          state = 3;
+        } else if (count < k) {
+          left = mid;
+          state = 1;
+        } else {
+          LOG.info("find exact kNN: {}", count);
+          break;
+        }
+        loop++;
       }
-      DataSet dataSet =
-          calculateAgg(uuid, localSet,
-              Arrays.asList(new AbstractMap.SimpleEntry<>(AggregateType.COUNT, Arrays.asList(0))),
-              header, tableClients);
-      count = (long) dataSet.iterator().next().get(0);
-      LOG.info("k: {} left: {} right: {} mid: {}", k, left, right, mid);
-      LOG.info("loop {}, radius: {}, with count {}", loop, mid, count);
-      if (count > k) {
-        right = mid;
-        state = 3;
-      } else if (count < k) {
-        left = mid;
-        state = 1;
-      } else {
-        LOG.info("find exact kNN: {}", count);
-        break;
-      }
-      loop++;
+    } else if (count  < k) {
+      LOG.error("Radius too small or data is smaller than k");
     }
     try {
       return knnCircleRangeQuery(header, project, filter, tableClients, Integer.MAX_VALUE, order,

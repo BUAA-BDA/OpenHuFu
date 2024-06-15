@@ -1,0 +1,40 @@
+{
+  "version": "1.0",
+  "defaultSchema": "points",
+  "schemas": [
+    {
+      "name": "points",
+      "type": "custom",
+      "factory": "group.bda.federate.sql.schema.FederateSchemaFactory",
+      "operand": {
+        "endpoints": ["localhost:54678", "localhost:54679", "localhost:54680", "localhost:54681"]
+      },
+      "tables": [
+        {
+          "name": "osm",
+          "factory": "group.bda.federate.sql.table.FederateTableFactory",
+          "operand": {
+            "feds": [
+              {
+                "endpoint": "localhost:54678",
+                "name": "osm_0"
+              },
+              {
+                "endpoint": "localhost:54679",
+                "name": "osm_1"
+              },
+              {
+                "endpoint": "localhost:54680",
+                "name": "osm_2"
+              },
+              {
+                "endpoint": "localhost:54681",
+                "name": "osm_3"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

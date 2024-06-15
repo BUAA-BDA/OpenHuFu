@@ -20,6 +20,7 @@
     <module>hufu-postgresql-driver</module>
     <module>hufu-spatialite-driver</module>
     <module>hufu-mysql-driver</module>
+    <module>hufu-evaluation</module>
     <!-- <module>hufu-geomesa-driver</module> -->
     <!-- <module>hufu-simba-driver</module> -->
     <!-- <module>hufu-spatialhadoop-driver</module> -->

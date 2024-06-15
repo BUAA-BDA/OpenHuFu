@@ -445,15 +445,19 @@ public abstract class FederateDBService extends FederateImplBase {
     Iterator<Row> rows = dataSetCache.getDataSet().rawIterator();
     List<Row> allRows = new ArrayList<>();
     List<Boolean> isIns = isInBuffer.get(request.getCacheUuid());
-    for (int i = 0; i < isIns.size(); i++) {
-      if (isIns.get(i) == Boolean.TRUE) {
-        Row row = rows.next();
-        RowBuilder builder = Row.newBuilder(1);
-        builder.set(0, row.getObject(0));
-        allRows.add(builder.build());
-      } else {
-        rows.next();
+    try {
+      for (int i = 0; i < isIns.size(); i++) {
+        if (isIns.get(i) == Boolean.TRUE) {
+          Row row = rows.next();
+          RowBuilder builder = Row.newBuilder(1);
+          builder.set(0, row.getObject(0));
+          allRows.add(builder.build());
+        } else {
+          rows.next();
+        }
       }
+    } catch (Exception e) {
+      LOG.error("error when get row from cache", e);
     }
     dataSet = DataSet.newDataSetUnsafe(header, allRows, request.getCacheUuid());
     dataSetCache = new PointDataSet(dataSet);
