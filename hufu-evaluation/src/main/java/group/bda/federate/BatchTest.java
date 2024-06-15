@@ -4,29 +4,48 @@ import java.io.*;
 import java.nio.file.*;
 import java.sql.*;
 import java.util.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
 
 public class BatchTest {
 
   private static final String JDBC_DRIVER = "group.bda.federate.sql.jdbc.HufuJDBCDriver";
   private static final String JDBC_URL = "jdbc:hufu:model=%s;lex=JAVA;caseSensitive=false;";
   private static final int REPEAT_TIMES = 4;
-  private static final String OUTPUT_DIR = "output";
-  private static final String RESULT_DIR = OUTPUT_DIR + "/result";
-  private static final String LOG_DIR = OUTPUT_DIR + "/logs";
-  private static final String type = "osm";
+  private static final String OUTPUT_DIR = "output/";
 
   public static void main(String[] args) {
+    final Options options = new Options();
+    final Option model = new Option("m", "model", true, "model of fed");
+    model.setRequired(true);
+    final Option sql = new Option("s", "sql", true, "input of sql");
+    sql.setRequired(true);
+    options.addOption(model);
+    options.addOption(sql);
+    final CommandLineParser parser = new DefaultParser();
+
     try {
+      CommandLine cmd = parser.parse(options, args);;
+      final String m = cmd.getOptionValue("model", "model.json");
+      final String s = cmd.getOptionValue("sql", "sql");
+      String[] splitS = s.split(File.separator);
+      String dataset = splitS[splitS.length - 2];
+      String resultDir = OUTPUT_DIR + dataset + "/result";
+      String logDir = OUTPUT_DIR + dataset + "/logs";
       createDirectoryIfNotExists(OUTPUT_DIR);
-      createDirectoryIfNotExists(RESULT_DIR);
-      createDirectoryIfNotExists(LOG_DIR);
+      createDirectoryIfNotExists(resultDir);
+      createDirectoryIfNotExists(logDir);
+
       Class.forName(JDBC_DRIVER);
-      String jdbcUrl = String.format(JDBC_URL, BatchTest.class.getClassLoader().getResource("model.json").getPath());
+
+      String jdbcUrl = String.format(JDBC_URL, m);
       try (Connection conn = DriverManager.getConnection(jdbcUrl)) {
-        Files.walk(Paths.get(BatchTest.class.getClassLoader().getResource("sql").getPath()))
+        Files.walk(Paths.get(s))
             .filter(Files::isRegularFile)
-            .filter(path -> path.getFileName().toString().endsWith(type + ".sql"))
-            .forEach(path -> executeSqlFile(conn, path));
+            .forEach(path -> executeSqlFile(conn, resultDir, logDir, path));
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -34,10 +53,10 @@ public class BatchTest {
     System.exit(0);
   }
 
-  private static void executeSqlFile(Connection conn, Path path) {
+  private static void executeSqlFile(Connection conn, String resultDir, String logDir, Path path) {
     String fileName = path.getFileName().toString();
-    String resultFileName = RESULT_DIR + "/" + fileName.substring(0, fileName.lastIndexOf('.')) + ".csv";
-    String logFileName = LOG_DIR + "/" + fileName.substring(0, fileName.lastIndexOf('.')) + ".log";
+    String resultFileName = resultDir + "/" + fileName.substring(0, fileName.lastIndexOf('.')) + ".csv";
+    String logFileName = logDir + "/" + fileName.substring(0, fileName.lastIndexOf('.')) + ".log";
 
     try (BufferedReader reader = Files.newBufferedReader(path);
          PrintWriter writer = new PrintWriter(new FileWriter(resultFileName))) {

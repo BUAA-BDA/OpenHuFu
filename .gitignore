@@ -33,3 +33,4 @@ hs_err_pid*
 /dataset/
 /target/
 /output/
+/fed-run.sh
