@@ -1,1 +1,1 @@
-java -jar ../../release/bin/evaluation.jar -m osm_$1/model.json -s osm_$1/sql -t $2
+java -jar -Xms4g -Xmx10g ../../release/bin/evaluation.jar -m osm_$1/model.json -s osm_$1/sql -t $2

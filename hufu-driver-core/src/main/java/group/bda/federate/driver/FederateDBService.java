@@ -12,6 +12,7 @@ import group.bda.federate.rpc.FederateService.ComparePolyRequest;
 import group.bda.federate.rpc.FederateService.ComparePolyRequest.Builder;
 import group.bda.federate.rpc.FederateService.ComparePolyResponse;
 import group.bda.federate.rpc.FederateService.DPRangeCountResponse;
+import group.bda.federate.rpc.FederateService.DistanceCacheRequest;
 import group.bda.federate.rpc.FederateService.KnnRadiusQueryRequest;
 import group.bda.federate.rpc.FederateService.PrivacyCountRequest;
 import group.bda.federate.rpc.FederateService.PrivacyCountResponse;
@@ -87,6 +88,7 @@ public abstract class FederateDBService extends FederateImplBase {
   protected final Lock clientLock;
   protected ConcurrentBuffer buffer;
   protected ConcurrentHashMap<String, List<Boolean>> isInBuffer;
+  protected ConcurrentHashMap<String, List<Ciphertext>> cipherBuffer = new ConcurrentHashMap<>();
   protected Random random;
   private final int THREAD_POOL_SIZE;
   private final ExecutorService executorService;
@@ -346,13 +348,22 @@ public abstract class FederateDBService extends FederateImplBase {
       List<Ciphertext> polyDists = PHE.poly(plainA, plainB, cipherDists);
       Ciphertext polyRadius = PHE.poly(plainA, plainB, cipherRadius);
       long endPolyTime = System.currentTimeMillis();
-      LOG.info("finish compute {} rows of polynomial with a: {}, b: {} in encryption mode within {} seconds",
+      LOG.info(
+          "finish compute {} rows of polynomial with a: {}, b: {} in encryption mode within {} seconds",
           dataSetCache.getRowCount(), a, b, (endPolyTime - startPolyTime) / 1000);
       Builder response = ComparePolyRequest.newBuilder();
-      for (Ciphertext polyDist : polyDists) {
+      // store the cache
+      if (request.getSize() < polyDists.size()) {
+        cipherBuffer.put(request.getUuid(), polyDists);
+      }
+
+      for (int i = 0;i < request.getSize() && i < polyDists.size();i++) {
+        Ciphertext polyDist = polyDists.get(i);
         response.addPolyDist(ByteString.copyFrom(polyDist.save()));
       }
+
       response.setPolyRadius(ByteString.copyFrom(polyRadius.save()));
+      response.setTotalSize(polyDists.size());
       ComparePolyRequest ComparePolyResponse = response.build();
       int size = ComparePolyResponse.getSerializedSize();
       int kbSize = size / 1024;
@@ -364,6 +375,31 @@ public abstract class FederateDBService extends FederateImplBase {
     } catch (IOException e) {
       LOG.error("error when he calculate", e);
     }
+  }
+
+  @Override
+  public void twoPartyDistanceCompareCache(final DistanceCacheRequest request,
+      StreamObserver<ComparePolyRequest> observer) {
+    List<Ciphertext> cipherCache = cipherBuffer.get(request.getUuid());
+    int start = request.getStart();
+    ComparePolyRequest.Builder response = ComparePolyRequest.newBuilder();
+    try {
+      int i = start;
+      for (; i < start + request.getSize() && i < cipherCache.size(); i++) {
+        response.addPolyDist(ByteString.copyFrom(cipherCache.get(i).save()));
+      }
+      if (i >= cipherCache.size()) {
+        cipherBuffer.remove(request.getUuid());
+      }
+      response.setPolyRadius(ByteString.EMPTY);
+      response.setTotalSize(cipherCache.size());
+      observer.onNext(response.build());
+      observer.onCompleted();
+    } catch (IOException e) {
+      LOG.error("error when he calculate", e);
+    }
+
+
   }
 
   @Override

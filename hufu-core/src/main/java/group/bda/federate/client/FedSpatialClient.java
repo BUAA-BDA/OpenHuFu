@@ -12,6 +12,7 @@ import group.bda.federate.rpc.FederateCommon.RowField;
 import group.bda.federate.rpc.FederateService.CompareEncDistanceRequest;
 import group.bda.federate.rpc.FederateService.ComparePolyRequest;
 import group.bda.federate.rpc.FederateService.ComparePolyResponse;
+import group.bda.federate.rpc.FederateService.DistanceCacheRequest;
 import group.bda.federate.rpc.FederateService.GeneralResponse;
 import group.bda.federate.security.dp.Laplace;
 import group.bda.federate.security.he.PHE;
@@ -460,32 +461,61 @@ public class FedSpatialClient {
               .setUuid(aggUuid)
               .setState(state)
               .setK(k)
+              .setSize(FedSpatialConfig.MAX_SIZE)
               .build();
+          List<ComparePolyRequest> results = new ArrayList<>();
           ComparePolyRequest comparePolyRequest = entry.getKey().twoPartyDistanceCompare(request);
-          ComparePolyResponse.Builder comparePolyResponse = ComparePolyResponse.newBuilder();
-          int count = comparePolyRequest.getPolyDistCount();
-          Ciphertext ciperPolyRadius = new Ciphertext();
-          ciperPolyRadius.load(PHE.context, comparePolyRequest.getPolyRadius().toByteArray());
-          long decrPolyRadius = PHE.decryptLong(keygen.secretKey(), ciperPolyRadius);
-
           int size = comparePolyRequest.getSerializedSize();
           int kbSize = size / 1024;
           int mbSize = kbSize / 1024;
           int gbSize = mbSize / 1024;
           LOG.info(
               "receive {} encrypted rows from server: {}, total size: {} bytes({} KB, {} MB, {} GB)",
-              count, endpoint,
+              comparePolyRequest.getPolyDistCount(), endpoint,
               size, kbSize, mbSize, gbSize);
           LOG.info("start to decrypt and compare the distance");
+
+          results.add(comparePolyRequest);
+          ComparePolyResponse.Builder comparePolyResponse = ComparePolyResponse.newBuilder();
+          int count = comparePolyRequest.getPolyDistCount();
+          Ciphertext ciperPolyRadius = new Ciphertext();
+          ciperPolyRadius.load(PHE.context, comparePolyRequest.getPolyRadius().toByteArray());
+          long decrPolyRadius = PHE.decryptLong(keygen.secretKey(), ciperPolyRadius);
+
+          int start = count;
+          int totalSize = comparePolyRequest.getTotalSize();
+          while (totalSize > start) {
+            DistanceCacheRequest distanceCacheRequest = DistanceCacheRequest.newBuilder()
+                .setUuid(aggUuid)
+                .setStart(start)
+                .setSize(FedSpatialConfig.MAX_SIZE)
+                .build();
+            ComparePolyRequest comparePolyCache = entry.getKey().twoPartyDistanceCompareCache(distanceCacheRequest);
+            size = comparePolyRequest.getSerializedSize();
+            kbSize = size / 1024;
+            mbSize = kbSize / 1024;
+            gbSize = mbSize / 1024;
+            LOG.info(
+                "receive {} encrypted rows from server: {}, total size: {} bytes({} KB, {} MB, {} GB)",
+                comparePolyRequest.getPolyDistCount(), endpoint,
+                size, kbSize, mbSize, gbSize);
+            results.add(comparePolyRequest);
+            start += comparePolyCache.getPolyDistCount();
+          }
+
+          LOG.info("start to decrypt and compare the distance");
           long startEncryptTime = System.currentTimeMillis();
-          Ciphertext[] ciperPolyDists = new Ciphertext[count];
-          for (int i = 0; i < count; i++) {
-            ciperPolyDists[i] = new Ciphertext();
-            ciperPolyDists[i].load(PHE.context, comparePolyRequest.getPolyDist(i).toByteArray());
+          Ciphertext[] ciperPolyDists = new Ciphertext[totalSize];
+          for (int i = 0, index = 0; i < results.size() && index < totalSize; i++) {
+            ComparePolyRequest comparePoly = results.get(i);
+            for (int j = 0; j < comparePoly.getPolyDistCount(); index++, j++) {
+              ciperPolyDists[index] = new Ciphertext();
+              ciperPolyDists[index].load(PHE.context, comparePoly.getPolyDist(j).toByteArray());
+            }
           }
           long[] decrPolyDist = PHE.decryptLong(keygen.secretKey(), ciperPolyDists);
           int isInCount = 0;
-          for (int i = 0; i < count; i++) {
+          for (int i = 0; i < totalSize; i++) {
             if (decrPolyDist[i] <= decrPolyRadius) {
               comparePolyResponse.addIsIn(true);
               isInCount++;

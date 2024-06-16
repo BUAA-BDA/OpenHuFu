@@ -34,3 +34,4 @@ hs_err_pid*
 /target/
 /output/
 /fed-run.sh
+/fed-statistics.sh

@@ -245,11 +245,19 @@ message CompareEncDistanceRequest {
   required string uuid = 4;
   required int32 state = 5; // state=0: not sure, state=1: count < k, state=2: count=k, state=3: count >k
   optional int32 k = 6;
+  required int32 size = 7;
+}
+
+message DistanceCacheRequest {
+  required string uuid = 1;
+  required int32 start = 2;
+  required int32 size = 3;
 }
 
 message ComparePolyRequest {
   repeated bytes polyDist = 1;
   required bytes polyRadius = 2;
+  required int32 totalSize = 3;
 }
 
 message ComparePolyResponse {
@@ -269,6 +277,7 @@ service Federate {
   rpc FedSpatialQuery(Query) returns(stream DataSetProto);
   rpc FedSpatialPrivacyQuery(PrivacyQuery) returns(stream DataSetProto);
   rpc TwoPartyDistanceCompare(CompareEncDistanceRequest) returns (ComparePolyRequest);
+  rpc TwoPartyDistanceCompareCache(DistanceCacheRequest) returns (ComparePolyRequest);
   rpc TwoPartyDistanceCompareResult(ComparePolyResponse) returns (GeneralResponse);
   rpc GetRandomDataSet(CacheID) returns (stream DataSetProto);
   rpc PrivacyCompare(PrivacyCompareRequest) returns (PrivacyCompareResponse);

@@ -19,4 +19,5 @@ public final class FedSpatialConfig {
   public static final double KNN_RADIUS = 1.0; // predefine radius of kNN
   public static final int FLOAT = 10000000; // float to long
   public static final boolean PROTECT_QUERY = true; // whether to protect query
+  public static final int MAX_SIZE = 200000;
 }

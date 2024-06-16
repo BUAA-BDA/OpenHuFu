@@ -3,6 +3,7 @@ package group.bda.federate.client;
 import group.bda.federate.rpc.FederateService.CompareEncDistanceRequest;
 import group.bda.federate.rpc.FederateService.ComparePolyRequest;
 import group.bda.federate.rpc.FederateService.ComparePolyResponse;
+import group.bda.federate.rpc.FederateService.DistanceCacheRequest;
 import java.util.Iterator;
 
 import group.bda.federate.rpc.FederateService;
@@ -199,6 +200,15 @@ public final class FederateDBClient {
   public ComparePolyRequest twoPartyDistanceCompare(CompareEncDistanceRequest request) {
     try {
       return blockingStub.twoPartyDistanceCompare(request);
+    } catch (StatusRuntimeException e) {
+      LOG.error("RPC failed in FedSpatialPrivacyQuery: {}", e.getStatus());
+      return null;
+    }
+  }
+
+  public ComparePolyRequest twoPartyDistanceCompareCache(DistanceCacheRequest request) {
+    try {
+      return blockingStub.twoPartyDistanceCompareCache(request);
     } catch (StatusRuntimeException e) {
       LOG.error("RPC failed in FedSpatialPrivacyQuery: {}", e.getStatus());
       return null;
