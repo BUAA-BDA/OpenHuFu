@@ -491,15 +491,15 @@ public class FedSpatialClient {
                 .setSize(FedSpatialConfig.MAX_SIZE)
                 .build();
             ComparePolyRequest comparePolyCache = entry.getKey().twoPartyDistanceCompareCache(distanceCacheRequest);
-            size = comparePolyRequest.getSerializedSize();
+            size = comparePolyCache.getSerializedSize();
             kbSize = size / 1024;
             mbSize = kbSize / 1024;
             gbSize = mbSize / 1024;
             LOG.info(
                 "receive {} encrypted rows from server: {}, total size: {} bytes({} KB, {} MB, {} GB)",
-                comparePolyRequest.getPolyDistCount(), endpoint,
+                comparePolyCache.getPolyDistCount(), endpoint,
                 size, kbSize, mbSize, gbSize);
-            results.add(comparePolyRequest);
+            results.add(comparePolyCache);
             start += comparePolyCache.getPolyDistCount();
           }
 
