@@ -23,14 +23,18 @@ public class BatchTest {
     model.setRequired(true);
     final Option sql = new Option("s", "sql", true, "input of sql");
     sql.setRequired(true);
+    final Option type = new Option("t", "type", true, "type of test: range_query, range_count, knn_query");
+    type.setRequired(true);
     options.addOption(model);
     options.addOption(sql);
+    options.addOption(type);
     final CommandLineParser parser = new DefaultParser();
 
     try {
       CommandLine cmd = parser.parse(options, args);;
       final String m = cmd.getOptionValue("model", "model.json");
       final String s = cmd.getOptionValue("sql", "sql");
+      final String t = cmd.getOptionValue("type", "range_query");
       String[] splitS = s.split(File.separator);
       String dataset = splitS[splitS.length - 2];
       String resultDir = OUTPUT_DIR + dataset + "/result";
@@ -45,6 +49,7 @@ public class BatchTest {
       try (Connection conn = DriverManager.getConnection(jdbcUrl)) {
         Files.walk(Paths.get(s))
             .filter(Files::isRegularFile)
+            .filter(f -> f.getFileName().toString().indexOf(t) != -1)
             .forEach(path -> executeSqlFile(conn, resultDir, logDir, path));
       }
     } catch (Exception e) {
