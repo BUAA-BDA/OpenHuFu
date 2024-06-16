@@ -3,5 +3,4 @@ start() {
     echo $! >> pid
 }
 
-cat /dev/null > pid
 start $1 $2
