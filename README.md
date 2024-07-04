@@ -4,6 +4,12 @@
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![Total Lines](https://tokei.rs/b1/github/BUAA-BDA/OpenHuFu?category=lines)](https://github.com/BUAA-BDA/OpenHuFu)
 
+### OpenHuFu is the open-sourced version of the spatial data federation system, Hu-Fu, in our VLDB'22 paper.
+
+### The appendix of the full paper can be referred to this [PDF](https://github.com/BUAA-BDA/OpenHufu/blob/main/Supplemental Materials for Full Paper.pdf).
+
+
+## Project Description
 Data isolation has become an obstacle to scale up query processing over big data, since sharing raw data among data owners is often prohibitive due to security concerns. A promising solution is to perform secure queries and analytics over a federation of multiple data owners leveraging techiniques like secure multi-party computation (SMC) and differential privacy, as evidenced by recent work on data federation and federated learning. 
 
 OpenHuFu is an open-sourced system for efficient and secure query processing on a data federation.
