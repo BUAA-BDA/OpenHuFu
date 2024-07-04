@@ -6,7 +6,7 @@
 
 ### OpenHuFu is the open-sourced version of the spatial data federation system, Hu-Fu, in our VLDB'22 paper.
 
-### The appendix of the full paper can be referred to this [PDF](https://github.com/BUAA-BDA/OpenHufu/blob/main/Supplemental Materials for Full Paper.pdf).
+### The appendix of the full paper can be referred to this [PDF](https://github.com/BUAA-BDA/OpenHuFu/blob/main/Supplemental%20Materials%20for%20Full%20Paper.pdf).
 
 
 ## Project Description
