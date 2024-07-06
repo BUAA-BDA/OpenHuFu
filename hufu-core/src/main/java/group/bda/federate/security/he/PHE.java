@@ -15,6 +15,7 @@ import edu.alibaba.mpc4j.crypto.fhe.modulus.CoeffModulus;
 import edu.alibaba.mpc4j.crypto.fhe.modulus.CoeffModulus.SecLevelType;
 import edu.alibaba.mpc4j.crypto.fhe.modulus.Modulus;
 import edu.alibaba.mpc4j.crypto.fhe.zq.UintCore;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
@@ -29,7 +30,7 @@ public class PHE {
   public static SealContext sealContextInit() {
     EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV);
     long value = (1L << 60) - 1L;
-    int polyModulusDegree = 64;
+    int polyModulusDegree = 8;
     int[] bitSize = new int[] {60, 60, 60, 60};
     Modulus plainModulus = new Modulus(value);
     parms.setPolyModulusDegree(polyModulusDegree);
@@ -224,7 +225,7 @@ public class PHE {
     return distance(encryptedX1, encryptedY1, plaintextX2, plaintextY2);
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
 
     // New a keygen
     KeyGenerator keygen = keyGenerator();
@@ -232,9 +233,9 @@ public class PHE {
     PublicKey publicKey = generatePublicKey(keygen);
     Encryptor encryptor = new Encryptor(context, publicKey);
 
-    long a = 4L;
+    long a = 100000000L;
     long b = 400L;
-    long r = 127093L * 127093L;
+    long r = 100000000L;
     Plaintext plainR = new Plaintext(UintCore.uintToHexString(new long[] {r}, 1));
     Ciphertext encRadius = new Ciphertext();
     encryptor.encrypt(plainR, encRadius);
@@ -242,16 +243,17 @@ public class PHE {
 
     Plaintext plaintextA = new Plaintext(UintCore.uintToHexString(new long[] {a}, 1));
     Plaintext plaintextB = new Plaintext(UintCore.uintToHexString(new long[] {b}, 1));
-    Ciphertext ciphertextPoly = PHE.poly(plaintextA, plaintextB, encRadius);
-
-    // Use keygen to decrypt
-    long actual = decryptLong(keygen.secretKey(), ciphertextPoly);
-    long expected = a * r + b;
-    System.out.println(actual);
-    System.out.println(expected);
-    String res = (actual - r * r) < 0 ? "In" : "Out";
-    System.out.println("Result :" + res);
-
+    for (int i =0;i < 10000;i++) {
+      Ciphertext ciphertextPoly = PHE.poly(plaintextA, plaintextB, encRadius);
+      System.out.println("size: " + ciphertextPoly.save().length);
+      // Use keygen to decrypt
+      long actual = decryptLong(keygen.secretKey(), ciphertextPoly);
+      long expected = a * r + b;
+      System.out.println(actual);
+      System.out.println(expected);
+      String res = (actual - r * r) < 0 ? "In" : "Out";
+      System.out.println("Result :" + res);
+    }
   }
 
 }

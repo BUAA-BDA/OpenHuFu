@@ -63,8 +63,11 @@ public class Laplace {
   public static void main(String[] args) {
     double longitude = 121;
     double latitude = 40;
+    double radius = 1;
     double[] result = Laplace.boundedPlanarLaplaceMechanism(longitude, latitude,
         FedSpatialConfig.Planar_EPS_DP, FedSpatialConfig.Planar_DELTA_DP);
-    System.out.println("(" + result[0] + "," + result[1] + ")");
+    double dpRadius = radius + Math.sqrt(
+        Math.pow(result[0] - longitude, 2) + Math.pow(result[1] - latitude, 2));
+    System.out.println("(" + result[0] + "," + result[1] + "), " + dpRadius);
   }
 }

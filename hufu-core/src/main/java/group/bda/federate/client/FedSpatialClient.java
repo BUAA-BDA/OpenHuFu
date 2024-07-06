@@ -802,20 +802,10 @@ public class FedSpatialClient {
     Header countHeader = headerBuilder.build();
     List<Expression> countProjects = buildCountProject();
 
-    List<Expression> countFilter = buildCountFilter(filter, right);
-    StreamingIterator<DataSetProto> streamProto =
-        fedSpatialPrivacyQuery(countHeader, countProjects, countFilter, tableClients,
-            Integer.MAX_VALUE, order, uuid, state, cached, k, keygen);
-    cached = true;
-    DataSet localSet = DataSet.newDataSet(header);
-    while (streamProto.hasNext()) {
-      localSet.mergeDataSetUnsafe(DataSet.fromProto(streamProto.next()));
-    }
-    DataSet dataSet =
-        calculateAgg(uuid, localSet,
-            Arrays.asList(new AbstractMap.SimpleEntry<>(AggregateType.COUNT, Arrays.asList(0))),
-            header, tableClients);
-    count = (long) dataSet.iterator().next().get(0);
+    List<Expression> countFilter;
+    StreamingIterator<DataSetProto> streamProto;
+    DataSet localSet;
+    DataSet dataSet;
     if (count != k) {
       while (left + deviation <= right) {
         mid = (left + right) / 2;
@@ -823,6 +813,7 @@ public class FedSpatialClient {
         streamProto =
             fedSpatialPrivacyQuery(countHeader, countProjects, countFilter, tableClients,
                 Integer.MAX_VALUE, order, uuid, state, cached, k, keygen);
+        cached = true;
         localSet = DataSet.newDataSet(header);
         while (streamProto.hasNext()) {
           localSet.mergeDataSetUnsafe(DataSet.fromProto(streamProto.next()));
@@ -850,6 +841,7 @@ public class FedSpatialClient {
       LOG.error("Radius too small or data is smaller than k");
     }
     try {
+      LOG.info("circle radius: {}", mid);
       return knnCircleRangeQuery(header, project, filter, tableClients, Integer.MAX_VALUE, order,
           uuid, uuid, mid, keygen);
     } finally {

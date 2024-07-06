@@ -346,6 +346,7 @@ public abstract class FederateDBService extends FederateImplBase {
       long startPolyTime = System.currentTimeMillis();
       List<Ciphertext> cipherDists = dataSetCache.getCipherDist();
       List<Ciphertext> polyDists = PHE.poly(plainA, plainB, cipherDists);
+      LOG.info("a: {}, b: {}, cipherRadius: {}", a, b, cipherRadius.toString());
       Ciphertext polyRadius = PHE.poly(plainA, plainB, cipherRadius);
       long endPolyTime = System.currentTimeMillis();
       LOG.info(
@@ -790,8 +791,8 @@ public abstract class FederateDBService extends FederateImplBase {
       }
       LOG.debug("{} nn circle radius is {}", results.size() - 1, distance);
     }
-    LOG.info("DP delt = {}", delt);
-    distance += Math.abs(new LaplaceDistribution(0, delt / FedSpatialConfig.EPS_DP).sample());
+//    LOG.info("DP delt = {}", delt);
+//    distance += Math.abs(new LaplaceDistribution(0, delt / FedSpatialConfig.EPS_DP).sample());
     responseBuilder.setRadius(distance);
     return responseBuilder.build();
   }
