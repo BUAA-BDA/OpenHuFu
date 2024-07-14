@@ -7,53 +7,29 @@
       "type": "custom",
       "factory": "group.bda.federate.sql.schema.FederateSchemaFactory",
       "operand": {
-        "endpoints": ["localhost:54678", "localhost:54679", "localhost:54680", "localhost:54681"]
+        "endpoints": ["localhost:54600", "localhost:54601", "localhost:54602", "localhost:54603"]
       },
       "tables": [
         {
-          "name": "osm_a",
+          "name": "osm",
           "factory": "group.bda.federate.sql.table.FederateTableFactory",
           "operand": {
             "feds": [
               {
-                "endpoint": "localhost:54678",
-                "name": "osm_a_1"
+                "endpoint": "localhost:54600",
+                "name": "osm_4_0"
               },
               {
-                "endpoint": "localhost:54679",
-                "name": "osm_a_2"
+                "endpoint": "localhost:54601",
+                "name": "osm_4_1"
               },
               {
-                "endpoint": "localhost:54680",
-                "name": "osm_a_3"
+                "endpoint": "localhost:54602",
+                "name": "osm_4_2"
               },
               {
-                "endpoint": "localhost:54681",
-                "name": "osm_a_4"
-              }
-            ]
-          }
-        },
-        {
-          "name": "osm_b",
-          "factory": "group.bda.federate.sql.table.FederateTableFactory",
-          "operand": {
-            "feds": [
-              {
-                "endpoint": "localhost:54678",
-                "name": "osm_b_1"
-              },
-              {
-                "endpoint": "localhost:54679",
-                "name": "osm_b_2"
-              },
-              {
-                "endpoint": "localhost:54680",
-                "name": "osm_b_3"
-              },
-              {
-                "endpoint": "localhost:54681",
-                "name": "osm_b_4"
+                "endpoint": "localhost:54603",
+                "name": "osm_4_3"
               }
             ]
           }

@@ -1,0 +1,5 @@
+SELECT id FROM osm WHERE DWithin(Point(120.34423, 31.18399), location, 0.0216923)
+SELECT id FROM osm WHERE DWithin(Point(120.82758, 31.05103), location, 0.0216923)
+SELECT id FROM osm WHERE DWithin(Point(120.2426383, 30.2817233), location, 0.0216923)
+SELECT id FROM osm WHERE DWithin(Point(120.3784906, 30.2538123), location, 0.0216923)
+SELECT id FROM osm WHERE DWithin(Point(120.34085, 31.14987), location, 0.0216923)

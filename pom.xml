@@ -20,6 +20,7 @@
     <module>hufu-postgresql-driver</module>
     <module>hufu-spatialite-driver</module>
     <module>hufu-mysql-driver</module>
+    <module>hufu-evaluation</module>
     <!-- <module>hufu-geomesa-driver</module> -->
     <!-- <module>hufu-simba-driver</module> -->
     <!-- <module>hufu-spatialhadoop-driver</module> -->
@@ -119,9 +120,19 @@
 
   <repositories>
     <repository>
-      <id>alimaven</id>
-      <name>aliyun maven</name>
-      <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+      <id>central</id>
+      <name>central</name>
+      <url>https://maven.aliyun.com/repository/public</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>github</id>
+      <url>https://maven.pkg.github.com/SongY123/mpc4j/</url>
       <releases>
         <enabled>true</enabled>
       </releases>

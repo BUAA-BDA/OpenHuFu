@@ -30,3 +30,12 @@ hs_err_pid*
 .factorypath
 *.iml
 *.idea
+/dataset/
+/target/
+/output/
+/fed-run.sh
+/fed-statistics.sh
+/fed-run-traffic.sh
+/hufu-demo-osm/cli/output/
+/hufu-demo-osm/driver/pid
+/fed-statistics-traffic.sh

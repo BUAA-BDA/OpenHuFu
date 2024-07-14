@@ -1,13 +1,10 @@
 package group.bda.federate.client;
 
-import java.security.PrivateKey;
-import java.util.ArrayList;
+import group.bda.federate.rpc.FederateService.CompareEncDistanceRequest;
+import group.bda.federate.rpc.FederateService.ComparePolyRequest;
+import group.bda.federate.rpc.FederateService.ComparePolyResponse;
+import group.bda.federate.rpc.FederateService.DistanceCacheRequest;
 import java.util.Iterator;
-import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Queue;
-
-import com.google.protobuf.Empty;
 
 import group.bda.federate.rpc.FederateService;
 import org.apache.logging.log4j.LogManager;
@@ -15,31 +12,18 @@ import org.apache.logging.log4j.Logger;
 
 import group.bda.federate.data.Header;
 import group.bda.federate.rpc.FederateCommon.DataSetProto;
-import group.bda.federate.rpc.FederateCommon.FederateDataSet;
-import group.bda.federate.rpc.FederateCommon.FederateTableInfo;
 import group.bda.federate.rpc.FederateCommon.HeaderProto;
-import group.bda.federate.rpc.FederateCommon.Point;
 import group.bda.federate.rpc.FederateGrpc;
 import group.bda.federate.rpc.FederateService.AddClientRequest;
 import group.bda.federate.rpc.FederateService.CacheID;
 import group.bda.federate.rpc.FederateService.Code;
 import group.bda.federate.rpc.FederateService.DPRangeCountResponse;
-import group.bda.federate.rpc.FederateService.DistanceJoinRequest;
 import group.bda.federate.rpc.FederateService.GeneralResponse;
-import group.bda.federate.rpc.FederateService.GetRowsResponse;
 import group.bda.federate.rpc.FederateService.GetTableHeaderRequest;
-import group.bda.federate.rpc.FederateService.KnnQueryRequest;
 import group.bda.federate.rpc.FederateService.KnnRadiusQueryResponse;
-import group.bda.federate.rpc.FederateService.PrivacyCountRequest;
 import group.bda.federate.rpc.FederateService.PrivacyQuery;
 import group.bda.federate.rpc.FederateService.QValue;
 import group.bda.federate.rpc.FederateService.Query;
-import group.bda.federate.rpc.FederateService.RangeCountRequest;
-import group.bda.federate.rpc.FederateService.RangeCountResponse;
-import group.bda.federate.rpc.FederateService.RangeQueryRequest;
-import group.bda.federate.rpc.FederateService.Row;
-import group.bda.federate.rpc.FederateService.TraversalTable;
-import group.bda.federate.security.rsa.RSA;
 import io.grpc.Channel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
@@ -52,12 +36,12 @@ public final class FederateDBClient {
   private String endpoint;
 
   public FederateDBClient(String host, int port) {
-    this(ManagedChannelBuilder.forAddress(host, port).usePlaintext().maxInboundMessageSize(1024 * 1024 * 80));
+    this(ManagedChannelBuilder.forAddress(host, port).usePlaintext().maxInboundMessageSize(Integer.MAX_VALUE));
     this.endpoint = String.format("%s:%d", host, port);
   }
 
   public FederateDBClient(String endpoint) {
-    this(ManagedChannelBuilder.forTarget(endpoint).usePlaintext().maxInboundMessageSize(1024 * 1024 * 80));
+    this(ManagedChannelBuilder.forTarget(endpoint).usePlaintext().maxInboundMessageSize(Integer.MAX_VALUE));
     this.endpoint = endpoint;
   }
 
@@ -190,10 +174,8 @@ public final class FederateDBClient {
   public void clearCache(String uuid) {
     try {
       blockingStub.clearCache(CacheID.newBuilder().setUuid(uuid).build());
-      return;
     } catch (StatusRuntimeException e) {
       LOG.error("RPC failed in clear cache: {}", e.getStatus());
-      return;
     }
   }
 
@@ -209,6 +191,33 @@ public final class FederateDBClient {
   public Iterator<DataSetProto> fedSpatialPrivacyQuery(PrivacyQuery query) {
     try {
       return blockingStub.fedSpatialPrivacyQuery(query);
+    } catch (StatusRuntimeException e) {
+      LOG.error("RPC failed in FedSpatialPrivacyQuery: {}", e.getStatus());
+      return null;
+    }
+  }
+
+  public ComparePolyRequest twoPartyDistanceCompare(CompareEncDistanceRequest request) {
+    try {
+      return blockingStub.twoPartyDistanceCompare(request);
+    } catch (StatusRuntimeException e) {
+      LOG.error("RPC failed in FedSpatialPrivacyQuery: {}", e.getStatus());
+      return null;
+    }
+  }
+
+  public ComparePolyRequest twoPartyDistanceCompareCache(DistanceCacheRequest request) {
+    try {
+      return blockingStub.twoPartyDistanceCompareCache(request);
+    } catch (StatusRuntimeException e) {
+      LOG.error("RPC failed in FedSpatialPrivacyQuery: {}", e.getStatus());
+      return null;
+    }
+  }
+
+  public GeneralResponse twoPartyDistanceCompareResult(ComparePolyResponse response) {
+    try {
+      return blockingStub.twoPartyDistanceCompareResult(response);
     } catch (StatusRuntimeException e) {
       LOG.error("RPC failed in FedSpatialPrivacyQuery: {}", e.getStatus());
       return null;

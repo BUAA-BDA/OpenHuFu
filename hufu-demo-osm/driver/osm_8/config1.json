@@ -1,0 +1,22 @@
+{
+    "port": 54600,
+    "url": "jdbc:postgresql://localhost:54321/osm_db",
+    "catalog": "osm_db",
+    "user": "hufu",
+    "passwd": "bda613+",
+    "tables": [
+        {
+            "name": "osm_8_1",
+            "columns": [
+                {
+                    "name": "id",
+                    "level": "protected"
+                },
+                {
+                    "name": "location",
+                    "level": "private"
+                }
+            ]
+        }
+    ]
+}
